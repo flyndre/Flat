@@ -1,4 +1,4 @@
-package com.example.flat
+package de.flyndre.flat
 
 import org.junit.Test
 

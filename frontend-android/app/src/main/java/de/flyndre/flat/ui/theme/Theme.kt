@@ -1,4 +1,4 @@
-package com.example.flat.ui.theme
+package de.flyndre.flat.ui.theme
 
 import android.app.Activity
 import android.os.Build
