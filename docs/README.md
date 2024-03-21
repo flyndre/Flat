@@ -12,7 +12,13 @@ The Flat app family is split into three main parts:
 
 Likewise, the codebase and therefore the docs are split in the same manner.
 
+## API
+
 The API is defined seperately in the [API Docs](/docs/api.md).
+
+## Conventions
+
+Conventions regarding Git and coding are documented [here](/docs/conventions.md).
 
 ## Tech Stack
 
