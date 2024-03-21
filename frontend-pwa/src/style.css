@@ -1,0 +1,14 @@
+/* @tailwind base; */
+@layer primevue;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    font-size: 14px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+}

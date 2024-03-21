@@ -12,12 +12,14 @@ To install the Dependencies, run:
 pnpm install
 ```
 
-> **INFO**\
+> **NOTE**\
 > To install pnpm, run:
 >
 > ```
 > npm install -g pnpm
 > ```
+>
+> And restart your terminal or IDE afterwards.
 
 ## Run
 
