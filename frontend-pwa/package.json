@@ -9,12 +9,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@jamescoyle/vue-icon": "^0.1.2",
+    "@mdi/js": "^7.4.47",
     "@vueuse/core": "^10.9.0",
     "primevue": "^3.50.0",
     "vue": "^3.4.21",
-    "vue-router": "^4.3.0"
+    "vue-router": "^4.3.0",
+    "vue3-google-map": "^0.20.0"
   },
   "devDependencies": {
+    "@types/google.maps": "^3.55.5",
     "@types/node": "^20.11.30",
     "@vitejs/plugin-vue": "^5.0.4",
     "autoprefixer": "^10.4.18",
