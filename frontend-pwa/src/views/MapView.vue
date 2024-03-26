@@ -139,11 +139,16 @@ const shapeList = ref<google.maps.drawing.OverlayCompleteEvent[]>([]);
 const selectedShape = ref<TypedShape>();
 const colors = ref(["#1E90FF", "#FF1493", "#32CD32", "#FF8C00", "#4B0082"]);
 const selectedColor = ref<string>();
-const polyOptions = {
+const shapeOptions = {
     strokeWeight: 0,
     fillOpacity: 0.45,
     editable: true,
     draggable: true,
+};
+const lineOptions = {
+    ...shapeOptions,
+    strokeWeight: 4,
+    strokeOpacity: 0.45,
 };
 
 function clearSelection() {
@@ -221,12 +226,10 @@ async function initialize() {
         markerOptions: {
             draggable: true,
         },
-        polylineOptions: {
-            editable: true,
-        },
-        rectangleOptions: polyOptions,
-        circleOptions: polyOptions,
-        polygonOptions: polyOptions,
+        polylineOptions: lineOptions,
+        rectangleOptions: shapeOptions,
+        circleOptions: shapeOptions,
+        polygonOptions: shapeOptions,
         map: map.value,
     });
 
@@ -235,7 +238,7 @@ async function initialize() {
         console.log(e);
         if (e.type != google.maps.drawing.OverlayType.MARKER) {
             // Switch back to non-drawing mode after drawing a shape.
-            drawingManager.value.setDrawingMode(null);
+            selectedToolType.value = null;
 
             // Add an event listener that selects the newly-drawn shape when the user
             // mouses down on it.
