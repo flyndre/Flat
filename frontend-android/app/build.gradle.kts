@@ -67,6 +67,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     // Maps SDK for Android
     implementation(libs.play.services.maps)
+    //jetpack compose for maps
+    implementation (libs.android.maps.compose)
+    implementation (libs.play.services.maps.v1810)
 
 }
 
