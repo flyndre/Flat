@@ -70,7 +70,12 @@ dependencies {
     //jetpack compose for maps
     implementation (libs.android.maps.compose)
     implementation (libs.play.services.maps.v1810)
-
+    //ktor
+    implementation(libs.ktor.client.core)
+    //ktor android engine
+    implementation(libs.ktor.client.android)
+    //ktor websocket support
+    implementation(libs.ktor.client.websockets)
 }
 
 secrets {
