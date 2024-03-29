@@ -70,7 +70,8 @@ dependencies {
     //jetpack compose for maps
     implementation (libs.android.maps.compose)
     implementation (libs.play.services.maps.v1810)
-
+    //OKHTTP for websocket support
+    implementation(libs.okhttp)
 }
 
 secrets {

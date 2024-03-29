@@ -1,6 +1,7 @@
 package de.flyndre.flat
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,8 +18,17 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import de.flyndre.flat.ui.theme.FlatTheme
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.WebSocket
 
 class MainActivity : ComponentActivity() {
+    private val socketListener = object : WebSocketClient.SocketListener {
+        override fun onMessage(message: String) {
+            Log.e("socketCheck onMessage", message)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
