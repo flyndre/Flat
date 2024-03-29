@@ -1,6 +1,7 @@
 package de.flyndre.flat
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,6 +10,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -16,27 +18,18 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import de.flyndre.flat.ui.theme.FlatTheme
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.android.Android
-import io.ktor.client.plugins.websocket.WebSockets
-import io.ktor.client.plugins.websocket.webSocket
-import io.ktor.http.HttpMethod
-import io.ktor.websocket.Frame
-import io.ktor.websocket.readText
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.WebSocket
 
 class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        val client = HttpClient(Android) {
-            install(WebSockets)
+    private val socketListener = object : WebSocketClient.SocketListener {
+        override fun onMessage(message: String) {
+            Log.e("socketCheck onMessage", message)
         }
+    }
 
-        testConnectWebsocket(client)
-        client.close()
-
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             FlatTheme {
@@ -45,16 +38,6 @@ class MainActivity : ComponentActivity() {
                     Map()
                 }
             }
-        }
-    }
-}
-
-fun testConnectWebsocket(client: HttpClient){
-    runBlocking {
-        client.webSocket(method = HttpMethod.Get, host = "192.168.40.30", port = 49154, path = "/ws") {
-            //send(Frame.Text("Test"))
-            //var response = incoming.receive() as? Frame.Text
-            //println(response?.readText())
         }
     }
 }
