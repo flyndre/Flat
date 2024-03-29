@@ -23,6 +23,7 @@ import okhttp3.Request
 import okhttp3.WebSocket
 
 class MainActivity : ComponentActivity() {
+    private lateinit var webSocketClient: WebSocketClient
     private val socketListener = object : WebSocketClient.SocketListener {
         override fun onMessage(message: String) {
             Log.e("socketCheck onMessage", message)
@@ -31,6 +32,11 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        webSocketClient = WebSocketClient.getInstance()
+        webSocketClient.setSocketUrl("https://10.0.2.2:44380/ws")
+        webSocketClient.setListener(socketListener)
+        webSocketClient.connect()
+
         setContent {
             FlatTheme {
                 // A surface container using the 'background' color from the theme
