@@ -79,7 +79,7 @@ const selectedShapeId = ref<string>();
 const selectedShape = computed({
     get: () => shapeList.value.find((s) => s.id === selectedShapeId.value),
     set: (v) => {
-        selectedShapeId.value = v.id;
+        selectedShapeId.value = v?.id ?? null;
         shapeList.value[shapeList.value.findIndex((s) => s.id === v.id)] = v;
     },
 });
@@ -116,9 +116,9 @@ function setSelection(shape: IdentifyableTypedShape) {
 }
 
 function deleteSelectedShape() {
-    if (selectedShape.value) {
+    if (selectedShape.value !== undefined) {
         selectedShape.value.overlay.setMap(null);
-        console.log(
+        shapeList.value.splice(
             shapeList.value.findIndex(
                 (oce) => oce.id === selectedShape.value.id
             )
@@ -129,7 +129,7 @@ function deleteSelectedShape() {
 
 function deleteAllShapes() {
     selectedShape.value = null;
-    unref(shapeList).forEach((o) => o.overlay.setMap(null));
+    shapeList.value.forEach((o) => o.overlay.setMap(null));
     shapeList.value = [];
 }
 
