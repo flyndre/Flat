@@ -78,7 +78,10 @@ const drawingManager = ref<google.maps.drawing.DrawingManager>();
 const selectedShapeId = ref<string>();
 const selectedShape = computed({
     get: () => shapeList.value.find((s) => s.id === selectedShapeId.value),
-    set: (v) => (selectedShapeId.value = v.id),
+    set: (v) => {
+        selectedShapeId.value = v.id;
+        shapeList.value[shapeList.value.findIndex((s) => s.id === v.id)] = v;
+    },
 });
 const colors = ref(["#1E90FF", "#FF1493", "#32CD32", "#FF8C00", "#4B0082"]);
 const selectedColor = ref<string>();
@@ -95,6 +98,7 @@ const lineOptions = {
 };
 
 function clearSelection() {
+    console.log(selectedShapeId.value, selectedShape.value);
     if (selectedShape.value) {
         console.log(selectedShape.value);
         selectedShape.value.overlay.setEditable(false);
@@ -189,7 +193,9 @@ async function initialize() {
         function (shape: google.maps.drawing.OverlayCompleteEvent) {
             if (isGeometry(shape)) {
                 const typedShape = { ...shape, id: `${Date.now()}` };
+                console.log(typedShape);
                 shapeList.value.push(typedShape);
+                console.log(shapeList.value);
                 // Switch back to non-drawing mode after drawing a shape.
                 // selectedToolType.value = null;
 
@@ -230,6 +236,9 @@ function setShapeColor(color: string) {
     selectColor(color);
     setSelectedShapeColor(color);
 }
+
+const selectedShapeEmpty = computed(() => selectedShape.value === undefined);
+const shapeListEmpty = computed(() => shapeList.value?.length === 0);
 </script>
 
 <template>
@@ -272,7 +281,7 @@ function setShapeColor(color: string) {
                     severity="secondary"
                     label="Delete Selected Shape"
                     @click="deleteSelectedShape"
-                    :disabled="!selectedShape"
+                    :disabled="selectedShapeEmpty"
                 >
                     <template #icon>
                         <MdiIcon class="mr-1.5" :icon="mdiDelete" />
@@ -282,7 +291,7 @@ function setShapeColor(color: string) {
                     severity="secondary"
                     label="Delete All Shapes"
                     @click="deleteAllShapes"
-                    :disabled="shapeList.length === 0"
+                    :disabled="shapeListEmpty"
                 >
                     <template #icon>
                         <MdiIcon class="mr-2" :icon="mdiDeleteSweep" />
@@ -291,6 +300,7 @@ function setShapeColor(color: string) {
             </div>
         </div>
     </div>
+    {{ shapeListEmpty }}
 </template>
 
 <style>
