@@ -106,12 +106,13 @@ function clearSelection() {
     }
 }
 
-function setSelection(shape: IdentifyableTypedShape) {
+function setSelection(shapeId: string) {
     clearSelection();
-    selectedShape.value = shape;
-    shape.overlay.setEditable(true);
+    selectedShapeId.value = shapeId;
+    selectedShape.value.overlay.setEditable(true);
     selectColor(
-        shape.overlay.get("fillColor") || shape.overlay.get("strokeColor")
+        selectedShape.value.overlay.get("fillColor") ||
+            selectedShape.value.overlay.get("strokeColor")
     );
 }
 
@@ -202,12 +203,12 @@ async function initialize() {
                 // Add an event listener that selects the newly-drawn shape when the user
                 // mouses down on it.
                 shape.overlay.addListener("click", function () {
-                    setSelection(typedShape);
+                    setSelection(typedShape.id);
                 });
                 // google.maps.event.addListener(newShape, "click", function () {
                 //     setSelection(newShape);
                 // });
-                setSelection(typedShape);
+                setSelection(typedShape.id);
             }
         }
     );
