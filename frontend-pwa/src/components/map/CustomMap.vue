@@ -1,51 +1,50 @@
 <script setup lang="ts">
-import { onMounted, ref, unref, watch } from "vue";
+/**
+ * THIS COMPONENT HAS TOP LEVEL AWAIT!
+ * It has to be done this way, since teh Google Maps API has to be loaded dynamically and cannot be imported as a module.
+ * Therefore, this component needs to be wrapped inside a `Suspense` tag.
+ */
+
+import { computed, onMounted, ref, unref, watch } from "vue";
 import { Loader } from "@googlemaps/js-api-loader";
 import { useGeolocation } from "@vueuse/core";
 import ProgressSpinner from "primevue/progressspinner";
 import Button from "primevue/button";
 import MdiIcon from "@/components/MdiIcon.vue";
-import SelectButton from "primevue/selectbutton";
-import {
-    mdiDeleteSweep,
-    mdiDelete,
-    mdiCrosshairsGps,
-    mdiRoadVariant,
-    mdiTerrain,
-    mdiEarth,
-    mdiEarthPlus,
-    mdiHandBackRightOutline,
-    mdiRectangleOutline,
-    mdiCircleOutline,
-    mdiVectorPolyline,
-    mdiVectorTriangle,
-    mdiCircle,
-} from "@mdi/js";
+import { mdiDeleteSweep, mdiDelete, mdiCrosshairsGps } from "@mdi/js";
+import MapTypeSelectButton from "@/components/map/MapTypeSelectButton.vue";
+import DrawingToolSelectButton from "@/components/map/DrawingToolSelectButton.vue";
+import ShapeColorSelectButton from "./ShapeColorSelectButton.vue";
+
+// Load the Maps API
+await new Loader({
+    apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+    libraries: ["core", "maps", "drawing"],
+}).importLibrary("maps");
 
 const model = defineModel<google.maps.Map>({
     required: false,
     default: undefined,
 });
 
-const shapeList = defineModel<google.maps.drawing.OverlayCompleteEvent[]>(
-    "shapes",
-    { default: [], required: false }
-);
+const shapeList = defineModel<IdentifyableTypedShape[]>("shapes", {
+    default: [],
+    required: false,
+});
 
-const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-const { coords: clientPos, error: clientPosError } = useGeolocation();
+// Map config
+
 const mapDiv = ref<HTMLDivElement>();
+const mapZoom = 15;
+
+const { coords: clientPos, error: clientPosError } = useGeolocation();
 onMounted(async () => {
-    (await new Loader({
-        apiKey,
-        libraries: ["core", "maps", "drawing"],
-    }).importLibrary("maps")) as google.maps.MapsLibrary;
     model.value = new google.maps.Map(mapDiv.value, {
         disableDefaultUI: true,
-        zoom: 15,
+        zoom: mapZoom,
         center: {
-            lat: clientPos.value.latitude,
-            lng: clientPos.value.longitude,
+            lat: 48,
+            lng: 8,
         },
     });
 });
@@ -57,84 +56,30 @@ function centerMap() {
             lng: clientPos.value.longitude,
         });
     } catch (e) {}
-    model.value.setZoom(14);
-}
-
-function loadGeoJson() {
-    model.value.data.loadGeoJson(
-        "https://storage.googleapis.com/mapsdevsite/json/google.json"
-    );
-}
-
-const mapTypes = [
-    {
-        value: "roadmap",
-        icon: mdiRoadVariant,
-    },
-    {
-        value: "terrain",
-        icon: mdiTerrain,
-    },
-    {
-        value: "satellite",
-        icon: mdiEarth,
-    },
-    {
-        value: "hybrid",
-        icon: mdiEarthPlus,
-    },
-];
-const selectedMapType = ref(mapTypes[0].value);
-watch(selectedMapType, (t) => setMapType(t));
-
-function setMapType(type: string) {
-    model.value.setMapTypeId(type);
-}
-
-const toolTypes = [
-    {
-        value: null,
-        icon: mdiHandBackRightOutline,
-    },
-    {
-        value: "rectangle",
-        icon: mdiRectangleOutline,
-    },
-    {
-        value: "circle",
-        icon: mdiCircleOutline,
-    },
-    {
-        value: "polygon",
-        icon: mdiVectorTriangle,
-    },
-    {
-        value: "polyline",
-        icon: mdiVectorPolyline,
-    },
-];
-const selectedToolType = ref<any>(null);
-watch(selectedToolType, (t) => setToolType(t));
-
-function setToolType(type: any) {
-    drawingManager.value.setDrawingMode(type);
+    model.value.setZoom(mapZoom);
 }
 
 /**
  * A setup for a Google Maps Map with shape tracking.
  * @see https://stackoverflow.com/a/12006751/11793652
  */
-
-type Shape =
-    | google.maps.Polygon
-    | google.maps.Polyline
-    | google.maps.Rectangle
-    | google.maps.Circle;
-type TypedShape = Shape & { type: google.maps.drawing.OverlayType };
+type TypedShape = {
+    overlay:
+        | google.maps.Polygon
+        | google.maps.Polyline
+        | google.maps.Rectangle
+        | google.maps.Circle;
+    type: google.maps.drawing.OverlayType;
+};
+type IdentifyableTypedShape = TypedShape & { id: string };
 
 // const selectedMapType = ref<>()
 const drawingManager = ref<google.maps.drawing.DrawingManager>();
-const selectedShape = ref<TypedShape>();
+const selectedShapeId = ref<string>();
+const selectedShape = computed({
+    get: () => shapeList.value.find((s) => s.id === selectedShapeId.value),
+    set: (v) => (selectedShapeId.value = v.id),
+});
 const colors = ref(["#1E90FF", "#FF1493", "#32CD32", "#FF8C00", "#4B0082"]);
 const selectedColor = ref<string>();
 const shapeOptions = {
@@ -151,21 +96,29 @@ const lineOptions = {
 
 function clearSelection() {
     if (selectedShape.value) {
-        selectedShape.value.setEditable(false);
+        console.log(selectedShape.value);
+        selectedShape.value.overlay.setEditable(false);
         selectedShape.value = null;
     }
 }
 
-function setSelection(shape) {
+function setSelection(shape: IdentifyableTypedShape) {
     clearSelection();
     selectedShape.value = shape;
-    shape.setEditable(true);
-    selectColor(shape.get("fillColor") || shape.get("strokeColor"));
+    shape.overlay.setEditable(true);
+    selectColor(
+        shape.overlay.get("fillColor") || shape.overlay.get("strokeColor")
+    );
 }
 
 function deleteSelectedShape() {
     if (selectedShape.value) {
-        unref(selectedShape).setMap(null);
+        selectedShape.value.overlay.setMap(null);
+        console.log(
+            shapeList.value.findIndex(
+                (oce) => oce.id === selectedShape.value.id
+            )
+        );
         selectedShape.value = null;
     }
 }
@@ -203,16 +156,11 @@ function setSelectedShapeColor(color: string) {
         if (
             selectedShape.value.type == google.maps.drawing.OverlayType.POLYLINE
         ) {
-            selectedShape.value.set("strokeColor", color);
+            selectedShape.value.overlay.set("strokeColor", color);
         } else {
-            selectedShape.value.set("fillColor", color);
+            selectedShape.value.overlay.set("fillColor", color);
         }
     }
-}
-
-function clickColorButton(color: string) {
-    selectColor(color);
-    setSelectedShapeColor(color);
 }
 
 async function initialize() {
@@ -231,39 +179,57 @@ async function initialize() {
         map: model.value,
     });
 
-    drawingManager.value.addListener("overlaycomplete", function (e) {
-        shapeList.value.push(e);
-        if (e.type != google.maps.drawing.OverlayType.MARKER) {
-            // Switch back to non-drawing mode after drawing a shape.
-            selectedToolType.value = null;
+    const isGeometry = (
+        shape: google.maps.drawing.OverlayCompleteEvent
+    ): shape is TypedShape =>
+        ![null, google.maps.drawing.OverlayType.MARKER].includes(shape.type);
 
-            // Add an event listener that selects the newly-drawn shape when the user
-            // mouses down on it.
-            const newShape = e.overlay;
-            newShape.type = e.type;
-            newShape.addListener("click", function () {
-                setSelection(newShape);
-            });
-            google.maps.event.addListener(newShape, "click", function () {
-                setSelection(newShape);
-            });
-            setSelection(newShape);
+    drawingManager.value.addListener(
+        "overlaycomplete",
+        function (shape: google.maps.drawing.OverlayCompleteEvent) {
+            if (isGeometry(shape)) {
+                const typedShape = { ...shape, id: `${Date.now()}` };
+                shapeList.value.push(typedShape);
+                // Switch back to non-drawing mode after drawing a shape.
+                // selectedToolType.value = null;
+
+                // Add an event listener that selects the newly-drawn shape when the user
+                // mouses down on it.
+                shape.overlay.addListener("click", function () {
+                    setSelection(typedShape);
+                });
+                // google.maps.event.addListener(newShape, "click", function () {
+                //     setSelection(newShape);
+                // });
+                setSelection(typedShape);
+            }
         }
-    });
+    );
 
     // Clear the current selection when the drawing mode is changed, or when the
     // map is clicked.
-    google.maps.event.addListener(
-        drawingManager,
-        "drawingmode_changed",
-        clearSelection
-    );
-    model.value.addListener("click", clearSelection);
+    // google.maps.event.addListener(
+    //     drawingManager,
+    //     "drawingmode_changed",
+    //     clearSelection
+    // );
     drawingManager.value.addListener("drawingmode_changed", clearSelection);
+    model.value.addListener("click", clearSelection);
     selectColor(colors.value[0]);
     centerMap();
 }
 window.addEventListener("load", initialize);
+
+function setMapType(type: google.maps.MapTypeId) {
+    model.value.setMapTypeId(type);
+}
+function setToolType(type: google.maps.drawing.OverlayType) {
+    drawingManager.value.setDrawingMode(type);
+}
+function setShapeColor(color: string) {
+    selectColor(color);
+    setSelectedShapeColor(color);
+}
 </script>
 
 <template>
@@ -279,20 +245,9 @@ window.addEventListener("load", initialize);
                     <MdiIcon :icon="mdiCrosshairsGps" />
                 </template>
             </Button>
-            <SelectButton
-                v-model="selectedMapType"
-                :options="mapTypes"
-                data-key="value"
-                option-value="value"
-                :allow-empty="false"
-                :pt="{ button: { class: 'h-9' } }"
-            >
-                <template #option="slotProps">
-                    <MdiIcon :icon="slotProps.option.icon" />
-                </template>
-            </SelectButton>
+            <MapTypeSelectButton @update:model-value="setMapType" />
         </div>
-        <div class="h-[500px] overflow-hidden">
+        <div class="h-[500px] overflow-hidden rounded-md">
             <div
                 v-show="model === undefined"
                 class="w-full h-full flex flex-col justify-center items-center"
@@ -309,46 +264,8 @@ window.addEventListener("load", initialize);
         </div>
         <div class="flex flex-row gap-2 items-center justify-stretch flex-wrap">
             <div class="flex flex-col gap-2 grow basis-50">
-                <SelectButton
-                    v-model="selectedToolType"
-                    :options="toolTypes"
-                    data-key="value"
-                    option-value="value"
-                    :allow-empty="false"
-                    :pt="{
-                        button: {
-                            class: 'h-9 w-auto grow flex flex-row justify-center',
-                        },
-                        root: {
-                            class: 'w-auto flex flex-row grow justify-stretch',
-                        },
-                    }"
-                >
-                    <template #option="slotProps">
-                        <MdiIcon :icon="slotProps.option.icon" />
-                    </template>
-                </SelectButton>
-                <SelectButton
-                    v-model="selectedColor"
-                    :options="colors"
-                    :allow-empty="false"
-                    :pt="{
-                        button: {
-                            class: 'h-9 w-auto grow flex flex-row justify-center',
-                        },
-                        root: {
-                            class: 'w-auto flex flex-row grow justify-stretch',
-                        },
-                    }"
-                >
-                    <template #option="slotProps">
-                        <MdiIcon
-                            @click="clickColorButton(slotProps.option)"
-                            :icon="mdiCircle"
-                            :style="{ color: slotProps.option }"
-                        />
-                    </template>
-                </SelectButton>
+                <DrawingToolSelectButton @update:model-value="setToolType" />
+                <ShapeColorSelectButton @update:model-value="setShapeColor" />
             </div>
             <div class="flex flex-col gap-2 grow basis-5 text-nowrap">
                 <Button
