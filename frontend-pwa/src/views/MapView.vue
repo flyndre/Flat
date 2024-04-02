@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import Card from "primevue/card";
-import Map from "@/components/map/Map.vue";
+import MapWithControls from "@/components/map/MapWithControls.vue";
 </script>
 
 <template>
     <Card>
         <template #content>
-            <Map />
+            <MapWithControls />
         </template>
     </Card>
 </template>

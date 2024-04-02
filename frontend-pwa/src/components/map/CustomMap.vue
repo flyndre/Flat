@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
-import { GoogleMap } from "vue3-google-map";
+import { onMounted, ref, unref, watch } from "vue";
+import { Loader } from "@googlemaps/js-api-loader";
 import { useGeolocation } from "@vueuse/core";
+import ProgressSpinner from "primevue/progressspinner";
 import Button from "primevue/button";
 import MdiIcon from "@/components/MdiIcon.vue";
 import SelectButton from "primevue/selectbutton";
@@ -21,43 +22,46 @@ import {
     mdiCircle,
 } from "@mdi/js";
 
-const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-const mapElement = ref();
-const map = computed<undefined | google.maps.Map>(() => mapElement.value?.map);
-const { coords: clientPos, error: clientPosError } = useGeolocation();
-const coordsUnavailable = computed(
-    () =>
-        clientPos.value.latitude === null || clientPos.value.longitude === null
+const model = defineModel<google.maps.Map>({
+    required: false,
+    default: undefined,
+});
+
+const shapeList = defineModel<google.maps.drawing.OverlayCompleteEvent[]>(
+    "shapes",
+    { default: [], required: false }
 );
-// watch(
-//     coords,
-//     (v) =>
-//         (mapCenter.value = {
-//             lat: v.latitude,
-//             lng: v.longitude,
-//         })
-// );
-const mapCenter = ref({
-    lat: 0,
-    lng: 0,
+
+const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+const { coords: clientPos, error: clientPosError } = useGeolocation();
+const mapDiv = ref<HTMLDivElement>();
+onMounted(async () => {
+    (await new Loader({
+        apiKey,
+        libraries: ["core", "maps", "drawing"],
+    }).importLibrary("maps")) as google.maps.MapsLibrary;
+    model.value = new google.maps.Map(mapDiv.value, {
+        disableDefaultUI: true,
+        zoom: 15,
+        center: {
+            lat: clientPos.value.latitude,
+            lng: clientPos.value.longitude,
+        },
+    });
 });
 
 function centerMap() {
     try {
-        map.value.panTo({
+        model.value.panTo({
             lat: clientPos.value.latitude,
             lng: clientPos.value.longitude,
         });
     } catch (e) {}
-    map.value.setZoom(14);
-}
-
-function exportBounds() {
-    console.log(map.value.data);
+    model.value.setZoom(14);
 }
 
 function loadGeoJson() {
-    map.value.data.loadGeoJson(
+    model.value.data.loadGeoJson(
         "https://storage.googleapis.com/mapsdevsite/json/google.json"
     );
 }
@@ -84,7 +88,7 @@ const selectedMapType = ref(mapTypes[0].value);
 watch(selectedMapType, (t) => setMapType(t));
 
 function setMapType(type: string) {
-    map.value.setMapTypeId(type);
+    model.value.setMapTypeId(type);
 }
 
 const toolTypes = [
@@ -130,7 +134,6 @@ type TypedShape = Shape & { type: google.maps.drawing.OverlayType };
 
 // const selectedMapType = ref<>()
 const drawingManager = ref<google.maps.drawing.DrawingManager>();
-const shapeList = ref<google.maps.drawing.OverlayCompleteEvent[]>([]);
 const selectedShape = ref<TypedShape>();
 const colors = ref(["#1E90FF", "#FF1493", "#32CD32", "#FF8C00", "#4B0082"]);
 const selectedColor = ref<string>();
@@ -162,14 +165,14 @@ function setSelection(shape) {
 
 function deleteSelectedShape() {
     if (selectedShape.value) {
-        selectedShape.value.setMap(null);
+        unref(selectedShape).setMap(null);
         selectedShape.value = null;
     }
 }
 
 function deleteAllShapes() {
     selectedShape.value = null;
-    shapeList.value.forEach((o) => o.overlay.setMap(null));
+    unref(shapeList).forEach((o) => o.overlay.setMap(null));
     shapeList.value = [];
 }
 
@@ -225,12 +228,11 @@ async function initialize() {
         rectangleOptions: shapeOptions,
         circleOptions: shapeOptions,
         polygonOptions: shapeOptions,
-        map: map.value,
+        map: model.value,
     });
 
     drawingManager.value.addListener("overlaycomplete", function (e) {
         shapeList.value.push(e);
-        console.log(e);
         if (e.type != google.maps.drawing.OverlayType.MARKER) {
             // Switch back to non-drawing mode after drawing a shape.
             selectedToolType.value = null;
@@ -256,7 +258,7 @@ async function initialize() {
         "drawingmode_changed",
         clearSelection
     );
-    map.value.addListener("click", clearSelection);
+    model.value.addListener("click", clearSelection);
     drawingManager.value.addListener("drawingmode_changed", clearSelection);
     selectColor(colors.value[0]);
     centerMap();
@@ -290,20 +292,21 @@ window.addEventListener("load", initialize);
                 </template>
             </SelectButton>
         </div>
-        <GoogleMap
-            class="rounded-lg h-[60vh] overflow-hidden"
-            ref="mapElement"
-            :api-key="apiKey"
-            :libraries="[
-                'drawing',
-                'geometry',
-                'localContext',
-                'visualization',
-            ]"
-            v-model="mapCenter"
-            :disable-default-ui="true"
-            :zoom="15"
-        />
+        <div class="h-[500px] overflow-hidden">
+            <div
+                v-show="model === undefined"
+                class="w-full h-full flex flex-col justify-center items-center"
+            >
+                <ProgressSpinner />
+            </div>
+            <div
+                v-show="model !== undefined"
+                class="w-full h-full"
+                ref="mapDiv"
+            >
+                <!-- Map goes here -->
+            </div>
+        </div>
         <div class="flex flex-row gap-2 items-center justify-stretch flex-wrap">
             <div class="flex flex-col gap-2 grow basis-50">
                 <SelectButton
