@@ -72,6 +72,8 @@ dependencies {
     implementation (libs.play.services.maps.v1810)
     //OKHTTP for websocket support
     implementation(libs.okhttp)
+    //navigation for jetpack compose
+    implementation(libs.androidx.navigation.compose)
 }
 
 secrets {
