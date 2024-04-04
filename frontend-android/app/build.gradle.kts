@@ -74,6 +74,8 @@ dependencies {
     //OKHTTP for websocket support
     implementation(libs.okhttp)
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    implementation("io.github.dellisd.spatialk:geojson:0.3.0")
+    implementation("io.github.dellisd.spatialk:turf:0.3.0")
 }
 
 secrets {
