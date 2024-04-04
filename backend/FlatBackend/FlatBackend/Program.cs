@@ -6,8 +6,12 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseUrls("https://localhost:44380/");
 var app = builder.Build();
-app.UseWebSockets();
-app.MapGet("/ws", async context =>
+var webSocketOptions = new WebSocketOptions
+{
+    KeepAliveInterval = TimeSpan.FromMinutes(2)
+};
+app.UseWebSockets(webSocketOptions);
+/* app.MapGet("/ws", async context =>
 {
     if (context.WebSockets.IsWebSocketRequest)
     {
@@ -32,6 +36,6 @@ app.MapGet("/ws", async context =>
     {
         context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
     }
-});
+});*/
 
 await app.RunAsync();
