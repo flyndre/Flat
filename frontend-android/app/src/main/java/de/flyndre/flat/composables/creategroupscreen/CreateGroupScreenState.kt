@@ -1,5 +1,5 @@
 package de.flyndre.flat.composables.creategroupscreen
 
-data class CreateGroupScreenState(
+/*data class CreateGroupScreenState(
     
-)
+)*/
