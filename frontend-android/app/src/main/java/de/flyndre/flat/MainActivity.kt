@@ -18,31 +18,29 @@ import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
+import de.flyndre.flat.models.IncrementalTrackMessage
+import de.flyndre.flat.models.Track
 import de.flyndre.flat.models.WebSocketMessage
+import de.flyndre.flat.services.WebSocketService
 import de.flyndre.flat.ui.theme.FlatTheme
+import io.github.dellisd.spatialk.geojson.Position
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.WebSocket
+import java.util.UUID
 
 class MainActivity : ComponentActivity() {
-    private lateinit var webSocketClient: WebSocketClient
-    private val socketListener = object : WebSocketClient.SocketListener {
-        override fun onMessage(message: String) {
-            Log.e("socketCheck onMessage", message)
-        }
-    }
+    lateinit var webSocketService :WebSocketService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        webSocketClient = WebSocketClient.getInstance()
-        webSocketClient.setSocketUrl("https://10.0.2.2:44380/ws")
-        webSocketClient.setListener(socketListener)
-        webSocketClient.connect()
-        var obj = WebSocketMessage("Hello World!")
-        var msg = Json.encodeToString(obj)
-        println(msg)
+        webSocketService = WebSocketService()
+        var trk = Track(UUID.randomUUID())
+        trk.addAll(arrayOf(Position(0.0,0.0), Position(1.0,1.0)))
+        webSocketService.sendTrackUpdate(trk)
+
         setContent {
             FlatTheme {
                 // A surface container using the 'background' color from the theme
