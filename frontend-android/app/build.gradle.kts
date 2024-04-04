@@ -74,6 +74,9 @@ dependencies {
     implementation(libs.okhttp)
     //navigation for jetpack compose
     implementation(libs.androidx.navigation.compose)
+    //viewmodel for jetpack compose
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+
 }
 
 secrets {
