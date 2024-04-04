@@ -1,6 +1,7 @@
 package de.flyndre.flat
 
 import android.os.Bundle
+import android.util.JsonReader
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -17,7 +18,10 @@ import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
+import de.flyndre.flat.models.WebSocketMessage
 import de.flyndre.flat.ui.theme.FlatTheme
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.WebSocket
@@ -36,12 +40,14 @@ class MainActivity : ComponentActivity() {
         webSocketClient.setSocketUrl("https://10.0.2.2:44380/ws")
         webSocketClient.setListener(socketListener)
         webSocketClient.connect()
-
+        var obj = WebSocketMessage("Hello World!")
+        var msg = Json.encodeToString(obj)
+        println(msg)
         setContent {
             FlatTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    Map()
+                    //Map()
                 }
             }
         }
@@ -56,7 +62,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
     )
 }
 
-@Composable
+/*@Composable
 fun Map(){
     val singapore = LatLng(1.35, 103.87)
     val cameraPositionState = rememberCameraPositionState {
@@ -72,4 +78,4 @@ fun Map(){
             snippet = "Marker in Singapore"
         )
     }
-}
+}*/

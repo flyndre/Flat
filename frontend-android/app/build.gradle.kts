@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id ("org.jetbrains.kotlin.plugin.serialization") version "1.6.0"
 }
 
 android {
@@ -72,6 +73,7 @@ dependencies {
     implementation (libs.play.services.maps.v1810)
     //OKHTTP for websocket support
     implementation(libs.okhttp)
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
 }
 
 secrets {
