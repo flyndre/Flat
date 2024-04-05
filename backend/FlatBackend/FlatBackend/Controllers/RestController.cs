@@ -4,8 +4,8 @@
 
 namespace FlatBackend.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class RestController : ControllerBase
     {
         //AccessRequest Handshake
