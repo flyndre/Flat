@@ -1,8 +1,6 @@
 package de.flyndre.flat
 
 import android.os.Bundle
-import android.util.JsonReader
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,34 +9,16 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
-import com.google.maps.android.compose.rememberCameraPositionState
-import de.flyndre.flat.models.IncrementalTrackMessage
-import de.flyndre.flat.models.Track
-import de.flyndre.flat.models.WebSocketMessage
+import de.flyndre.flat.services.ConnectionService
 import de.flyndre.flat.services.TrackingService
-import de.flyndre.flat.services.WebSocketService
 import de.flyndre.flat.ui.theme.FlatTheme
-import io.github.dellisd.spatialk.geojson.Position
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.WebSocket
-import java.util.UUID
 
 class MainActivity : ComponentActivity() {
-    lateinit var webSocketService :WebSocketService
+    var connectionService = ConnectionService("https:10.0.2.2/ws")
     var trakingService = TrackingService()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        webSocketService = WebSocketService()
         trakingService.startTracking()
 
         setContent {
