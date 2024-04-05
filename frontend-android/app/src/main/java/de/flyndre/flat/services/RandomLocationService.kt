@@ -15,8 +15,8 @@ class RandomLocationService(override var trackingService: ITrackingService, var 
     var lastlon = ThreadLocalRandom.current().nextDouble(lon1,lon2)
     var thread = Thread(Runnable {
         while(!Thread.interrupted()) {
-            lastlon = ThreadLocalRandom.current().nextDouble(lastlon-0.00001,lastlon+0.0001)
-            lastlat = ThreadLocalRandom.current().nextDouble(lastlat-0.00001,lastlat+0.0001)
+            lastlon = ThreadLocalRandom.current().nextDouble(lastlon-0.0001,lastlon+0.0001)
+            lastlat = ThreadLocalRandom.current().nextDouble(lastlat-0.0001,lastlat+0.0001)
             trackingService.addNewPosition(
                 Position(
                     lastlon,
