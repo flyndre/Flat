@@ -42,13 +42,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
-    fun testWebSocketClient(){
-        webSocketClient = WebSocketClient.getInstance()
-        webSocketClient.setSocketUrl("https://10.0.2.2:44380/ws")
-        webSocketClient.setListener(socketListener)
-        webSocketClient.connect()
-    }
 }
 
 @Composable

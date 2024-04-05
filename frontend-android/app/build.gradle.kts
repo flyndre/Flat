@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     id ("org.jetbrains.kotlin.plugin.serialization") version "1.6.0"
-    id("com.google.devtools.ksp")
 }
 
 android {
@@ -81,14 +80,6 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     //viewmodel for jetpack compose
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-
-    //room database dependencies
-    implementation(libs.androidx.room.runtime)
-    annotationProcessor(libs.androidx.room.compiler)
-    // To use Kotlin Symbol Processing (KSP)
-    ksp(libs.androidx.room.compiler)
-    // optional - Kotlin Extensions and Coroutines support for Room
-    implementation(libs.androidx.room.ktx)
 }
 
 secrets {
