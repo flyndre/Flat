@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id ("org.jetbrains.kotlin.plugin.serialization") version "1.6.0"
 }
 
 android {
@@ -39,7 +40,7 @@ android {
         buildConfig = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.11"
     }
     packaging {
         resources {
@@ -72,6 +73,13 @@ dependencies {
     implementation (libs.play.services.maps.v1810)
     //OKHTTP for websocket support
     implementation(libs.okhttp)
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    implementation("io.github.dellisd.spatialk:geojson:0.3.0")
+    implementation("io.github.dellisd.spatialk:turf:0.3.0")
+    //navigation for jetpack compose
+    implementation(libs.androidx.navigation.compose)
+    //viewmodel for jetpack compose
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
 }
 
 secrets {

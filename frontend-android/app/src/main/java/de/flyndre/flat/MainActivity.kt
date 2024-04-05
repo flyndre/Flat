@@ -1,7 +1,6 @@
 package de.flyndre.flat
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,38 +9,35 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import de.flyndre.flat.services.ConnectionService
+import de.flyndre.flat.services.TrackingService
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
+import de.flyndre.flat.composables.creategroupscreen.CreateGroupScreen
+import de.flyndre.flat.composables.initialscreen.InitialScreen
+import de.flyndre.flat.composables.joinscreen.JoinScreen
 import de.flyndre.flat.ui.theme.FlatTheme
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.WebSocket
 
 class MainActivity : ComponentActivity() {
-    private lateinit var webSocketClient: WebSocketClient
-    private val socketListener = object : WebSocketClient.SocketListener {
-        override fun onMessage(message: String) {
-            Log.e("socketCheck onMessage", message)
-        }
-    }
+    var connectionService = ConnectionService("https:10.0.2.2/ws")
+    var trakingService = TrackingService()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        webSocketClient = WebSocketClient.getInstance()
-        webSocketClient.setSocketUrl("https://10.0.2.2:44380/ws")
-        webSocketClient.setListener(socketListener)
-        webSocketClient.connect()
-
+        trakingService.startTracking()
         setContent {
             FlatTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    Map()
+                    AppEntryPoint(modifier = Modifier)
                 }
             }
         }
@@ -49,14 +45,16 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-            text = "Hello $name!",
-            modifier = modifier
-    )
+fun AppEntryPoint(modifier: Modifier){
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = "initial") {
+        composable("initial"){ InitialScreen(modifier = modifier, onNavigateToJoinScreen = {navController.navigate("join")}, onNavigateToCreateGroupScreen = {navController.navigate("creategroup")})}
+        composable("join"){JoinScreen(modifier = modifier, onNavigateToInitialScreen = {navController.navigate("initial")})}
+        composable("creategroup"){CreateGroupScreen(modifier = modifier, onNavigateToInitialScreen = {navController.navigate("initial")})}
+    }
 }
 
-@Composable
+/*@Composable
 fun Map(){
     val singapore = LatLng(1.35, 103.87)
     val cameraPositionState = rememberCameraPositionState {
@@ -72,4 +70,4 @@ fun Map(){
             snippet = "Marker in Singapore"
         )
     }
-}
+}*/
