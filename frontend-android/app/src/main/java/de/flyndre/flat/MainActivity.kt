@@ -1,7 +1,6 @@
 package de.flyndre.flat
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,6 +9,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import de.flyndre.flat.services.ConnectionService
+import de.flyndre.flat.services.TrackingService
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -24,21 +25,14 @@ import de.flyndre.flat.composables.creategroupscreen.CreateGroupScreen
 import de.flyndre.flat.composables.initialscreen.InitialScreen
 import de.flyndre.flat.composables.joinscreen.JoinScreen
 import de.flyndre.flat.ui.theme.FlatTheme
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.WebSocket
 
 class MainActivity : ComponentActivity() {
-    private lateinit var webSocketClient: WebSocketClient
-    private val socketListener = object : WebSocketClient.SocketListener {
-        override fun onMessage(message: String) {
-            Log.e("socketCheck onMessage", message)
-        }
-    }
+    var connectionService = ConnectionService("https:10.0.2.2/ws")
+    var trakingService = TrackingService()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        trakingService.startTracking()
         setContent {
             FlatTheme {
                 // A surface container using the 'background' color from the theme
@@ -67,7 +61,7 @@ fun AppEntryPoint(modifier: Modifier){
     }
 }
 
-@Composable
+/*@Composable
 fun Map(){
     val singapore = LatLng(1.35, 103.87)
     val cameraPositionState = rememberCameraPositionState {
@@ -83,4 +77,4 @@ fun Map(){
             snippet = "Marker in Singapore"
         )
     }
-}
+}*/
