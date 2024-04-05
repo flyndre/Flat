@@ -11,8 +11,8 @@ The Communication is splitted in two parts. There is the stateless part and the 
 For the stateless communication an REST-API is used. For the stateful Communication we will use websockets.
 ### REST-API
 At the Moment the REST-Endpoint URLS are:
-/api/RestController/AccessRequest/{id}
-/api/RestController/Collection/{id}
-/api/RestController/Collection/
+/api/Rest/AccessRequest/{id}
+/api/Rest/Collection/{id}
+/api/Rest/Collection/
 The Single Endpointfunction will be documented when their implemented.
 ### Websocket
