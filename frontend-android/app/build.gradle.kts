@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.flat"
+    namespace = "de.flyndre.flat"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.flat"
+        applicationId = "de.flyndre.flat"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
