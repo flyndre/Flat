@@ -8,40 +8,42 @@ namespace FlatBackend.Controllers
     [ApiController]
     public class RestController : ControllerBase
     {
-        // GET: api/<ValuesController>
-        //[HttpGet]
-        //public IEnumerable<string> Get()
-        //{
-        //    return new string[] { "value1", "value2" };
-        //}
+        //AccessRequest Handshake
+        [HttpGet("AccessRequest/{id}")]
+        public string Get( int id )
+        {
+            // send List of AccessRequests
+            return "";
+        }
 
-        //// GET api/<ValuesController>/5
-        //[HttpGet("{id}")]
-        //public string Get( int id )
-        //{
-        //    return "value";
-        //}
+        [HttpPost("AccessRequest/{id}")]
+        public void PostAccessConfirmationCollection( int id, [FromBody] string value )
+        {
+            //call add User to Accessrequestlist
+        }
 
-        // POST api/<ValuesController>
-        //[HttpPost]
-        //public void Post( [FromBody] string value )
-        //{
-        //}
-
+        //Collection specifik
+        // POST api/<RestController>/
         [HttpPost]
         public void PostOpenCollection( [FromBody] string value )
         {
             //call create Database and send Objekt back
         }
 
-        // PUT api/<ValuesController>/5
+        [HttpPost("Collection/{id}")]
+        public void PostAccessRequestCollection( int id, [FromBody] string value )
+        {
+            //call add User to Accessrequestlist
+        }
+
+        // PUT api/<ValuesController>/Collection/5 ChangeAreaDivision
         [HttpPut("Collection/{id}")]
         public void PutSetOrChangeAreaDivision( int id, [FromBody] string value )
         {
             //call Change or set AreaDivision in Database
         }
 
-        // DELETE api/<ValuesController>/5 CloseCollection
+        // DELETE api/<ValuesController>/Collection/5 CloseCollection
         [HttpDelete("Collection/{id}")]
         public void DeleteCollection( int id )
         {
