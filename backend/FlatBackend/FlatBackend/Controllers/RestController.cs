@@ -13,7 +13,7 @@ namespace FlatBackend.Controllers
         public string Get( int id )
         {
             // send List of AccessRequests
-            return "";
+            return "Hey";
         }
 
         [HttpPost("AccessRequest/{id}")]
@@ -24,7 +24,7 @@ namespace FlatBackend.Controllers
 
         //Collection specifik
         // POST api/<RestController>/
-        [HttpPost]
+        [HttpPost("Collection")]
         public void PostOpenCollection( [FromBody] string value )
         {
             //call create Database and send Objekt back

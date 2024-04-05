@@ -6,6 +6,7 @@ namespace FlatBackend.Controllers
     public class WebsocketController : ControllerBase
     {
         [Route("/ws")]
+        [HttpGet]
         public async Task Get()
         {
             if (HttpContext.WebSockets.IsWebSocketRequest)
