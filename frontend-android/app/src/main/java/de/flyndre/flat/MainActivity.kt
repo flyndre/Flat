@@ -25,6 +25,7 @@ import de.flyndre.flat.composables.creategroupscreen.CreateGroupScreen
 import de.flyndre.flat.composables.initialscreen.InitialScreen
 import de.flyndre.flat.composables.joinscreen.JoinScreen
 import de.flyndre.flat.ui.theme.FlatTheme
+import kotlin.concurrent.thread
 
 class MainActivity : ComponentActivity() {
     var connectionService = ConnectionService("https:10.0.2.2/ws")
@@ -32,7 +33,13 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        trakingService.startTracking()
+        Thread(Runnable {
+            while(true){
+                trakingService.startTracking()
+                Thread.sleep(10000)
+                trakingService.stopTracking()
+            }
+        }).start()
         setContent {
             FlatTheme {
                 // A surface container using the 'background' color from the theme
@@ -41,6 +48,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
     }
 }
 

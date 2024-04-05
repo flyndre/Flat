@@ -5,7 +5,7 @@ import io.github.dellisd.spatialk.geojson.Point
 import io.github.dellisd.spatialk.geojson.Position
 import java.util.UUID
 
-class Track(var trackId: UUID): ArrayList<Position>() {
+class Track(var trackId: UUID = UUID.randomUUID()): ArrayList<Position>() {
 
     fun toLineString():LineString{
         if(size<2){

@@ -1,5 +1,6 @@
 package de.flyndre.flat.services
 
+import android.util.Log
 import de.flyndre.flat.interfaces.ILocationService
 import de.flyndre.flat.interfaces.ITrackingService
 import io.github.dellisd.spatialk.geojson.Position
@@ -13,22 +14,29 @@ class RandomLocationService(override var trackingService: ITrackingService, var 
     var lon2 = 8.506647
     var lastlat = ThreadLocalRandom.current().nextDouble(lat1,lat2)
     var lastlon = ThreadLocalRandom.current().nextDouble(lon1,lon2)
-    var thread = Thread(Runnable {
-        while(!Thread.interrupted()) {
-            lastlon = ThreadLocalRandom.current().nextDouble(lastlon-0.0001,lastlon+0.0001)
-            lastlat = ThreadLocalRandom.current().nextDouble(lastlat-0.0001,lastlat+0.0001)
-            trackingService.addNewPosition(
-                Position(
-                    lastlon,
-                    lastlat
-                )
-            )
-            Thread.sleep(interval)
-        }
-    })
+    lateinit var thread :Thread
 
     override fun startTracking() {
-        thread.start()
+        try {
+            thread = Thread(Runnable {
+                try{
+                    while(!Thread.interrupted()) {
+                        lastlon = ThreadLocalRandom.current().nextDouble(lastlon-0.0001,lastlon+0.0001)
+                        lastlat = ThreadLocalRandom.current().nextDouble(lastlat-0.0001,lastlat+0.0001)
+                        trackingService.addNewPosition(
+                            Position(
+                                lastlon,
+                                lastlat
+                            )
+                        )
+                        Thread.sleep(interval)
+                    }
+                }catch (_:InterruptedException){}
+            })
+            thread.start()
+        }catch (ex:Exception){
+            Log.e(this.toString(),ex.toString())
+        }
 
     }
 
