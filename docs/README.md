@@ -11,6 +11,9 @@ The Flat app family is split into three main parts:
 -   [Backend](/docs/backend/README.md) (Shared by both frontends)
 
 Likewise, the codebase and therefore the docs are split in the same manner.
+Shared documentation is located in the folder this README is located in:
+
+-   [Shared UI Specifications](/docs/ui.md)
 
 ## API
 
@@ -27,3 +30,28 @@ Conventions regarding Git and coding are documented [here](/docs/conventions.md)
 | Android Frontend | Jetpack Compose, Kotlin                                      |
 | PWA Frontend     | TypeScript, Vite, Vue, Tailwind CSS, [ Vuetify \| PrimeVue ] |
 | Backend          | .NET, C#                                                     |
+
+## Requirementss
+
+Must:
+
+-   Map display
+-   Divide map into areas
+-   Track your own location via GPS (can be started and stopped)
+-   Share tracking with other team members via backend
+-   Join the team via link
+-   User name
+
+Target:
+
+-   Join via QR code
+-   Leaderboard/Statistics
+-   Dark Mode
+-   Define collection templates
+
+Can:
+
+-   Start/stop tracking via notification
+-   Profile pictures
+-   Team leader can send push messages to participants
+-   Suggestions for optimal route distribution
