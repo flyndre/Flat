@@ -8,6 +8,9 @@ import java.util.UUID
 class Track(var trackId: UUID): ArrayList<Position>() {
 
     fun toLineString():LineString{
+        if(size<2){
+            return LineString(Position(0.0,0.0),Position(0.0,0.0))
+        }
         return LineString(this)
     }
 

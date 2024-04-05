@@ -21,6 +21,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import de.flyndre.flat.models.IncrementalTrackMessage
 import de.flyndre.flat.models.Track
 import de.flyndre.flat.models.WebSocketMessage
+import de.flyndre.flat.services.TrackingService
 import de.flyndre.flat.services.WebSocketService
 import de.flyndre.flat.ui.theme.FlatTheme
 import io.github.dellisd.spatialk.geojson.Position
@@ -33,13 +34,12 @@ import java.util.UUID
 
 class MainActivity : ComponentActivity() {
     lateinit var webSocketService :WebSocketService
+    var trakingService = TrackingService()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         webSocketService = WebSocketService()
-        var trk = Track(UUID.randomUUID())
-        trk.addAll(arrayOf(Position(0.0,0.0), Position(1.0,1.0)))
-        webSocketService.sendTrackUpdate(trk)
+        trakingService.startTracking()
 
         setContent {
             FlatTheme {
