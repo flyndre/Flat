@@ -7,12 +7,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class PresetScreenViewModel(presetId: Int?, db: AppDatabase) :ViewModel() {
-    //preset name
     private val _presetName = MutableStateFlow("")
     val presetName: StateFlow<String> = _presetName.asStateFlow()
-    //preset description
+    fun updatePresetName(presetName: String){
+        _presetName.value = presetName
+    }
+
     private val _presetDescription = MutableStateFlow("")
     val presetDescription: StateFlow<String> = _presetDescription.asStateFlow()
+    fun updatePresetDescription(presetDescription: String){
+        _presetDescription.value = presetDescription
+    }
+
     init{
         //check whether id is not null and fetch the preset from database
         if(presetId != null){
