@@ -68,7 +68,14 @@ class ConnectionService(
     }
 
     override fun closeCollection(collection: CollectionInstance) {
-        TODO("Not yet implemented")
+        var request = Request.Builder()
+            .url("$baseUrl/api/rest/collection/${collection.id}")
+            .delete()
+            .build()
+        var result = restClient.newCall(request).execute()
+        if(!result.isSuccessful){
+            TODO()
+        }
     }
 
     override fun setAreaDivision(divisions: List<CollectionArea>) {
