@@ -1,6 +1,5 @@
 package de.flyndre.flat
 
-import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,6 +17,7 @@ import androidx.room.Room
 import de.flyndre.flat.composables.creategroupscreen.CreateGroupScreen
 import de.flyndre.flat.composables.initialscreen.InitialScreen
 import de.flyndre.flat.composables.joinscreen.JoinScreen
+import de.flyndre.flat.composables.presetscreen.PresetScreen
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.ui.theme.FlatTheme
 import kotlin.concurrent.thread
@@ -56,6 +56,7 @@ fun AppEntryPoint(modifier: Modifier, db: AppDatabase){
     NavHost(navController = navController, startDestination = "initial") {
         composable("initial"){ InitialScreen(modifier = modifier, onNavigateToJoinScreen = {navController.navigate("join")}, onNavigateToCreateGroupScreen = {navController.navigate("creategroup")})}
         composable("join"){JoinScreen(modifier = modifier, onNavigateToInitialScreen = {navController.navigate("initial")})}
-        composable("creategroup"){CreateGroupScreen(modifier = modifier, db = db,  onNavigateToInitialScreen = {navController.navigate("initial")})}
+        composable("creategroup"){CreateGroupScreen(modifier = modifier, db = db,  onNavigateToInitialScreen = {navController.navigate("initial")}, onNavigateToNewPresetScreen = {navController.navigate("newpreset")})}
+        composable("newpreset"){ PresetScreen(preset = null, topBarText = "New Preset", onNavigateToCreateGroupScreen = {navController.navigate("creategroup")})}
     }
 }
