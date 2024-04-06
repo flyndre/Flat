@@ -20,23 +20,23 @@ namespace FlatBackend.Controllers
 
         //AccessRequest Handshake
         [HttpGet("AccessRequest/{id}")]
-        public async Task<string> Get( string id )
+        public async Task<ObjectResult> Get( Guid id )
         {
             try
             {
                 var Collection = await mongoDBService.GetCollection(id);
                 List<UserModel> users = Collection.RequestedAccess;
                 var Json = JsonSerializer.Serialize(users);
-                return Json;
+                return Ok(users);
             }
             catch (Exception ex)
             {
-                return ex.ToString();
+                return NotFound(ex.ToString());
             }
         }
 
         [HttpPost("AccessRequest/{id}")]
-        public async Task<ObjectResult> PostAccessConfirmationCollection( string id, [FromBody] UserModel value )
+        public async Task<ObjectResult> PostAccessConfirmationCollection( Guid id, [FromBody] UserModel value )
         {
             try
             {
@@ -72,11 +72,14 @@ namespace FlatBackend.Controllers
         }
 
         [HttpPost("Collection/{id}")]
-        public async Task<ObjectResult> PostAccessRequestCollection( string id, [FromBody] UserModel value )
+        public async Task<ObjectResult> PostAccessRequestCollection( Guid id, [FromBody] UserModel value )
         {
             try
             {
                 var oldCol = await mongoDBService.GetCollection(id);
+                if (oldCol.RequestedAccess == null)
+                { oldCol.RequestedAccess = new List<UserModel>(); }
+
                 oldCol.RequestedAccess.Add(value);
                 mongoDBService.ChangeCollection(oldCol);
                 return Ok(new object { });
@@ -90,7 +93,7 @@ namespace FlatBackend.Controllers
 
         // PUT api/<ValuesController>/Collection/5 ChangeAreaDivision
         [HttpPut("Collection/{id}")]
-        public async Task<string> PutSetOrChangeAreaDivision( string id, [FromBody] List<AreaModel> value )
+        public async Task<string> PutSetOrChangeAreaDivision( Guid id, [FromBody] List<AreaModel> value )
         {
             try
             {
@@ -111,11 +114,11 @@ namespace FlatBackend.Controllers
 
         // DELETE api/<ValuesController>/Collection/5 CloseCollection
         [HttpDelete("Collection/{id}")]
-        public async Task<ObjectResult> DeleteCollection( string id )
+        public async Task<ObjectResult> DeleteCollection( Guid id )
         {
             try
             {
-                mongoDBService.RemoveCollection(id);
+                mongoDBService.RemoveCollection(id); //and inform all clients
                 return Ok(new object { });
             }
             catch (Exception ex)
