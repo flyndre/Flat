@@ -28,13 +28,13 @@ namespace FlatBackend.Database
             return;
         }
 
-        public void RemoveCollection( ObjectId id )
+        public void RemoveCollection( string id )
         {
             collection.DeleteOne(r => r.Id == id);
             return;
         }
 
-        public async Task<CollectionModel> GetCollection( ObjectId id )
+        public async Task<CollectionModel> GetCollection( string id )
         {
             return await collection.Find(r => r.Id == id).FirstAsync();
         }

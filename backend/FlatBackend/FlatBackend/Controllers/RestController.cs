@@ -3,6 +3,8 @@ using FlatBackend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualBasic;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization.IdGenerators;
+using MongoDB.Bson.Serialization.Serializers;
 using System.Text.Json;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -17,7 +19,7 @@ namespace FlatBackend.Controllers
 
         //AccessRequest Handshake
         [HttpGet("AccessRequest/{id}")]
-        public async Task<string> Get( ObjectId id )
+        public async Task<string> Get( string id )
         {
             var Collection = await mongoDBService.GetCollection(id);
             List<UserModel> users = Collection.RequestedAccess;
@@ -26,7 +28,7 @@ namespace FlatBackend.Controllers
         }
 
         [HttpPost("AccessRequest/{id}")]
-        public async void PostAccessConfirmationCollection( ObjectId id, [FromBody] UserModel value )
+        public async void PostAccessConfirmationCollection( string id, [FromBody] UserModel value )
         {
             try
             {
@@ -48,11 +50,12 @@ namespace FlatBackend.Controllers
         {
             mongoDBService.AddCollection(value);
             var result = await mongoDBService.GetCollection(value.Id);
-            return JsonSerializer.Serialize(result);
+            var Json = JsonSerializer.Serialize(result);
+            return Json;
         }
 
         [HttpPost("Collection/{id}")]
-        public async void PostAccessRequestCollection( ObjectId id, [FromBody] UserModel value )
+        public async void PostAccessRequestCollection( string id, [FromBody] UserModel value )
         {
             var oldCol = await mongoDBService.GetCollection(id);
             oldCol.RequestedAccess.Add(value);
@@ -62,7 +65,7 @@ namespace FlatBackend.Controllers
 
         // PUT api/<ValuesController>/Collection/5 ChangeAreaDivision
         [HttpPut("Collection/{id}")]
-        public async Task<string> PutSetOrChangeAreaDivision( ObjectId id, [FromBody] List<AreaModel> value )
+        public async Task<string> PutSetOrChangeAreaDivision( string id, [FromBody] List<AreaModel> value )
         {
             var oldCol = await mongoDBService.GetCollection(id);
             foreach (var area in value)
@@ -76,7 +79,7 @@ namespace FlatBackend.Controllers
 
         // DELETE api/<ValuesController>/Collection/5 CloseCollection
         [HttpDelete("Collection/{id}")]
-        public void DeleteCollection( ObjectId id )
+        public void DeleteCollection( string id )
         {
             mongoDBService.RemoveCollection(id);
             //call delete Collection in Database
