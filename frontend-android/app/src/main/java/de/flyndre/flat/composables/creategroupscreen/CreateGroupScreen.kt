@@ -18,11 +18,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import de.flyndre.flat.database.AppDatabase
+import de.flyndre.flat.database.entities.Preset
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateGroupScreen(modifier: Modifier = Modifier, db: AppDatabase, onNavigateToInitialScreen: () -> Unit, createGroupScreenViewModel: CreateGroupScreenViewModel = CreateGroupScreenViewModel(db = db)){
-    val createGroupScreenState by createGroupScreenViewModel.createGroupState.collectAsState()
+    val presets by createGroupScreenViewModel.presets.collectAsState()
     Scaffold(topBar = {
         TopAppBar(title = {Text(text = "Presets")},
             navigationIcon = {
@@ -41,15 +42,15 @@ fun CreateGroupScreen(modifier: Modifier = Modifier, db: AppDatabase, onNavigate
     }
     ) {
         innerPadding ->
-        PresetList(Modifier.padding(innerPadding), presets = createGroupScreenState.presets)
+        PresetList(Modifier.padding(innerPadding), presets = presets)
     }
 }
 
 @Composable
-private fun PresetList(modifier: Modifier, presets: List<String>){
+private fun PresetList(modifier: Modifier, presets: List<Preset>){
     Column(modifier = modifier) {
         presets.forEach{
-            preset -> Text(text = preset)
+            preset -> Text(text = preset.presetName)
         }
     }
 }
