@@ -1,5 +1,6 @@
 ﻿using FlatBackend.Database;
 using FlatBackend.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualBasic;
 using MongoDB.Bson;
@@ -21,14 +22,21 @@ namespace FlatBackend.Controllers
         [HttpGet("AccessRequest/{id}")]
         public async Task<string> Get( string id )
         {
-            var Collection = await mongoDBService.GetCollection(id);
-            List<UserModel> users = Collection.RequestedAccess;
-            var Json = JsonSerializer.Serialize(users);
-            return Json;
+            try
+            {
+                var Collection = await mongoDBService.GetCollection(id);
+                List<UserModel> users = Collection.RequestedAccess;
+                var Json = JsonSerializer.Serialize(users);
+                return Json;
+            }
+            catch (Exception ex)
+            {
+                return ex.ToString();
+            }
         }
 
         [HttpPost("AccessRequest/{id}")]
-        public async void PostAccessConfirmationCollection( string id, [FromBody] UserModel value )
+        public async Task<ObjectResult> PostAccessConfirmationCollection( string id, [FromBody] UserModel value )
         {
             try
             {
@@ -37,9 +45,11 @@ namespace FlatBackend.Controllers
                 oldCol.RequestedAccess.Remove(user);
                 oldCol.ConfirmedUsers.Add(user);
                 mongoDBService.ChangeCollection(oldCol);
+                return Ok(new object { });
             }
-            catch
+            catch (Exception ex)
             {
+                return NotFound(ex.ToString());
             }//call add User to AccessrequestConfirmedlist
         }
 
@@ -48,18 +58,33 @@ namespace FlatBackend.Controllers
         [HttpPost("Collection")]
         public async Task<string> PostOpenCollection( [FromBody] CollectionModel value )
         {
-            mongoDBService.AddCollection(value);
-            var result = await mongoDBService.GetCollection(value.Id);
-            var Json = JsonSerializer.Serialize(result);
-            return Json;
+            try
+            {
+                mongoDBService.AddCollection(value);
+                var result = await mongoDBService.GetCollection(value.Id);
+                var Json = JsonSerializer.Serialize(result);
+                return Json;
+            }
+            catch (Exception ex)
+            {
+                return ex.ToString();
+            }
         }
 
         [HttpPost("Collection/{id}")]
-        public async void PostAccessRequestCollection( string id, [FromBody] UserModel value )
+        public async Task<ObjectResult> PostAccessRequestCollection( string id, [FromBody] UserModel value )
         {
-            var oldCol = await mongoDBService.GetCollection(id);
-            oldCol.RequestedAccess.Add(value);
-            mongoDBService.ChangeCollection(oldCol);
+            try
+            {
+                var oldCol = await mongoDBService.GetCollection(id);
+                oldCol.RequestedAccess.Add(value);
+                mongoDBService.ChangeCollection(oldCol);
+                return Ok(new object { });
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.ToString());
+            }
             //call add User to Accessrequestlist
         }
 
@@ -67,21 +92,36 @@ namespace FlatBackend.Controllers
         [HttpPut("Collection/{id}")]
         public async Task<string> PutSetOrChangeAreaDivision( string id, [FromBody] List<AreaModel> value )
         {
-            var oldCol = await mongoDBService.GetCollection(id);
-            foreach (var area in value)
+            try
             {
-                oldCol.CollectionArea.Add(area);
+                var oldCol = await mongoDBService.GetCollection(id);
+                foreach (var area in value)
+                {
+                    oldCol.CollectionArea.Add(area);
+                }
+                mongoDBService.ChangeCollection(oldCol);
+                oldCol = await mongoDBService.GetCollection(id);
+                return JsonSerializer.Serialize(oldCol);
             }
-            mongoDBService.ChangeCollection(oldCol);
-            oldCol = await mongoDBService.GetCollection(id);
-            return JsonSerializer.Serialize(oldCol);
+            catch (Exception ex)
+            {
+                return ex.ToString();
+            }
         }
 
         // DELETE api/<ValuesController>/Collection/5 CloseCollection
         [HttpDelete("Collection/{id}")]
-        public void DeleteCollection( string id )
+        public async Task<ObjectResult> DeleteCollection( string id )
         {
-            mongoDBService.RemoveCollection(id);
+            try
+            {
+                mongoDBService.RemoveCollection(id);
+                return Ok(new object { });
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.ToString());
+            }
             //call delete Collection in Database
         }
     }
