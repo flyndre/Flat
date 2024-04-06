@@ -18,6 +18,7 @@ roomKtx = "2.6.1"
 roomRuntime = "2.6.1"
 secretsGradlePlugin = "2.0.1"
 symbolProcessingApi = "1.9.23-1.0.20"
+roomCommon = "2.6.1"
 
 [libraries]
 android-maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsComposeVersion" }
@@ -47,6 +48,7 @@ play-services-maps = { module = "com.google.android.gms:play-services-maps", ver
 play-services-maps-v1810 = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMapsVersion" }
 secrets-gradle-plugin = { module = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin", version.ref = "secretsGradlePlugin" }
 symbol-processing-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "symbolProcessingApi" }
+androidx-room-common = { group = "androidx.room", name = "room-common", version.ref = "roomCommon" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
