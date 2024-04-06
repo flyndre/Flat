@@ -48,7 +48,7 @@ fun PresetScreen(
                 Button(onClick = {  }) {
                     Text("Save and Start")
                 }
-                Button(onClick = {  }) {
+                Button(onClick = { presetScreenViewModel.savePresetToDatabase(); onNavigateToCreateGroupScreen() }) {
                     Text("Save")
                 }
             }
