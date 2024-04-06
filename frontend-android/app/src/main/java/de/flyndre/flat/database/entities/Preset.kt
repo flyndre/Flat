@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class Preset(
-    @PrimaryKey val id: Int,
+    @PrimaryKey(autoGenerate = true) val id: Int,
     @ColumnInfo(name = "presetName") val presetName: String,
     @ColumnInfo(name = "presetDescription") val presetDescription: String
 )
