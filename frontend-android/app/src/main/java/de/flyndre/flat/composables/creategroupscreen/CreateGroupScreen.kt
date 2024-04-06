@@ -6,6 +6,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,8 +34,9 @@ fun CreateGroupScreen(modifier: Modifier = Modifier, db: AppDatabase, onNavigate
                }
         })
     }, floatingActionButton = {
-        FloatingActionButton(onClick = { /*TODO*/ }) {
-            Icon(Icons.Default.Add, contentDescription = "add preset")
+        ExtendedFloatingActionButton(onClick = { /*TODO*/ }) {
+            Icon(Icons.Filled.Add, contentDescription = "add new preset")
+            Text(text = "create preset")
         }
     }
     ) {
