@@ -1,6 +1,7 @@
 package de.flyndre.flat.composables.presetscreen
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -13,7 +14,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -25,6 +29,8 @@ import de.flyndre.flat.database.AppDatabase
 fun PresetScreen(
     modifier: Modifier = Modifier,
     presetId: Int?, db: AppDatabase, topBarText: String, onNavigateToCreateGroupScreen: () -> Unit, presetScreenViewModel: PresetScreenViewModel = PresetScreenViewModel(presetId = presetId, db = db)){
+    val presetName by presetScreenViewModel.presetName.collectAsState()
+    val presetDescription by presetScreenViewModel.presetDescription.collectAsState()
     Scaffold(topBar = {
         CenterAlignedTopAppBar(title = { Text(text = topBarText) }, navigationIcon = { IconButton(
             onClick = { onNavigateToCreateGroupScreen() }) {
@@ -47,8 +53,10 @@ fun PresetScreen(
                 }
             }
         }) {
-        innerPadding -> {
-            Modifier.padding(innerPadding)
-    }
+        innerPadding ->
+        Column (modifier = Modifier.padding(innerPadding)) {
+            TextField(value = presetName, onValueChange = {presetScreenViewModel.updatePresetName(it)}, label = {Text(text = "Preset Name")})
+            TextField(value = presetDescription, onValueChange = {presetScreenViewModel.updatePresetDescription(it)}, label = {Text(text = "Preset Description")})
+        }
     }
 }
