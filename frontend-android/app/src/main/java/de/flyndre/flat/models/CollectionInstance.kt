@@ -4,10 +4,10 @@ import io.github.dellisd.spatialk.geojson.Polygon
 import java.util.UUID
 
 class CollectionInstance(
-    name:String,
-    id: UUID,
-    area: Polygon,
-    divisions: ArrayList<CollectionArea> = arrayListOf()
+    var name:String,
+    var id: UUID,
+    var area: Polygon,
+    var divisions: ArrayList<CollectionArea> = arrayListOf()
 ) {
 
 
