@@ -17,13 +17,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import de.flyndre.flat.database.entities.Preset
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PresetScreen(
     modifier: Modifier = Modifier,
-    preset: Preset?, topBarText: String, onNavigateToCreateGroupScreen: () -> Unit, presetScreenViewModel: PresetScreenViewModel = PresetScreenViewModel(preset = preset)){
+    presetId: Int?, topBarText: String, onNavigateToCreateGroupScreen: () -> Unit, presetScreenViewModel: PresetScreenViewModel = PresetScreenViewModel(presetId = presetId)){
     Scaffold(topBar = {
         CenterAlignedTopAppBar(title = { Text(text = topBarText) }, navigationIcon = { IconButton(
             onClick = { onNavigateToCreateGroupScreen() }) {

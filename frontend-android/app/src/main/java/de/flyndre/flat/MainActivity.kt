@@ -8,11 +8,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
 import de.flyndre.flat.services.ConnectionService
 import de.flyndre.flat.services.TrackingService
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.room.Room
 import de.flyndre.flat.composables.creategroupscreen.CreateGroupScreen
 import de.flyndre.flat.composables.initialscreen.InitialScreen
@@ -50,7 +52,9 @@ fun AppEntryPoint(modifier: Modifier, db: AppDatabase){
     NavHost(navController = navController, startDestination = "initial") {
         composable("initial"){ InitialScreen(modifier = modifier, onNavigateToJoinScreen = {navController.navigate("join")}, onNavigateToCreateGroupScreen = {navController.navigate("creategroup")})}
         composable("join"){JoinScreen(modifier = modifier, onNavigateToInitialScreen = {navController.navigate("initial")})}
-        composable("creategroup"){CreateGroupScreen(modifier = modifier, db = db,  onNavigateToInitialScreen = {navController.navigate("initial")}, onNavigateToNewPresetScreen = {navController.navigate("newpreset")})}
-        composable("newpreset"){ PresetScreen(preset = null, topBarText = "New Preset", onNavigateToCreateGroupScreen = {navController.navigate("creategroup")})}
+        composable("creategroup"){CreateGroupScreen(modifier = modifier, db = db,  onNavigateToInitialScreen = {navController.navigate("initial")}, onNavigateToNewPresetScreen = {navController.navigate("newpreset")}, navController = navController)}
+        composable("newpreset"){ PresetScreen(presetId = null, topBarText = "New Preset", onNavigateToCreateGroupScreen = {navController.navigate("creategroup")})}
+        composable("editpreset/{presetId}", arguments = listOf(navArgument("presetId"){type = NavType.IntType})){ backStackEntry -> val presetId = backStackEntry.arguments?.getInt("presetId")
+            PresetScreen(presetId = presetId, topBarText = "Edit Preset", onNavigateToCreateGroupScreen = { navController.navigate("creategroup") })}
     }
 }
