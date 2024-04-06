@@ -56,7 +56,7 @@ fun CreateGroupScreen(modifier: Modifier = Modifier, db: AppDatabase, onNavigate
 private fun PresetList(modifier: Modifier, navController: NavController, presets: List<Preset>){
     Column(modifier = modifier) {
         presets.forEach{
-            preset -> ListItem(modifier = Modifier.clickable { navController.navigate("editpreset/" + preset.id) }, headlineContent = { preset.presetName }, supportingContent = { preset.presetDescription } )
+            preset -> ListItem(modifier = Modifier.clickable { navController.navigate("editpreset/" + preset.id) }, headlineContent = { Text(text = preset.presetName) }, supportingContent = { Text(text = preset.presetDescription) } )
         }
     }
 }
