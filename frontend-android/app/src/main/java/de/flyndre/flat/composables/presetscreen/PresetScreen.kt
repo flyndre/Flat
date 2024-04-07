@@ -1,5 +1,6 @@
 package de.flyndre.flat.composables.presetscreen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.GoogleMapOptions
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapUiSettings
 import de.flyndre.flat.database.AppDatabase
 
 
@@ -31,7 +33,7 @@ import de.flyndre.flat.database.AppDatabase
 @Composable
 fun PresetScreen(
     modifier: Modifier = Modifier,
-    presetId: Int?, db: AppDatabase, topBarText: String, onNavigateToCreateGroupScreen: () -> Unit, presetScreenViewModel: PresetScreenViewModel = PresetScreenViewModel(presetId = presetId, db = db)){
+    presetId: Int?, db: AppDatabase, topBarText: String, onNavigateToCreateGroupScreen: () -> Unit, onNavigateToCollectionAreaScreen: () -> Unit, presetScreenViewModel: PresetScreenViewModel = PresetScreenViewModel(presetId = presetId, db = db)){
     val presetName by presetScreenViewModel.presetName.collectAsState()
     val presetDescription by presetScreenViewModel.presetDescription.collectAsState()
     Scaffold(topBar = {
@@ -61,8 +63,8 @@ fun PresetScreen(
             val modifier = Modifier.padding(10.dp)
             TextField(modifier = modifier, value = presetName, onValueChange = {presetScreenViewModel.updatePresetName(it)}, label = {Text(text = "Preset Name")})
             TextField(modifier = modifier, value = presetDescription, onValueChange = {presetScreenViewModel.updatePresetDescription(it)}, label = {Text(text = "Preset Description")})
-            Card (modifier = modifier) {
-                //GoogleMap(googleMapOptionsFactory = { GoogleMapOptions(). })
+            Card (modifier = modifier){
+                GoogleMap(onMapClick = {onNavigateToCollectionAreaScreen()}, uiSettings = MapUiSettings(zoomControlsEnabled = false, zoomGesturesEnabled = false, scrollGesturesEnabled = false, rotationGesturesEnabled = false, tiltGesturesEnabled = false))
             }
         }
     }
