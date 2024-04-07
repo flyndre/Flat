@@ -1,13 +1,17 @@
 package de.flyndre.flat
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavType
 import de.flyndre.flat.services.ConnectionService
 import de.flyndre.flat.services.TrackingService
@@ -22,7 +26,6 @@ import de.flyndre.flat.composables.joinscreen.JoinScreen
 import de.flyndre.flat.composables.presetscreen.PresetScreen
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.ui.theme.FlatTheme
-import kotlin.concurrent.thread
 
 class MainActivity : ComponentActivity() {
     var connectionService = ConnectionService("https:10.0.2.2/ws")
@@ -30,6 +33,9 @@ class MainActivity : ComponentActivity() {
     lateinit var db: AppDatabase
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //request permissions
+        requestLocationPermission()
+
         Thread(Runnable {
             while(true){
                 trakingService.startTracking()
@@ -49,6 +55,20 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+    }
+
+    private fun requestLocationPermission(){
+        val requestPermissionLauncher =
+            registerForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { isGranted: Boolean ->
+                if (!isGranted) {
+                    finishAndRemoveTask()
+                }
+            }
+        if(ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
     }
 }
 

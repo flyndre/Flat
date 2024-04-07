@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -21,6 +22,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.google.android.gms.maps.GoogleMapOptions
+import com.google.maps.android.compose.GoogleMap
 import de.flyndre.flat.database.AppDatabase
 
 
@@ -55,8 +58,12 @@ fun PresetScreen(
         }) {
         innerPadding ->
         Column (modifier = Modifier.padding(innerPadding)) {
-            TextField(value = presetName, onValueChange = {presetScreenViewModel.updatePresetName(it)}, label = {Text(text = "Preset Name")})
-            TextField(value = presetDescription, onValueChange = {presetScreenViewModel.updatePresetDescription(it)}, label = {Text(text = "Preset Description")})
+            val modifier = Modifier.padding(10.dp)
+            TextField(modifier = modifier, value = presetName, onValueChange = {presetScreenViewModel.updatePresetName(it)}, label = {Text(text = "Preset Name")})
+            TextField(modifier = modifier, value = presetDescription, onValueChange = {presetScreenViewModel.updatePresetDescription(it)}, label = {Text(text = "Preset Description")})
+            Card (modifier = modifier) {
+                //GoogleMap(googleMapOptionsFactory = { GoogleMapOptions(). })
+            }
         }
     }
 }
