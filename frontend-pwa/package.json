@@ -13,6 +13,8 @@
         "@jamescoyle/vue-icon": "^0.1.2",
         "@mdi/js": "^7.4.47",
         "@vueuse/core": "^10.9.0",
+        "@vueuse/rxjs": "^10.9.0",
+        "dexie": "^4.0.1",
         "primevue": "^3.50.0",
         "vue": "^3.4.21",
         "vue-router": "^4.3.0"
