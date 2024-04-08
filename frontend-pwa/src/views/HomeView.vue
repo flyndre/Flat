@@ -7,28 +7,33 @@ import { mdiImport, mdiMapMarkerPath } from "@mdi/js";
 </script>
 
 <template>
-    <AppBar>
-        <router-link :to="{ name: 'presets' }">
-            <Button label="My Collections" text>
-                <template #icon>
-                    <MdiIcon class="mr-2.5" :icon="mdiMapMarkerPath" />
-                </template>
-            </Button>
-        </router-link>
-        <router-link :to="{ name: 'home' }">
-            <Button label="Join a Collection">
-                <template #icon>
-                    <MdiIcon class="mr-2.5" :icon="mdiImport" />
-                </template>
-            </Button>
-        </router-link>
-    </AppBar>
-    <div
-        class="w-full h-full min-h-[50vh] bg-white flex flex-col items-center justify-center text-gray-500"
-    >
-        Map Placeholder
-    </div>
-    <!-- <Card :pt="{ footer: { class: 'flex flex-row gap-2' } }">
+    <div class="h-screen flex flex-col justify-stretch">
+        <AppBar>
+            <template #action-left>
+                <router-link :to="{ name: 'presets' }">
+                    <Button label="My Collections" text>
+                        <template #icon>
+                            <MdiIcon class="mr-2.5" :icon="mdiMapMarkerPath" />
+                        </template>
+                    </Button>
+                </router-link>
+            </template>
+            <template #action-right>
+                <router-link :to="{ name: 'join' }">
+                    <Button label="Join a Collection">
+                        <template #icon>
+                            <MdiIcon class="mr-2.5" :icon="mdiImport" />
+                        </template>
+                    </Button>
+                </router-link>
+            </template>
+        </AppBar>
+        <div
+            class="w-full flex-grow bg-white flex flex-col items-center justify-center text-gray-500"
+        >
+            Map Placeholder
+        </div>
+        <!-- <Card :pt="{ footer: { class: 'flex flex-row gap-2' } }">
         <template #title> Flat </template>
         <template #subtitle> Fleet Live Area Tracking </template>
         <template #content>
@@ -44,4 +49,5 @@ import { mdiImport, mdiMapMarkerPath } from "@mdi/js";
             </a>
         </template>
     </Card> -->
+    </div>
 </template>
