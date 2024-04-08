@@ -14,6 +14,9 @@ dependencies:
   '@mdi/js':
     specifier: ^7.4.47
     version: 7.4.47
+  '@types/naughty-words':
+    specifier: ^1.2.3
+    version: 1.2.3
   '@vueuse/core':
     specifier: ^10.9.0
     version: 10.9.0(vue@3.4.21)
@@ -23,6 +26,9 @@ dependencies:
   dexie:
     specifier: ^4.0.1
     version: 4.0.1
+  naughty-words:
+    specifier: ^1.2.0
+    version: 1.2.0
   primevue:
     specifier: ^3.50.0
     version: 3.50.0(vue@3.4.21)
@@ -487,6 +493,10 @@ packages:
   /@types/google.maps@3.55.5:
     resolution: {integrity: sha512-U1QwCo1GeeLm0YI/GoHvfd1VfwgnoUSBcKCMXXFAM+2izSSuqqwZUJ9XNO6NxZxmYKjBNI+NF5eGF6uUSb1aSg==}
     dev: true
+
+  /@types/naughty-words@1.2.3:
+    resolution: {integrity: sha512-Cf70ztEQzMJrAGtkCWeG65puU4dyL9sskYytOXMRXUNsAHxb5d2eetKUy9gBdg3nVDHNe4sbWfNCDwHJ/TeCEg==}
+    dev: false
 
   /@types/node@20.11.30:
     resolution: {integrity: sha512-dHM6ZxwlmuZaRmUPfv1p+KrdD1Dci04FbdEm/9wEMouFqxYoFl5aMkt0VMAUtYRQDyYvD41WJLukhq/ha3YuTw==}
@@ -1031,6 +1041,10 @@ packages:
     resolution: {integrity: sha512-eSRppjcPIatRIMC1U6UngP8XFcz8MQWGQdt1MTBQ7NaAmvXDfvNxbvWV3x2y6CdEUciCSsDHDQZbhYaB8QEo2g==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
+
+  /naughty-words@1.2.0:
+    resolution: {integrity: sha512-0iadX6fN+3NsfvIRtWmmpEX9VsoIQ6n9FwyIxmew9w5yzFNqMgs/Ky0eAC/z5xXSHtqlVoByiovdROikwH9SXQ==}
+    dev: false
 
   /node-releases@2.0.14:
     resolution: {integrity: sha512-y10wOWt8yZpqXmOgRo77WaHEmhYQYGNA6y421PKsKYWEK8aW+cqAphborZDhqfyKrbZEN92CN1X2KbafY2s7Yw==}

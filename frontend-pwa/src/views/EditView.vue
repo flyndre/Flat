@@ -4,11 +4,12 @@ import { clientId } from "@/data/clientMetadata";
 import { collectionService } from "@/data/collections";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import { Collection } from "@/types/collection";
+import validateCollection from "@/validation/validateCollection";
 import { mdiArrowLeft, mdiCheck, mdiPlay } from "@mdi/js";
 import Button from "primevue/button";
 import Card from "primevue/card";
 import InputText from "primevue/inputtext";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { RouteLocationRaw, useRouter } from "vue-router";
 
 const props = withDefaults(
@@ -29,6 +30,7 @@ const collection = ref<Collection>({
 });
 const loading = ref(false);
 const title = props.edit ? "Edit" : "Create";
+const submittable = computed(() => validateCollection(collection.value));
 
 onMounted(async () => {
     if (props.edit) {
@@ -85,12 +87,23 @@ const start = () => _saveCollection({ name: "presets" });
         <template #title> {{ title }} </template>
         <template #action-right>
             <div class="flex flex-row gap-2">
-                <Button label="Save" severity="primary" text @click="save">
+                <Button
+                    label="Save"
+                    severity="primary"
+                    text
+                    @click="save"
+                    :disabled="!submittable"
+                >
                     <template #icon>
                         <MdiIcon class="mr-2.5" :icon="mdiCheck" />
                     </template>
                 </Button>
-                <Button label="Start" severity="primary" @click="start">
+                <Button
+                    label="Start"
+                    severity="primary"
+                    @click="start"
+                    :disabled="!submittable"
+                >
                     <template #icon>
                         <MdiIcon class="mr-2.5" :icon="mdiPlay" />
                     </template>
