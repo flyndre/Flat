@@ -9,9 +9,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class PresetScreenViewModel(presetId: Int?, db: AppDatabase) :ViewModel() {
+class PresetScreenViewModel(presetId: Long?, db: AppDatabase) :ViewModel() {
     //appdatabase
-    private lateinit var _db: AppDatabase
+    private var _db: AppDatabase
     //preset id
     private var _presetId: Long? = null
     //preset name
@@ -62,7 +62,7 @@ class PresetScreenViewModel(presetId: Int?, db: AppDatabase) :ViewModel() {
         _db = db
         //check whether id is not null and fetch the preset from database
         if(presetId != null){
-            _presetId = presetId.toLong()
+            _presetId = presetId
             viewModelScope.launch {
                 val preset = db.presetDao().getPresetById(presetId = presetId)
                 _presetName.value = preset.presetName

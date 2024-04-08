@@ -1,6 +1,5 @@
 package de.flyndre.flat.composables.presetscreen
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,18 +23,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.google.android.gms.maps.GoogleMapOptions
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapUiSettings
 import de.flyndre.flat.database.AppDatabase
-import de.flyndre.flat.database.entities.Preset
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PresetScreen(
     modifier: Modifier = Modifier,
-    presetId: Int?, db: AppDatabase, navController: NavController, topBarText: String, onNavigateToCreateGroupScreen: () -> Unit, presetScreenViewModel: PresetScreenViewModel = PresetScreenViewModel(presetId = presetId, db = db)){
+    presetId: Long?, db: AppDatabase, navController: NavController, topBarText: String, onNavigateToCreateGroupScreen: () -> Unit, presetScreenViewModel: PresetScreenViewModel = PresetScreenViewModel(presetId = presetId, db = db)){
     val presetName by presetScreenViewModel.presetName.collectAsState()
     val presetDescription by presetScreenViewModel.presetDescription.collectAsState()
     Scaffold(topBar = {

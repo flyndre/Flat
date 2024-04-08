@@ -81,9 +81,9 @@ fun AppEntryPoint(modifier: Modifier, db: AppDatabase){
         composable("join"){JoinScreen(modifier = modifier, onNavigateToInitialScreen = {navController.navigate("initial")})}
         composable("creategroup"){CreateGroupScreen(modifier = modifier, db = db,  onNavigateToInitialScreen = {navController.navigate("initial")}, onNavigateToNewPresetScreen = {navController.navigate("newpreset")}, navController = navController)}
         composable("newpreset"){ PresetScreen(presetId = null, db = db, navController = navController, topBarText = "New Preset", onNavigateToCreateGroupScreen = {navController.navigate("creategroup")})}
-        composable("editpreset/{presetId}", arguments = listOf(navArgument("presetId"){type = NavType.IntType})){ backStackEntry -> val presetId = backStackEntry.arguments?.getInt("presetId")
+        composable("editpreset/{presetId}", arguments = listOf(navArgument("presetId"){type = NavType.LongType})){ backStackEntry -> val presetId = backStackEntry.arguments?.getLong("presetId")
             PresetScreen(presetId = presetId, db = db, navController = navController, topBarText = "Edit Preset", onNavigateToCreateGroupScreen = { navController.navigate("creategroup") }) }
-        composable("collectionarea/{presetId}", arguments = listOf(navArgument("presetId"){type = NavType.IntType})){ backStackEntry -> val presetId = backStackEntry.arguments!!.getInt("presetId")
+        composable("collectionarea/{presetId}", arguments = listOf(navArgument("presetId"){type = NavType.LongType})){ backStackEntry -> val presetId = backStackEntry.arguments!!.getLong("presetId")
             CollectionAreaScreen(presetId = presetId, db = db, navController = navController)}
     }
 }

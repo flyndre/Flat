@@ -15,7 +15,7 @@ import de.flyndre.flat.database.AppDatabase
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CollectionAreaScreen(modifier: Modifier = Modifier, presetId: Int, db: AppDatabase, navController: NavController){
+fun CollectionAreaScreen(modifier: Modifier = Modifier, presetId: Long, db: AppDatabase, navController: NavController){
     Scaffold(
         topBar = {
             TopAppBar(title = {}, navigationIcon = { IconButton(onClick = { navController.navigate("editpreset/$presetId") }) {

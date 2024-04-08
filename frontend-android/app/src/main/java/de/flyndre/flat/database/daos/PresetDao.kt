@@ -12,7 +12,7 @@ interface PresetDao {
     @Query("Select * From preset")
     fun getAll(): Flow<List<Preset>>
     @Query("Select * From preset Where id = :presetId")
-    suspend fun getPresetById(presetId: Int): Preset
+    suspend fun getPresetById(presetId: Long): Preset
     @Update
     suspend fun updatePreset(preset: Preset)
     @Insert
