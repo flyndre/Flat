@@ -8,8 +8,19 @@ import { mdiArrowLeft, mdiCheck, mdiPlay } from "@mdi/js";
 import Button from "primevue/button";
 import Card from "primevue/card";
 import InputText from "primevue/inputtext";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { RouteLocationRaw, useRouter } from "vue-router";
+
+const props = withDefaults(
+    defineProps<{
+        edit?: boolean;
+        id?: number;
+    }>(),
+    {
+        edit: false,
+        id: undefined,
+    }
+);
 
 const router = useRouter();
 const collection = ref<Collection>({
@@ -17,20 +28,40 @@ const collection = ref<Collection>({
     adminClientId: clientId.value,
 });
 const loading = ref(false);
-const title = collection.value.id ? "Edit" : "Create";
+const title = props.edit ? "Edit" : "Create";
+
+onMounted(async () => {
+    if (props.edit) {
+        if (Number.isNaN(props.id)) {
+            // todo: show toast
+            await router.replace({ name: "presets" });
+            return;
+        }
+        try {
+            const storedCollection = await collectionService.get(props.id);
+            if (storedCollection === undefined) {
+                // todo: show toast
+                await router.replace({ name: "presets" });
+            }
+            collection.value = storedCollection;
+        } catch (error) {
+            // todo: show toast
+            await router.replace({ name: "presets" });
+        }
+    }
+});
 
 async function _saveCollection(target: RouteLocationRaw) {
-    console.log(collection.value);
     loading.value = true;
     try {
-        if (collection.value.id) {
+        if (props.edit) {
             await collectionService.put({ ...collection.value });
         } else {
             await collectionService.add({ ...collection.value });
         }
         router.push(target);
     } catch (error) {
-        // Show error toast
+        // todo: show toast
     } finally {
         loading.value = false;
     }

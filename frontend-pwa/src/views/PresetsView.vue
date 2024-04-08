@@ -1,21 +1,16 @@
 <script setup lang="ts">
 import MdiIcon from "@/components/MdiIcon.vue";
-import { clientId } from "@/data/clientMetadata";
 import { collections, collectionService } from "@/data/collections";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
-import { mdiArrowLeft, mdiDelete, mdiDeleteSweep, mdiPlus } from "@mdi/js";
+import {
+    mdiArrowLeft,
+    mdiDelete,
+    mdiDeleteSweep,
+    mdiPlus,
+    mdiSquareEditOutline,
+} from "@mdi/js";
 import Button from "primevue/button";
 import Card from "primevue/card";
-import { ref } from "vue";
-
-const newName = ref("");
-const createNew = () => {
-    collectionService.add({
-        name: newName.value,
-        adminClientId: clientId.value,
-    });
-    newName.value = "";
-};
 </script>
 
 <template>
@@ -31,7 +26,7 @@ const createNew = () => {
         </template>
         <template #title> My Collections </template>
         <template #action-right>
-            <router-link :to="{ name: 'edit' }">
+            <router-link :to="{ name: 'create' }">
                 <Button label="Create new" severity="primary">
                     <template #icon>
                         <MdiIcon class="mr-2.5" :icon="mdiPlus" />
@@ -80,6 +75,18 @@ const createNew = () => {
                                     <MdiIcon :icon="mdiDelete" />
                                 </template>
                             </Button>
+                            <router-link
+                                :to="{
+                                    name: 'edit',
+                                    params: { id: collection.id },
+                                }"
+                            >
+                                <Button text>
+                                    <template #icon>
+                                        <MdiIcon :icon="mdiSquareEditOutline" />
+                                    </template>
+                                </Button>
+                            </router-link>
                         </div>
                     </div>
                 </template>

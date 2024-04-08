@@ -7,6 +7,7 @@ import PresetsView from "@/views/PresetsView.vue";
 import EditView from "@/views/EditView.vue";
 import JoinView from "@/views/JoinView.vue";
 import AboutView from "@/views/AboutView.vue";
+import { parseIntElse as stringParamToInt } from "@/util/parseInt";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -37,9 +38,18 @@ const router = createRouter({
             component: PresetsView,
         },
         {
-            path: "/edit",
+            path: "/create",
+            name: "create",
+            component: EditView,
+        },
+        {
+            path: "/edit/:id",
             name: "edit",
             component: EditView,
+            props: (r) => ({
+                edit: true,
+                id: stringParamToInt(r.params["id"]),
+            }),
         },
         {
             path: "/:pathMatch(.*)*",
