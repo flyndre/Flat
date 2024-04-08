@@ -36,6 +36,9 @@ fun InitialScreen(
                 Button(onClick = { onNavigateToCreateGroupScreen() }) {
                     Text("Create")
                 }
+                Button(onClick = {  }) {
+                    Text("Lukas BUHton")
+                }
             }
         }
     ) { innerPadding ->
