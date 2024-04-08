@@ -23,6 +23,7 @@ fun InitialScreen(
     modifier: Modifier = Modifier,
     onNavigateToJoinScreen: () -> Unit,
     onNavigateToCreateGroupScreen: () -> Unit,
+    onLukasBUHtton: () -> Unit
 ) {
     Scaffold(
         bottomBar = {
@@ -37,7 +38,7 @@ fun InitialScreen(
                     Text("Create")
                 }
                 Button(onClick = {  }) {
-                    Text("Lukas BUHton")
+                    Text("Lukas BUHtton")
                 }
             }
         }
