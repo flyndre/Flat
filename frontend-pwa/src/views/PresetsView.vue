@@ -1,15 +1,13 @@
 <script setup lang="ts">
-import AppBar from "@/components/AppBar.vue";
-import MainWrapper from "@/components/MainWrapper.vue";
 import MdiIcon from "@/components/MdiIcon.vue";
 import { clientId } from "@/data/clientMetadata";
 import { collections, collectionService } from "@/data/collections";
+import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import { mdiArrowLeft, mdiDelete, mdiDeleteSweep, mdiPlus } from "@mdi/js";
 import Button from "primevue/button";
 import Card from "primevue/card";
-import InputGroup from "primevue/inputgroup";
-import InputText from "primevue/inputtext";
 import { ref } from "vue";
+
 const newName = ref("");
 const createNew = () => {
     collectionService.add({
@@ -21,29 +19,27 @@ const createNew = () => {
 </script>
 
 <template>
-    <div>
-        <AppBar>
-            <template #action-left>
-                <router-link :to="{ name: 'home' }">
-                    <Button label="Back" severity="secondary" text>
-                        <template #icon>
-                            <MdiIcon class="mr-2.5" :icon="mdiArrowLeft" />
-                        </template>
-                    </Button>
-                </router-link>
-            </template>
-            <template #title> My Collections </template>
-            <template #action-right>
-                <router-link :to="{ name: 'edit' }">
-                    <Button label="Create new" severity="primary">
-                        <template #icon>
-                            <MdiIcon class="mr-2.5" :icon="mdiPlus" />
-                        </template>
-                    </Button>
-                </router-link>
-            </template>
-        </AppBar>
-        <MainWrapper>
+    <DefaultLayout>
+        <template #action-left>
+            <router-link :to="{ name: 'home' }">
+                <Button label="Back" severity="secondary" text>
+                    <template #icon>
+                        <MdiIcon class="mr-2.5" :icon="mdiArrowLeft" />
+                    </template>
+                </Button>
+            </router-link>
+        </template>
+        <template #title> My Collections </template>
+        <template #action-right>
+            <router-link :to="{ name: 'edit' }">
+                <Button label="Create new" severity="primary">
+                    <template #icon>
+                        <MdiIcon class="mr-2.5" :icon="mdiPlus" />
+                    </template>
+                </Button>
+            </router-link>
+        </template>
+        <template #default>
             <Card>
                 <template #content>
                     <div v-if="collections?.length === 0" class="opacity-30">
@@ -88,6 +84,6 @@ const createNew = () => {
                     </div>
                 </template>
             </Card>
-        </MainWrapper>
-    </div>
+        </template>
+    </DefaultLayout>
 </template>

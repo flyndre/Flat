@@ -1,16 +1,15 @@
 <script setup lang="ts">
-import AppBar from "@/components/AppBar.vue";
-import Button from "primevue/button";
 import MdiIcon from "@/components/MdiIcon.vue";
-import { mdiArrowLeft, mdiCheck, mdiPlay } from "@mdi/js";
-import { ref } from "vue";
-import { Collection } from "@/types/collection";
 import { clientId } from "@/data/clientMetadata";
+import { collectionService } from "@/data/collections";
+import DefaultLayout from "@/layouts/DefaultLayout.vue";
+import { Collection } from "@/types/collection";
+import { mdiArrowLeft, mdiCheck, mdiPlay } from "@mdi/js";
+import Button from "primevue/button";
 import Card from "primevue/card";
 import InputText from "primevue/inputtext";
-import { collectionService } from "@/data/collections";
+import { ref } from "vue";
 import { RouteLocationRaw, useRouter } from "vue-router";
-import MainWrapper from "@/components/MainWrapper.vue";
 
 const router = useRouter();
 const collection = ref<Collection>({
@@ -42,34 +41,32 @@ const start = () => _saveCollection({ name: "presets" });
 </script>
 
 <template>
-    <div>
-        <AppBar>
-            <template #action-left>
-                <router-link :to="{ name: 'presets' }">
-                    <Button label="Back" severity="secondary" text>
-                        <template #icon>
-                            <MdiIcon class="mr-2.5" :icon="mdiArrowLeft" />
-                        </template>
-                    </Button>
-                </router-link>
-            </template>
-            <template #title> {{ title }} </template>
-            <template #action-right>
-                <div class="flex flex-row gap-2">
-                    <Button label="Save" severity="primary" text @click="save">
-                        <template #icon>
-                            <MdiIcon class="mr-2.5" :icon="mdiCheck" />
-                        </template>
-                    </Button>
-                    <Button label="Start" severity="primary" @click="start">
-                        <template #icon>
-                            <MdiIcon class="mr-2.5" :icon="mdiPlay" />
-                        </template>
-                    </Button>
-                </div>
-            </template>
-        </AppBar>
-        <MainWrapper>
+    <DefaultLayout>
+        <template #action-left>
+            <router-link :to="{ name: 'presets' }">
+                <Button label="Back" severity="secondary" text>
+                    <template #icon>
+                        <MdiIcon class="mr-2.5" :icon="mdiArrowLeft" />
+                    </template>
+                </Button>
+            </router-link>
+        </template>
+        <template #title> {{ title }} </template>
+        <template #action-right>
+            <div class="flex flex-row gap-2">
+                <Button label="Save" severity="primary" text @click="save">
+                    <template #icon>
+                        <MdiIcon class="mr-2.5" :icon="mdiCheck" />
+                    </template>
+                </Button>
+                <Button label="Start" severity="primary" @click="start">
+                    <template #icon>
+                        <MdiIcon class="mr-2.5" :icon="mdiPlay" />
+                    </template>
+                </Button>
+            </div>
+        </template>
+        <template #default>
             <Card>
                 <template #content>
                     <div class="flex flex-col gap-2.5">
@@ -85,6 +82,6 @@ const start = () => _saveCollection({ name: "presets" });
                     </div>
                 </template>
             </Card>
-        </MainWrapper>
-    </div>
+        </template>
+    </DefaultLayout>
 </template>
