@@ -23,17 +23,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.google.android.gms.maps.GoogleMapOptions
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapUiSettings
 import de.flyndre.flat.database.AppDatabase
+import de.flyndre.flat.database.entities.Preset
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PresetScreen(
     modifier: Modifier = Modifier,
-    presetId: Int?, db: AppDatabase, topBarText: String, onNavigateToCreateGroupScreen: () -> Unit, onNavigateToCollectionAreaScreen: () -> Unit, presetScreenViewModel: PresetScreenViewModel = PresetScreenViewModel(presetId = presetId, db = db)){
+    presetId: Int?, db: AppDatabase, navController: NavController, topBarText: String, onNavigateToCreateGroupScreen: () -> Unit, presetScreenViewModel: PresetScreenViewModel = PresetScreenViewModel(presetId = presetId, db = db)){
     val presetName by presetScreenViewModel.presetName.collectAsState()
     val presetDescription by presetScreenViewModel.presetDescription.collectAsState()
     Scaffold(topBar = {
@@ -41,7 +43,7 @@ fun PresetScreen(
             onClick = { onNavigateToCreateGroupScreen() }) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "back to preset screen"
+                contentDescription = "back to create group screen"
             )
         }})
     },
@@ -64,7 +66,10 @@ fun PresetScreen(
             TextField(modifier = modifier, value = presetName, onValueChange = {presetScreenViewModel.updatePresetName(it)}, label = {Text(text = "Preset Name")})
             TextField(modifier = modifier, value = presetDescription, onValueChange = {presetScreenViewModel.updatePresetDescription(it)}, label = {Text(text = "Preset Description")})
             Card (modifier = modifier){
-                GoogleMap(onMapClick = {onNavigateToCollectionAreaScreen()}, uiSettings = MapUiSettings(zoomControlsEnabled = false, zoomGesturesEnabled = false, scrollGesturesEnabled = false, rotationGesturesEnabled = false, tiltGesturesEnabled = false))
+                GoogleMap(onMapClick = {
+                    val id = presetScreenViewModel.savePresetTemporaryToDatabase()
+                    navController.navigate("collectionarea/$id") },
+                    uiSettings = MapUiSettings(zoomControlsEnabled = false, zoomGesturesEnabled = false, scrollGesturesEnabled = false, rotationGesturesEnabled = false, tiltGesturesEnabled = false))
             }
         }
     }

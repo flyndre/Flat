@@ -80,9 +80,10 @@ fun AppEntryPoint(modifier: Modifier, db: AppDatabase){
         composable("initial"){ InitialScreen(modifier = modifier, onNavigateToJoinScreen = {navController.navigate("join")}, onNavigateToCreateGroupScreen = {navController.navigate("creategroup")})}
         composable("join"){JoinScreen(modifier = modifier, onNavigateToInitialScreen = {navController.navigate("initial")})}
         composable("creategroup"){CreateGroupScreen(modifier = modifier, db = db,  onNavigateToInitialScreen = {navController.navigate("initial")}, onNavigateToNewPresetScreen = {navController.navigate("newpreset")}, navController = navController)}
-        composable("newpreset"){ PresetScreen(presetId = null, db = db, topBarText = "New Preset", onNavigateToCreateGroupScreen = {navController.navigate("creategroup")}, onNavigateToCollectionAreaScreen = {navController.navigate("collectionarea")})}
+        composable("newpreset"){ PresetScreen(presetId = null, db = db, navController = navController, topBarText = "New Preset", onNavigateToCreateGroupScreen = {navController.navigate("creategroup")})}
         composable("editpreset/{presetId}", arguments = listOf(navArgument("presetId"){type = NavType.IntType})){ backStackEntry -> val presetId = backStackEntry.arguments?.getInt("presetId")
-            PresetScreen(presetId = presetId, db = db, topBarText = "Edit Preset", onNavigateToCreateGroupScreen = { navController.navigate("creategroup") }, onNavigateToCollectionAreaScreen = {navController.navigate("collectionarea")}) }
-        composable("collectionarea"){ CollectionAreaScreen()}
+            PresetScreen(presetId = presetId, db = db, navController = navController, topBarText = "Edit Preset", onNavigateToCreateGroupScreen = { navController.navigate("creategroup") }) }
+        composable("collectionarea/{presetId}", arguments = listOf(navArgument("presetId"){type = NavType.IntType})){ backStackEntry -> val presetId = backStackEntry.arguments!!.getInt("presetId")
+            CollectionAreaScreen(presetId = presetId, db = db, navController = navController)}
     }
 }

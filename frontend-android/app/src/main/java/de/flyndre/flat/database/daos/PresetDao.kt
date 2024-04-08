@@ -16,5 +16,5 @@ interface PresetDao {
     @Update
     suspend fun updatePreset(preset: Preset)
     @Insert
-    suspend fun insertPreset(preset: Preset)
+    suspend fun insertPreset(preset: Preset): Long
 }
