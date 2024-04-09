@@ -1,13 +1,15 @@
 <script setup lang="ts">
+import InputIcon from "@/components/icons/InputIcon.vue";
 import TextButtonIcon from "@/components/icons/TextButtonIcon.vue";
 import { clientId } from "@/data/clientMetadata";
 import { collectionService } from "@/data/collections";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import { Collection } from "@/types/collection";
 import validateCollection from "@/validation/validateCollection";
-import { mdiArrowLeft, mdiCheck, mdiPlay } from "@mdi/js";
+import { mdiArrowLeft, mdiCheck, mdiMapMarkerPath, mdiPlay } from "@mdi/js";
 import Button from "primevue/button";
 import Card from "primevue/card";
+import IconField from "primevue/iconfield";
 import InputText from "primevue/inputtext";
 import { computed, onMounted, ref } from "vue";
 import { RouteLocationRaw, useRouter } from "vue-router";
@@ -103,7 +105,10 @@ const start = () => _saveCollection({ name: "presets" });
             <Card>
                 <template #content>
                     <div class="flex flex-col gap-2.5">
-                        <InputText placeholder="Name" v-model="collection.name" />
+                        <IconField iconPosition="left">
+                            <InputIcon :icon="mdiMapMarkerPath" />
+                            <InputText class="w-full" placeholder="Collection Name" v-model="collection.name" />
+                        </IconField>
                         <div
                             class="w-full h-48 bg-gray-300 flex flex-col items-center justify-center text-gray-500 rounded-md">
                             Map Placeholder
