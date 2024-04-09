@@ -1,18 +1,20 @@
 <script setup lang="ts">
-import MdiIcon from "@/components/icons/MdiIcon.vue";
+import CardProgressIndicator from "@/components/card/CardProgressIndicator.vue";
+import InputIcon from "@/components/icons/InputIcon.vue";
+import TextButtonIcon from "@/components/icons/TextButtonIcon.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
+import getJoinId from "@/util/getJoinId";
+import { isOnMobile } from "@/util/mobileDetection";
 import validateJoinLink from "@/validation/validateJoinLink";
 import validateJoinName from "@/validation/validateJoinName";
-import { mdiAccount, mdiArrowLeft, mdiImport, mdiLink, mdiLinkVariant } from "@mdi/js";
+import { mdiAccount, mdiArrowLeft, mdiClose, mdiImport, mdiLink } from "@mdi/js";
 import Button from "primevue/button";
 import Card from "primevue/card";
+import Dialog from "primevue/dialog";
+import IconField from "primevue/iconfield";
 import InputText from "primevue/inputtext";
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
-import getJoinId from "@/util/getJoinId";
-import IconField from "primevue/iconfield";
-import InputIcon from "@/components/icons/InputIcon.vue";
-import TextButtonIcon from "@/components/icons/TextButtonIcon.vue";
 
 const props = defineProps<{
     id?: string,
@@ -23,8 +25,14 @@ const joinLink = ref(props.id ? window.location.href : '');
 const joinId = computed(() => getJoinId(joinLink.value));
 const joinName = ref('');
 const submittable = computed(() => validateJoinLink(joinLink.value) && validateJoinName(joinName.value));
+const dialogVisible = ref(false);
 function join() {
-
+    dialogVisible.value = true;
+    // todo: send request
+}
+function cancel() {
+    dialogVisible.value = false;
+    // todo: cancel request or send cancelation request
 }
 </script>
 
@@ -48,6 +56,20 @@ function join() {
             </Button>
         </template>
         <template #default>
+            <Dialog v-model:visible="dialogVisible" :closable="false" :draggable="false" modal
+                :position="isOnMobile ? 'bottom' : 'top'" class="overflow-hidden" header="Waiting to join...">
+                <CardProgressIndicator mode="indeterminate" />
+                Please stand by as the collection's admin reviews your join request.
+                <template #footer>
+                    <div class="w-full flex flex-row justify-center">
+                        <Button label="Cancel request" severity="danger" text @click="cancel">
+                            <template #icon>
+                                <TextButtonIcon :icon="mdiClose" />
+                            </template>
+                        </Button>
+                    </div>
+                </template>
+            </Dialog>
             <Card :pt="{ root: { class: 'overflow-hidden' } }">
                 <template #header>
                     <div
@@ -64,7 +86,7 @@ function join() {
                         </IconField>
                         <IconField iconPosition="left">
                             <InputIcon :icon="mdiAccount" />
-                            <InputText class="w-full" placeholder="Join as" v-model="joinName" />
+                            <InputText class="w-full" placeholder="Your Name" v-model="joinName" />
                         </IconField>
                     </div>
                 </template>
