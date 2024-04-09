@@ -56,6 +56,10 @@ onMounted(async () => {
 });
 
 async function _saveCollection(target: RouteLocationRaw) {
+    if (!submittable.value) {
+        // todo: show toast
+        return;
+    }
     loading.value = true;
     try {
         if (props.edit) {
@@ -63,7 +67,7 @@ async function _saveCollection(target: RouteLocationRaw) {
         } else {
             await collectionService.add({ ...collection.value });
         }
-        router.push(target);
+        await router.push(target);
     } catch (error) {
         // todo: show toast
     } finally {
