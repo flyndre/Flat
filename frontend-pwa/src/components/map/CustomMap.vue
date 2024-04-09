@@ -55,7 +55,7 @@ function centerMap() {
             lat: clientPos.value.latitude,
             lng: clientPos.value.longitude,
         });
-    } catch (e) {}
+    } catch (e) { }
     model.value.setZoom(mapZoom);
 }
 
@@ -65,10 +65,10 @@ function centerMap() {
  */
 type TypedShape = {
     overlay:
-        | google.maps.Polygon
-        | google.maps.Polyline
-        | google.maps.Rectangle
-        | google.maps.Circle;
+    | google.maps.Polygon
+    | google.maps.Polyline
+    | google.maps.Rectangle
+    | google.maps.Circle;
     type: google.maps.drawing.OverlayType;
 };
 type IdentifyableTypedShape = TypedShape & { id: string };
@@ -112,7 +112,7 @@ function setSelection(shapeId: string) {
     selectedShape.value.overlay.setEditable(true);
     selectColor(
         selectedShape.value.overlay.get("fillColor") ||
-            selectedShape.value.overlay.get("strokeColor")
+        selectedShape.value.overlay.get("strokeColor")
     );
 }
 
@@ -245,12 +245,8 @@ const shapeListEmpty = computed(() => shapeList.value?.length === 0);
 <template>
     <div class="flex flex-col gap-2">
         <div class="flex flex-row gap-2 items-end justify-between">
-            <Button
-                severity="secondary"
-                :disabled="clientPosError !== null"
-                icon="mdi mdi-crosshairs-gps"
-                @click="() => centerMap()"
-            >
+            <Button severity="secondary" :disabled="clientPosError !== null" icon="mdi mdi-crosshairs-gps"
+                @click="() => centerMap()">
                 <template #icon>
                     <MdiIcon :icon="mdiCrosshairsGps" />
                 </template>
@@ -258,17 +254,10 @@ const shapeListEmpty = computed(() => shapeList.value?.length === 0);
             <MapTypeSelectButton @update:model-value="setMapType" />
         </div>
         <div class="h-[500px] overflow-hidden rounded-md">
-            <div
-                v-show="model === undefined"
-                class="w-full h-full flex flex-col justify-center items-center"
-            >
+            <div v-show="model === undefined" class="w-full h-full flex flex-col justify-center items-center">
                 <ProgressSpinner />
             </div>
-            <div
-                v-show="model !== undefined"
-                class="w-full h-full"
-                ref="mapDiv"
-            >
+            <div v-show="model !== undefined" class="w-full h-full" ref="mapDiv">
                 <!-- Map goes here -->
             </div>
         </div>
@@ -278,22 +267,14 @@ const shapeListEmpty = computed(() => shapeList.value?.length === 0);
                 <ShapeColorSelectButton @update:model-value="setShapeColor" />
             </div>
             <div class="flex flex-col gap-2 grow basis-5 text-nowrap">
-                <Button
-                    severity="secondary"
-                    label="Delete Selected Shape"
-                    @click="deleteSelectedShape"
-                    :disabled="selectedShapeEmpty"
-                >
+                <Button severity="secondary" label="Delete Selected Shape" @click="deleteSelectedShape"
+                    :disabled="selectedShapeEmpty">
                     <template #icon>
                         <MdiIcon class="mr-1.5" :icon="mdiDelete" />
                     </template>
                 </Button>
-                <Button
-                    severity="secondary"
-                    label="Delete All Shapes"
-                    @click="deleteAllShapes"
-                    :disabled="shapeListEmpty"
-                >
+                <Button severity="secondary" label="Delete All Shapes" @click="deleteAllShapes"
+                    :disabled="shapeListEmpty">
                     <template #icon>
                         <MdiIcon class="mr-2" :icon="mdiDeleteSweep" />
                     </template>

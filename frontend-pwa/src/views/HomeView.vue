@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import TextButtonIcon from "@/components/icons/TextButtonIcon.vue";
 import MdiIcon from "@/components/MdiIcon.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import { mdiImport, mdiInformationOutline, mdiMapMarkerPath } from "@mdi/js";
@@ -17,25 +18,23 @@ import Button from "primevue/button";
             </router-link>
         </template>
         <template #action-right>
-            <router-link :to="{ name: 'join' }">
+            <router-link :to="{ name: 'scan' }">
                 <Button label="Join a Collection">
                     <template #icon>
-                        <MdiIcon class="mr-2.5" :icon="mdiImport" />
+                        <TextButtonIcon :icon="mdiImport" />
                     </template>
                 </Button>
             </router-link>
             <router-link :to="{ name: 'presets' }">
                 <Button label="My Collections" text>
                     <template #icon>
-                        <MdiIcon class="mr-2.5" :icon="mdiMapMarkerPath" />
+                        <TextButtonIcon :icon="mdiMapMarkerPath" />
                     </template>
                 </Button>
             </router-link>
         </template>
         <template #background>
-            <div
-                class="w-full h-full bg-gray-200 flex flex-col items-center justify-center text-gray-500"
-            >
+            <div class="w-full h-full bg-gray-200 flex flex-col items-center justify-center text-gray-500">
                 Map Placeholder
             </div>
         </template>

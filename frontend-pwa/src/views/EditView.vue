@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import MdiIcon from "@/components/MdiIcon.vue";
+import TextButtonIcon from "@/components/icons/TextButtonIcon.vue";
 import { clientId } from "@/data/clientMetadata";
 import { collectionService } from "@/data/collections";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
@@ -79,7 +79,7 @@ const start = () => _saveCollection({ name: "presets" });
             <router-link :to="{ name: 'presets' }">
                 <Button label="Back" severity="secondary" text>
                     <template #icon>
-                        <MdiIcon class="mr-2.5" :icon="mdiArrowLeft" />
+                        <TextButtonIcon :icon="mdiArrowLeft" />
                     </template>
                 </Button>
             </router-link>
@@ -87,25 +87,14 @@ const start = () => _saveCollection({ name: "presets" });
         <template #title> {{ title }} </template>
         <template #action-right>
             <div class="flex flex-row gap-2">
-                <Button
-                    label="Save"
-                    severity="primary"
-                    text
-                    @click="save"
-                    :disabled="!submittable"
-                >
+                <Button label="Save" severity="primary" text @click="save" :disabled="!submittable">
                     <template #icon>
-                        <MdiIcon class="mr-2.5" :icon="mdiCheck" />
+                        <TextButtonIcon :icon="mdiCheck" />
                     </template>
                 </Button>
-                <Button
-                    label="Start"
-                    severity="primary"
-                    @click="start"
-                    :disabled="!submittable"
-                >
+                <Button label="Start" severity="primary" @click="start" :disabled="!submittable">
                     <template #icon>
-                        <MdiIcon class="mr-2.5" :icon="mdiPlay" />
+                        <TextButtonIcon :icon="mdiPlay" />
                     </template>
                 </Button>
             </div>
@@ -114,13 +103,9 @@ const start = () => _saveCollection({ name: "presets" });
             <Card>
                 <template #content>
                     <div class="flex flex-col gap-2.5">
-                        <InputText
-                            placeholder="Name"
-                            v-model="collection.name"
-                        />
+                        <InputText placeholder="Name" v-model="collection.name" />
                         <div
-                            class="w-full h-48 bg-gray-300 flex flex-col items-center justify-center text-gray-500 rounded-md"
-                        >
+                            class="w-full h-48 bg-gray-300 flex flex-col items-center justify-center text-gray-500 rounded-md">
                             Map Placeholder
                         </div>
                     </div>
