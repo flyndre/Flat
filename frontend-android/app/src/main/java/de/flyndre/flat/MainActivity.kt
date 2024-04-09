@@ -3,6 +3,7 @@ package de.flyndre.flat
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -27,9 +28,11 @@ import de.flyndre.flat.composables.joinscreen.JoinScreen
 import de.flyndre.flat.composables.presetscreen.PresetScreen
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.ui.theme.FlatTheme
+import io.github.dellisd.spatialk.geojson.Polygon
+import io.github.dellisd.spatialk.geojson.Position
 
 class MainActivity : ComponentActivity() {
-    var connectionService = ConnectionService("https:10.0.2.2/ws")
+    var connectionService = ConnectionService("https:10.0.2.2:44380/api/rest")
     var trakingService = TrackingService()
     lateinit var db: AppDatabase
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,6 +42,15 @@ class MainActivity : ComponentActivity() {
 
         Thread(Runnable {
             while(true){
+                try {
+                    connectionService.openCollection("Test", Polygon(listOf(
+                        Position(0.0,0.0),
+                        Position(0.0,1.0),
+                        Position(1.1,1.1)
+                    )))
+                }catch (ex:Exception){
+                    Log.e(this.toString(),ex.toString())
+                }
                 trakingService.startTracking()
                 Thread.sleep(10000)
                 trakingService.stopTracking()
