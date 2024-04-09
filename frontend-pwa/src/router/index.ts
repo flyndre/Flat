@@ -8,6 +8,7 @@ import JoinView from '@/views/JoinView.vue';
 import MapView from '@/views/MapView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
 import PresetsView from '@/views/PresetsView.vue';
+import TrackingView from '@/views/TrackingView.vue';
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -56,6 +57,11 @@ const router = createRouter({
                 edit: true,
                 id: stringParamToInt(r.params['id']),
             }),
+        },
+        {
+            path: '/track',
+            name: 'track',
+            component: TrackingView,
         },
         {
             path: '/:pathMatch(.*)*',
