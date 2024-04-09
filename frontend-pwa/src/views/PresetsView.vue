@@ -1,17 +1,31 @@
 <script setup lang="ts">
-import TextButtonIcon from "@/components/icons/TextButtonIcon.vue";
-import MdiIcon from "@/components/icons/MdiIcon.vue";
-import { collections, collectionService } from "@/data/collections";
-import DefaultLayout from "@/layouts/DefaultLayout.vue";
+import MdiIcon from '@/components/icons/MdiIcon.vue';
+import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import { collections, collectionService } from '@/data/collections';
+import DefaultLayout from '@/layouts/DefaultLayout.vue';
+import { Collection } from '@/types/collection';
 import {
     mdiArrowLeft,
-    mdiDelete,
+    mdiChevronRight,
     mdiDeleteSweep,
     mdiPlus,
-    mdiSquareEditOutline,
-} from "@mdi/js";
-import Button from "primevue/button";
-import Card from "primevue/card";
+} from '@mdi/js';
+import Button from 'primevue/button';
+import Card from 'primevue/card';
+import Column from 'primevue/column';
+import DataTable from 'primevue/datatable';
+import { ref } from 'vue';
+
+const deleteModeActive = ref(false);
+
+const selectedToDelete = ref<Collection[]>([]);
+function deleteSelected() {
+    collectionService.bulkDelete(selectedToDelete.value.map((c) => c.id));
+    selectedToDelete.value = [];
+}
+function deleteSingle(id: string) {
+    collectionService.delete(id);
+}
 </script>
 
 <template>
@@ -41,37 +55,71 @@ import Card from "primevue/card";
                     <div v-if="collections?.length === 0" class="opacity-30">
                         No Collections yet
                     </div>
-                    <div v-else class="flex flex-col mb-4">
-                        <div
-                            class="flex flex-row justify-between items-center py-2 border-solid border-0 border-b border-b-slate-500 border-opacity-20">
-                            <span class="font-bold"> Name </span>
-                            <Button label="Delete All" @click="collectionService.clear()" severity="secondary" text>
-                                <template #icon>
-                                    <TextButtonIcon :icon="mdiDeleteSweep" />
+                    <div v-else class="flex flex-col">
+                        <DataTable
+                            v-model:selection="selectedToDelete"
+                            :value="collections"
+                            :dataKey="(c: Collection) => c.id"
+                            :pt="{
+                                bodyRow: {
+                                    class: '[&>*]:p-2 first:[&>*]:pl-0 last:[&>*]:pr-0 [&>*]:last:border-b-0 [&>*]:last:pb-0',
+                                },
+                                headerRow: {
+                                    class: '[&>*]:p-2 [&>*]:pt-0 first:[&>*]:pl-0 last:[&>*]:pr-0',
+                                },
+                            }"
+                        >
+                            <Column selectionMode="multiple" header-class="w-6">
+                            </Column>
+                            <Column header-class="flex flex-row justify-end">
+                                <template #header>
+                                    <Button
+                                        label="Delete Selected"
+                                        severity="secondary"
+                                        @click="deleteSelected"
+                                        :disabled="
+                                            selectedToDelete.length === 0
+                                        "
+                                        text
+                                    >
+                                        <template #icon>
+                                            <TextButtonIcon
+                                                :icon="mdiDeleteSweep"
+                                            />
+                                        </template>
+                                    </Button>
                                 </template>
-                            </Button>
-                        </div>
-                        <div v-for="collection of collections"
-                            class="flex flex-row gap-2 py-2 items-center border-solid border-0 border-b border-b-slate-500 border-opacity-20">
-                            <span class="flex-grow">
-                                {{ collection.name }}
-                            </span>
-                            <Button @click="collectionService.delete(collection.id)" severity="secondary" text>
-                                <template #icon>
-                                    <MdiIcon :icon="mdiDelete" />
+                                <template #body="slotProps">
+                                    <router-link
+                                        :to="{
+                                            name: 'edit',
+                                            params: { id: slotProps.data.id },
+                                        }"
+                                    >
+                                        <Button
+                                            class="w-full"
+                                            severity="contrast"
+                                            text
+                                        >
+                                            <template #default>
+                                                <div
+                                                    class="w-full flex flex-row justify-between items-center"
+                                                >
+                                                    <span>
+                                                        {{
+                                                            slotProps.data.name
+                                                        }}
+                                                    </span>
+                                                    <MdiIcon
+                                                        :icon="mdiChevronRight"
+                                                    />
+                                                </div>
+                                            </template>
+                                        </Button>
+                                    </router-link>
                                 </template>
-                            </Button>
-                            <router-link :to="{
-                name: 'edit',
-                params: { id: collection.id },
-            }">
-                                <Button text>
-                                    <template #icon>
-                                        <MdiIcon :icon="mdiSquareEditOutline" />
-                                    </template>
-                                </Button>
-                            </router-link>
-                        </div>
+                            </Column>
+                        </DataTable>
                     </div>
                 </template>
             </Card>
