@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import MdiIcon from "@/components/MdiIcon.vue";
+import MdiIcon from "@/components/icons/MdiIcon.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import validateJoinLink from "@/validation/validateJoinLink";
 import validateJoinName from "@/validation/validateJoinName";

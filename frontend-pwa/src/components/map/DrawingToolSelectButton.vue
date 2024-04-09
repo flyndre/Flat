@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import SelectButton from "primevue/selectbutton";
-import MdiIcon from "@/components/MdiIcon.vue";
+import MdiIcon from "@/components/icons/MdiIcon.vue";
 import {
     mdiHandBackRightOutline,
     mdiRectangleOutline,
@@ -42,21 +42,15 @@ const toolTypes: ToolTypeOption[] = [
 </script>
 
 <template>
-    <SelectButton
-        v-model="selectedToolType"
-        :options="toolTypes"
-        data-key="value"
-        option-value="value"
-        :allow-empty="false"
-        :pt="{
-            button: {
-                class: 'h-9 w-auto grow flex flex-row justify-center',
-            },
-            root: {
-                class: 'w-auto flex flex-row grow justify-stretch',
-            },
-        }"
-    >
+    <SelectButton v-model="selectedToolType" :options="toolTypes" data-key="value" option-value="value"
+        :allow-empty="false" :pt="{
+        button: {
+            class: 'h-9 w-auto grow flex flex-row justify-center',
+        },
+        root: {
+            class: 'w-auto flex flex-row grow justify-stretch',
+        },
+    }">
         <template #option="slotProps">
             <MdiIcon :icon="slotProps.option.icon" />
         </template>

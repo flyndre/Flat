@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import InputIcon from "primevue/inputicon";
-import MdiIcon from "@/components/MdiIcon.vue";
+import MdiIcon from "@/components/icons/MdiIcon.vue";
 
 defineProps<{
     icon: string;

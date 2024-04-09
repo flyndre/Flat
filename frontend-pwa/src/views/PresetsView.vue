@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import TextButtonIcon from "@/components/icons/TextButtonIcon.vue";
-import MdiIcon from "@/components/MdiIcon.vue";
+import MdiIcon from "@/components/icons/MdiIcon.vue";
 import { collections, collectionService } from "@/data/collections";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import {

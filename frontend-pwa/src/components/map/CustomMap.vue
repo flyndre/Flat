@@ -10,7 +10,7 @@ import { Loader } from "@googlemaps/js-api-loader";
 import { useGeolocation } from "@vueuse/core";
 import ProgressSpinner from "primevue/progressspinner";
 import Button from "primevue/button";
-import MdiIcon from "@/components/MdiIcon.vue";
+import MdiIcon from "@/components/icons/MdiIcon.vue";
 import { mdiDeleteSweep, mdiDelete, mdiCrosshairsGps } from "@mdi/js";
 import MapTypeSelectButton from "@/components/map/MapTypeSelectButton.vue";
 import DrawingToolSelectButton from "@/components/map/DrawingToolSelectButton.vue";

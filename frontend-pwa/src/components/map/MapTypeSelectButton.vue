@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import SelectButton from "primevue/selectbutton";
-import MdiIcon from "@/components/MdiIcon.vue";
+import MdiIcon from "@/components/icons/MdiIcon.vue";
 import { mdiRoadVariant, mdiTerrain, mdiEarth, mdiEarthPlus } from "@mdi/js";
 const selectedMapType = defineModel<google.maps.MapTypeId>({
     required: false,
@@ -31,14 +31,8 @@ const mapTypeOptions: MapTypeOption[] = [
 </script>
 
 <template>
-    <SelectButton
-        v-model="selectedMapType"
-        :options="mapTypeOptions"
-        data-key="value"
-        option-value="value"
-        :allow-empty="false"
-        :pt="{ button: { class: 'h-9' } }"
-    >
+    <SelectButton v-model="selectedMapType" :options="mapTypeOptions" data-key="value" option-value="value"
+        :allow-empty="false" :pt="{ button: { class: 'h-9' } }">
         <template #option="slotProps">
             <MdiIcon :icon="slotProps.option.icon" />
         </template>
