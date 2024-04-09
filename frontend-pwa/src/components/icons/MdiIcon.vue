@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import SvgIcon from '@jamescoyle/vue-icon';
 defineProps<{
     icon: string;
 }>();
 </script>
 
 <template>
-    <SvgIcon
-        class="opacity-85 mdi-icon"
-        style="transform: scale(2)"
-        type="mdi"
-        size="10"
-        :path="icon"
-    />
+    <svg
+        class="opacity-85 scale-[2]"
+        width="10"
+        height="10"
+        viewBox="0 0 24 24"
+    >
+        <path class="fill-current" :d="icon" />
+    </svg>
 </template>

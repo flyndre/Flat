@@ -8,9 +8,6 @@ dependencies:
   '@googlemaps/js-api-loader':
     specifier: ^1.16.6
     version: 1.16.6
-  '@jamescoyle/vue-icon':
-    specifier: ^0.1.2
-    version: 0.1.2
   '@mdi/js':
     specifier: ^7.4.47
     version: 7.4.47
@@ -331,10 +328,6 @@ packages:
       wrap-ansi: 8.1.0
       wrap-ansi-cjs: /wrap-ansi@7.0.0
     dev: true
-
-  /@jamescoyle/vue-icon@0.1.2:
-    resolution: {integrity: sha512-KFrImXx5TKIi6iQXlnyLEBl4rNosNKbTeRnr70ucTdUaciVmd9qK9d/pZAaKt1Ob/8xNnX2GMp8LisyHdKtEgw==}
-    dev: false
 
   /@jridgewell/gen-mapping@0.3.5:
     resolution: {integrity: sha512-IzL8ZoEDIBRWEzlCcRhOaCupYyN5gdIK+Q6fbFdPDg6HqX6jpkItn7DFIpW9LQzXG6Df9sA7+OKnq0qlz/GaQg==}

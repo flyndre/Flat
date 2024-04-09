@@ -10,7 +10,6 @@
     },
     "dependencies": {
         "@googlemaps/js-api-loader": "^1.16.6",
-        "@jamescoyle/vue-icon": "^0.1.2",
         "@mdi/js": "^7.4.47",
         "@types/naughty-words": "^1.2.3",
         "@types/uuid": "^9.0.8",
