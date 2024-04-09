@@ -4,5 +4,5 @@ export default (joinName: string) =>
     ![
         joinName !== undefined,
         joinName.length > 0,
-        ![...de, ...en].some(w => joinName.includes(w)),
+        ![...de, ...en].some(w => joinName.toLowerCase().includes(w.toLowerCase())),
     ].includes(false);
