@@ -4,4 +4,4 @@ export default (joinLink: string) => {
         return undefined;
     }
     return match[1];
-}
+};

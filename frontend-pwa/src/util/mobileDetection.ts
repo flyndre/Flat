@@ -1,5 +1,5 @@
-import { computedWithControl } from "@vueuse/core";
-import { computed } from "vue";
+import { computedWithControl } from '@vueuse/core';
+import { computed } from 'vue';
 
 /**
  * Utility to check whether the app is running on mobile or not.
@@ -20,7 +20,7 @@ function onMobile(a: string) {
 const _onMobile = computedWithControl([], () =>
     onMobile(navigator.userAgent || navigator.vendor)
 );
-window.addEventListener("resize", _onMobile.trigger);
-window.addEventListener("orientationchange", _onMobile.trigger);
+window.addEventListener('resize', _onMobile.trigger);
+window.addEventListener('orientationchange', _onMobile.trigger);
 
 export const isOnMobile = computed(() => _onMobile.value);

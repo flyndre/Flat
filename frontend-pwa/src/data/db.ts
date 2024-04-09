@@ -1,6 +1,6 @@
 // db.ts
-import { Collection } from "@/types/collection";
-import Dexie, { Table } from "dexie";
+import { Collection } from '@/types/collection';
+import Dexie, { Table } from 'dexie';
 
 export class FlatDexie extends Dexie {
     // 'friends' is added by dexie when declaring the stores()
@@ -8,9 +8,9 @@ export class FlatDexie extends Dexie {
     collections!: Table<Collection>;
 
     constructor() {
-        super("FlatDatabase");
+        super('FlatDatabase');
         this.version(1).stores({
-            collections: "++id, name, adminClientId", // Primary key and indexed props
+            collections: '++id, name, adminClientId', // Primary key and indexed props
         });
     }
 }

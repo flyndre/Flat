@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import SelectButton from "primevue/selectbutton";
-import MdiIcon from "@/components/icons/MdiIcon.vue";
+import SelectButton from 'primevue/selectbutton';
+import MdiIcon from '@/components/icons/MdiIcon.vue';
 import {
     mdiHandBackRightOutline,
     mdiRectangleOutline,
     mdiCircleOutline,
     mdiVectorPolyline,
     mdiVectorTriangle,
-} from "@mdi/js";
+} from '@mdi/js';
 const selectedToolType = defineModel<google.maps.drawing.OverlayType>({
     required: false,
     default: null,
@@ -23,34 +23,40 @@ const toolTypes: ToolTypeOption[] = [
         icon: mdiHandBackRightOutline,
     },
     {
-        value: "rectangle",
+        value: 'rectangle',
         icon: mdiRectangleOutline,
     },
     {
-        value: "circle",
+        value: 'circle',
         icon: mdiCircleOutline,
     },
     {
-        value: "polygon",
+        value: 'polygon',
         icon: mdiVectorTriangle,
     },
     {
-        value: "polyline",
+        value: 'polyline',
         icon: mdiVectorPolyline,
     },
 ];
 </script>
 
 <template>
-    <SelectButton v-model="selectedToolType" :options="toolTypes" data-key="value" option-value="value"
-        :allow-empty="false" :pt="{
-        button: {
-            class: 'h-9 w-auto grow flex flex-row justify-center',
-        },
-        root: {
-            class: 'w-auto flex flex-row grow justify-stretch',
-        },
-    }">
+    <SelectButton
+        v-model="selectedToolType"
+        :options="toolTypes"
+        data-key="value"
+        option-value="value"
+        :allow-empty="false"
+        :pt="{
+            button: {
+                class: 'h-9 w-auto grow flex flex-row justify-center',
+            },
+            root: {
+                class: 'w-auto flex flex-row grow justify-stretch',
+            },
+        }"
+    >
         <template #option="slotProps">
             <MdiIcon :icon="slotProps.option.icon" />
         </template>

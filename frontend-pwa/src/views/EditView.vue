@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import InputIcon from "@/components/icons/InputIcon.vue";
-import TextButtonIcon from "@/components/icons/TextButtonIcon.vue";
-import { clientId } from "@/data/clientMetadata";
-import { collectionService } from "@/data/collections";
-import DefaultLayout from "@/layouts/DefaultLayout.vue";
-import { Collection } from "@/types/collection";
-import validateCollection from "@/validation/validateCollection";
-import { mdiArrowLeft, mdiCheck, mdiMapMarkerPath, mdiPlay } from "@mdi/js";
-import Button from "primevue/button";
-import Card from "primevue/card";
-import IconField from "primevue/iconfield";
-import InputText from "primevue/inputtext";
-import { computed, onMounted, ref } from "vue";
-import { RouteLocationRaw, useRouter } from "vue-router";
+import InputIcon from '@/components/icons/InputIcon.vue';
+import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import { clientId } from '@/data/clientMetadata';
+import { collectionService } from '@/data/collections';
+import DefaultLayout from '@/layouts/DefaultLayout.vue';
+import { Collection } from '@/types/collection';
+import validateCollection from '@/validation/validateCollection';
+import { mdiArrowLeft, mdiCheck, mdiMapMarkerPath, mdiPlay } from '@mdi/js';
+import Button from 'primevue/button';
+import Card from 'primevue/card';
+import IconField from 'primevue/iconfield';
+import InputText from 'primevue/inputtext';
+import { computed, onMounted, ref } from 'vue';
+import { RouteLocationRaw, useRouter } from 'vue-router';
 
 const props = withDefaults(
     defineProps<{
@@ -27,30 +27,30 @@ const props = withDefaults(
 
 const router = useRouter();
 const collection = ref<Collection>({
-    name: "",
+    name: '',
     adminClientId: clientId.value,
 });
 const loading = ref(false);
-const title = props.edit ? "Edit" : "Create";
+const title = props.edit ? 'Edit' : 'Create';
 const submittable = computed(() => validateCollection(collection.value));
 
 onMounted(async () => {
     if (props.edit) {
         if (Number.isNaN(props.id)) {
             // todo: show toast
-            await router.replace({ name: "presets" });
+            await router.replace({ name: 'presets' });
             return;
         }
         try {
             const storedCollection = await collectionService.get(props.id);
             if (storedCollection === undefined) {
                 // todo: show toast
-                await router.replace({ name: "presets" });
+                await router.replace({ name: 'presets' });
             }
             collection.value = storedCollection;
         } catch (error) {
             // todo: show toast
-            await router.replace({ name: "presets" });
+            await router.replace({ name: 'presets' });
         }
     }
 });
@@ -71,8 +71,8 @@ async function _saveCollection(target: RouteLocationRaw) {
     }
 }
 
-const save = () => _saveCollection({ name: "presets" });
-const start = () => _saveCollection({ name: "presets" });
+const save = () => _saveCollection({ name: 'presets' });
+const start = () => _saveCollection({ name: 'presets' });
 </script>
 
 <template>
@@ -89,12 +89,23 @@ const start = () => _saveCollection({ name: "presets" });
         <template #title> {{ title }} </template>
         <template #action-right>
             <div class="flex flex-row gap-2">
-                <Button label="Save" severity="primary" text @click="save" :disabled="!submittable">
+                <Button
+                    label="Save"
+                    severity="primary"
+                    text
+                    @click="save"
+                    :disabled="!submittable"
+                >
                     <template #icon>
                         <TextButtonIcon :icon="mdiCheck" />
                     </template>
                 </Button>
-                <Button label="Start" severity="primary" @click="start" :disabled="!submittable">
+                <Button
+                    label="Start"
+                    severity="primary"
+                    @click="start"
+                    :disabled="!submittable"
+                >
                     <template #icon>
                         <TextButtonIcon :icon="mdiPlay" />
                     </template>
@@ -107,10 +118,15 @@ const start = () => _saveCollection({ name: "presets" });
                     <div class="flex flex-col gap-2.5">
                         <IconField iconPosition="left">
                             <InputIcon :icon="mdiMapMarkerPath" />
-                            <InputText class="w-full" placeholder="Collection Name" v-model="collection.name" />
+                            <InputText
+                                class="w-full"
+                                placeholder="Collection Name"
+                                v-model="collection.name"
+                            />
                         </IconField>
                         <div
-                            class="w-full h-48 bg-gray-300 flex flex-col items-center justify-center text-gray-500 rounded-md">
+                            class="w-full h-48 bg-gray-300 flex flex-col items-center justify-center text-gray-500 rounded-md"
+                        >
                             Map Placeholder
                         </div>
                     </div>

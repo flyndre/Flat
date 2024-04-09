@@ -1,4 +1,4 @@
-import getJoinId from "@/util/getJoinId";
+import getJoinId from '@/util/getJoinId';
 
 export default (joinLink: string) =>
     ![

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import SvgIcon from "@jamescoyle/vue-icon";
+import SvgIcon from '@jamescoyle/vue-icon';
 defineProps<{
     icon: string;
 }>();

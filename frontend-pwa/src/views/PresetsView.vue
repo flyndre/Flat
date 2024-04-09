@@ -16,8 +16,6 @@ import Column from 'primevue/column';
 import DataTable from 'primevue/datatable';
 import { ref } from 'vue';
 
-const deleteModeActive = ref(false);
-
 const selectedToDelete = ref<Collection[]>([]);
 function deleteSelected() {
     collectionService.bulkDelete(selectedToDelete.value.map((c) => c.id));

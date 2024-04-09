@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { isOnMobile } from "@/util/mobileDetection";
+import { isOnMobile } from '@/util/mobileDetection';
 </script>
 
 <template>

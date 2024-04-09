@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import TextButtonIcon from "@/components/icons/TextButtonIcon.vue";
-import DefaultLayout from "@/layouts/DefaultLayout.vue";
-import { mdiArrowLeft } from "@mdi/js";
-import Button from "primevue/button";
-import Card from "primevue/card";
+import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import DefaultLayout from '@/layouts/DefaultLayout.vue';
+import { mdiArrowLeft } from '@mdi/js';
+import Button from 'primevue/button';
+import Card from 'primevue/card';
 </script>
 
 <template>

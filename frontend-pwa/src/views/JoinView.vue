@@ -1,30 +1,38 @@
 <script setup lang="ts">
-import CardProgressIndicator from "@/components/card/CardProgressIndicator.vue";
-import InputIcon from "@/components/icons/InputIcon.vue";
-import TextButtonIcon from "@/components/icons/TextButtonIcon.vue";
-import DefaultLayout from "@/layouts/DefaultLayout.vue";
-import getJoinId from "@/util/getJoinId";
-import { isOnMobile } from "@/util/mobileDetection";
-import validateJoinLink from "@/validation/validateJoinLink";
-import validateJoinName from "@/validation/validateJoinName";
-import { mdiAccount, mdiArrowLeft, mdiClose, mdiImport, mdiLink } from "@mdi/js";
-import Button from "primevue/button";
-import Card from "primevue/card";
-import Dialog from "primevue/dialog";
-import IconField from "primevue/iconfield";
-import InputText from "primevue/inputtext";
-import { computed, ref } from "vue";
-import { useRouter } from "vue-router";
+import CardProgressIndicator from '@/components/card/CardProgressIndicator.vue';
+import InputIcon from '@/components/icons/InputIcon.vue';
+import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import DefaultLayout from '@/layouts/DefaultLayout.vue';
+import getJoinId from '@/util/getJoinId';
+import { isOnMobile } from '@/util/mobileDetection';
+import validateJoinLink from '@/validation/validateJoinLink';
+import validateJoinName from '@/validation/validateJoinName';
+import {
+    mdiAccount,
+    mdiArrowLeft,
+    mdiClose,
+    mdiImport,
+    mdiLink,
+} from '@mdi/js';
+import Button from 'primevue/button';
+import Card from 'primevue/card';
+import Dialog from 'primevue/dialog';
+import IconField from 'primevue/iconfield';
+import InputText from 'primevue/inputtext';
+import { computed, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const props = defineProps<{
-    id?: string,
+    id?: string;
 }>();
 
 const router = useRouter();
 const joinLink = ref(props.id ? window.location.href : '');
 const joinId = computed(() => getJoinId(joinLink.value));
 const joinName = ref('');
-const submittable = computed(() => validateJoinLink(joinLink.value) && validateJoinName(joinName.value));
+const submittable = computed(
+    () => validateJoinLink(joinLink.value) && validateJoinName(joinName.value)
+);
 const dialogVisible = ref(false);
 function join() {
     dialogVisible.value = true;
@@ -49,20 +57,38 @@ function cancel() {
         </template>
         <template #title> Join a Collection </template>
         <template #action-right>
-            <Button label="Join" severity="primary" :disabled="!submittable" @click="join">
+            <Button
+                label="Join"
+                severity="primary"
+                :disabled="!submittable"
+                @click="join"
+            >
                 <template #icon>
                     <TextButtonIcon :icon="mdiImport" />
                 </template>
             </Button>
         </template>
         <template #default>
-            <Dialog v-model:visible="dialogVisible" :closable="false" :draggable="false" modal
-                :position="isOnMobile ? 'bottom' : 'top'" class="overflow-hidden" header="Waiting to join...">
+            <Dialog
+                v-model:visible="dialogVisible"
+                :closable="false"
+                :draggable="false"
+                modal
+                :position="isOnMobile ? 'bottom' : 'top'"
+                class="overflow-hidden"
+                header="Waiting to join..."
+            >
                 <CardProgressIndicator mode="indeterminate" />
-                Please stand by as the collection's admin reviews your join request.
+                Please stand by as the collection's admin reviews your join
+                request.
                 <template #footer>
                     <div class="w-full flex flex-row justify-center">
-                        <Button label="Cancel request" severity="danger" text @click="cancel">
+                        <Button
+                            label="Cancel request"
+                            severity="danger"
+                            text
+                            @click="cancel"
+                        >
                             <template #icon>
                                 <TextButtonIcon :icon="mdiClose" />
                             </template>
@@ -73,7 +99,8 @@ function cancel() {
             <Card :pt="{ root: { class: 'overflow-hidden' } }">
                 <template #header>
                     <div
-                        class="w-full flex-grow bg-gray-950 h-96 flex flex-col items-center justify-center text-gray-500">
+                        class="w-full flex-grow bg-gray-950 h-96 flex flex-col items-center justify-center text-gray-500"
+                    >
                         Camera Placeholder
                     </div>
                 </template>
@@ -81,12 +108,20 @@ function cancel() {
                     <div class="flex flex-col gap-2.5">
                         <IconField iconPosition="left">
                             <InputIcon :icon="mdiLink" />
-                            <InputText class="w-full" placeholder="Or enter a link manually" v-model="joinLink"
-                                :disabled="id !== undefined" />
+                            <InputText
+                                class="w-full"
+                                placeholder="Or enter a link manually"
+                                v-model="joinLink"
+                                :disabled="id !== undefined"
+                            />
                         </IconField>
                         <IconField iconPosition="left">
                             <InputIcon :icon="mdiAccount" />
-                            <InputText class="w-full" placeholder="Your Name" v-model="joinName" />
+                            <InputText
+                                class="w-full"
+                                placeholder="Your Name"
+                                v-model="joinName"
+                            />
                         </IconField>
                     </div>
                 </template>

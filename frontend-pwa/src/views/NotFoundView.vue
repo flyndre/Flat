@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import TextButtonIcon from "@/components/icons/TextButtonIcon.vue";
-import DefaultLayout from "@/layouts/DefaultLayout.vue";
-import { mdiArrowLeft, mdiHome } from "@mdi/js";
-import Button from "primevue/button";
-import Card from "primevue/card";
-import { useRouter } from "vue-router";
+import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import DefaultLayout from '@/layouts/DefaultLayout.vue';
+import { mdiArrowLeft, mdiHome } from '@mdi/js';
+import Button from 'primevue/button';
+import Card from 'primevue/card';
+import { useRouter } from 'vue-router';
 const router = useRouter();
 </script>
 

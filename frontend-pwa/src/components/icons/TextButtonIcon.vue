@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import MdiIcon from "@/components/icons/MdiIcon.vue";
+import MdiIcon from '@/components/icons/MdiIcon.vue';
 
 defineProps<{
     icon: string;

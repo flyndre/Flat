@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import TextButtonIcon from "@/components/icons/TextButtonIcon.vue";
-import MdiIcon from "@/components/icons/MdiIcon.vue";
-import DefaultLayout from "@/layouts/DefaultLayout.vue";
-import { mdiImport, mdiInformationOutline, mdiMapMarkerPath } from "@mdi/js";
-import Button from "primevue/button";
+import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import MdiIcon from '@/components/icons/MdiIcon.vue';
+import DefaultLayout from '@/layouts/DefaultLayout.vue';
+import { mdiImport, mdiInformationOutline, mdiMapMarkerPath } from '@mdi/js';
+import Button from 'primevue/button';
 </script>
 
 <template>
@@ -34,7 +34,9 @@ import Button from "primevue/button";
             </router-link>
         </template>
         <template #background>
-            <div class="w-full h-full bg-gray-200 flex flex-col items-center justify-center text-gray-500">
+            <div
+                class="w-full h-full bg-gray-200 flex flex-col items-center justify-center text-gray-500"
+            >
                 Map Placeholder
             </div>
         </template>
