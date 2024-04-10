@@ -1,23 +1,22 @@
-import axios from 'axios'
+import api from "./api";
 
-axios.defaults.baseURL = import.meta.env.BASE_URL;
 
 export async function openCollection(name : string, clientId : string, collectionArea : any){
-    
-    const response = await axios.post("collection", {name : name, clientId : clientId, collectionArea : collectionArea}); 
-    const responseData = response.status != 200 ? null : response.data;
-    
-    if(responseData == null){
-        throw WebTransportError; 
-    }
+    const response = await api.post("collection", {name : name, clientId : clientId, collectionArea : collectionArea}); 
+    return response; 
+}
 
-    return responseData; 
+export async function changeCollectionArea(collectionId : string, collectionArea : any[]){
+    const response = await api.put(`collection/${collectionId}`, {value: collectionArea}); 
+    return response;
+}
+
+export async function deleteCollection(collectionId : string, collectionArea : any[]){
+    const response = await api.delete(`collection/${collectionId}`); 
+    return response;
 }
 
 export async function accessRequest(username : string, clientId : string, collectionId : string){
-    
-}
-
-export async function getCollection(collectionId : string){
-    
+    const response = await api.post(`collection/${collectionId}`, {value: clientId}); 
+    return response;
 }
