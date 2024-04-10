@@ -1,11 +1,14 @@
 package de.flyndre.flat.composables.collectionareascreen
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
 import de.flyndre.flat.database.AppDatabase
+import de.flyndre.flat.database.entities.Preset
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class CollectionAreaScreenViewModel(presetId: Long, db: AppDatabase): ViewModel() {
     //appdatabase
@@ -36,8 +39,19 @@ class CollectionAreaScreenViewModel(presetId: Long, db: AppDatabase): ViewModel(
         _listAreaPoints.value = arrayListOf<LatLng>()
     }
 
+    fun saveCollectionAreaToPreset(){
+        viewModelScope.launch {
+            var preset = _db.presetDao().getPresetById(presetId = _presetId)
+            preset = Preset(preset.id, preset.presetName, preset.presetDescription, presetAreaPoints = _listAreaPoints.value)
+            _db.presetDao().updatePreset(preset)
+        }
+    }
+
     init{
         _db = db
         _presetId = presetId
+        viewModelScope.launch {
+            _listAreaPoints.value = _db.presetDao().getPresetById(presetId = presetId).presetAreaPoints
+        }
     }
 }

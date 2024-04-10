@@ -58,6 +58,12 @@ fun CollectionAreaScreen(modifier: Modifier = Modifier, presetId: Long, db: AppD
         bottomBar = {
                     if(!movingEnabled){
                         Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)) {
+                            Button(onClick = {
+                                collectionAreaScreenViewModel.saveCollectionAreaToPreset()
+                                navController.navigate("editpreset/$presetId")
+                            }) {
+                                Text(text = "Save Area")
+                            }
                             Button(onClick = { collectionAreaScreenViewModel.removeLastCollectionAreaPoint() }) {
                                 Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "remove the last point")
                             }
