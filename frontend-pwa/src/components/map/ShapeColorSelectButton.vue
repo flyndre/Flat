@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import SelectButton from "primevue/selectbutton";
-import MdiIcon from "@/components/MdiIcon.vue";
-import { mdiCircle } from "@mdi/js";
+import SelectButton from 'primevue/selectbutton';
+import MdiIcon from '@/components/icons/MdiIcon.vue';
+import { mdiCircle } from '@mdi/js';
 const selectedColor = defineModel<string>({
     required: false,
-    default: "#1E90FF",
+    default: '#1E90FF',
 });
 const colorOptions: string[] = [
-    "#1E90FF",
-    "#FF1493",
-    "#32CD32",
-    "#FF8C00",
-    "#4B0082",
+    '#1E90FF',
+    '#FF1493',
+    '#32CD32',
+    '#FF8C00',
+    '#4B0082',
 ];
 </script>
 

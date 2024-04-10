@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import SelectButton from "primevue/selectbutton";
-import MdiIcon from "@/components/MdiIcon.vue";
+import SelectButton from 'primevue/selectbutton';
+import MdiIcon from '@/components/icons/MdiIcon.vue';
 import {
     mdiHandBackRightOutline,
     mdiRectangleOutline,
     mdiCircleOutline,
     mdiVectorPolyline,
     mdiVectorTriangle,
-} from "@mdi/js";
+} from '@mdi/js';
 const selectedToolType = defineModel<google.maps.drawing.OverlayType>({
     required: false,
     default: null,
@@ -23,19 +23,19 @@ const toolTypes: ToolTypeOption[] = [
         icon: mdiHandBackRightOutline,
     },
     {
-        value: "rectangle",
+        value: 'rectangle',
         icon: mdiRectangleOutline,
     },
     {
-        value: "circle",
+        value: 'circle',
         icon: mdiCircleOutline,
     },
     {
-        value: "polygon",
+        value: 'polygon',
         icon: mdiVectorTriangle,
     },
     {
-        value: "polyline",
+        value: 'polyline',
         icon: mdiVectorPolyline,
     },
 ];

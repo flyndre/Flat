@@ -76,9 +76,9 @@ dependencies {
     implementation (libs.play.services.maps.v1810)
     //OKHTTP for websocket support
     implementation(libs.okhttp)
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
-    implementation("io.github.dellisd.spatialk:geojson:0.3.0")
-    implementation("io.github.dellisd.spatialk:turf:0.3.0")
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.geojson)
+    implementation(libs.turf)
     //navigation for jetpack compose
     implementation(libs.androidx.navigation.compose)
     //viewmodel for jetpack compose
@@ -90,6 +90,11 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     // optional - Kotlin Extensions and Coroutines support for Room
     implementation(libs.androidx.room.ktx)
+    //dependencies for requesting permissions
+    implementation(libs.androidx.activity.ktx)
+    implementation(libs.androidx.fragment.ktx)
+    //dependencies for serializing objects to json and back
+    implementation (libs.gson)
 }
 
 secrets {

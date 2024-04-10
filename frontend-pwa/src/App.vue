@@ -1,8 +1,10 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import Snackbar from '@/components/Snackbar.vue';
+</script>
 
 <template>
-    <div class="max-w-[800px] m-auto flex flex-col gap-4 p-4">
-        <img src="/branding.webp" class="w-full rounded-xl bg-white" />
+    <div class="max-w-[800px] m-auto flex flex-col">
         <router-view />
     </div>
+    <Snackbar />
 </template>
