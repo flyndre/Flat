@@ -93,8 +93,8 @@ dependencies {
     //dependencies for requesting permissions
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.fragment.ktx)
-
-
+    //dependencies for serializing objects to json and back
+    implementation (libs.gson)
 }
 
 secrets {

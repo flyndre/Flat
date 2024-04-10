@@ -2,6 +2,7 @@ package de.flyndre.flat.composables.presetscreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.maps.model.LatLng
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.database.entities.Preset
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,15 +29,19 @@ class PresetScreenViewModel(presetId: Long?, db: AppDatabase) :ViewModel() {
         _presetDescription.value = presetDescription
     }
 
+    //preset area points
+    private val _presetAreaPoints: MutableStateFlow<ArrayList<LatLng>> = MutableStateFlow(arrayListOf())
+    val presetAreaPoints: StateFlow<List<LatLng>> = _presetAreaPoints.asStateFlow()
+
     //function for saving preset
     fun savePresetToDatabase(){
         if(_presetId != null){
-            val preset = Preset(_presetId!!, _presetName.value, _presetDescription.value)
+            val preset = Preset(_presetId!!, _presetName.value, _presetDescription.value, _presetAreaPoints.value)
             viewModelScope.launch {
                 _db.presetDao().updatePreset(preset = preset)
             }
         }else{
-            val preset = Preset(0, _presetName.value, _presetDescription.value)
+            val preset = Preset(0, _presetName.value, _presetDescription.value, arrayListOf())
             viewModelScope.launch {
                 _db.presetDao().insertPreset(preset = preset)
             }
@@ -48,11 +53,11 @@ class PresetScreenViewModel(presetId: Long?, db: AppDatabase) :ViewModel() {
     fun savePresetTemporaryToDatabase(): Long{
         if(_presetId != null){
             viewModelScope.launch{
-                _db.presetDao().updatePreset(Preset(_presetId!!, _presetName.value, _presetDescription.value))
+                _db.presetDao().updatePreset(Preset(_presetId!!, _presetName.value, _presetDescription.value, _presetAreaPoints.value))
             }
         }else{
             viewModelScope.launch {
-                _presetId = _db.presetDao().insertPreset(Preset(0, _presetName.value, _presetDescription.value))
+                _presetId = _db.presetDao().insertPreset(Preset(0, _presetName.value, _presetDescription.value, arrayListOf()))
             }
         }
         return _presetId!!
@@ -67,6 +72,7 @@ class PresetScreenViewModel(presetId: Long?, db: AppDatabase) :ViewModel() {
                 val preset = db.presetDao().getPresetById(presetId = presetId)
                 _presetName.value = preset.presetName
                 _presetDescription.value = preset.presetDescription
+                _presetAreaPoints.value = preset.presetAreaPoints
             }
         }
     }
