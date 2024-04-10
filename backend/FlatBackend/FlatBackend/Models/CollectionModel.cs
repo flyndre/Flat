@@ -8,15 +8,15 @@ namespace FlatBackend.Models
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string? MongoId { get; set; }
+        public string? mongoId { get; set; }
 
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid id { get; set; } = Guid.NewGuid();
 
-        public Guid OwnerId { get; set; }
-        public string? Name { get; set; }
+        public Guid clientId { get; set; }
+        public string? name { get; set; }
 
-        public List<AreaModel>? CollectionArea { get; set; }
-        public List<UserModel>? ConfirmedUsers { get; set; }
-        public List<UserModel>? RequestedAccess { get; set; }
+        public List<AreaModel>? collectionArea { get; set; }
+        public List<UserModel>? confirmedUsers { get; set; }
+        public List<UserModel>? requestedAccess { get; set; }
     }
 }
