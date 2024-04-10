@@ -15,6 +15,8 @@ namespace FlatBackend.Models
         public Guid clientId { get; set; }
         public string? name { get; set; }
 
+        public string area { get; set; }
+
         public List<AreaModel>? collectionArea { get; set; }
         public List<UserModel>? confirmedUsers { get; set; }
         public List<UserModel>? requestedAccess { get; set; }
