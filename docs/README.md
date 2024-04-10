@@ -31,7 +31,7 @@ Conventions regarding Git and coding are documented [here](/docs/conventions.md)
 | PWA Frontend     | TypeScript, Vite, Vue, Tailwind CSS, [ Vuetify \| PrimeVue ] |
 | Backend          | .NET, C#                                                     |
 
-## Requirementss
+## Requirements
 
 Must:
 
