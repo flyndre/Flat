@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import SelectButton from "primevue/selectbutton";
-import MdiIcon from "@/components/MdiIcon.vue";
-import { mdiRoadVariant, mdiTerrain, mdiEarth, mdiEarthPlus } from "@mdi/js";
+import SelectButton from 'primevue/selectbutton';
+import MdiIcon from '@/components/icons/MdiIcon.vue';
+import { mdiRoadVariant, mdiTerrain, mdiEarth, mdiEarthPlus } from '@mdi/js';
 const selectedMapType = defineModel<google.maps.MapTypeId>({
     required: false,
-    default: "roadmap" as google.maps.MapTypeId,
+    default: 'roadmap' as google.maps.MapTypeId,
 });
 type MapTypeOption = {
     value: `${google.maps.MapTypeId}`;
@@ -12,19 +12,19 @@ type MapTypeOption = {
 };
 const mapTypeOptions: MapTypeOption[] = [
     {
-        value: "roadmap",
+        value: 'roadmap',
         icon: mdiRoadVariant,
     },
     {
-        value: "terrain",
+        value: 'terrain',
         icon: mdiTerrain,
     },
     {
-        value: "satellite",
+        value: 'satellite',
         icon: mdiEarth,
     },
     {
-        value: "hybrid",
+        value: 'hybrid',
         icon: mdiEarthPlus,
     },
 ];

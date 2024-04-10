@@ -4,6 +4,10 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocketListener
+import java.security.cert.X509Certificate
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 
 class WebSocketClient {
     private lateinit var webSocket: okhttp3.WebSocket
@@ -11,6 +15,24 @@ class WebSocketClient {
     private var socketUrl = ""
     private var shouldReconnect = true
     private var client: OkHttpClient? = null
+
+    //set self sign certificate
+    val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
+        override fun checkClientTrusted(
+            chain: Array<out X509Certificate>?,
+            authType: String?
+        ) {}
+
+        override fun checkServerTrusted(
+            chain: Array<out X509Certificate>?,
+            authType: String?
+        ) {}
+
+        override fun getAcceptedIssuers() = arrayOf<X509Certificate>()
+    })
+
+    val sslContext = SSLContext.getInstance("SSL")
+
 
     companion object {
         private lateinit var instance: WebSocketClient
@@ -36,7 +58,14 @@ class WebSocketClient {
     }
 
     private fun initWebSocket() {
-        client = OkHttpClient()
+        sslContext.init(null, trustAllCerts, java.security.SecureRandom())
+
+        // Create an ssl socket factory with our all-trusting manager
+        val sslSocketFactory = sslContext.socketFactory
+        client = OkHttpClient.Builder()
+            .sslSocketFactory(sslSocketFactory, trustAllCerts[0] as X509TrustManager)
+            .hostnameVerifier{ _, _ -> true }
+            .build()
         val request = Request.Builder().url(url = socketUrl).build()
         webSocket = client!!.newWebSocket(request, webSocketListener)
         //this must me done else memory leak will be caused

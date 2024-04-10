@@ -1,75 +1,89 @@
 package de.flyndre.flat
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
-import com.google.maps.android.compose.rememberCameraPositionState
+import androidx.core.content.ContextCompat
+import androidx.navigation.NavType
+import de.flyndre.flat.services.ConnectionService
+import de.flyndre.flat.services.TrackingService
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import androidx.room.Room
+import de.flyndre.flat.composables.collectionareascreen.CollectionAreaScreen
+import de.flyndre.flat.composables.creategroupscreen.CreateGroupScreen
+import de.flyndre.flat.composables.initialscreen.InitialScreen
+import de.flyndre.flat.composables.joinscreen.JoinScreen
+import de.flyndre.flat.composables.presetscreen.PresetScreen
+import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.ui.theme.FlatTheme
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.WebSocket
 
 class MainActivity : ComponentActivity() {
-    private lateinit var webSocketClient: WebSocketClient
-    private val socketListener = object : WebSocketClient.SocketListener {
-        override fun onMessage(message: String) {
-            Log.e("socketCheck onMessage", message)
-        }
-    }
-
+    var connectionService = ConnectionService("https:10.0.2.2/ws")
+    var trakingService = TrackingService()
+    lateinit var db: AppDatabase
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        webSocketClient = WebSocketClient.getInstance()
-        webSocketClient.setSocketUrl("https://10.0.2.2:44380/ws")
-        webSocketClient.setListener(socketListener)
-        webSocketClient.connect()
+        //request permissions
+        requestLocationPermission()
+
+        Thread(Runnable {
+            while(true){
+                trakingService.startTracking()
+                Thread.sleep(10000)
+                trakingService.stopTracking()
+            }
+        }).start()
+
+        db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "flat-database").build()
 
         setContent {
             FlatTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    Map()
+                    AppEntryPoint(modifier = Modifier, db = db)
                 }
             }
+        }
+
+    }
+
+    private fun requestLocationPermission(){
+        val requestPermissionLauncher =
+            registerForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { isGranted: Boolean ->
+                if (!isGranted) {
+                    finishAndRemoveTask()
+                }
+            }
+        if(ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-            text = "Hello $name!",
-            modifier = modifier
-    )
-}
-
-@Composable
-fun Map(){
-    val singapore = LatLng(1.35, 103.87)
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(singapore, 10f)
-    }
-    GoogleMap(
-        modifier = Modifier.fillMaxSize(),
-        cameraPositionState = cameraPositionState
-    ) {
-        Marker(
-            state = MarkerState(position = singapore),
-            title = "Singapore",
-            snippet = "Marker in Singapore"
-        )
+fun AppEntryPoint(modifier: Modifier, db: AppDatabase){
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = "initial") {
+        composable("initial"){ InitialScreen(modifier = modifier, onNavigateToJoinScreen = {navController.navigate("join")}, onNavigateToCreateGroupScreen = {navController.navigate("creategroup")}, onLukasBUHtton = {})}
+        composable("join"){JoinScreen(modifier = modifier, onNavigateToInitialScreen = {navController.navigate("initial")})}
+        composable("creategroup"){CreateGroupScreen(modifier = modifier, db = db,  onNavigateToInitialScreen = {navController.navigate("initial")}, onNavigateToNewPresetScreen = {navController.navigate("newpreset")}, navController = navController)}
+        composable("newpreset"){ PresetScreen(presetId = null, db = db, navController = navController, topBarText = "New Preset", onNavigateToCreateGroupScreen = {navController.navigate("creategroup")})}
+        composable("editpreset/{presetId}", arguments = listOf(navArgument("presetId"){type = NavType.LongType})){ backStackEntry -> val presetId = backStackEntry.arguments?.getLong("presetId")
+            PresetScreen(presetId = presetId, db = db, navController = navController, topBarText = "Edit Preset", onNavigateToCreateGroupScreen = { navController.navigate("creategroup") }) }
+        composable("collectionarea/{presetId}", arguments = listOf(navArgument("presetId"){type = NavType.LongType})){ backStackEntry -> val presetId = backStackEntry.arguments!!.getLong("presetId")
+            CollectionAreaScreen(presetId = presetId, db = db, navController = navController)}
     }
 }
