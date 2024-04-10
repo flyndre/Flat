@@ -5,29 +5,29 @@
  * Therefore, this component needs to be wrapped inside a `Suspense` tag.
  */
 
-import { computed, onMounted, ref, unref, watch } from "vue";
-import { Loader } from "@googlemaps/js-api-loader";
-import { useGeolocation } from "@vueuse/core";
-import ProgressSpinner from "primevue/progressspinner";
-import Button from "primevue/button";
-import MdiIcon from "@/components/MdiIcon.vue";
-import { mdiDeleteSweep, mdiDelete, mdiCrosshairsGps } from "@mdi/js";
-import MapTypeSelectButton from "@/components/map/MapTypeSelectButton.vue";
-import DrawingToolSelectButton from "@/components/map/DrawingToolSelectButton.vue";
-import ShapeColorSelectButton from "./ShapeColorSelectButton.vue";
+import { computed, onMounted, ref, unref, watch } from 'vue';
+import { Loader } from '@googlemaps/js-api-loader';
+import { useGeolocation } from '@vueuse/core';
+import ProgressSpinner from 'primevue/progressspinner';
+import Button from 'primevue/button';
+import MdiIcon from '@/components/icons/MdiIcon.vue';
+import { mdiDeleteSweep, mdiDelete, mdiCrosshairsGps } from '@mdi/js';
+import MapTypeSelectButton from '@/components/map/MapTypeSelectButton.vue';
+import DrawingToolSelectButton from '@/components/map/DrawingToolSelectButton.vue';
+import ShapeColorSelectButton from './ShapeColorSelectButton.vue';
 
 // Load the Maps API
 await new Loader({
     apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-    libraries: ["core", "maps", "drawing"],
-}).importLibrary("maps");
+    libraries: ['core', 'maps', 'drawing'],
+}).importLibrary('maps');
 
 const model = defineModel<google.maps.Map>({
     required: false,
     default: undefined,
 });
 
-const shapeList = defineModel<IdentifyableTypedShape[]>("shapes", {
+const shapeList = defineModel<IdentifyableTypedShape[]>('shapes', {
     default: [],
     required: false,
 });
@@ -83,7 +83,7 @@ const selectedShape = computed({
         shapeList.value[shapeList.value.findIndex((s) => s.id === v.id)] = v;
     },
 });
-const colors = ref(["#1E90FF", "#FF1493", "#32CD32", "#FF8C00", "#4B0082"]);
+const colors = ref(['#1E90FF', '#FF1493', '#32CD32', '#FF8C00', '#4B0082']);
 const selectedColor = ref<string>();
 const shapeOptions = {
     strokeWeight: 0,
@@ -111,8 +111,8 @@ function setSelection(shapeId: string) {
     selectedShapeId.value = shapeId;
     selectedShape.value.overlay.setEditable(true);
     selectColor(
-        selectedShape.value.overlay.get("fillColor") ||
-            selectedShape.value.overlay.get("strokeColor")
+        selectedShape.value.overlay.get('fillColor') ||
+            selectedShape.value.overlay.get('strokeColor')
     );
 }
 
@@ -139,21 +139,21 @@ function selectColor(color: string) {
 
     // Retrieves the current options from the drawing manager and replaces the
     // stroke or fill color as appropriate.
-    const polylineOptions = drawingManager.value.get("polylineOptions");
+    const polylineOptions = drawingManager.value.get('polylineOptions');
     polylineOptions.strokeColor = color;
-    drawingManager.value.set("polylineOptions", polylineOptions);
+    drawingManager.value.set('polylineOptions', polylineOptions);
 
-    const rectangleOptions = drawingManager.value.get("rectangleOptions");
+    const rectangleOptions = drawingManager.value.get('rectangleOptions');
     rectangleOptions.fillColor = color;
-    drawingManager.value.set("rectangleOptions", rectangleOptions);
+    drawingManager.value.set('rectangleOptions', rectangleOptions);
 
-    const circleOptions = drawingManager.value.get("circleOptions");
+    const circleOptions = drawingManager.value.get('circleOptions');
     circleOptions.fillColor = color;
-    drawingManager.value.set("circleOptions", circleOptions);
+    drawingManager.value.set('circleOptions', circleOptions);
 
-    const polygonOptions = drawingManager.value.get("polygonOptions");
+    const polygonOptions = drawingManager.value.get('polygonOptions');
     polygonOptions.fillColor = color;
-    drawingManager.value.set("polygonOptions", polygonOptions);
+    drawingManager.value.set('polygonOptions', polygonOptions);
 }
 
 function setSelectedShapeColor(color: string) {
@@ -161,9 +161,9 @@ function setSelectedShapeColor(color: string) {
         if (
             selectedShape.value.type == google.maps.drawing.OverlayType.POLYLINE
         ) {
-            selectedShape.value.overlay.set("strokeColor", color);
+            selectedShape.value.overlay.set('strokeColor', color);
         } else {
-            selectedShape.value.overlay.set("fillColor", color);
+            selectedShape.value.overlay.set('fillColor', color);
         }
     }
 }
@@ -190,7 +190,7 @@ async function initialize() {
         ![null, google.maps.drawing.OverlayType.MARKER].includes(shape.type);
 
     drawingManager.value.addListener(
-        "overlaycomplete",
+        'overlaycomplete',
         function (shape: google.maps.drawing.OverlayCompleteEvent) {
             if (isGeometry(shape)) {
                 const typedShape = { ...shape, id: `${Date.now()}` };
@@ -202,7 +202,7 @@ async function initialize() {
 
                 // Add an event listener that selects the newly-drawn shape when the user
                 // mouses down on it.
-                shape.overlay.addListener("click", function () {
+                shape.overlay.addListener('click', function () {
                     setSelection(typedShape.id);
                 });
                 // google.maps.event.addListener(newShape, "click", function () {
@@ -220,12 +220,12 @@ async function initialize() {
     //     "drawingmode_changed",
     //     clearSelection
     // );
-    drawingManager.value.addListener("drawingmode_changed", clearSelection);
-    model.value.addListener("click", clearSelection);
+    drawingManager.value.addListener('drawingmode_changed', clearSelection);
+    model.value.addListener('click', clearSelection);
     selectColor(colors.value[0]);
     centerMap();
 }
-window.addEventListener("load", initialize);
+window.addEventListener('load', initialize);
 
 function setMapType(type: google.maps.MapTypeId) {
     model.value.setMapTypeId(type);
