@@ -21,23 +21,28 @@ import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Polygon
 import de.flyndre.flat.database.AppDatabase
+import io.github.dellisd.spatialk.geojson.dsl.point
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CollectionAreaScreen(modifier: Modifier = Modifier, presetId: Long, db: AppDatabase, navController: NavController, collectionAreaScreenViewModel: CollectionAreaScreenViewModel = CollectionAreaScreenViewModel(presetId, db)){
     var movingEnabled by remember { mutableStateOf(true) }
+    val listAreaPoints by collectionAreaScreenViewModel.listAreaPoints.collectAsState()
     Scaffold(
         topBar = {
             TopAppBar(title = { if(movingEnabled){
@@ -53,13 +58,10 @@ fun CollectionAreaScreen(modifier: Modifier = Modifier, presetId: Long, db: AppD
         bottomBar = {
                     if(!movingEnabled){
                         Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)) {
-                            Button(onClick = { /*TODO*/ }) {
-                                Icon(Icons.Filled.Edit, contentDescription = "create a new collection area")
-                            }
-                            Button(onClick = { /*TODO*/ }) {
+                            Button(onClick = { collectionAreaScreenViewModel.removeLastCollectionAreaPoint() }) {
                                 Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "remove the last point")
                             }
-                            Button(onClick = { /*TODO*/ }) {
+                            Button(onClick = { collectionAreaScreenViewModel.clearCollectionArea() }) {
                                 Icon(Icons.Filled.Delete, contentDescription = "delete the existing collection area")
                             }
                         }
@@ -87,6 +89,10 @@ fun CollectionAreaScreen(modifier: Modifier = Modifier, presetId: Long, db: AppD
             mapSettings = MapUiSettings(zoomControlsEnabled = false, zoomGesturesEnabled = false, tiltGesturesEnabled = false, rotationGesturesEnabled = false, scrollGesturesEnabled = false)
             mapProperties = MapProperties(isMyLocationEnabled = false)
         }
-        GoogleMap(modifier = Modifier.padding(innerPadding), uiSettings = mapSettings, properties = mapProperties)
+        GoogleMap(modifier = Modifier.padding(innerPadding), uiSettings = mapSettings, properties = mapProperties, onMapClick = {if(!movingEnabled){collectionAreaScreenViewModel.addPCollectionAreaPoint(it)}}){
+            if(listAreaPoints.isNotEmpty()){
+                Polygon(points = listAreaPoints, fillColor = Color(255, 159, 246, 127), strokeColor = Color(255, 159, 246, 255))
+            }
+        }
     }
 }
