@@ -10,11 +10,20 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class CollectionAreaScreenViewModel(presetId: Long, db: AppDatabase): ViewModel() {
+class CollectionAreaScreenViewModel(db: AppDatabase): ViewModel() {
     //appdatabase
-    private var _db: AppDatabase
+    private var _db = db
     //preset id
-    private var _presetId: Long
+    private var _presetId: Long = 0
+
+    fun setPresetId(presetId: Long){
+        _presetId = presetId
+
+        viewModelScope.launch {
+            _listAreaPoints.value = _db.presetDao().getPresetById(presetId = presetId).presetAreaPoints
+        }
+    }
+
     //list of points for selection area
     private val _listAreaPoints: MutableStateFlow<ArrayList<LatLng>> = MutableStateFlow(arrayListOf())
     val listAreaPoints: StateFlow<List<LatLng>> = _listAreaPoints.asStateFlow()
@@ -44,14 +53,6 @@ class CollectionAreaScreenViewModel(presetId: Long, db: AppDatabase): ViewModel(
             var preset = _db.presetDao().getPresetById(presetId = _presetId)
             preset = Preset(preset.id, preset.presetName, preset.presetDescription, presetAreaPoints = _listAreaPoints.value)
             _db.presetDao().updatePreset(preset)
-        }
-    }
-
-    init{
-        _db = db
-        _presetId = presetId
-        viewModelScope.launch {
-            _listAreaPoints.value = _db.presetDao().getPresetById(presetId = presetId).presetAreaPoints
         }
     }
 }
