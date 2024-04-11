@@ -2,14 +2,16 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id ("org.jetbrains.kotlin.plugin.serialization") version "1.6.0"
+    id("com.google.devtools.ksp")
 }
 
 android {
-    namespace = "com.example.flat"
+    namespace = "de.flyndre.flat"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.flat"
+        applicationId = "de.flyndre.flat"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
@@ -39,7 +41,7 @@ android {
         buildConfig = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.11"
     }
     packaging {
         resources {
@@ -58,6 +60,8 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.room.common)
+    implementation(libs.androidx.room.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -72,6 +76,25 @@ dependencies {
     implementation (libs.play.services.maps.v1810)
     //OKHTTP for websocket support
     implementation(libs.okhttp)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.geojson)
+    implementation(libs.turf)
+    //navigation for jetpack compose
+    implementation(libs.androidx.navigation.compose)
+    //viewmodel for jetpack compose
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    //room database dependencies
+    implementation(libs.androidx.room.runtime)
+    annotationProcessor(libs.androidx.room.compiler)
+    // To use Kotlin Symbol Processing (KSP)
+    ksp(libs.androidx.room.compiler)
+    // optional - Kotlin Extensions and Coroutines support for Room
+    implementation(libs.androidx.room.ktx)
+    //dependencies for requesting permissions
+    implementation(libs.androidx.activity.ktx)
+    implementation(libs.androidx.fragment.ktx)
+    //dependencies for serializing objects to json and back
+    implementation (libs.gson)
 }
 
 secrets {

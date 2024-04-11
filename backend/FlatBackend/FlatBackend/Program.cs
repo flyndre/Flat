@@ -4,10 +4,26 @@ using System.Net.WebSockets;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 builder.WebHost.UseUrls("https://localhost:44380/");
+builder.Services.AddControllers();
 var app = builder.Build();
-app.UseWebSockets();
-app.MapGet("/ws", async context =>
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+var webSocketOptions = new WebSocketOptions
+{
+    KeepAliveInterval = TimeSpan.FromMinutes(2)
+};
+app.UseWebSockets(webSocketOptions);
+/* app.MapGet("/ws", async context =>
 {
     if (context.WebSockets.IsWebSocketRequest)
     {
@@ -32,6 +48,12 @@ app.MapGet("/ws", async context =>
     {
         context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
     }
-});
+});*/
+
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
+app.MapControllers();
 
 await app.RunAsync();

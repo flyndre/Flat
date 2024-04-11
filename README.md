@@ -1,4 +1,4 @@
-![Flat Banner](docs/assets/flat.png)
+![Flat Banner](docs/assets/flat.webp)
 
 # Fleet Live Area Tracking
 

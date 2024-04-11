@@ -1,23 +1,44 @@
 <script setup lang="ts">
-import Button from "primevue/button";
-import Card from "primevue/card";
+import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import MdiIcon from '@/components/icons/MdiIcon.vue';
+import DefaultLayout from '@/layouts/DefaultLayout.vue';
+import { mdiImport, mdiInformationOutline, mdiMapMarkerPath } from '@mdi/js';
+import Button from 'primevue/button';
 </script>
 
 <template>
-    <Card :pt="{ footer: { class: 'flex flex-row gap-2' } }">
-        <template #title> Flat </template>
-        <template #subtitle> Fleet Live Area Tracking </template>
-        <template #content>
-            The modern cross-platform route tracking app to orchestrate
-            volunteer collection campaigns in your neighborhood.
+    <DefaultLayout>
+        <template #action-left>
+            <router-link :to="{ name: 'about' }">
+                <Button severity="secondary" text>
+                    <template #icon>
+                        <MdiIcon :icon="mdiInformationOutline" />
+                    </template>
+                </Button>
+            </router-link>
         </template>
-        <template #footer>
-            <a href="https://github.com/flyndre/Flat">
-                <Button label="Repository" />
-            </a>
-            <a href="https://flyndre.github.io">
-                <Button text label="Team Website" />
-            </a>
+        <template #action-right>
+            <router-link :to="{ name: 'scan' }">
+                <Button label="Join a Collection">
+                    <template #icon>
+                        <TextButtonIcon :icon="mdiImport" />
+                    </template>
+                </Button>
+            </router-link>
+            <router-link :to="{ name: 'presets' }">
+                <Button label="My Collections" text>
+                    <template #icon>
+                        <TextButtonIcon :icon="mdiMapMarkerPath" />
+                    </template>
+                </Button>
+            </router-link>
         </template>
-    </Card>
+        <template #background>
+            <div
+                class="w-full h-full bg-gray-200 flex flex-col items-center justify-center text-gray-500"
+            >
+                Map Placeholder
+            </div>
+        </template>
+    </DefaultLayout>
 </template>
