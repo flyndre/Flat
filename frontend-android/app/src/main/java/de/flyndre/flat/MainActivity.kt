@@ -20,14 +20,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.room.Room
-import de.flyndre.flat.composables.collectionareascreen.CollectionAreaScreen
-import de.flyndre.flat.composables.collectionareascreen.CollectionAreaScreenViewModel
+import de.flyndre.flat.composables.presetscreen.collectionareascreen.CollectionAreaScreen
 import de.flyndre.flat.composables.creategroupscreen.CreateGroupScreen
 import de.flyndre.flat.composables.creategroupscreen.CreateGroupScreenViewModel
 import de.flyndre.flat.composables.initialscreen.InitialScreen
 import de.flyndre.flat.composables.joinscreen.JoinScreen
 import de.flyndre.flat.composables.presetscreen.PresetScreen
 import de.flyndre.flat.composables.presetscreen.PresetScreenViewModel
+import de.flyndre.flat.composables.presetscreen.collectionareascreen.CollectionAreaScreenViewModel
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.ui.theme.FlatTheme
 
@@ -49,12 +49,15 @@ class MainActivity : ComponentActivity() {
         }).start()
 
         db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "flat-database").build()
+        val collectionAreaScreenViewModel = CollectionAreaScreenViewModel()
+        val createGroupScreenViewModel = CreateGroupScreenViewModel(db = db)
+        val presetScreenViewModel = PresetScreenViewModel(db = db, collectionAreaScreenViewModel = collectionAreaScreenViewModel)
 
         setContent {
             FlatTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    AppEntryPoint(modifier = Modifier, db = db)
+                    AppEntryPoint(modifier = Modifier, db = db, createGroupScreenViewModel, presetScreenViewModel, collectionAreaScreenViewModel)
                 }
             }
         }
@@ -77,29 +80,22 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun AppEntryPoint(modifier: Modifier, db: AppDatabase){
-    val createGroupScreenViewModel = CreateGroupScreenViewModel(db = db)
-    val presetScreenViewModel = PresetScreenViewModel(db = db)
-    val collectionAreaScreenViewModel = CollectionAreaScreenViewModel(db = db)
+fun AppEntryPoint(modifier: Modifier, db: AppDatabase, createGroupScreenViewModel: CreateGroupScreenViewModel, presetScreenViewModel: PresetScreenViewModel, collectionAreaScreenViewModel: CollectionAreaScreenViewModel){
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "initial") {
         composable("initial"){ InitialScreen(modifier = modifier, onNavigateToJoinScreen = {navController.navigate("join")}, onNavigateToCreateGroupScreen = {navController.navigate("creategroup")}, onLukasBUHtton = {})}
         composable("join"){JoinScreen(modifier = modifier, onNavigateToInitialScreen = {navController.navigate("initial")})}
-        composable("creategroup"){CreateGroupScreen(modifier = modifier, onNavigateToInitialScreen = {navController.navigate("initial")}, onNavigateToNewPresetScreen = {navController.navigate("newpreset")}, navController = navController, createGroupScreenViewModel = CreateGroupScreenViewModel(db = db))}
+        composable("creategroup"){CreateGroupScreen(modifier = modifier, db = db,  onNavigateToInitialScreen = {navController.navigate("initial")}, onNavigateToNewPresetScreen = {navController.navigate("newpreset")}, navController = navController, createGroupScreenViewModel = createGroupScreenViewModel)}
         composable("newpreset"){
-            presetScreenViewModel.setPresetId(0)
-            PresetScreen(navController = navController, topBarText = "New Preset", onNavigateToCreateGroupScreen = {navController.navigate("creategroup")}, presetScreenViewModel = presetScreenViewModel)
+            PresetScreen(presetId = null, db = db, navController = navController, topBarText = "New Preset", onNavigateToCreateGroupScreen = {navController.navigate("creategroup")}, presetScreenViewModel = presetScreenViewModel)}
+        composable("editpreset/{presetId}", arguments = listOf(navArgument("presetId"){type = NavType.LongType})){
+            backStackEntry -> val presetId = backStackEntry.arguments?.getLong("presetId")
+            if(presetId!! != 0.toLong()){//0 is the way to signalize to the navController that no new values need to be loaded from database
+                presetScreenViewModel.setPresetId(presetId = presetId)
+            }
+            PresetScreen(presetId = presetId, db = db, navController = navController, topBarText = "Edit Preset", onNavigateToCreateGroupScreen = { navController.navigate("creategroup") }, presetScreenViewModel = presetScreenViewModel) }
+        composable("collectionarea/{presetId}", arguments = listOf(navArgument("presetId"){type = NavType.LongType})){ backStackEntry -> val presetId = backStackEntry.arguments!!.getLong("presetId")
+            CollectionAreaScreen(db = db, navController = navController, collectionAreaScreenViewModel = collectionAreaScreenViewModel)
         }
-        composable("editpreset/{presetId}", arguments = listOf(navArgument("presetId"){ type = NavType.LongType})){
-            backStackEntry ->
-            val presetId = backStackEntry.arguments!!.getLong("presetId")
-            presetScreenViewModel.setPresetId(presetId = presetId)
-            PresetScreen(navController = navController, topBarText = "Edit Preset", onNavigateToCreateGroupScreen = { navController.navigate("creategroup") }, presetScreenViewModel = presetScreenViewModel)
-        }
-        composable("collectionarea/{presetId}", arguments = listOf(navArgument("presetId"){type = NavType.LongType})){
-            backStackEntry ->
-            val presetId = backStackEntry.arguments!!.getLong("presetId")
-            collectionAreaScreenViewModel.setPresetId(presetId = presetId)
-            CollectionAreaScreen(presetId = presetId, navController = navController, collectionAreaScreenViewModel = collectionAreaScreenViewModel)}
     }
 }

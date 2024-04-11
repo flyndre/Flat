@@ -18,9 +18,9 @@ import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 
 class CreateGroupScreenViewModel(db: AppDatabase) : ViewModel() {
+    private val _db = db
     //private val _createGroupState = MutableStateFlow(CreateGroupScreenState())
     //val createGroupState: StateFlow<CreateGroupScreenState> = _createGroupState.asStateFlow()
     private val _presets  = db.presetDao().getAll()
     val presets = _presets.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-
 }

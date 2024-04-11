@@ -3,6 +3,7 @@ package de.flyndre.flat.composables.presetscreen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
+import de.flyndre.flat.composables.presetscreen.collectionareascreen.CollectionAreaScreenViewModel
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.database.entities.Preset
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,34 +11,25 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class PresetScreenViewModel(db: AppDatabase) :ViewModel() {
+class PresetScreenViewModel(db: AppDatabase, collectionAreaScreenViewModel: CollectionAreaScreenViewModel) :ViewModel() {
     //appdatabase
     private var _db = db
+    //collectionAreaScreenViewModel
+    private var _collectionAreaScreenViewModel = collectionAreaScreenViewModel
     //preset id
     private var _presetId: Long = 0
+    fun setPresetId(presetId: Long){
+        _presetId = presetId
+        viewModelScope.launch {
+            val preset = _db.presetDao().getPresetById(presetId = presetId)
+            _presetName.value = preset.presetName
+            _presetDescription.value = preset.presetDescription
+            _collectionAreaScreenViewModel.setListAreaPoints(preset.presetAreaPoints)
+        }
+    }
     fun getPresetId(): Long{
         return _presetId
     }
-
-    fun setPresetId(presetId: Long){
-        _presetId = presetId
-        if(presetId == 0.toLong()){
-            viewModelScope.launch {
-                _presetName.value = ""
-                _presetDescription.value = ""
-                _presetAreaPoints.value = arrayListOf()
-                _presetId = _db.presetDao().insertPreset(Preset(_presetId, _presetName.value, _presetDescription.value, _presetAreaPoints.value))
-            }
-        }else{
-            viewModelScope.launch {
-                val preset = _db.presetDao().getPresetById(presetId = presetId)
-                _presetName.value = preset.presetName
-                _presetDescription.value = preset.presetDescription
-                _presetAreaPoints.value = preset.presetAreaPoints
-            }
-        }
-    }
-
     //preset name
     private val _presetName = MutableStateFlow("")
     val presetName: StateFlow<String> = _presetName.asStateFlow()
@@ -52,13 +44,15 @@ class PresetScreenViewModel(db: AppDatabase) :ViewModel() {
         _presetDescription.value = presetDescription
     }
 
-    //preset area points
-    private val _presetAreaPoints: MutableStateFlow<ArrayList<LatLng>> = MutableStateFlow(arrayListOf())
-    val presetAreaPoints: StateFlow<List<LatLng>> = _presetAreaPoints.asStateFlow()
-
+    //function for saving preset
     fun savePresetToDatabase(){
+        val preset = Preset(_presetId, _presetName.value, _presetDescription.value, _collectionAreaScreenViewModel.getListAreaPoints())
         viewModelScope.launch {
-            _db.presetDao().updatePreset(Preset(_presetId, _presetName.value, _presetDescription.value, _presetAreaPoints.value))
+            if(_presetId == 0.toLong()){
+                _db.presetDao().insertPreset(preset = preset)
+            }else{
+                _db.presetDao().updatePreset(preset = preset)
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-package de.flyndre.flat.composables.collectionareascreen
+package de.flyndre.flat.composables.presetscreen.collectionareascreen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -40,7 +40,7 @@ import io.github.dellisd.spatialk.geojson.dsl.point
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CollectionAreaScreen(modifier: Modifier = Modifier, presetId: Long, navController: NavController, collectionAreaScreenViewModel: CollectionAreaScreenViewModel){
+fun CollectionAreaScreen(modifier: Modifier = Modifier, db: AppDatabase, navController: NavController, collectionAreaScreenViewModel: CollectionAreaScreenViewModel){
     var movingEnabled by remember { mutableStateOf(true) }
     val listAreaPoints by collectionAreaScreenViewModel.listAreaPoints.collectAsState()
     Scaffold(
@@ -50,7 +50,7 @@ fun CollectionAreaScreen(modifier: Modifier = Modifier, presetId: Long, navContr
             }else{
                 Text(text = "Select the collection area")
             }
-                 }, navigationIcon = { IconButton(onClick = { navController.navigate("editpreset/$presetId") }) {
+                 }, navigationIcon = { IconButton(onClick = { navController.navigate("editpreset/0") }) {
                 Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "back to preset screen")
             }})
@@ -59,8 +59,7 @@ fun CollectionAreaScreen(modifier: Modifier = Modifier, presetId: Long, navContr
                     if(!movingEnabled){
                         Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)) {
                             Button(onClick = {
-                                collectionAreaScreenViewModel.saveCollectionAreaToPreset()
-                                navController.navigate("editpreset/$presetId")
+                                navController.navigate("editpreset/0")
                             }) {
                                 Text(text = "Save Area")
                             }
