@@ -31,7 +31,8 @@ import de.flyndre.flat.database.AppDatabase
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PresetScreen(
-    modifier: Modifier = Modifier, navController: NavController, topBarText: String, onNavigateToCreateGroupScreen: () -> Unit, presetScreenViewModel: PresetScreenViewModel){
+    modifier: Modifier = Modifier,
+    presetId: Long?, db: AppDatabase, navController: NavController, topBarText: String, onNavigateToCreateGroupScreen: () -> Unit, presetScreenViewModel: PresetScreenViewModel = PresetScreenViewModel(presetId = presetId, db = db)){
     val presetName by presetScreenViewModel.presetName.collectAsState()
     val presetDescription by presetScreenViewModel.presetDescription.collectAsState()
 
@@ -63,8 +64,7 @@ fun PresetScreen(
             TextField(modifier = modifier, value = presetName, onValueChange = {presetScreenViewModel.updatePresetName(it)}, label = {Text(text = "Preset Name")})
             TextField(modifier = modifier, value = presetDescription, onValueChange = {presetScreenViewModel.updatePresetDescription(it)}, label = {Text(text = "Preset Description")})
             Card (modifier = modifier){
-                GoogleMap(onMapClick = {
-                    navController.navigate("collectionarea/" + presetScreenViewModel.getPresetId()) },
+                GoogleMap(onMapClick = { navController.navigate("collectionarea/" + presetScreenViewModel.getPresetId()) },
                     uiSettings = MapUiSettings(zoomControlsEnabled = false, zoomGesturesEnabled = false, scrollGesturesEnabled = false, rotationGesturesEnabled = false, tiltGesturesEnabled = false))
             }
         }

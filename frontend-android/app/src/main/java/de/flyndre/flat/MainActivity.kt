@@ -21,13 +21,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.room.Room
 import de.flyndre.flat.composables.collectionareascreen.CollectionAreaScreen
-import de.flyndre.flat.composables.collectionareascreen.CollectionAreaScreenViewModel
 import de.flyndre.flat.composables.creategroupscreen.CreateGroupScreen
-import de.flyndre.flat.composables.creategroupscreen.CreateGroupScreenViewModel
 import de.flyndre.flat.composables.initialscreen.InitialScreen
 import de.flyndre.flat.composables.joinscreen.JoinScreen
 import de.flyndre.flat.composables.presetscreen.PresetScreen
-import de.flyndre.flat.composables.presetscreen.PresetScreenViewModel
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.ui.theme.FlatTheme
 
@@ -78,28 +75,15 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppEntryPoint(modifier: Modifier, db: AppDatabase){
-    val createGroupScreenViewModel = CreateGroupScreenViewModel(db = db)
-    val presetScreenViewModel = PresetScreenViewModel(db = db)
-    val collectionAreaScreenViewModel = CollectionAreaScreenViewModel(db = db)
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "initial") {
         composable("initial"){ InitialScreen(modifier = modifier, onNavigateToJoinScreen = {navController.navigate("join")}, onNavigateToCreateGroupScreen = {navController.navigate("creategroup")}, onLukasBUHtton = {})}
         composable("join"){JoinScreen(modifier = modifier, onNavigateToInitialScreen = {navController.navigate("initial")})}
-        composable("creategroup"){CreateGroupScreen(modifier = modifier, onNavigateToInitialScreen = {navController.navigate("initial")}, onNavigateToNewPresetScreen = {navController.navigate("newpreset")}, navController = navController, createGroupScreenViewModel = CreateGroupScreenViewModel(db = db))}
-        composable("newpreset"){
-            presetScreenViewModel.setPresetId(0)
-            PresetScreen(navController = navController, topBarText = "New Preset", onNavigateToCreateGroupScreen = {navController.navigate("creategroup")}, presetScreenViewModel = presetScreenViewModel)
-        }
-        composable("editpreset/{presetId}", arguments = listOf(navArgument("presetId"){ type = NavType.LongType})){
-            backStackEntry ->
-            val presetId = backStackEntry.arguments!!.getLong("presetId")
-            presetScreenViewModel.setPresetId(presetId = presetId)
-            PresetScreen(navController = navController, topBarText = "Edit Preset", onNavigateToCreateGroupScreen = { navController.navigate("creategroup") }, presetScreenViewModel = presetScreenViewModel)
-        }
-        composable("collectionarea/{presetId}", arguments = listOf(navArgument("presetId"){type = NavType.LongType})){
-            backStackEntry ->
-            val presetId = backStackEntry.arguments!!.getLong("presetId")
-            collectionAreaScreenViewModel.setPresetId(presetId = presetId)
-            CollectionAreaScreen(presetId = presetId, navController = navController, collectionAreaScreenViewModel = collectionAreaScreenViewModel)}
+        composable("creategroup"){CreateGroupScreen(modifier = modifier, db = db,  onNavigateToInitialScreen = {navController.navigate("initial")}, onNavigateToNewPresetScreen = {navController.navigate("newpreset")}, navController = navController)}
+        composable("newpreset"){ PresetScreen(presetId = null, db = db, navController = navController, topBarText = "New Preset", onNavigateToCreateGroupScreen = {navController.navigate("creategroup")})}
+        composable("editpreset/{presetId}", arguments = listOf(navArgument("presetId"){type = NavType.LongType})){ backStackEntry -> val presetId = backStackEntry.arguments?.getLong("presetId")
+            PresetScreen(presetId = presetId, db = db, navController = navController, topBarText = "Edit Preset", onNavigateToCreateGroupScreen = { navController.navigate("creategroup") }) }
+        composable("collectionarea/{presetId}", arguments = listOf(navArgument("presetId"){type = NavType.LongType})){ backStackEntry -> val presetId = backStackEntry.arguments!!.getLong("presetId")
+            CollectionAreaScreen(presetId = presetId, db = db, navController = navController)}
     }
 }

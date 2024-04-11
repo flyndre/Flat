@@ -40,7 +40,7 @@ import io.github.dellisd.spatialk.geojson.dsl.point
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CollectionAreaScreen(modifier: Modifier = Modifier, presetId: Long, navController: NavController, collectionAreaScreenViewModel: CollectionAreaScreenViewModel){
+fun CollectionAreaScreen(modifier: Modifier = Modifier, presetId: Long, db: AppDatabase, navController: NavController, collectionAreaScreenViewModel: CollectionAreaScreenViewModel = CollectionAreaScreenViewModel(presetId, db)){
     var movingEnabled by remember { mutableStateOf(true) }
     val listAreaPoints by collectionAreaScreenViewModel.listAreaPoints.collectAsState()
     Scaffold(
