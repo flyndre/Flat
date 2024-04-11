@@ -7,7 +7,11 @@ import ProgressSpinner from 'primevue/progressspinner';
     <Suspense>
         <CustomMap />
         <template #fallback>
-            <ProgressSpinner />
+            <div
+                class="w-full h-full flex flex-col justify-center items-center"
+            >
+                <ProgressSpinner />
+            </div>
         </template>
     </Suspense>
 </template>

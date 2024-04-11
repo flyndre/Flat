@@ -12,7 +12,7 @@ To install the Dependencies, run:
 pnpm install
 ```
 
-> **NOTE**\
+> [!NOTE]
 > To install pnpm, run:
 >
 > ```
@@ -28,6 +28,13 @@ To run the PWA Frontend in dev mode run:
 ```
 pnpm dev
 ```
+
+> [!NOTE]
+> To properly use the Google Maps API, create the file `/frontend-pwa/.env.local` with the following contents:
+>
+> ```
+> VITE_GOOGLE_MAPS_API_KEY=<api key>
+> ```
 
 ## Build
 
