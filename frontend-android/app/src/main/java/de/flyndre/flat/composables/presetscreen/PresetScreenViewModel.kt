@@ -14,10 +14,7 @@ class PresetScreenViewModel(presetId: Long?, db: AppDatabase) :ViewModel() {
     //appdatabase
     private var _db: AppDatabase
     //preset id
-    private var _presetId: Long = 0
-    fun getPresetId(): Long{
-        return _presetId
-    }
+    private var _presetId: Long? = null
     //preset name
     private val _presetName = MutableStateFlow("")
     val presetName: StateFlow<String> = _presetName.asStateFlow()
@@ -51,20 +48,31 @@ class PresetScreenViewModel(presetId: Long?, db: AppDatabase) :ViewModel() {
         }
     }
 
+    //function for saving preset temporary for editing the map setting in collectionareascreen
+    //returns the id of the preset
+    fun savePresetTemporaryToDatabase(): Long{
+        if(_presetId != null){
+            viewModelScope.launch{
+                _db.presetDao().updatePreset(Preset(_presetId!!, _presetName.value, _presetDescription.value, _presetAreaPoints.value))
+            }
+        }else{
+            viewModelScope.launch {
+                _presetId = _db.presetDao().insertPreset(Preset(0, _presetName.value, _presetDescription.value, arrayListOf()))
+            }
+        }
+        return _presetId!!
+    }
+
     init{
         _db = db
         //check whether id is not null and fetch the preset from database
         if(presetId != null){
             _presetId = presetId
             viewModelScope.launch {
-                val preset = _db.presetDao().getPresetById(presetId = presetId)
+                val preset = db.presetDao().getPresetById(presetId = presetId)
                 _presetName.value = preset.presetName
                 _presetDescription.value = preset.presetDescription
                 _presetAreaPoints.value = preset.presetAreaPoints
-            }
-        }else{
-            viewModelScope.launch {
-                _presetId = _db.presetDao().insertPreset(Preset(_presetId, _presetName.value, _presetDescription.value, _presetAreaPoints.value))
             }
         }
     }

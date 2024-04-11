@@ -35,7 +35,6 @@ fun PresetScreen(
     presetId: Long?, db: AppDatabase, navController: NavController, topBarText: String, onNavigateToCreateGroupScreen: () -> Unit, presetScreenViewModel: PresetScreenViewModel = PresetScreenViewModel(presetId = presetId, db = db)){
     val presetName by presetScreenViewModel.presetName.collectAsState()
     val presetDescription by presetScreenViewModel.presetDescription.collectAsState()
-
     Scaffold(topBar = {
         CenterAlignedTopAppBar(title = { Text(text = topBarText) }, navigationIcon = { IconButton(
             onClick = { onNavigateToCreateGroupScreen() }) {
@@ -64,7 +63,9 @@ fun PresetScreen(
             TextField(modifier = modifier, value = presetName, onValueChange = {presetScreenViewModel.updatePresetName(it)}, label = {Text(text = "Preset Name")})
             TextField(modifier = modifier, value = presetDescription, onValueChange = {presetScreenViewModel.updatePresetDescription(it)}, label = {Text(text = "Preset Description")})
             Card (modifier = modifier){
-                GoogleMap(onMapClick = { navController.navigate("collectionarea/" + presetScreenViewModel.getPresetId()) },
+                GoogleMap(onMapClick = {
+                    val id = presetScreenViewModel.savePresetTemporaryToDatabase()
+                    navController.navigate("collectionarea/$id") },
                     uiSettings = MapUiSettings(zoomControlsEnabled = false, zoomGesturesEnabled = false, scrollGesturesEnabled = false, rotationGesturesEnabled = false, tiltGesturesEnabled = false))
             }
         }
