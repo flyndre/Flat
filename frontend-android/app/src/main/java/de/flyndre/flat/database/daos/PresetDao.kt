@@ -17,4 +17,6 @@ interface PresetDao {
     suspend fun updatePreset(preset: Preset)
     @Insert
     suspend fun insertPreset(preset: Preset): Long
+    @Query("Delete From preset Where id = :presetId ")
+    suspend fun deletePresetById(presetId: Long)
 }
