@@ -1,43 +1,10 @@
 <script setup lang="ts">
-import MdiIcon from '@/components/icons/MdiIcon.vue';
 import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import ThemeSwitch from '@/components/settings/ThemeSwitch.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
-import { isOnMobile } from '@/util/mobileDetection';
-import {
-    mdiArrowLeft,
-    mdiBrightness2,
-    mdiCellphone,
-    mdiLaptop,
-    mdiWhiteBalanceSunny,
-} from '@mdi/js';
-import { ColorSchemeType } from '@vueuse/core';
+import { mdiArrowLeft } from '@mdi/js';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
-import SelectButton from 'primevue/selectbutton';
-import { ref } from 'vue';
-
-const selectedTheme = ref('no-preference');
-const themeOptions: {
-    label: string;
-    value: ColorSchemeType;
-    icon: string;
-}[] = [
-    {
-        label: 'Light',
-        value: 'light',
-        icon: mdiWhiteBalanceSunny,
-    },
-    {
-        label: 'Device',
-        value: 'no-preference',
-        icon: isOnMobile ? mdiCellphone : mdiLaptop,
-    },
-    {
-        label: 'Dark',
-        value: 'dark',
-        icon: mdiBrightness2,
-    },
-];
 </script>
 
 <template>
@@ -55,27 +22,11 @@ const themeOptions: {
         <template #default>
             <Card class="mb-2.5">
                 <template #content>
-                    <SelectButton
-                        class="flex w-full flex-row"
-                        v-model="selectedTheme"
-                        :options="themeOptions"
-                        :option-value="(o) => o.value"
-                        :allow-empty="false"
-                        :pt="{ button: { class: 'w-full' } }"
+                    <div
+                        class="flex flex-col justify-start items-stretch gap-2"
                     >
-                        <template #option="slotProps">
-                            <div
-                                class="flex flex-row justify-center items-center flex-nowrap w-full gap-3"
-                            >
-                                <MdiIcon :icon="slotProps.option.icon" />
-                                <span
-                                    class="text-ellipsis overflow-hidden z-10"
-                                >
-                                    {{ slotProps.option.label }}
-                                </span>
-                            </div>
-                        </template>
-                    </SelectButton>
+                        <ThemeSwitch />
+                    </div>
                 </template>
             </Card>
 
