@@ -99,7 +99,7 @@ function cancel() {
             <Card :pt="{ root: { class: 'overflow-hidden' } }">
                 <template #header>
                     <div
-                        class="w-full flex-grow bg-gray-950 h-96 flex flex-col items-center justify-center text-gray-500"
+                        class="w-full flex-grow bg-gray-500 bg-opacity-50 h-96 flex flex-col items-center justify-center text-gray-500 select-none"
                     >
                         Camera Placeholder
                     </div>

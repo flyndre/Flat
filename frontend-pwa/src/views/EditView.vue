@@ -129,7 +129,7 @@ const start = () => _saveCollection({ name: 'presets' });
                             />
                         </IconField>
                         <div
-                            class="w-full h-48 bg-gray-300 flex flex-col items-center justify-center text-gray-500 rounded-md"
+                            class="w-full h-48 bg-gray-500 bg-opacity-50 flex flex-col items-center justify-center text-gray-500 rounded-md select-none"
                         >
                             Map Placeholder
                         </div>
