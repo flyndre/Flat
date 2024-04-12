@@ -17,20 +17,38 @@ import {
     mdiStop,
 } from '@mdi/js';
 import { MenuItem } from 'primevue/menuitem';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { isOnMobile } from '@/util/mobileDetection';
 import Dialog from 'primevue/dialog';
 import Textarea from 'primevue/textarea';
+import { useGeolocation } from '@vueuse/core';
+import { watch } from 'vue';
 
-const admin = ref(true);
-const trackingState = ref(false);
+const adminView = ref(true);
+
+const { coords, error, pause, resume } = useGeolocation({
+    enableHighAccuracy: true,
+});
+const trackingActive = ref(false);
+watch(trackingActive, (trackingOn) => {
+    if (trackingOn) {
+        resume();
+    } else {
+        pause();
+    }
+});
 const trackingLoading = ref(false);
+const locationError = computed(
+    () =>
+        error.value !== undefined &&
+        error.value?.code === GeolocationPositionError.PERMISSION_DENIED
+);
 
 function toggleTrackingState() {
     trackingLoading.value = true;
     setTimeout(() => {
         trackingLoading.value = false;
-        trackingState.value = !trackingState.value;
+        trackingActive.value = !trackingActive.value;
     }, 1000);
 }
 
@@ -62,7 +80,7 @@ function shareInvitationLink() {}
     <DefaultLayout>
         <template #action-left>
             <SplitButton
-                v-if="admin"
+                v-if="adminView"
                 :model="adminActions"
                 :label="isOnMobile ? '' : 'Add Participants'"
                 severity="secondary"
@@ -95,7 +113,7 @@ function shareInvitationLink() {}
             </Button>
         </template>
         <template #title>
-            <template v-if="trackingState">
+            <template v-if="trackingActive">
                 <TextButtonIcon
                     class="text-red-500 animate-ping"
                     :icon="mdiCircle"
@@ -109,18 +127,51 @@ function shareInvitationLink() {}
         </template>
         <template #action-right>
             <Button
-                :label="trackingState ? 'Pause Tracking' : 'Start Tracking'"
+                :label="trackingActive ? 'Pause Tracking' : 'Start Tracking'"
                 :loading="trackingLoading"
+                :disabled="locationError"
                 @click="toggleTrackingState"
             >
                 <template #icon>
                     <TextButtonIcon
-                        :icon="trackingState ? mdiPause : mdiPlay"
+                        :icon="trackingActive ? mdiPause : mdiPlay"
                     />
                 </template>
             </Button>
         </template>
         <template #default>
+            <!-- Geolocation Permission Dialog -->
+            <Dialog
+                :position="isOnMobile ? 'bottom' : 'top'"
+                :visible="locationError"
+                header="Location Permission Required"
+                :draggable="false"
+                :closable="false"
+                modal
+            >
+                <template #default>
+                    To use this app, it is required that you grant the location
+                    permission.
+                    {{ locationError }}
+                </template>
+                <template #footer>
+                    <div class="w-full flex flex-row justify-center gap-2">
+                        <Button
+                            label="Leave Collection"
+                            severity="secondary"
+                            text
+                        >
+                            <template #icon>
+                                <TextButtonIcon
+                                    class="rotate-180 mr-3"
+                                    :icon="mdiExport"
+                                />
+                            </template>
+                        </Button>
+                    </div>
+                </template>
+            </Dialog>
+
             <!-- Invitation Dialog -->
             <Dialog
                 :position="isOnMobile ? 'bottom' : 'top'"
@@ -261,10 +312,17 @@ function shareInvitationLink() {}
             </Dialog>
 
             <div
-                class="w-full h-full bg-gray-200 flex flex-col items-center justify-center text-gray-500 rounded-md"
+                class="w-full h-full bg-gray-200 flex flex-col items-center justify-center text-gray-500 rounded-md gap-2"
                 :class="{ 'mb-2': !isOnMobile }"
             >
                 Map Placeholder
+                <div
+                    class="flex flex-col border border-solid rounded-md py-1 px-2"
+                    :class="{ 'opacity-30': !trackingActive }"
+                >
+                    <span>Lat: {{ coords?.latitude }}</span>
+                    <span>Lon: {{ coords?.longitude }}</span>
+                </div>
             </div>
         </template>
     </DefaultLayout>

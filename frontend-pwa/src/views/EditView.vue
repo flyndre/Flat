@@ -5,14 +5,20 @@ import { clientId } from '@/data/clientMetadata';
 import { collectionService } from '@/data/collections';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { Collection } from '@/types/collection';
+import { safeMapCenterFromGeolocationCoords } from '@/util/googleMapsUtils';
 import validateCollection from '@/validation/validateCollection';
 import { mdiArrowLeft, mdiCheck, mdiMapMarkerPath, mdiPlay } from '@mdi/js';
+import { useGeolocation } from '@vueuse/core';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import IconField from 'primevue/iconfield';
 import InputText from 'primevue/inputtext';
 import { computed, onMounted, ref } from 'vue';
 import { RouteLocationRaw, useRouter } from 'vue-router';
+import { GoogleMap } from 'vue3-google-map';
+
+const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+const mapCenter = safeMapCenterFromGeolocationCoords(useGeolocation().coords);
 
 const props = withDefaults(
     defineProps<{
@@ -117,7 +123,16 @@ const start = () => _saveCollection({ name: 'presets' });
             </div>
         </template>
         <template #default>
-            <Card>
+            <Card :pt="{ root: { class: 'overflow-hidden' } }">
+                <template #header>
+                    <GoogleMap
+                        class="w-full h-[30vh] pointer-events-none"
+                        :api-key
+                        :zoom="15"
+                        :center="mapCenter"
+                        :disable-default-ui="true"
+                    />
+                </template>
                 <template #content>
                     <div class="flex flex-col gap-2.5">
                         <IconField iconPosition="left">
@@ -128,11 +143,6 @@ const start = () => _saveCollection({ name: 'presets' });
                                 v-model="collection.name"
                             />
                         </IconField>
-                        <div
-                            class="w-full h-48 bg-gray-300 flex flex-col items-center justify-center text-gray-500 rounded-md"
-                        >
-                            Map Placeholder
-                        </div>
                     </div>
                 </template>
             </Card>

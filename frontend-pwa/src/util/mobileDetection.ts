@@ -1,4 +1,3 @@
-import { computedWithControl } from '@vueuse/core';
 import { computed } from 'vue';
 
 /**
@@ -17,10 +16,6 @@ function onMobile(a: string) {
     );
 }
 
-const _onMobile = computedWithControl([], () =>
+export const isOnMobile = computed(() =>
     onMobile(navigator.userAgent || navigator.vendor)
 );
-window.addEventListener('resize', _onMobile.trigger);
-window.addEventListener('orientationchange', _onMobile.trigger);
-
-export const isOnMobile = computed(() => _onMobile.value);

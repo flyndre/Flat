@@ -1,13 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
 import { parseIntElse as stringParamToInt } from '@/util/parseInt';
-import AboutView from '@/views/AboutView.vue';
 import EditView from '@/views/EditView.vue';
 import HomeView from '@/views/HomeView.vue';
 import JoinView from '@/views/JoinView.vue';
 import MapView from '@/views/MapView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
 import PresetsView from '@/views/PresetsView.vue';
+import SettingsView from '@/views/SettingsView.vue';
 import TrackingView from '@/views/TrackingView.vue';
 
 const router = createRouter({
@@ -19,9 +19,9 @@ const router = createRouter({
             component: HomeView,
         },
         {
-            path: '/about',
-            name: 'about',
-            component: AboutView,
+            path: '/settings',
+            name: 'settings',
+            component: SettingsView,
         },
         {
             path: '/join',
