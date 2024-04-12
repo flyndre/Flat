@@ -4,15 +4,7 @@ import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
 import { mdiCog, mdiImport, mdiMapMarkerPath } from '@mdi/js';
-import {
-    asyncComputed,
-    refThrottled,
-    useDebounce,
-    useGeolocation,
-    useIntervalFn,
-    useThrottle,
-    watchThrottled,
-} from '@vueuse/core';
+import { useGeolocation, useThrottle } from '@vueuse/core';
 import Button from 'primevue/button';
 import { GoogleMap } from 'vue3-google-map';
 import brandingSrc from '@/assets/images/branding.webp?url';
