@@ -1,10 +1,21 @@
 <script setup lang="ts">
-import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
+import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
-import { mdiImport, mdiInformationOutline, mdiMapMarkerPath } from '@mdi/js';
+import { safeMapCenterFromGeolocationCoords } from '@/util/googleMapsUtils';
+import {
+    mdiCrosshairsGps,
+    mdiImport,
+    mdiInformationOutline,
+    mdiMapMarkerPath,
+} from '@mdi/js';
+import { useGeolocation } from '@vueuse/core';
 import Button from 'primevue/button';
-import mapPlaceholderSrc from '@/assets/images/map-placeholder.jpg?url';
+import { GoogleMap } from 'vue3-google-map';
+import brandingSrc from '@/assets/images/branding.webp?url';
+
+const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+const mapCenter = safeMapCenterFromGeolocationCoords(useGeolocation().coords);
 </script>
 
 <template>
@@ -35,7 +46,20 @@ import mapPlaceholderSrc from '@/assets/images/map-placeholder.jpg?url';
             </router-link>
         </template>
         <template #background>
-            <img class="w-full h-full object-cover" :src="mapPlaceholderSrc" />
+            <GoogleMap
+                class="w-full h-full scale-105 blur-sm"
+                :api-key
+                :zoom="15"
+                :center="mapCenter"
+                :disable-default-ui="true"
+            />
+        </template>
+        <template #default>
+            <div
+                class="h-full w-full flex flex-col justify-center items-center"
+            >
+                <img class="object-contain w-full" :src="brandingSrc" />
+            </div>
         </template>
     </DefaultLayout>
 </template>
