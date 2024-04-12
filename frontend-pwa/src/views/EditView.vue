@@ -5,15 +5,20 @@ import { clientId } from '@/data/clientMetadata';
 import { collectionService } from '@/data/collections';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { Collection } from '@/types/collection';
+import { safeMapCenterFromGeolocationCoords } from '@/util/googleMapsUtils';
 import validateCollection from '@/validation/validateCollection';
 import { mdiArrowLeft, mdiCheck, mdiMapMarkerPath, mdiPlay } from '@mdi/js';
+import { useGeolocation } from '@vueuse/core';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import IconField from 'primevue/iconfield';
 import InputText from 'primevue/inputtext';
 import { computed, onMounted, ref } from 'vue';
 import { RouteLocationRaw, useRouter } from 'vue-router';
-import mapPlaceholderSrc from '@/assets/images/map-placeholder.jpg?url';
+import { GoogleMap } from 'vue3-google-map';
+
+const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+const mapCenter = safeMapCenterFromGeolocationCoords(useGeolocation().coords);
 
 const props = withDefaults(
     defineProps<{
@@ -120,9 +125,12 @@ const start = () => _saveCollection({ name: 'presets' });
         <template #default>
             <Card :pt="{ root: { class: 'overflow-hidden' } }">
                 <template #header>
-                    <img
-                        class="w-full h-full object-cover"
-                        :src="mapPlaceholderSrc"
+                    <GoogleMap
+                        class="w-full h-[30vh] pointer-events-none"
+                        :api-key
+                        :zoom="15"
+                        :center="mapCenter"
+                        :disable-default-ui="true"
                     />
                 </template>
                 <template #content>
