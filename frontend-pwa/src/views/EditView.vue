@@ -13,6 +13,7 @@ import IconField from 'primevue/iconfield';
 import InputText from 'primevue/inputtext';
 import { computed, onMounted, ref } from 'vue';
 import { RouteLocationRaw, useRouter } from 'vue-router';
+import mapPlaceholderSrc from '@/assets/images/map-placeholder.jpg?url';
 
 const props = withDefaults(
     defineProps<{
@@ -117,7 +118,13 @@ const start = () => _saveCollection({ name: 'presets' });
             </div>
         </template>
         <template #default>
-            <Card>
+            <Card :pt="{ root: { class: 'overflow-hidden' } }">
+                <template #header>
+                    <img
+                        class="w-full h-full object-cover"
+                        :src="mapPlaceholderSrc"
+                    />
+                </template>
                 <template #content>
                     <div class="flex flex-col gap-2.5">
                         <IconField iconPosition="left">
@@ -128,11 +135,6 @@ const start = () => _saveCollection({ name: 'presets' });
                                 v-model="collection.name"
                             />
                         </IconField>
-                        <div
-                            class="w-full h-48 bg-gray-500 bg-opacity-50 flex flex-col items-center justify-center text-gray-500 rounded-md select-none"
-                        >
-                            Map Placeholder
-                        </div>
                     </div>
                 </template>
             </Card>
