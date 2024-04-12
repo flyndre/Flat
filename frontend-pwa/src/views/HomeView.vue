@@ -51,6 +51,7 @@ const mapCenter = safeMapCenterFromGeolocationCoords(useGeolocation().coords);
                 :api-key
                 :zoom="15"
                 :center="mapCenter"
+                :map-type-id="'satellite'"
                 :disable-default-ui="true"
             />
         </template>
