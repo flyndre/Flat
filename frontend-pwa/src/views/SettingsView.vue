@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
-import HomeLocationSetting from '@/components/settings/HomeLocationSetting.vue';
 import ThemeSetting from '@/components/settings/ThemeSetting.vue';
+import HomeLocationSetting from '@/components/settings/HomeLocationSetting.vue';
+import HandednessSetting from '@/components/settings/HandednessSetting.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { mdiArrowLeft } from '@mdi/js';
 import Button from 'primevue/button';
@@ -15,6 +16,10 @@ const settings = [
     {
         label: 'Home Screen Location',
         component: HomeLocationSetting,
+    },
+    {
+        label: 'Handedness',
+        component: HandednessSetting,
     },
 ];
 </script>

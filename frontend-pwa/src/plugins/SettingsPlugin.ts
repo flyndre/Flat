@@ -11,6 +11,7 @@ type Settings = {
     homeLive: boolean;
     homeLatitude: number;
     homeLongitude: number;
+    handedness: 'left' | 'right';
 };
 
 const defaultSettings: Settings = {
@@ -18,6 +19,7 @@ const defaultSettings: Settings = {
     homeLive: true,
     homeLatitude: 8.297651,
     homeLongitude: -79.12684,
+    handedness: 'right',
 };
 
 const settings = ref<Settings>(defaultSettings);
