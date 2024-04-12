@@ -13,6 +13,7 @@ import { useGeolocation } from '@vueuse/core';
 import Button from 'primevue/button';
 import { GoogleMap } from 'vue3-google-map';
 import brandingSrc from '@/assets/images/branding.webp?url';
+import { isOnMobile } from '@/util/mobileDetection';
 
 const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 const mapCenter = safeMapCenterFromGeolocationCoords(useGeolocation().coords);
@@ -47,7 +48,7 @@ const mapCenter = safeMapCenterFromGeolocationCoords(useGeolocation().coords);
         </template>
         <template #background>
             <GoogleMap
-                class="w-full h-full scale-105 blur-sm"
+                class="w-full h-full scale-110 blur-sm bg-yellow-50"
                 :api-key
                 :zoom="15"
                 :center="mapCenter"
@@ -58,6 +59,7 @@ const mapCenter = safeMapCenterFromGeolocationCoords(useGeolocation().coords);
         <template #default>
             <div
                 class="h-full w-full flex flex-col justify-center items-center"
+                :class="{ 'pb-[10vh]': !isOnMobile }"
             >
                 <img class="object-contain w-full" :src="brandingSrc" />
             </div>
