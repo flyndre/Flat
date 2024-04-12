@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { useSettings } from '@/plugins/SettingsPlugin';
 import { isOnMobile } from '@/util/mobileDetection';
+
+const { settings } = useSettings();
 </script>
 
 <template>
@@ -43,14 +46,33 @@ import { isOnMobile } from '@/util/mobileDetection';
                 isOnMobile &&
                 ($slots?.['action-right'] || $slots?.['action-left'])
             "
-            class="sticky left-0 right-0 bottom-0 p-2.5 flex flex-row justify-between items-center gap-2"
+            class="sticky left-0 right-0 bottom-0 p-2.5 flex justify-between items-center gap-2"
+            :class="
+                settings.handedness === 'right'
+                    ? 'flex-row'
+                    : 'flex-row-reverse'
+            "
         >
-            <div class="flex-grow flex flex-row gap-2 justify-start">
+            <div
+                class="flex-grow flex flex-row gap-2"
+                :class="
+                    settings.handedness === 'right'
+                        ? 'justify-start'
+                        : 'justify-end'
+                "
+            >
                 <slot name="action-left">
                     <div></div>
                 </slot>
             </div>
-            <div class="flex-grow flex flex-row-reverse gap-2 justify-start">
+            <div
+                class="flex-grow flex gap-2 justify-start"
+                :class="
+                    settings.handedness === 'right'
+                        ? 'flex-row-reverse'
+                        : 'flex-row'
+                "
+            >
                 <slot name="action-right">
                     <div></div>
                 </slot>

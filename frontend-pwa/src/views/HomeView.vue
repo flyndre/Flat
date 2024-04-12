@@ -75,10 +75,14 @@ const mapZoomReal = useThrottle(mapZoomSlider, 25);
                 <!-- ⭕ -->
                 <img class="object-contain w-full" :src="brandingSrc" />
                 <Slider
-                    :orientation="isOnMobile ? 'vertical' : 'horizontal'"
                     class="cursor-pointer"
-                    :class="isOnMobile ? 'fixed right-8 h-[60vh]' : 'w-1/2'"
+                    :class="[
+                        !isOnMobile
+                            ? 'w-1/2'
+                            : `fixed h-1/2 ${settings.handedness}-8`,
+                    ]"
                     v-model="mapZoomSlider"
+                    :orientation="isOnMobile ? 'vertical' : 'horizontal'"
                     :step="0.01"
                     :min="4"
                     :max="20"
