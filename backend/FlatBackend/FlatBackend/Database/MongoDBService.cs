@@ -24,19 +24,19 @@ namespace FlatBackend.Database
 
         public void ChangeCollection( CollectionModel col )
         {
-            collection.FindOneAndReplace(replacement => replacement.Id == col.Id, col);
+            collection.FindOneAndReplace(replacement => replacement.id == col.id, col);
             return;
         }
 
         public void RemoveCollection( Guid id )
         {
-            collection.DeleteOne(r => r.Id == id);
+            collection.DeleteOne(r => r.id == id);
             return;
         }
 
         public async Task<CollectionModel> GetCollection( Guid id )
         {
-            return await collection.Find(r => r.Id == id).FirstAsync();
+            return await collection.Find(r => r.id == id).FirstAsync();
         }
     }
 }

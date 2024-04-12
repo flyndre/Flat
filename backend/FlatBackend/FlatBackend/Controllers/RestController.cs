@@ -25,7 +25,7 @@ namespace FlatBackend.Controllers
             try
             {
                 var Collection = await mongoDBService.GetCollection(id);
-                List<UserModel> users = Collection.RequestedAccess;
+                List<UserModel> users = Collection.requestedAccess;
                 var Json = JsonSerializer.Serialize(users);
                 return Ok(users);
             }
@@ -36,14 +36,34 @@ namespace FlatBackend.Controllers
         }
 
         [HttpPost("AccessRequest/{id}")]
+        public async Task<ObjectResult> PostAccessRequestCollection( Guid id, [FromBody] UserModel value )
+        {
+            try
+            {
+                var oldCol = await mongoDBService.GetCollection(id);
+                if (oldCol.requestedAccess == null)
+                { oldCol.requestedAccess = new List<UserModel>(); }
+
+                oldCol.requestedAccess.Add(value);
+                mongoDBService.ChangeCollection(oldCol);
+                return Ok(new object { });
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.ToString());
+            }
+            //call add User to Accessrequestlist
+        }
+
+        [HttpPost("AccessConfirmation/{id}")]
         public async Task<ObjectResult> PostAccessConfirmationCollection( Guid id, [FromBody] UserModel value )
         {
             try
             {
                 var oldCol = await mongoDBService.GetCollection(id);
-                UserModel? user = oldCol.RequestedAccess.Find(e => e.Id == value.Id);
-                oldCol.RequestedAccess.Remove(user);
-                oldCol.ConfirmedUsers.Add(user);
+                UserModel? user = oldCol.requestedAccess.Find(e => e.clientId == value.clientId);
+                oldCol.requestedAccess.Remove(user);
+                oldCol.confirmedUsers.Add(user);
                 mongoDBService.ChangeCollection(oldCol);
                 return Ok(new object { });
             }
@@ -60,8 +80,20 @@ namespace FlatBackend.Controllers
         {
             try
             {
+                if (value.collectionArea == null)
+                {
+                    value.collectionArea = new List<AreaModel>();
+                }
+                if (value.confirmedUsers == null)
+                {
+                    value.confirmedUsers = new List<UserModel>();
+                }
+                if (value.requestedAccess == null)
+                {
+                    value.requestedAccess = new List<UserModel>();
+                }
                 mongoDBService.AddCollection(value);
-                var result = await mongoDBService.GetCollection(value.Id);
+                var result = await mongoDBService.GetCollection(value.id);
                 var Json = JsonSerializer.Serialize(result);
                 return Json;
             }
@@ -69,26 +101,6 @@ namespace FlatBackend.Controllers
             {
                 return ex.ToString();
             }
-        }
-
-        [HttpPost("Collection/{id}")]
-        public async Task<ObjectResult> PostAccessRequestCollection( Guid id, [FromBody] UserModel value )
-        {
-            try
-            {
-                var oldCol = await mongoDBService.GetCollection(id);
-                if (oldCol.RequestedAccess == null)
-                { oldCol.RequestedAccess = new List<UserModel>(); }
-
-                oldCol.RequestedAccess.Add(value);
-                mongoDBService.ChangeCollection(oldCol);
-                return Ok(new object { });
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.ToString());
-            }
-            //call add User to Accessrequestlist
         }
 
         // PUT api/<ValuesController>/Collection/5 ChangeAreaDivision
@@ -100,7 +112,7 @@ namespace FlatBackend.Controllers
                 var oldCol = await mongoDBService.GetCollection(id);
                 foreach (var area in value)
                 {
-                    oldCol.CollectionArea.Add(area);
+                    oldCol.collectionArea.Add(area);
                 }
                 mongoDBService.ChangeCollection(oldCol);
                 oldCol = await mongoDBService.GetCollection(id);

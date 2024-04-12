@@ -1,4 +1,4 @@
-package de.flyndre.flat.composables.collectionareascreen
+package de.flyndre.flat.composables.presetscreen.collectionareascreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,14 +10,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class CollectionAreaScreenViewModel(presetId: Long, db: AppDatabase): ViewModel() {
-    //appdatabase
-    private var _db: AppDatabase
-    //preset id
-    private var _presetId: Long
+class CollectionAreaScreenViewModel(): ViewModel() {
     //list of points for selection area
     private val _listAreaPoints: MutableStateFlow<ArrayList<LatLng>> = MutableStateFlow(arrayListOf())
     val listAreaPoints: StateFlow<List<LatLng>> = _listAreaPoints.asStateFlow()
+
+    fun setListAreaPoints(list: ArrayList<LatLng>){
+        _listAreaPoints.value = list
+    }
+
+    fun getListAreaPoints(): ArrayList<LatLng>{
+        return _listAreaPoints.value
+    }
 
     fun addPCollectionAreaPoint(point: LatLng){
         val newList = arrayListOf<LatLng>()
@@ -37,21 +41,5 @@ class CollectionAreaScreenViewModel(presetId: Long, db: AppDatabase): ViewModel(
 
     fun clearCollectionArea(){
         _listAreaPoints.value = arrayListOf<LatLng>()
-    }
-
-    fun saveCollectionAreaToPreset(){
-        viewModelScope.launch {
-            var preset = _db.presetDao().getPresetById(presetId = _presetId)
-            preset = Preset(preset.id, preset.presetName, preset.presetDescription, presetAreaPoints = _listAreaPoints.value)
-            _db.presetDao().updatePreset(preset)
-        }
-    }
-
-    init{
-        _db = db
-        _presetId = presetId
-        viewModelScope.launch {
-            _listAreaPoints.value = _db.presetDao().getPresetById(presetId = presetId).presetAreaPoints
-        }
     }
 }

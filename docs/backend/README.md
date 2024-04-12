@@ -11,9 +11,11 @@ The Communication is splitted in two parts. There is the stateless part and the 
 For the stateless communication an REST-API is used. For the stateful Communication we will use websockets.
 ### REST-API
 At the Moment the REST-Endpoint URLS are:
-/api/Rest/AccessRequest/{id}
-/api/Rest/Collection/{id}
-/api/Rest/Collection/
+ - /api/Rest/AccessRequest/{id}
+ - /api/Rest/AccessConfirmation/{id}
+ - /api/Rest/Collection/{id}
+ - /api/Rest/Collection/
+
 To use the Backend properly you need an running docker-container of MongoDB.
 Here the docker-command for Container initiallisation: docker run --name mongodb -p 27017:27017 -d mongodb/mongodb-community-server:latest
 next you have to create the Database for the Backend named: CollectionsDatabase with the Collection collections inside the Mongodb.
