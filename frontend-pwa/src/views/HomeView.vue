@@ -4,7 +4,7 @@ import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { safeMapCenterFromGeolocationCoords } from '@/util/googleMapsUtils';
 import {
-    mdiCrosshairsGps,
+    mdiCog,
     mdiImport,
     mdiInformationOutline,
     mdiMapMarkerPath,
@@ -21,10 +21,10 @@ const mapCenter = safeMapCenterFromGeolocationCoords(useGeolocation().coords);
 <template>
     <DefaultLayout>
         <template #action-left>
-            <router-link :to="{ name: 'about' }">
+            <router-link :to="{ name: 'settings' }">
                 <Button severity="secondary">
                     <template #icon>
-                        <MdiIcon :icon="mdiInformationOutline" />
+                        <MdiIcon :icon="mdiCog" />
                     </template>
                 </Button>
             </router-link>
