@@ -41,7 +41,7 @@ import { isOnMobile } from '@/util/mobileDetection';
                 isOnMobile &&
                 ($slots?.['action-right'] || $slots?.['action-left'])
             "
-            class="flex flex-row-reverse justify-between items-center gap-2 p-2.5"
+            class="fixed left-0 right-0 bottom-0 p-2.5 flex flex-row-reverse justify-between items-center gap-2"
         >
             <slot name="action-right">
                 <div></div>
