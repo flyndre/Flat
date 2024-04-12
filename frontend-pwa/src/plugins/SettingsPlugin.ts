@@ -8,10 +8,16 @@ const SETTINGS_KEY = 'flat/settings/settings';
 
 type Settings = {
     theme: ColorSchemeType;
+    homeLive: boolean;
+    homeLatitude: number;
+    homeLongitude: number;
 };
 
 const defaultSettings: Settings = {
     theme: 'no-preference',
+    homeLive: true,
+    homeLatitude: 8.297651,
+    homeLongitude: -79.12684,
 };
 
 const settings = ref<Settings>(defaultSettings);

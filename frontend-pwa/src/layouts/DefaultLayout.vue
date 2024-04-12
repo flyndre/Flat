@@ -4,7 +4,9 @@ import { isOnMobile } from '@/util/mobileDetection';
 
 <template>
     <div class="h-screen flex flex-col">
-        <div class="fixed top-0 left-0 right-0 bottom-0 -z-50">
+        <div
+            class="fixed top-0 left-0 right-0 bottom-0 -z-50 flex flex-col justify-center items-center overflow-visible"
+        >
             <slot name="background" />
         </div>
         <header v-if="!isOnMobile || $slots.title" class="p-2">

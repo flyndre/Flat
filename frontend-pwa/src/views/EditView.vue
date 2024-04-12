@@ -5,7 +5,7 @@ import { clientId } from '@/data/clientMetadata';
 import { collectionService } from '@/data/collections';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { Collection } from '@/types/collection';
-import { safeMapCenterFromGeolocationCoords } from '@/util/googleMapsUtils';
+import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
 import validateCollection from '@/validation/validateCollection';
 import { mdiArrowLeft, mdiCheck, mdiMapMarkerPath, mdiPlay } from '@mdi/js';
 import { useGeolocation } from '@vueuse/core';
@@ -18,7 +18,7 @@ import { RouteLocationRaw, useRouter } from 'vue-router';
 import { GoogleMap } from 'vue3-google-map';
 
 const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-const mapCenter = safeMapCenterFromGeolocationCoords(useGeolocation().coords);
+const mapCenter = mapCenterWithDefaults(useGeolocation().coords);
 
 const props = withDefaults(
     defineProps<{

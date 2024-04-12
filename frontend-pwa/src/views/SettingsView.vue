@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import HomeLocationInput from '@/components/settings/HomeLocationInput.vue';
 import ThemeSwitch from '@/components/settings/ThemeSwitch.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { mdiArrowLeft } from '@mdi/js';
@@ -21,12 +22,16 @@ import Card from 'primevue/card';
         <template #title> Settings </template>
         <template #default>
             <Card class="mb-2.5">
+                <template #title> Theme </template>
                 <template #content>
-                    <div
-                        class="flex flex-col justify-start items-stretch gap-2"
-                    >
-                        <ThemeSwitch />
-                    </div>
+                    <ThemeSwitch />
+                </template>
+            </Card>
+
+            <Card class="mb-2.5">
+                <template #title> Homscreen Map Location </template>
+                <template #content>
+                    <HomeLocationInput />
                 </template>
             </Card>
 
