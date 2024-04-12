@@ -1,11 +1,22 @@
 <script setup lang="ts">
 import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
-import HomeLocationInput from '@/components/settings/HomeLocationInput.vue';
-import ThemeSwitch from '@/components/settings/ThemeSwitch.vue';
+import HomeLocationSetting from '@/components/settings/HomeLocationSetting.vue';
+import ThemeSetting from '@/components/settings/ThemeSetting.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { mdiArrowLeft } from '@mdi/js';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
+
+const settings = [
+    {
+        label: 'Theme',
+        component: ThemeSetting,
+    },
+    {
+        label: 'Home Screen Location',
+        component: HomeLocationSetting,
+    },
+];
 </script>
 
 <template>
@@ -21,17 +32,10 @@ import Card from 'primevue/card';
         </template>
         <template #title> Settings </template>
         <template #default>
-            <Card class="mb-2.5">
-                <template #title> Theme </template>
+            <Card v-for="setting of settings" class="mb-2.5">
+                <template #title> {{ setting.label }} </template>
                 <template #content>
-                    <ThemeSwitch />
-                </template>
-            </Card>
-
-            <Card class="mb-2.5">
-                <template #title> Homscreen Map Location </template>
-                <template #content>
-                    <HomeLocationInput />
+                    <component :is="setting.component" />
                 </template>
             </Card>
 
