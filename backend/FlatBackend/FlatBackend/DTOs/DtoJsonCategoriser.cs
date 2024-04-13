@@ -74,5 +74,22 @@ namespace FlatBackend.DTOs
                 return false;
             }
         }
+
+        public bool isAreaAssignmentDto( string areaAssignmentDtoJson )
+        {
+            try
+            {
+                AreaAssingmentDto result = JsonSerializer.Deserialize<AreaAssingmentDto>(areaAssignmentDtoJson);
+                if (result == null)
+                {
+                    return false;
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
     }
 }

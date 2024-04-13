@@ -1,4 +1,5 @@
 ﻿using FlatBackend.Controllers;
+using FlatBackend.Websocket;
 
 namespace FlatBackend.Models
 {
