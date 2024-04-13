@@ -79,7 +79,7 @@ const mapZoomReal = useThrottle(mapZoomSlider, 25);
                     :class="[
                         !isOnMobile
                             ? 'w-1/2'
-                            : `fixed h-1/2 ${settings.handedness}-8`,
+                            : `fixed h-1/2 ${settings.handedness === 'right' ? 'right-8' : 'left-8'}`,
                     ]"
                     v-model="mapZoomSlider"
                     :orientation="isOnMobile ? 'vertical' : 'horizontal'"
