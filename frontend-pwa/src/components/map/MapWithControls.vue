@@ -9,6 +9,11 @@ import DrawingToolSelectButton from './DrawingToolSelectButton.vue';
 import ShapeColorSelectButton from './ShapeColorSelectButton.vue';
 import MapTypeSelectButton from './MapTypeSelectButton.vue';
 import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
+import { Overlay } from '@/types/map/Overlay';
+
+const shapeModel = defineModel<Overlay[]>('shapes', {
+    default: [],
+});
 
 const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 const mapComponentRef = ref<InstanceType<typeof GoogleMap> | null>();
@@ -45,7 +50,7 @@ function addShapeChangeListeners(shape: any) {
             google.maps.event.addListener(
                 shape,
                 'bounds_changed',
-                shapeChanged
+                shapeListChanged
             );
             break;
 
@@ -53,12 +58,12 @@ function addShapeChangeListeners(shape: any) {
             google.maps.event.addListener(
                 shape,
                 'radius_changed',
-                shapeChanged
+                shapeListChanged
             );
             google.maps.event.addListener(
                 shape,
                 'center_changed',
-                shapeChanged
+                shapeListChanged
             );
             break;
 
@@ -66,17 +71,17 @@ function addShapeChangeListeners(shape: any) {
             google.maps.event.addListener(
                 shape.getPath(),
                 'insert_at',
-                shapeChanged
+                shapeListChanged
             );
             google.maps.event.addListener(
                 shape.getPath(),
                 'remove_at',
-                shapeChanged
+                shapeListChanged
             );
             google.maps.event.addListener(
                 shape.getPath(),
                 'set_at',
-                shapeChanged
+                shapeListChanged
             );
             break;
 
@@ -84,17 +89,17 @@ function addShapeChangeListeners(shape: any) {
             google.maps.event.addListener(
                 shape.getPath(),
                 'insert_at',
-                shapeChanged
+                shapeListChanged
             );
             google.maps.event.addListener(
                 shape.getPath(),
                 'remove_at',
-                shapeChanged
+                shapeListChanged
             );
             google.maps.event.addListener(
                 shape.getPath(),
                 'set_at',
-                shapeChanged
+                shapeListChanged
             );
             break;
 
@@ -106,8 +111,8 @@ function addShapeChangeListeners(shape: any) {
             break;
     }
 }
-function shapeChanged() {
-    console.log('❗');
+function shapeListChanged() {
+    shapeModel.value = all_overlays;
 }
 
 /**
@@ -142,9 +147,10 @@ function deleteSelectedShape() {
     if (selectedShape) {
         selectedShape.setMap(null);
         /* 🟡 Custom */ all_overlays = all_overlays.filter(
-            (o) => o !== selectedShape
+            (o) => o.overlay?.getMap() !== null
         );
         /* 🟡 Custom */ clearSelection();
+        /* 🟡 Custom */ shapeListChanged();
     }
 }
 
@@ -154,6 +160,7 @@ function deleteAllShapes() {
     }
     all_overlays = [];
     /* 🟡 Custom */ clearSelection();
+    /* 🟡 Custom */ shapeListChanged();
 }
 
 function selectColor(color) {
@@ -242,6 +249,7 @@ async function initialize() {
                 });
                 setSelection(newShape);
                 /* 🟡 Custom */ addShapeChangeListeners(newShape);
+                /* 🟡 Custom */ shapeListChanged();
             }
         }
     );
