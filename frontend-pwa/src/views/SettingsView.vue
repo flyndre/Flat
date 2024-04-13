@@ -1,25 +1,44 @@
 <script setup lang="ts">
+import MdiIcon from '@/components/icons/MdiIcon.vue';
 import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
-import ThemeSetting from '@/components/settings/ThemeSetting.vue';
-import HomeLocationSetting from '@/components/settings/HomeLocationSetting.vue';
 import HandednessSetting from '@/components/settings/HandednessSetting.vue';
+import HomeLocationSetting from '@/components/settings/HomeLocationSetting.vue';
+import ThemeSetting from '@/components/settings/ThemeSetting.vue';
+import AboutSetting from '@/components/settings/AboutSetting.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
-import { mdiArrowLeft } from '@mdi/js';
+import {
+    mdiArrowLeft,
+    mdiHandClap,
+    mdiHomeMapMarker,
+    mdiInformation,
+    mdiPalette,
+} from '@mdi/js';
+import Accordion from 'primevue/accordion';
+import AccordionTab from 'primevue/accordiontab';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
+import { ref } from 'vue';
 
 const settings = [
     {
         label: 'Theme',
+        icon: mdiPalette,
         component: ThemeSetting,
     },
     {
+        label: 'Handedness',
+        icon: mdiHandClap,
+        component: HandednessSetting,
+    },
+    {
         label: 'Home Screen Location',
+        icon: mdiHomeMapMarker,
         component: HomeLocationSetting,
     },
     {
-        label: 'Handedness',
-        component: HandednessSetting,
+        label: 'About',
+        icon: mdiInformation,
+        component: AboutSetting,
     },
 ];
 </script>
@@ -37,27 +56,23 @@ const settings = [
         </template>
         <template #title> Settings </template>
         <template #default>
-            <Card v-for="setting of settings" class="mb-2.5">
-                <template #title> {{ setting.label }} </template>
+            <Card
+                class="mb-2.5 overflow-hidden"
+                :pt="{ body: { class: 'p-0 overflow-hidden' } }"
+            >
                 <template #content>
-                    <component :is="setting.component" />
-                </template>
-            </Card>
-
-            <Card :pt="{ footer: { class: 'flex flex-row gap-2' } }">
-                <template #title> About Flat </template>
-                <template #subtitle> Fleet Live Area Tracking </template>
-                <template #content>
-                    The modern cross-platform route tracking app to orchestrate
-                    volunteer collection campaigns in your neighborhood.
-                </template>
-                <template #footer>
-                    <a href="https://github.com/flyndre/Flat">
-                        <Button label="Repository" />
-                    </a>
-                    <a href="https://flyndre.github.io">
-                        <Button text label="Team Website" />
-                    </a>
+                    <Accordion :multiple="true" :active-index="[0, 1]">
+                        <AccordionTab
+                            v-for="setting of settings"
+                            :key="setting.label"
+                        >
+                            <template #header>
+                                <span class="mr-auto">{{ setting.label }}</span>
+                                <MdiIcon class="mr-3" :icon="setting.icon" />
+                            </template>
+                            <component :is="setting.component" />
+                        </AccordionTab>
+                    </Accordion>
                 </template>
             </Card>
         </template>
