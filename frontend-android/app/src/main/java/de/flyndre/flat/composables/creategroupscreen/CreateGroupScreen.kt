@@ -28,7 +28,7 @@ import de.flyndre.flat.database.entities.Preset
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateGroupScreen(modifier: Modifier = Modifier, db: AppDatabase, onNavigateToInitialScreen: () -> Unit, onNavigateToNewPresetScreen: () -> Unit, navController: NavController, createGroupScreenViewModel: CreateGroupScreenViewModel){
+fun CreateGroupScreen(modifier: Modifier = Modifier, onNavigateToInitialScreen: () -> Unit, onNavigateToNewPresetScreen: () -> Unit, navController: NavController, createGroupScreenViewModel: CreateGroupScreenViewModel){
     val presets by createGroupScreenViewModel.presets.collectAsState()
     Scaffold(topBar = {
         TopAppBar(title = {Text(text = "Presets")},
