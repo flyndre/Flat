@@ -33,7 +33,7 @@ import de.flyndre.flat.database.AppDatabase
 @Composable
 fun PresetScreen(
     modifier: Modifier = Modifier,
-    presetId: Long?, db: AppDatabase, navController: NavController, topBarText: String, onNavigateToCreateGroupScreen: () -> Unit, presetScreenViewModel: PresetScreenViewModel){
+    presetId: Long?, navController: NavController, topBarText: String, onNavigateToCreateGroupScreen: () -> Unit, presetScreenViewModel: PresetScreenViewModel){
     val presetName by presetScreenViewModel.presetName.collectAsState()
     val presetDescription by presetScreenViewModel.presetDescription.collectAsState()
 
