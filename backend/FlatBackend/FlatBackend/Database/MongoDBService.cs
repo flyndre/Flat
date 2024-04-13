@@ -1,6 +1,7 @@
 ﻿using FlatBackend.Models;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Driver.Core.Configuration;
 using System.Text.Json;
 
 namespace FlatBackend.Database
@@ -12,14 +13,18 @@ namespace FlatBackend.Database
 
         public MongoDBService()
         {
-            Mongo = new MongoClient("mongodb://localhost:27017");
+            Mongo = new MongoClient(Program.DBConnectionString);
             collection = Mongo.GetDatabase("CollectionsDatabase").GetCollection<CollectionModel>("collections");
         }
 
-        public async void AddCollection( CollectionModel col )
+        public async Task AddCollection( CollectionModel col )
         {
-            collection.InsertOneAsync(col);
-            return;
+            try
+            {
+                collection.InsertOneAsync(col);
+                return;
+            }
+            catch (Exception ex) { Console.WriteLine(ex.ToString()); return; }
         }
 
         public void ChangeCollection( CollectionModel col )
@@ -36,7 +41,14 @@ namespace FlatBackend.Database
 
         public async Task<CollectionModel> GetCollection( Guid id )
         {
-            return await collection.Find(r => r.id == id).FirstAsync();
+            try
+            {
+                return await collection.Find(r => r.id == id).FirstAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex); return null;
+            }
         }
     }
 }

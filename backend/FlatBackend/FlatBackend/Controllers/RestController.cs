@@ -16,7 +16,10 @@ namespace FlatBackend.Controllers
     [Route("api/[controller]")]
     public class RestController : ControllerBase
     {
-        private MongoDBService mongoDBService = new MongoDBService();
+        private MongoDBService mongoDBService;
+
+        public RestController()
+        { mongoDBService = new MongoDBService(); }
 
         //AccessRequest Handshake
         [HttpGet("AccessRequest/{id}")]
@@ -92,9 +95,13 @@ namespace FlatBackend.Controllers
                 {
                     value.requestedAccess = new List<UserModel>();
                 }
-                mongoDBService.AddCollection(value);
+                Console.WriteLine("Got the Json now calling Mongo");
+                await mongoDBService.AddCollection(value);
+                Console.WriteLine("Mongo Success.");
                 var result = await mongoDBService.GetCollection(value.id);
+                Console.WriteLine("Json ready: " + result);
                 var Json = JsonSerializer.Serialize(result);
+                Console.WriteLine("Json ready: " + result);
                 return Json;
             }
             catch (Exception ex)
