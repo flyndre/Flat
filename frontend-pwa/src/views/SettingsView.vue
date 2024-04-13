@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import AboutSetting from '@/components/settings/AboutSetting.vue';
 import HandednessSetting from '@/components/settings/HandednessSetting.vue';
 import HomeLocationSetting from '@/components/settings/HomeLocationSetting.vue';
 import ThemeSetting from '@/components/settings/ThemeSetting.vue';
-import AboutSetting from '@/components/settings/AboutSetting.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import {
     mdiArrowLeft,
@@ -17,7 +17,6 @@ import Accordion from 'primevue/accordion';
 import AccordionTab from 'primevue/accordiontab';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
-import { ref } from 'vue';
 
 const settings = [
     {
