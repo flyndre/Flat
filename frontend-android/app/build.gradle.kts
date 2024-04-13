@@ -95,10 +95,6 @@ dependencies {
     implementation(libs.androidx.fragment.ktx)
     //dependencies for serializing objects to json and back
     implementation (libs.gson)
-    //barcode scanning
-    implementation(libs.barcode.scanning)
-    //camera usage for barcode scanning
-    
 }
 
 secrets {

@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun JoinScreen(modifier: Modifier = Modifier, onNavigateToInitialScreen: () -> Unit) {
+fun JoinScreen(modifier: Modifier = Modifier, onNavigateToInitialScreen: () -> Unit, joinScreenViewModel: JoinScreenViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(title = { Text(text = "") }, navigationIcon = {
