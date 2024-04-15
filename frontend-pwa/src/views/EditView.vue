@@ -7,7 +7,13 @@ import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { Collection } from '@/types/collection';
 import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
 import validateCollection from '@/validation/validateCollection';
-import { mdiArrowLeft, mdiCheck, mdiMapMarkerPath, mdiPlay } from '@mdi/js';
+import {
+    mdiArrowLeft,
+    mdiCheck,
+    mdiMapMarkerPath,
+    mdiPlay,
+    mdiViewDashboardEdit,
+} from '@mdi/js';
 import { useGeolocation } from '@vueuse/core';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
@@ -123,7 +129,12 @@ const start = () => _saveCollection({ name: 'presets' });
             </div>
         </template>
         <template #default>
-            <Card :pt="{ root: { class: 'overflow-hidden' } }">
+            <Card
+                :pt="{
+                    root: { class: 'overflow-hidden' },
+                    header: { class: 'relative' },
+                }"
+            >
                 <template #header>
                     <GoogleMap
                         class="w-full h-[30vh] pointer-events-none"
@@ -132,6 +143,20 @@ const start = () => _saveCollection({ name: 'presets' });
                         :center="mapCenter"
                         :disable-default-ui="true"
                     />
+                    <router-link
+                        :to="{ name: 'edit-map', params: { id: props.id } }"
+                    >
+                        <Button
+                            class="absolute bottom-6 right-6"
+                            label="Edit Areas"
+                            severity="secondary"
+                            raised
+                        >
+                            <template #icon>
+                                <TextButtonIcon :icon="mdiViewDashboardEdit" />
+                            </template>
+                        </Button>
+                    </router-link>
                 </template>
                 <template #content>
                     <div class="flex flex-col gap-2.5">

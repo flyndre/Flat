@@ -1,6 +1,18 @@
 <script setup lang="ts">
 import { TypedOverlay } from '@/types/map/TypedOverlay';
-import { mdiDelete, mdiDeleteSweep } from '@mdi/js';
+import {
+    mdiCircle,
+    mdiDelete,
+    mdiDeleteSweep,
+    mdiDrawing,
+    mdiMap,
+    mdiPalette,
+    mdiPentagonOutline,
+    mdiRectangle,
+    mdiShape,
+    mdiTriangle,
+    mdiVectorPolygon,
+} from '@mdi/js';
 import Button from 'primevue/button';
 import { computed, nextTick, ref, watch } from 'vue';
 import { GoogleMap } from 'vue3-google-map';
@@ -10,6 +22,11 @@ import LocateMeButton from './LocateMeButton.vue';
 import LocationSearchDialog from './LocationSearchDialog.vue';
 import MapTypeSelectButton from './MapTypeSelectButton.vue';
 import ShapeColorSelectButton from './ShapeColorSelectButton.vue';
+import TabView from 'primevue/tabview';
+import TabPanel from 'primevue/tabpanel';
+import TextButtonIcon from '../icons/TextButtonIcon.vue';
+import Card from 'primevue/card';
+import { isOnMobile } from '@/util/mobileDetection';
 
 /**
  * The shapes drawn on the map.
@@ -313,26 +330,14 @@ window.addEventListener('load', initialize);
 </script>
 
 <template>
-    <div class="flex flex-col gap-2">
-        <div class="flex flex-row gap-2 items-center justify-stretch flex-wrap">
-            <div class="flex flex-row gap-2 grow text-nowrap basis-7/12">
-                <LocateMeButton
-                    :initial-pan="true"
-                    :locate-me-handler="(r) => panMapToPos(r)"
-                />
-                <LocationSearchDialog
-                    :places-service
-                    :select-result-callback="
-                        (r) => panMapToPos(r.geometry?.location)
-                    "
-                />
-            </div>
-            <MapTypeSelectButton class="basis-1/12" v-model="mapTypeId" />
-        </div>
-        <div class="h-[500px] overflow-hidden rounded-md">
+    <div
+        class="flex gap-2 h-full justify-stretch items-stretch pb-2"
+        :class="[isOnMobile ? 'flex-col' : 'flex-col-reverse']"
+    >
+        <div class="grow overflow-hidden rounded-xl">
             <GoogleMap
                 ref="mapComponentRef"
-                style="height: 500px; width: 100%"
+                style="min-height: 100vh; height: 100vh; width: 100%"
                 :api-key
                 :libraries="['drawing', 'places']"
                 :zoom="mapZoom"
@@ -341,32 +346,148 @@ window.addEventListener('load', initialize);
                 :clickable-icons="false"
             />
         </div>
-        <div class="flex flex-row gap-2 items-center justify-stretch flex-wrap">
-            <div class="flex flex-col gap-2 grow basis-50">
-                <DrawingToolSelectButton v-model="selectedToolRef" />
-                <ShapeColorSelectButton v-model="selectedColorRef" />
-            </div>
-            <div class="flex flex-col gap-2 grow basis-5 text-nowrap">
-                <Button
-                    severity="secondary"
-                    label="Delete Selected Shape"
-                    @click="deleteSelectedShape"
-                    :disabled="!shapeSelected"
+        <Card
+            :class="{ isOnMobile: 'rounded-b-none' }"
+            :pt="{ body: { class: isOnMobile ? 'pb-0' : 'pt-0' } }"
+        >
+            <template #content>
+                <TabView
+                    :pt="{
+                        root: {
+                            class:
+                                'flex ' +
+                                (isOnMobile ? 'flex-col-reverse' : 'flex-col'),
+                        },
+                        nav: {
+                            class: isOnMobile ? 'mt-6' : 'mb-6',
+                        },
+                        inkbar: { class: 'rounded-t h-1' },
+                        panelContainer: { class: 'p-0' },
+                    }"
                 >
-                    <template #icon>
-                        <MdiIcon class="mr-1.5" :icon="mdiDelete" />
-                    </template>
-                </Button>
-                <Button
-                    severity="secondary"
-                    label="Delete All Shapes"
-                    @click="() => deleteAllShapes()"
-                >
-                    <template #icon>
-                        <MdiIcon class="mr-2" :icon="mdiDeleteSweep" />
-                    </template>
-                </Button>
-            </div>
-        </div>
+                    <TabPanel>
+                        <template #header>
+                            <div class="flex justify-center items-center">
+                                <TextButtonIcon :icon="mdiMap" />
+                                Map
+                            </div>
+                        </template>
+                        <div
+                            class="flex flex-row gap-2 items-center justify-stretch flex-wrap"
+                        >
+                            <div
+                                class="flex flex-row gap-2 grow text-nowrap basis-7/12"
+                            >
+                                <LocateMeButton
+                                    :initial-pan="true"
+                                    :locate-me-handler="(r) => panMapToPos(r)"
+                                />
+                                <LocationSearchDialog
+                                    :places-service
+                                    :select-result-callback="
+                                        (r) => panMapToPos(r.geometry?.location)
+                                    "
+                                />
+                            </div>
+                            <MapTypeSelectButton
+                                class="basis-1/12"
+                                v-model="mapTypeId"
+                            />
+                        </div>
+                    </TabPanel>
+                    <TabPanel>
+                        <template #header>
+                            <div class="flex justify-center items-center">
+                                <TextButtonIcon :icon="mdiPalette" />
+                                Drawing
+                            </div>
+                        </template>
+                        <div
+                            class="flex flex-row gap-2 items-center justify-stretch flex-wrap"
+                        >
+                            <div class="flex flex-col gap-2 grow basis-50">
+                                <DrawingToolSelectButton
+                                    v-model="selectedToolRef"
+                                />
+                                <ShapeColorSelectButton
+                                    v-model="selectedColorRef"
+                                />
+                            </div>
+                            <div
+                                class="flex flex-col gap-2 grow basis-5 text-nowrap"
+                            >
+                                <Button
+                                    severity="secondary"
+                                    label="Delete Selected Shape"
+                                    @click="deleteSelectedShape"
+                                    :disabled="!shapeSelected"
+                                >
+                                    <template #icon>
+                                        <MdiIcon
+                                            class="mr-1.5"
+                                            :icon="mdiDelete"
+                                        />
+                                    </template>
+                                </Button>
+                                <Button
+                                    severity="secondary"
+                                    label="Delete All Shapes"
+                                    @click="() => deleteAllShapes()"
+                                >
+                                    <template #icon>
+                                        <MdiIcon
+                                            class="mr-2"
+                                            :icon="mdiDeleteSweep"
+                                        />
+                                    </template>
+                                </Button>
+                            </div>
+                        </div>
+                    </TabPanel>
+                    <TabPanel>
+                        <template #header>
+                            <div class="flex justify-center items-center">
+                                <TextButtonIcon :icon="mdiDrawing" />
+                                Shapes
+                            </div>
+                        </template>
+                        <div
+                            class="flex flex-col gap-2 items-center justify-stretch flex-wrap"
+                        >
+                            <Button
+                                v-for="shape of shapes"
+                                class="w-full text-left capitalize"
+                                :label="shape.type"
+                                severity="contrast"
+                                text
+                            >
+                                <template #icon>
+                                    <TextButtonIcon
+                                        :style="{
+                                            color:
+                                                shape.overlay.get(
+                                                    'fillColor'
+                                                ) ||
+                                                shape.overlay.get(
+                                                    'strokeColor'
+                                                ),
+                                        }"
+                                        :icon="
+                                            shape.type === 'rectangle'
+                                                ? mdiRectangle
+                                                : shape.type === 'circle'
+                                                  ? mdiCircle
+                                                  : shape.type === 'polygon'
+                                                    ? mdiTriangle
+                                                    : mdiPentagonOutline
+                                        "
+                                    />
+                                </template>
+                            </Button>
+                        </div>
+                    </TabPanel>
+                </TabView>
+            </template>
+        </Card>
     </div>
 </template>
