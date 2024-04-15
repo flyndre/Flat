@@ -361,6 +361,7 @@ window.addEventListener('load', initialize);
                 :center="mapCenter"
                 :disable-default-ui="true"
                 :map-type-id="mapTypeId"
+                :clickable-icons="false"
             />
         </div>
         <div class="flex flex-row gap-2 items-center justify-stretch flex-wrap">
