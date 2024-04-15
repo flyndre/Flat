@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useGeolocation } from '@vueuse/core';
+import { syncRef, useGeolocation } from '@vueuse/core';
 import { computed, ref, watch } from 'vue';
 import { GoogleMap } from 'vue3-google-map';
 import MdiIcon from '../icons/MdiIcon.vue';
@@ -134,6 +134,7 @@ function addShapeChangeListeners(shape: any) {
     }
 }
 function shapeListChanged() {
+    console.log(all_overlays);
     shapes.value.length = 0;
     shapes.value.push(...all_overlays);
 }
@@ -220,6 +221,7 @@ function setSelectedShapeColor(color) {
         } else {
             selectedShape.set('fillColor', color);
         }
+        /* 🟡 Custom */ shapeListChanged();
     }
 }
 
