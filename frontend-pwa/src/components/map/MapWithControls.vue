@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { syncRef, useGeolocation } from '@vueuse/core';
+import { useGeolocation } from '@vueuse/core';
 import { computed, ref, watch } from 'vue';
 import { GoogleMap } from 'vue3-google-map';
 import MdiIcon from '../icons/MdiIcon.vue';
@@ -9,28 +9,29 @@ import DrawingToolSelectButton from './DrawingToolSelectButton.vue';
 import ShapeColorSelectButton from './ShapeColorSelectButton.vue';
 import MapTypeSelectButton from './MapTypeSelectButton.vue';
 import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
-import { Overlay } from '@/types/map/Overlay';
 import { TypedOverlay } from '@/types/map/TypedOverlay';
 import { nextTick } from 'vue';
 
-// const shapeModel = defineProps<{
-//     shapes: TypedOverlay[];
-// }>();
-// const emit = defineEmits<{
-//     'update:shapes': [value: TypedOverlay[]];
-// }>();
-
+/**
+ * The shapes drawn on the map.
+ */
 const shapes = defineModel<TypedOverlay[]>('shapes', { default: [] });
+let recentlyUpdated = false;
 
-// watch(shapeModel.shapes, (v) => {
-//     if (v === all_overlays) return;
-//     deleteAllShapes(false);
-//     if (v.length === 0) return;
-//     v.forEach((s) => {
-//         s.overlay?.setMap(map.value);
-//         // processNewOverlay(s, false);
-//     });
-// });
+watch(
+    // TODO: watch values not length as soon as shapes are inputted geojson
+    () => shapes.value.length,
+    () => {
+        if (recentlyUpdated) return; // Prevents infinite update loop
+        deleteAllShapes(false);
+        shapes.value.forEach((s) => {
+            s.overlay?.setMap(map.value);
+            processNewOverlay(s, false);
+        });
+        recentlyUpdated = true;
+        nextTick(() => (recentlyUpdated = false));
+    }
+);
 
 const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 const mapComponentRef = ref<InstanceType<typeof GoogleMap> | null>();
@@ -134,9 +135,10 @@ function addShapeChangeListeners(shape: any) {
     }
 }
 function shapeListChanged() {
-    console.log(all_overlays);
     shapes.value.length = 0;
     shapes.value.push(...all_overlays);
+    recentlyUpdated = true;
+    nextTick(() => (recentlyUpdated = false));
 }
 
 /**
@@ -245,6 +247,30 @@ const lineOptions = {
     strokeWeight: 4,
     strokeOpacity: 0.45,
 };
+
+/* 🟡 Custom */ function processNewOverlay(overlay: any, userCreated = true) {
+    all_overlays.push(overlay);
+    if (overlay.type != google.maps.drawing.OverlayType.MARKER) {
+        // Switch back to non-drawing mode after drawing a shape.
+        // drawingManager.setDrawingMode(null);
+        /* 🟡 Custom */ if (userCreated) selectedToolRef.value = null;
+
+        // Add an event listener that selects the newly-drawn shape when the user
+        // mouses down on it.
+        var newShape = overlay.overlay;
+        newShape.type = overlay.type;
+        google.maps.event.addListener(newShape, 'click', function () {
+            setSelection(newShape);
+        });
+        if (userCreated) {
+            /* 🟡 Custom */ // Has to be next tick, otherwise the tool change above will unselect the selected shape
+            /* 🟡 Custom */ nextTick(() => setSelection(newShape));
+            /* 🟡 Custom */ shapeListChanged();
+        }
+        /* 🟡 Custom */ addShapeChangeListeners(newShape);
+    }
+}
+
 async function initialize() {
     // Creates a drawing manager attached to the map that allows the user to draw
     // markers, lines, and shapes.
@@ -264,34 +290,7 @@ async function initialize() {
     google.maps.event.addListener(
         drawingManager,
         'overlaycomplete',
-        // (e) => processNewOverlay(e, true)
-        /* 🟡 Custom: commented out for centralized function above */
-        function (e) {
-            all_overlays.push(e);
-            if (e.type != google.maps.drawing.OverlayType.MARKER) {
-                // Switch back to non-drawing mode after drawing a shape.
-                // drawingManager.setDrawingMode(null);
-                /* 🟡 Custom */ selectedToolRef.value = null;
-
-                /* 🟡 Custom */ // Has to be next tick, otherwise the tool change above will unselect the selected shape
-                /* 🟡 Custom */ nextTick(() => {
-                    // Add an event listener that selects the newly-drawn shape when the user
-                    // mouses down on it.
-                    var newShape = e.overlay;
-                    newShape.type = e.type;
-                    google.maps.event.addListener(
-                        newShape,
-                        'click',
-                        function () {
-                            setSelection(newShape);
-                        }
-                    );
-                    setSelection(newShape);
-                    /* 🟡 Custom */ shapeListChanged();
-                    /* 🟡 Custom */ addShapeChangeListeners(newShape);
-                });
-            }
-        }
+        /* 🟡 Custom */ (e) => processNewOverlay(e)
     );
 
     // Clear the current selection when the drawing mode is changed, or when the
