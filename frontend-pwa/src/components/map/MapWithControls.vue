@@ -29,6 +29,7 @@ import LocateMeButton from './LocateMeButton.vue';
 import LocationSearchDialog from './LocationSearchDialog.vue';
 import MapTypeSelectButton from './MapTypeSelectButton.vue';
 import ShapeColorSelectButton from './ShapeColorSelectButton.vue';
+import ScrollPanel from 'primevue/scrollpanel';
 
 /**
  * The shapes drawn on the map.
@@ -388,7 +389,7 @@ window.addEventListener('load', initialize);
             />
         </div>
         <Card
-            :class="{ isOnMobile: 'rounded-b-none' }"
+            :class="[{ isOnMobile: 'rounded-b-none' }]"
             :pt="{ body: { class: isOnMobile ? 'pb-0' : 'pt-0' } }"
         >
             <template #content>
@@ -461,11 +462,16 @@ window.addEventListener('load', initialize);
                                 Shapes
                             </div>
                         </template>
-                        <div
-                            class="flex flex-col gap-2 items-center justify-stretch flex-wrap"
+                        <ScrollPanel
+                            class="h-[40vh] max-h-[40vh]"
+                            :pt="{
+                                content: {
+                                    class: 'flex flex-col gap-2 items-center justify-start',
+                                },
+                            }"
                         >
                             <div
-                                class="w-full flex flex-row justify-between gap-1"
+                                class="w-full flex flex-row justify-between gap-1 overflow-auto shrink-0"
                                 v-for="(shape, i) of shapes"
                             >
                                 <Button
@@ -524,18 +530,8 @@ window.addEventListener('load', initialize);
                                     </template>
                                 </Button>
                             </div>
-                            <!-- <Button
-                                    class="grow basis-0"
-                                    severity="secondary"
-                                    label="Delete"
-                                    @click="deleteSelectedShape"
-                                    :disabled="!shapeSelected"
-                                >
-                                    <template #icon>
-                                        <TextButtonIcon :icon="mdiClose" />
-                                    </template>
-                                </Button> -->
                             <Button
+                                class="shrink-0"
                                 severity="danger"
                                 text
                                 :disabled="shapes.length === 0"
@@ -546,7 +542,7 @@ window.addEventListener('load', initialize);
                                     Delete All
                                 </template>
                             </Button>
-                        </div>
+                        </ScrollPanel>
                     </TabPanel>
                 </TabView>
             </template>
