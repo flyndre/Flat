@@ -44,9 +44,7 @@ const mapCenter = mapCenterWithDefaults(useGeolocation().coords, {
     lng: 0,
 });
 
-function setMapType(type: google.maps.MapTypeId) {
-    map.value?.setMapTypeId(type);
-}
+const mapTypeId = ref<google.maps.MapTypeId>();
 const selectedToolRef = ref<google.maps.drawing.OverlayType>(null);
 watch(selectedToolRef, (v) => setToolType(v));
 function setToolType(type: google.maps.drawing.OverlayType) {
@@ -330,7 +328,7 @@ window.addEventListener('load', initialize);
                     <MdiIcon :icon="mdiCrosshairsGps" />
                 </template>
             </Button>
-            <MapTypeSelectButton @update:model-value="setMapType" />
+            <MapTypeSelectButton v-model="mapTypeId" />
         </div>
         <div class="h-[500px] overflow-hidden rounded-md">
             <GoogleMap
@@ -341,6 +339,7 @@ window.addEventListener('load', initialize);
                 :zoom="mapZoom"
                 :center="mapCenter"
                 :disable-default-ui="true"
+                :map-type-id="mapTypeId"
             />
         </div>
         <div class="flex flex-row gap-2 items-center justify-stretch flex-wrap">
