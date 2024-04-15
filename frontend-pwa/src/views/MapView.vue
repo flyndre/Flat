@@ -16,9 +16,11 @@ const areas = ref<TypedOverlay[]>([]);
 
 const props = withDefaults(
     defineProps<{
+        edit?: boolean;
         id?: number;
     }>(),
     {
+        edit: false,
         id: undefined,
     }
 );
@@ -54,7 +56,12 @@ const shapeHtml = computed(() =>
 <template>
     <DefaultLayout>
         <template #action-left>
-            <router-link :to="{ name: 'edit', params: { id: props.id } }">
+            <router-link
+                :to="{
+                    name: edit ? 'edit' : 'create',
+                    params: { id: props.id },
+                }"
+            >
                 <Button label="Back" severity="secondary" text>
                     <template #icon>
                         <TextButtonIcon :icon="mdiArrowLeft" />

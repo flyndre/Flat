@@ -3,6 +3,10 @@ import InputIcon from '@/components/icons/InputIcon.vue';
 import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
 import { clientId } from '@/data/clientMetadata';
 import { collectionService } from '@/data/collections';
+import {
+    GOOGLE_MAPS_API_KEY,
+    GOOGLE_MAPS_API_LIBRARIES,
+} from '@/data/constants';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { Collection } from '@/types/collection';
 import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
@@ -23,7 +27,8 @@ import { computed, onMounted, ref } from 'vue';
 import { RouteLocationRaw, useRouter } from 'vue-router';
 import { GoogleMap } from 'vue3-google-map';
 
-const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+const apiKey = GOOGLE_MAPS_API_KEY;
+const libraries = GOOGLE_MAPS_API_LIBRARIES;
 const mapCenter = mapCenterWithDefaults(useGeolocation().coords);
 
 const props = withDefaults(
@@ -139,12 +144,16 @@ const start = () => _saveCollection({ name: 'presets' });
                     <GoogleMap
                         class="w-full h-[30vh] pointer-events-none"
                         :api-key
+                        :libraries
                         :zoom="15"
                         :center="mapCenter"
                         :disable-default-ui="true"
                     />
                     <router-link
-                        :to="{ name: 'edit-map', params: { id: props.id } }"
+                        :to="{
+                            name: edit ? 'edit-map' : 'create-map',
+                            params: { id: props.id },
+                        }"
                     >
                         <Button
                             class="absolute bottom-6 right-6"

@@ -13,8 +13,13 @@ import Slider from 'primevue/slider';
 import { ref } from 'vue';
 import { useSettings } from '@/plugins/SettingsPlugin';
 import { computed } from 'vue';
+import {
+    GOOGLE_MAPS_API_KEY,
+    GOOGLE_MAPS_API_LIBRARIES,
+} from '@/data/constants';
 
-const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+const apiKey = GOOGLE_MAPS_API_KEY;
+const libraries = GOOGLE_MAPS_API_LIBRARIES;
 const { settings } = useSettings();
 const homeCoordsDefaults = computed(() => ({
     lat: settings.value.homeLatitude,
@@ -58,6 +63,7 @@ const mapZoomReal = useThrottle(mapZoomSlider, 25);
             <GoogleMap
                 class="min-w-[150vmax] min-h-[150vmax] blur-[1px] bg-yellow-50 c-animate-areal"
                 :api-key
+                :libraries
                 :zoom="mapZoomReal"
                 :center="mapCenter"
                 :map-type-id="'satellite'"

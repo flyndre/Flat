@@ -27,6 +27,10 @@ import TabPanel from 'primevue/tabpanel';
 import TextButtonIcon from '../icons/TextButtonIcon.vue';
 import Card from 'primevue/card';
 import { isOnMobile } from '@/util/mobileDetection';
+import {
+    GOOGLE_MAPS_API_KEY,
+    GOOGLE_MAPS_API_LIBRARIES,
+} from '@/data/constants';
 
 /**
  * The shapes drawn on the map.
@@ -49,7 +53,8 @@ watch(
     }
 );
 
-const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+const apiKey = GOOGLE_MAPS_API_KEY;
+const libraries = GOOGLE_MAPS_API_LIBRARIES;
 const mapComponentRef = ref<InstanceType<typeof GoogleMap> | null>();
 const mapReady = computed(() => mapComponentRef.value?.ready);
 const map = computed(() => mapComponentRef.value?.map);
@@ -339,7 +344,7 @@ window.addEventListener('load', initialize);
                 ref="mapComponentRef"
                 style="min-height: 100vh; height: 100vh; width: 100%"
                 :api-key
-                :libraries="['drawing', 'places']"
+                :libraries
                 :zoom="mapZoom"
                 :disable-default-ui="true"
                 :map-type-id="mapTypeId"
