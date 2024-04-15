@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useGeolocation } from '@vueuse/core';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { GoogleMap } from 'vue3-google-map';
 import MdiIcon from '../icons/MdiIcon.vue';
 import Button from 'primevue/button';
@@ -9,11 +9,10 @@ import DrawingToolSelectButton from './DrawingToolSelectButton.vue';
 import ShapeColorSelectButton from './ShapeColorSelectButton.vue';
 import MapTypeSelectButton from './MapTypeSelectButton.vue';
 import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
-import { Overlay } from '@/types/map/Overlay';
+import { TypedOverlay } from '@/types/map/TypedOverlay';
+import { nextTick } from 'vue';
 
-const shapeModel = defineModel<Overlay[]>('shapes', {
-    default: [],
-});
+const shapes = defineModel<TypedOverlay[]>('shapes', { default: [] });
 
 const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 const mapComponentRef = ref<InstanceType<typeof GoogleMap> | null>();
@@ -29,6 +28,8 @@ const mapCenter = mapCenterWithDefaults(useGeolocation().coords, {
 function setMapType(type: google.maps.MapTypeId) {
     map.value?.setMapTypeId(type);
 }
+const selectedTool = ref<google.maps.drawing.OverlayType>(null);
+watch(selectedTool, (v) => setToolType(v));
 function setToolType(type: google.maps.drawing.OverlayType) {
     drawingManager.setDrawingMode(type);
 }
@@ -112,7 +113,8 @@ function addShapeChangeListeners(shape: any) {
     }
 }
 function shapeListChanged() {
-    shapeModel.value = all_overlays;
+    shapes.value.length = 0;
+    shapes.value.push(...all_overlays);
 }
 
 /**
@@ -130,6 +132,7 @@ var selectedColor;
 function clearSelection() {
     if (selectedShape) {
         selectedShape.setEditable(false);
+        selectedShape.setDraggable(false);
         selectedShape = null;
         /* 🟡 Custom */ shapeSelected.value = false;
     }
@@ -139,6 +142,7 @@ function setSelection(shape) {
     clearSelection();
     selectedShape = shape;
     shape.setEditable(true);
+    shape.setDraggable(true);
     selectColor(shape.get('fillColor') || shape.get('strokeColor'));
     /* 🟡 Custom */ shapeSelected.value = true;
 }
@@ -154,13 +158,14 @@ function deleteSelectedShape() {
     }
 }
 
-function deleteAllShapes() {
-    for (var i = 0; i < all_overlays.length; i++) {
-        all_overlays[i].overlay.setMap(null);
-    }
+function deleteAllShapes(/* 🟡 Custom */ notify = true) {
+    all_overlays.forEach((o) => o?.overlay?.setMap(null));
+    // for (var i = 0; i < all_overlays.length; i++) {
+    //     all_overlays[i].overlay.setMap(null);
+    // }
     all_overlays = [];
     /* 🟡 Custom */ clearSelection();
-    /* 🟡 Custom */ shapeListChanged();
+    /* 🟡 Custom */ if (notify) shapeListChanged();
 }
 
 function selectColor(color) {
@@ -234,22 +239,32 @@ async function initialize() {
     google.maps.event.addListener(
         drawingManager,
         'overlaycomplete',
+        // (e) => processNewOverlay(e, true)
+        /* 🟡 Custom: commented out for centralized function above */
         function (e) {
             all_overlays.push(e);
             if (e.type != google.maps.drawing.OverlayType.MARKER) {
                 // Switch back to non-drawing mode after drawing a shape.
-                drawingManager.setDrawingMode(null);
+                // drawingManager.setDrawingMode(null);
+                /* 🟡 Custom */ selectedTool.value = null;
 
-                // Add an event listener that selects the newly-drawn shape when the user
-                // mouses down on it.
-                var newShape = e.overlay;
-                newShape.type = e.type;
-                google.maps.event.addListener(newShape, 'click', function () {
+                /* 🟡 Custom */ // Has to be next tick, otherwise the tool change above will unselect the selected shape
+                /* 🟡 Custom */ nextTick(() => {
+                    // Add an event listener that selects the newly-drawn shape when the user
+                    // mouses down on it.
+                    var newShape = e.overlay;
+                    newShape.type = e.type;
+                    google.maps.event.addListener(
+                        newShape,
+                        'click',
+                        function () {
+                            setSelection(newShape);
+                        }
+                    );
                     setSelection(newShape);
+                    /* 🟡 Custom */ shapeListChanged();
+                    /* 🟡 Custom */ addShapeChangeListeners(newShape);
                 });
-                setSelection(newShape);
-                /* 🟡 Custom */ addShapeChangeListeners(newShape);
-                /* 🟡 Custom */ shapeListChanged();
             }
         }
     );
@@ -306,7 +321,7 @@ window.addEventListener('load', initialize);
         </div>
         <div class="flex flex-row gap-2 items-center justify-stretch flex-wrap">
             <div class="flex flex-col gap-2 grow basis-50">
-                <DrawingToolSelectButton @update:model-value="setToolType" />
+                <DrawingToolSelectButton v-model="selectedTool" />
                 <ShapeColorSelectButton @update:model-value="setShapeColor" />
             </div>
             <div class="flex flex-col gap-2 grow basis-5 text-nowrap">
@@ -323,7 +338,7 @@ window.addEventListener('load', initialize);
                 <Button
                     severity="secondary"
                     label="Delete All Shapes"
-                    @click="deleteAllShapes"
+                    @click="() => deleteAllShapes()"
                 >
                     <template #icon>
                         <MdiIcon class="mr-2" :icon="mdiDeleteSweep" />
