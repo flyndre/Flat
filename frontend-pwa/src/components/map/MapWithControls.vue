@@ -4,13 +4,21 @@ import { computed, ref, watch } from 'vue';
 import { GoogleMap } from 'vue3-google-map';
 import MdiIcon from '../icons/MdiIcon.vue';
 import Button from 'primevue/button';
-import { mdiCrosshairsGps, mdiDelete, mdiDeleteSweep } from '@mdi/js';
+import {
+    mdiCrosshairsGps,
+    mdiDelete,
+    mdiDeleteSweep,
+    mdiMagnify,
+} from '@mdi/js';
 import DrawingToolSelectButton from './DrawingToolSelectButton.vue';
 import ShapeColorSelectButton from './ShapeColorSelectButton.vue';
 import MapTypeSelectButton from './MapTypeSelectButton.vue';
 import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
 import { TypedOverlay } from '@/types/map/TypedOverlay';
 import { nextTick } from 'vue';
+import InputText from 'primevue/inputtext';
+import InputGroup from 'primevue/inputgroup';
+import TextButtonIcon from '../icons/TextButtonIcon.vue';
 
 /**
  * The shapes drawn on the map.
@@ -317,25 +325,38 @@ window.addEventListener('load', initialize);
 
 <template>
     <div class="flex flex-col gap-2">
-        <div class="flex flex-row gap-2 items-end justify-between">
-            <Button
-                severity="secondary"
-                :disabled="clientPosError !== null"
-                icon="mdi mdi-crosshairs-gps"
-                @click="() => centerMap()"
-            >
-                <template #icon>
-                    <MdiIcon :icon="mdiCrosshairsGps" />
-                </template>
-            </Button>
-            <MapTypeSelectButton v-model="mapTypeId" />
+        <div class="flex flex-row gap-2 items-center justify-stretch flex-wrap">
+            <div class="flex flex-row gap-2 grow text-nowrap basis-7/12">
+                <Button
+                    severity="secondary"
+                    :disabled="clientPosError !== null"
+                    @click="() => centerMap()"
+                >
+                    <template #icon>
+                        <MdiIcon :icon="mdiCrosshairsGps" />
+                    </template>
+                </Button>
+                <Button
+                    class="grow"
+                    label="Search"
+                    severity="secondary"
+                    @click=""
+                    outlined
+                    :pt="{ label: { class: 'text-left' } }"
+                >
+                    <template #icon>
+                        <TextButtonIcon :icon="mdiMagnify" />
+                    </template>
+                </Button>
+            </div>
+            <MapTypeSelectButton class="basis-1/12" v-model="mapTypeId" />
         </div>
         <div class="h-[500px] overflow-hidden rounded-md">
             <GoogleMap
                 ref="mapComponentRef"
                 style="height: 500px; width: 100%"
                 :api-key
-                :libraries="['drawing']"
+                :libraries="['drawing', 'places']"
                 :zoom="mapZoom"
                 :center="mapCenter"
                 :disable-default-ui="true"
