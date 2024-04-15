@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Card from 'primevue/card';
 import MapWithControls from '@/components/map/MapWithControls.vue';
 import { ref, watch } from 'vue';
 import { GeometryObject } from 'geojson';
@@ -11,6 +10,7 @@ import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
 import Button from 'primevue/button';
 import { mdiArrowLeft, mdiCheck } from '@mdi/js';
+import { getCornerPosition } from '@/util/googleMapsUtils';
 
 const areas = ref<TypedOverlay[]>([]);
 
@@ -43,14 +43,9 @@ const addShape = () => {
     });
 };
 
-const shapeHtml = computed(() =>
-    areas.value
-        .map(
-            (s) =>
-                /*html*/ `<span style="color: ${s.overlay.get('fillColor') || s.overlay.get('strokeColor')}" >${s.type}</span>`
-        )
-        .join('&nbsp;')
-);
+function _saveAreas() {
+    alert(areas.value.map((s) => s.type + getCornerPosition(s)));
+}
 </script>
 
 <template>
@@ -72,7 +67,7 @@ const shapeHtml = computed(() =>
         <template #title> Edit Map </template>
         <template #action-right>
             <div class="flex flex-row gap-2">
-                <Button label="Save" severity="primary">
+                <Button label="Save" severity="primary" @click="_saveAreas">
                     <template #icon>
                         <TextButtonIcon :icon="mdiCheck" />
                     </template>

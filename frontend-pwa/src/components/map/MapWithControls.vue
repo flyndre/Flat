@@ -30,6 +30,7 @@ import LocationSearchDialog from './LocationSearchDialog.vue';
 import MapTypeSelectButton from './MapTypeSelectButton.vue';
 import ShapeColorSelectButton from './ShapeColorSelectButton.vue';
 import ScrollPanel from 'primevue/scrollpanel';
+import { getCornerPosition } from '@/util/googleMapsUtils';
 
 /**
  * The shapes drawn on the map.
@@ -74,42 +75,7 @@ function panMapToPos(position: google.maps.LatLngLiteral | google.maps.LatLng) {
     map.value?.setZoom(mapZoom);
 }
 function panMapToShape(shape: TypedOverlay) {
-    if (
-        ((overlay): overlay is google.maps.Rectangle =>
-            shape.type === google.maps.drawing.OverlayType.RECTANGLE)(
-            shape.overlay
-        )
-    ) {
-        map.value.panToBounds(shape.overlay.getBounds());
-        return;
-    }
-    if (
-        ((overlay): overlay is google.maps.Circle =>
-            shape.type === google.maps.drawing.OverlayType.CIRCLE)(
-            shape.overlay
-        )
-    ) {
-        map.value.panToBounds(shape.overlay.getBounds());
-        return;
-    }
-    if (
-        ((overlay): overlay is google.maps.Polygon =>
-            shape.type === google.maps.drawing.OverlayType.POLYGON)(
-            shape.overlay
-        )
-    ) {
-        map.value.panTo(shape.overlay.getPath().getArray()[0]);
-        return;
-    }
-    if (
-        ((overlay): overlay is google.maps.Polyline =>
-            shape.type === google.maps.drawing.OverlayType.POLYLINE)(
-            shape.overlay
-        )
-    ) {
-        map.value.panTo(shape.overlay.getPath().getArray()[0]);
-        return;
-    }
+    panMapToPos(getCornerPosition(shape));
 }
 
 const selectedColorRef = ref<string>();
