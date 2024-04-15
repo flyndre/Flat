@@ -32,7 +32,7 @@ import io.github.dellisd.spatialk.geojson.Polygon
 import io.github.dellisd.spatialk.geojson.Position
 
 class MainActivity : ComponentActivity() {
-    var connectionService = ConnectionService("https:10.0.2.2:44380/api/rest")
+    var connectionService = ConnectionService("https:flat.buhss.de/api/rest")
     var trakingService = TrackingService()
     lateinit var db: AppDatabase
     override fun onCreate(savedInstanceState: Bundle?) {

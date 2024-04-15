@@ -79,6 +79,8 @@ class ConnectionService(
             .url("$baseUrl/collection")
             .post(Json.encodeToString(CollectionInstance(name,clientId,area)).toRequestBody("application/json".toMediaType()))
             .build()
+        var s = Json.encodeToString(CollectionInstance(name,clientId,area))
+        println(s);
         var response = restClient.newCall(request).execute()
 
         if(response.isSuccessful&&response.body !=null){
@@ -86,8 +88,9 @@ class ConnectionService(
             response.close()
             return json.decodeFromString(bodyString)
         }else{
+            val responseString = response.body?.string()
             response.close()
-            throw OpenCollectionException("Could not create the collection")
+            throw OpenCollectionException("Could not create the collection\n"+responseString)
 
         }
     }
