@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun JoinScreen(modifier: Modifier = Modifier, onNavigateToInitialScreen: () -> Unit, joinScreenViewModel: JoinScreenViewModel) {
+fun JoinScreen(modifier: Modifier = Modifier, onNavigateToInitialScreen: () -> Unit, onNavigateToTrackingScreen: () -> Unit, joinScreenViewModel: JoinScreenViewModel) {
     val joinLink by joinScreenViewModel.joinLink.collectAsState()
     val joinName by joinScreenViewModel.joinName.collectAsState()
     var joiningAllowed by remember { mutableStateOf(false) }
@@ -47,7 +47,7 @@ fun JoinScreen(modifier: Modifier = Modifier, onNavigateToInitialScreen: () -> U
             val modifier = Modifier.padding(10.dp)
             TextField(modifier = modifier, value = joinLink, onValueChange = {joinScreenViewModel.updateJoinLink(it)}, label = {Text(text = "Link for joining")})
             TextField(modifier = modifier, value = joinName, onValueChange = {joinScreenViewModel.updateJoinName(it)}, label = {Text(text = "Name for joining")})
-            Button(onClick = { /*TODO*/ }, enabled = joiningAllowed) {
+            Button(onClick = { onNavigateToTrackingScreen() }, enabled = joiningAllowed) {
                 Text(text = "Join")
             }
         }
