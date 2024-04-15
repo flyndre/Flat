@@ -16,14 +16,17 @@ interface IConnectionService {
     var onCollectionClosed: ((CollectionClosedMessage) -> Unit)?
     var onTrackUpdate: ((IncrementalTrackMessage) -> Unit)?
 
-    fun openCollection(name: String,area: Polygon ,divisions: List<CollectionArea>) : CollectionInstance
+    fun openCollection(name: String, area: Polygon) : CollectionInstance
     fun closeCollection(collection: CollectionInstance)
-    fun setAreaDivision(divisions: List<CollectionArea>)
-    fun assignCollectionArea(area: CollectionArea, clientId: UUID? = null)
+    fun setAreaDivision(collectionId: UUID, divisions: List<CollectionArea>)
+    fun assignCollectionArea(collectionId: UUID,area: CollectionArea, clientId: UUID? = null)
     fun requestAccess(username: String, collectionId: UUID) : RequestAccessResult
     fun giveAccess(request: AccessResquestMessage)
     fun denyAccess(request: AccessResquestMessage)
     fun leaveCollection(collection: CollectionInstance)
     fun sendTrackUpdate(track: Track)
+    fun openWebsocket()
+    fun closeWebsocket()
+
 
 }
