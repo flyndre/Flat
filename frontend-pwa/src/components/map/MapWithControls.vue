@@ -1,24 +1,16 @@
 <script setup lang="ts">
+import { TypedOverlay } from '@/types/map/TypedOverlay';
+import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
+import { mdiCrosshairsGps, mdiDelete, mdiDeleteSweep } from '@mdi/js';
 import { useGeolocation } from '@vueuse/core';
-import { computed, ref, watch } from 'vue';
+import Button from 'primevue/button';
+import { computed, nextTick, ref, watch } from 'vue';
 import { GoogleMap } from 'vue3-google-map';
 import MdiIcon from '../icons/MdiIcon.vue';
-import Button from 'primevue/button';
-import {
-    mdiCrosshairsGps,
-    mdiDelete,
-    mdiDeleteSweep,
-    mdiMagnify,
-} from '@mdi/js';
 import DrawingToolSelectButton from './DrawingToolSelectButton.vue';
-import ShapeColorSelectButton from './ShapeColorSelectButton.vue';
+import LocationSearchDialog from './LocationSearchDialog.vue';
 import MapTypeSelectButton from './MapTypeSelectButton.vue';
-import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
-import { TypedOverlay } from '@/types/map/TypedOverlay';
-import { nextTick } from 'vue';
-import InputText from 'primevue/inputtext';
-import InputGroup from 'primevue/inputgroup';
-import TextButtonIcon from '../icons/TextButtonIcon.vue';
+import ShapeColorSelectButton from './ShapeColorSelectButton.vue';
 
 /**
  * The shapes drawn on the map.
@@ -51,6 +43,8 @@ const mapCenter = mapCenterWithDefaults(useGeolocation().coords, {
     lat: 0,
     lng: 0,
 });
+
+const placesService = ref<google.maps.places.PlacesService>();
 
 const mapTypeId = ref<google.maps.MapTypeId>();
 const selectedToolRef = ref<google.maps.drawing.OverlayType>(null);
@@ -319,6 +313,10 @@ async function initialize() {
     // );
 
     buildColorPalette();
+
+    /* 🟡 Custom */ placesService.value = new google.maps.places.PlacesService(
+        map.value
+    );
 }
 window.addEventListener('load', initialize);
 </script>
@@ -336,18 +334,12 @@ window.addEventListener('load', initialize);
                         <MdiIcon :icon="mdiCrosshairsGps" />
                     </template>
                 </Button>
-                <Button
-                    class="grow"
-                    label="Search"
-                    severity="secondary"
-                    @click=""
-                    outlined
-                    :pt="{ label: { class: 'text-left' } }"
-                >
-                    <template #icon>
-                        <TextButtonIcon :icon="mdiMagnify" />
-                    </template>
-                </Button>
+                <LocationSearchDialog
+                    :places-service
+                    :select-result-callback="
+                        (r) => map.panTo(r.geometry?.location)
+                    "
+                />
             </div>
             <MapTypeSelectButton class="basis-1/12" v-model="mapTypeId" />
         </div>
