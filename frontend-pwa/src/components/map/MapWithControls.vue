@@ -399,7 +399,7 @@ window.addEventListener('load', initialize);
                         <template #header>
                             <div class="flex justify-center items-center">
                                 <TextButtonIcon :icon="mdiPalette" />
-                                Drawing
+                                Tools
                             </div>
                         </template>
                         <div
