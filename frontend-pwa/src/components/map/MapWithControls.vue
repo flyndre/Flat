@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { TypedOverlay } from '@/types/map/TypedOverlay';
-import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
-import { mdiCrosshairsGps, mdiDelete, mdiDeleteSweep } from '@mdi/js';
-import { useGeolocation } from '@vueuse/core';
+import { mdiDelete, mdiDeleteSweep } from '@mdi/js';
 import Button from 'primevue/button';
 import { computed, nextTick, ref, watch } from 'vue';
 import { GoogleMap } from 'vue3-google-map';
 import MdiIcon from '../icons/MdiIcon.vue';
 import DrawingToolSelectButton from './DrawingToolSelectButton.vue';
+import LocateMeButton from './LocateMeButton.vue';
 import LocationSearchDialog from './LocationSearchDialog.vue';
 import MapTypeSelectButton from './MapTypeSelectButton.vue';
 import ShapeColorSelectButton from './ShapeColorSelectButton.vue';
@@ -38,11 +37,6 @@ const mapComponentRef = ref<InstanceType<typeof GoogleMap> | null>();
 const mapReady = computed(() => mapComponentRef.value?.ready);
 const map = computed(() => mapComponentRef.value?.map);
 const mapZoom = 15;
-const { coords: clientPos, error: clientPosError } = useGeolocation();
-const mapCenter = mapCenterWithDefaults(useGeolocation().coords, {
-    lat: 0,
-    lng: 0,
-});
 
 const placesService = ref<google.maps.places.PlacesService>();
 
@@ -52,12 +46,9 @@ watch(selectedToolRef, (v) => setToolType(v));
 function setToolType(type: google.maps.drawing.OverlayType) {
     drawingManager.setDrawingMode(type);
 }
-function centerMap() {
+function panMapToPos(position: google.maps.LatLngLiteral | google.maps.LatLng) {
     try {
-        map.value?.panTo({
-            lat: clientPos.value.latitude,
-            lng: clientPos.value.longitude,
-        });
+        map.value?.panTo(position);
     } catch (e) {}
     map.value?.setZoom(mapZoom);
 }
@@ -325,19 +316,14 @@ window.addEventListener('load', initialize);
     <div class="flex flex-col gap-2">
         <div class="flex flex-row gap-2 items-center justify-stretch flex-wrap">
             <div class="flex flex-row gap-2 grow text-nowrap basis-7/12">
-                <Button
-                    severity="secondary"
-                    :disabled="clientPosError !== null"
-                    @click="() => centerMap()"
-                >
-                    <template #icon>
-                        <MdiIcon :icon="mdiCrosshairsGps" />
-                    </template>
-                </Button>
+                <LocateMeButton
+                    :initial-pan="true"
+                    :locate-me-handler="(r) => panMapToPos(r)"
+                />
                 <LocationSearchDialog
                     :places-service
                     :select-result-callback="
-                        (r) => map.panTo(r.geometry?.location)
+                        (r) => panMapToPos(r.geometry?.location)
                     "
                 />
             </div>
@@ -350,7 +336,6 @@ window.addEventListener('load', initialize);
                 :api-key
                 :libraries="['drawing', 'places']"
                 :zoom="mapZoom"
-                :center="mapCenter"
                 :disable-default-ui="true"
                 :map-type-id="mapTypeId"
                 :clickable-icons="false"
