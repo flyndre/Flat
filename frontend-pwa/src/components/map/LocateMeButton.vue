@@ -29,7 +29,7 @@ function locateMe() {
 }
 
 onMounted(() => {
-    if (clientPosError === null) {
+    if (clientPosError.value == null) {
         locateMe();
     }
 });
