@@ -9,10 +9,28 @@ import DrawingToolSelectButton from './DrawingToolSelectButton.vue';
 import ShapeColorSelectButton from './ShapeColorSelectButton.vue';
 import MapTypeSelectButton from './MapTypeSelectButton.vue';
 import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
+import { Overlay } from '@/types/map/Overlay';
 import { TypedOverlay } from '@/types/map/TypedOverlay';
 import { nextTick } from 'vue';
 
+// const shapeModel = defineProps<{
+//     shapes: TypedOverlay[];
+// }>();
+// const emit = defineEmits<{
+//     'update:shapes': [value: TypedOverlay[]];
+// }>();
+
 const shapes = defineModel<TypedOverlay[]>('shapes', { default: [] });
+
+// watch(shapeModel.shapes, (v) => {
+//     if (v === all_overlays) return;
+//     deleteAllShapes(false);
+//     if (v.length === 0) return;
+//     v.forEach((s) => {
+//         s.overlay?.setMap(map.value);
+//         // processNewOverlay(s, false);
+//     });
+// });
 
 const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 const mapComponentRef = ref<InstanceType<typeof GoogleMap> | null>();
@@ -28,8 +46,8 @@ const mapCenter = mapCenterWithDefaults(useGeolocation().coords, {
 function setMapType(type: google.maps.MapTypeId) {
     map.value?.setMapTypeId(type);
 }
-const selectedTool = ref<google.maps.drawing.OverlayType>(null);
-watch(selectedTool, (v) => setToolType(v));
+const selectedToolRef = ref<google.maps.drawing.OverlayType>(null);
+watch(selectedToolRef, (v) => setToolType(v));
 function setToolType(type: google.maps.drawing.OverlayType) {
     drawingManager.setDrawingMode(type);
 }
@@ -42,6 +60,9 @@ function centerMap() {
     } catch (e) {}
     map.value?.setZoom(mapZoom);
 }
+
+const selectedColorRef = ref<string>();
+watch(selectedColorRef, (v) => setShapeColor(v));
 
 const shapeSelected = ref(false);
 
@@ -143,7 +164,9 @@ function setSelection(shape) {
     selectedShape = shape;
     shape.setEditable(true);
     shape.setDraggable(true);
-    selectColor(shape.get('fillColor') || shape.get('strokeColor'));
+    /* 🟡 Custom */ selectedColorRef.value =
+        shape.get('fillColor') || shape.get('strokeColor');
+    // selectColor(shape.get('fillColor') || shape.get('strokeColor'));
     /* 🟡 Custom */ shapeSelected.value = true;
 }
 
@@ -246,7 +269,7 @@ async function initialize() {
             if (e.type != google.maps.drawing.OverlayType.MARKER) {
                 // Switch back to non-drawing mode after drawing a shape.
                 // drawingManager.setDrawingMode(null);
-                /* 🟡 Custom */ selectedTool.value = null;
+                /* 🟡 Custom */ selectedToolRef.value = null;
 
                 /* 🟡 Custom */ // Has to be next tick, otherwise the tool change above will unselect the selected shape
                 /* 🟡 Custom */ nextTick(() => {
@@ -321,8 +344,8 @@ window.addEventListener('load', initialize);
         </div>
         <div class="flex flex-row gap-2 items-center justify-stretch flex-wrap">
             <div class="flex flex-col gap-2 grow basis-50">
-                <DrawingToolSelectButton v-model="selectedTool" />
-                <ShapeColorSelectButton @update:model-value="setShapeColor" />
+                <DrawingToolSelectButton v-model="selectedToolRef" />
+                <ShapeColorSelectButton v-model="selectedColorRef" />
             </div>
             <div class="flex flex-col gap-2 grow basis-5 text-nowrap">
                 <Button
