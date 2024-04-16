@@ -3,11 +3,21 @@ import InputIcon from '@/components/icons/InputIcon.vue';
 import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
 import { clientId } from '@/data/clientMetadata';
 import { collectionService } from '@/data/collections';
+import {
+    GOOGLE_MAPS_API_KEY,
+    GOOGLE_MAPS_API_LIBRARIES,
+} from '@/data/constants';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { Collection } from '@/types/collection';
-import { safeMapCenterFromGeolocationCoords } from '@/util/googleMapsUtils';
+import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
 import validateCollection from '@/validation/validateCollection';
-import { mdiArrowLeft, mdiCheck, mdiMapMarkerPath, mdiPlay } from '@mdi/js';
+import {
+    mdiArrowLeft,
+    mdiCheck,
+    mdiMapMarkerPath,
+    mdiPlay,
+    mdiViewDashboardEdit,
+} from '@mdi/js';
 import { useGeolocation } from '@vueuse/core';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
@@ -17,8 +27,9 @@ import { computed, onMounted, ref } from 'vue';
 import { RouteLocationRaw, useRouter } from 'vue-router';
 import { GoogleMap } from 'vue3-google-map';
 
-const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-const mapCenter = safeMapCenterFromGeolocationCoords(useGeolocation().coords);
+const apiKey = GOOGLE_MAPS_API_KEY;
+const libraries = GOOGLE_MAPS_API_LIBRARIES;
+const mapCenter = mapCenterWithDefaults(useGeolocation().coords);
 
 const props = withDefaults(
     defineProps<{
@@ -123,15 +134,38 @@ const start = () => _saveCollection({ name: 'presets' });
             </div>
         </template>
         <template #default>
-            <Card :pt="{ root: { class: 'overflow-hidden' } }">
+            <Card
+                :pt="{
+                    root: { class: 'overflow-hidden' },
+                    header: { class: 'relative' },
+                }"
+            >
                 <template #header>
                     <GoogleMap
                         class="w-full h-[30vh] pointer-events-none"
                         :api-key
+                        :libraries
                         :zoom="15"
                         :center="mapCenter"
                         :disable-default-ui="true"
                     />
+                    <router-link
+                        :to="{
+                            name: edit ? 'edit-map' : 'create-map',
+                            params: { id: props.id },
+                        }"
+                    >
+                        <Button
+                            class="absolute bottom-6 right-6"
+                            label="Edit Areas"
+                            severity="secondary"
+                            raised
+                        >
+                            <template #icon>
+                                <TextButtonIcon :icon="mdiViewDashboardEdit" />
+                            </template>
+                        </Button>
+                    </router-link>
                 </template>
                 <template #content>
                     <div class="flex flex-col gap-2.5">

@@ -35,11 +35,6 @@ const router = createRouter({
             props: true,
         },
         {
-            path: '/map',
-            name: 'map',
-            component: MapView,
-        },
-        {
             path: '/presets',
             name: 'presets',
             component: PresetsView,
@@ -50,9 +45,23 @@ const router = createRouter({
             component: EditView,
         },
         {
+            path: '/create/map',
+            name: 'create-map',
+            component: MapView,
+        },
+        {
             path: '/edit/:id',
             name: 'edit',
             component: EditView,
+            props: (r) => ({
+                edit: true,
+                id: stringParamToInt(r.params['id']),
+            }),
+        },
+        {
+            path: '/edit/:id/map',
+            name: 'edit-map',
+            component: MapView,
             props: (r) => ({
                 edit: true,
                 id: stringParamToInt(r.params['id']),

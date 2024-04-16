@@ -37,7 +37,14 @@ const mapTypeOptions: MapTypeOption[] = [
         data-key="value"
         option-value="value"
         :allow-empty="false"
-        :pt="{ button: { class: 'h-9' } }"
+        :pt="{
+            button: {
+                class: 'h-9 w-auto grow flex flex-row justify-center',
+            },
+            root: {
+                class: 'w-auto flex flex-row grow justify-stretch',
+            },
+        }"
     >
         <template #option="slotProps">
             <MdiIcon :icon="slotProps.option.icon" />
