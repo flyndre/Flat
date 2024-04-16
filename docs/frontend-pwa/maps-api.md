@@ -11,7 +11,7 @@ The component can be included to display a map and receives the `api-key` as a p
 > [!CAUTION]
 > Everytime the `GoogleMap` component is used, it has to be provided the same `api-key` and `libraries` props;
 > Otherwise it causes the API to error.
-> To achieve this, the constants `GOOGLE_MAPS_API_KEY` and `GOOGLE_MAPS_API_LIBRARIES` are to be imported from `src/util/constants.ts` and passed to the component.
+> To achieve this, the constants `GOOGLE_MAPS_API_KEY` and `GOOGLE_MAPS_API_LIBRARIES` are to be imported from `src/data/constants.ts` and passed to the component.
 
 It also provides other props for convenient reactivity such as `center` and `zoom`.
 To access the `google.maps.Map` instance, use the `ref` attribute like in the following example.
