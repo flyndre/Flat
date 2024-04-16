@@ -1,6 +1,7 @@
 import { IdentifyableTypedOverlay } from '@/types/map/IdentifyableTypedOverlay';
+import { OverlayOptions } from '@/types/map/OverlayOptions';
 import { TypedOverlay } from '@/types/map/TypedOverlay';
-import { Geometry, GeometryObject } from 'geojson';
+import { Geometry } from 'geojson';
 import { Ref, computed } from 'vue';
 
 export function ifInfinityReplaceWith(number: number, replacement: number) {
@@ -118,8 +119,34 @@ function _coordinatesFromPolything(
     return polything
         .getPath()
         .getArray()
-        .map((vertex) => [vertex.lng(), vertex.lat()]);
+        .map((vertex) => [vertex.lat(), vertex.lng()]);
 }
 
-export function geoJSONObjectToShapeList(geoJSONObject: GeometryObject) {}
-export function geoJSONtoShape(geoJSON: Geometry) {}
+export function geoJSONtoShape(
+    geoJSON: Geometry,
+    shapeOptions: google.maps.GroundOverlayOptions = {}
+) {
+    switch (geoJSON.type) {
+        case 'Polygon':
+            return geoJSONtoPolygon(geoJSON, shapeOptions);
+        case 'LineString':
+
+        default:
+            return undefined;
+    }
+}
+
+export function geoJSONtoPolygon(
+    geoJSON: GeoJSON.Polygon,
+    shapeOptions: OverlayOptions = {}
+) {
+    return new google.maps.Polygon({
+        ...shapeOptions,
+        paths: [
+            geoJSON.coordinates[0].map((coords) => ({
+                lat: coords[0],
+                lng: coords[1],
+            })),
+        ],
+    });
+}

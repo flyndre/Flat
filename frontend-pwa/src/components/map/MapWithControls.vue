@@ -3,28 +3,32 @@ import {
     GOOGLE_MAPS_API_KEY,
     GOOGLE_MAPS_API_LIBRARIES,
 } from '@/data/constants';
+import { Division } from '@/types/Division';
+import { IdentifyableTypedOverlay } from '@/types/map/IdentifyableTypedOverlay';
 import { TypedOverlay } from '@/types/map/TypedOverlay';
+import {
+    geoJSONtoPolygon,
+    getShapeBounds,
+    getShapeColor,
+    polygonToGeoJSON,
+} from '@/util/googleMapsUtils';
 import { isOnMobile } from '@/util/mobileDetection';
 import { mdiDeleteForever, mdiMap, mdiPalette, mdiShape } from '@mdi/js';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import TabPanel from 'primevue/tabpanel';
 import TabView from 'primevue/tabview';
+import { v4 as uuidv4 } from 'uuid';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { GoogleMap } from 'vue3-google-map';
 import MdiIcon from '../icons/MdiIcon.vue';
 import TextButtonIcon from '../icons/TextButtonIcon.vue';
+import DrawingModeSwitch from './DrawingModeSwitch.vue';
 import LocateMeButton from './LocateMeButton.vue';
 import LocationSearchDialog from './LocationSearchDialog.vue';
 import MapTypeSelectButton from './MapTypeSelectButton.vue';
 import ShapeColorSelectButton from './ShapeColorSelectButton.vue';
-import { getShapeBounds } from '@/util/googleMapsUtils';
-import DrawingModeSwitch from './DrawingModeSwitch.vue';
-import { IdentifyableTypedOverlay } from '@/types/map/IdentifyableTypedOverlay';
-import { v4 as uuidv4 } from 'uuid';
 import ShapesList from './ShapesList.vue';
-import { Division } from '@/types/Division';
-import { polygonToGeoJSON } from '@/util/googleMapsUtils';
 
 /**
  * The shapes drawn on the map.
@@ -38,20 +42,37 @@ const areas = defineModel<Division[]>('areas', {
 let recentlyUpdated = false;
 
 watch(
-    // TODO: watch values not length as soon as shapes are inputted geojson
-    () => areas.value.length,
+    () => areas.value,
     () => {
         if (recentlyUpdated) return; // Prevents infinite update loop
         deleteAllShapes(false);
-        shapes.value.forEach((s) => {
-            // TODO: update for geojson
-            const sClone = structuredClone(s);
-            sClone.overlay?.setMap(map.value);
-            processNewOverlay(sClone, false);
+        areas.value.forEach((a) => {
+            const shape = {
+                id: a.id,
+                name: a.name,
+                type: google.maps.drawing.OverlayType.POLYGON,
+                overlay: geoJSONtoPolygon(
+                    {
+                        type: 'Polygon',
+                        coordinates: a.area.coordinates[0],
+                    },
+                    {
+                        ...shapeOptions,
+                        strokeColor: a.color,
+                        fillColor: a.color,
+                    }
+                ),
+            };
+            shape.overlay.setMap(map.value);
+            processNewOverlay(shape, false);
         });
         recentlyUpdated = true;
+        shapes.value.length = 0;
+        shapes.value.push(...all_overlays);
+        clearSelection();
         nextTick(() => (recentlyUpdated = false));
-    }
+    },
+    { deep: true }
 );
 
 const apiKey = GOOGLE_MAPS_API_KEY;
@@ -170,6 +191,7 @@ function shapeListChanged() {
     areas.value = shapes.value.map((s) => ({
         id: s.id,
         name: s.name,
+        color: getShapeColor(s),
         area: {
             type: 'MultiPolygon',
             coordinates: [
@@ -279,8 +301,8 @@ function buildColorPalette() {
 const shapeOptions = {
     strokeWeight: 0,
     fillOpacity: 0.45,
-    editable: true,
-    draggable: true,
+    editable: false,
+    draggable: false,
 };
 const lineOptions = {
     ...shapeOptions,
@@ -289,8 +311,10 @@ const lineOptions = {
 };
 
 /* 🟡 Custom */ function processNewOverlay(overlay: any, userCreated = true) {
-    overlay.id = uuidv4();
-    overlay.name = '';
+    if (userCreated) {
+        overlay.id = uuidv4();
+        overlay.name = '';
+    }
     all_overlays.push(overlay);
     if (overlay.type != google.maps.drawing.OverlayType.MARKER) {
         // Switch back to non-drawing mode after drawing a shape.

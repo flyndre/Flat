@@ -4,7 +4,7 @@ import { ref } from 'vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
 import Button from 'primevue/button';
-import { mdiArrowLeft, mdiCheck } from '@mdi/js';
+import { mdiArrowLeft, mdiCheck, mdiDuck } from '@mdi/js';
 import { v4 as uuidv4 } from 'uuid';
 import { Division } from '@/types/Division';
 
@@ -21,28 +21,28 @@ const props = withDefaults(
     }
 );
 
-// const addShape = () => {
-//     areas.value.push({
-//         overlay: new google.maps.Polygon({
-//             paths: [
-//                 { lat: 48.384521, lng: 8.582583 },
-//                 { lat: 48.383178, lng: 8.583846 },
-//                 { lat: 48.383348, lng: 8.580421 },
-//             ],
-//             strokeColor: '#FF0000',
-//             strokeOpacity: 0.8,
-//             strokeWeight: 2,
-//             fillColor: '#FF0000',
-//             fillOpacity: 0.35,
-//         }),
-//         type: google.maps.drawing.OverlayType.POLYGON,
-//         id: uuidv4(),
-//         name: 'Mein erstes Polygon 😊',
-//     });
-// };
+const addShape = () => {
+    areas.value.push({
+        area: {
+            type: 'MultiPolygon',
+            coordinates: [
+                [
+                    [
+                        [48.384521, 8.582583],
+                        [48.383178, 8.583846],
+                        [48.383348, 8.580421],
+                    ],
+                ],
+            ],
+        },
+        id: uuidv4(),
+        name: 'Mein erstes Polygon 😊',
+        color: 'lime',
+    });
+};
 
 function _saveAreas() {
-    alert(JSON.stringify(areas.value));
+    console.log(areas.value);
 }
 </script>
 
@@ -64,13 +64,11 @@ function _saveAreas() {
         </template>
         <template #title> Edit Map </template>
         <template #action-right>
-            <div class="flex flex-row gap-2">
-                <Button label="Save" severity="primary" @click="_saveAreas">
-                    <template #icon>
-                        <TextButtonIcon :icon="mdiCheck" />
-                    </template>
-                </Button>
-            </div>
+            <Button label="Save" severity="primary" @click="_saveAreas">
+                <template #icon>
+                    <TextButtonIcon :icon="mdiCheck" />
+                </template>
+            </Button>
         </template>
         <template #default>
             <MapWithControls v-model:areas="areas" />
