@@ -25,6 +25,7 @@ class PresetScreenViewModel(db: AppDatabase, collectionAreaScreenViewModel: Coll
             _presetName.value = preset.presetName
             _presetDescription.value = preset.presetDescription
             _collectionAreaScreenViewModel.setListAreaPoints(preset.presetAreaPoints)
+            _collectionAreaScreenViewModel.setCameraPosition(preset.presetCameraPosition)
         }
     }
     fun getPresetId(): Long{
@@ -46,7 +47,7 @@ class PresetScreenViewModel(db: AppDatabase, collectionAreaScreenViewModel: Coll
 
     //function for saving preset
     fun savePresetToDatabase(){
-        val preset = Preset(_presetId, _presetName.value, _presetDescription.value, _collectionAreaScreenViewModel.getListAreaPoints())
+        val preset = Preset(_presetId, _presetName.value, _presetDescription.value, _collectionAreaScreenViewModel.getListAreaPoints(), _collectionAreaScreenViewModel.getCameraPosition())
         viewModelScope.launch {
             if(_presetId == 0.toLong()){
                 _db.presetDao().insertPreset(preset = preset)
