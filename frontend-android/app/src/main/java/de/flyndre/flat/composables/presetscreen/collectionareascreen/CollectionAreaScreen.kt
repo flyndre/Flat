@@ -31,10 +31,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Polygon
+import com.google.maps.android.compose.rememberCameraPositionState
 import de.flyndre.flat.database.AppDatabase
 import io.github.dellisd.spatialk.geojson.dsl.point
 
@@ -43,6 +45,10 @@ import io.github.dellisd.spatialk.geojson.dsl.point
 fun CollectionAreaScreen(modifier: Modifier = Modifier, navController: NavController, collectionAreaScreenViewModel: CollectionAreaScreenViewModel){
     var movingEnabled by remember { mutableStateOf(true) }
     val listAreaPoints by collectionAreaScreenViewModel.listAreaPoints.collectAsState()
+    val cameraPosition by collectionAreaScreenViewModel.cameraPosition.collectAsState()
+    val cameraPositionState = rememberCameraPositionState {
+        position = cameraPosition
+    }
     Scaffold(
         topBar = {
             TopAppBar(title = { if(movingEnabled){
@@ -59,6 +65,7 @@ fun CollectionAreaScreen(modifier: Modifier = Modifier, navController: NavContro
                     if(!movingEnabled){
                         Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)) {
                             Button(onClick = {
+                                collectionAreaScreenViewModel.setCameraPosition(cameraPositionState.position)
                                 navController.navigate("editpreset/0")
                             }) {
                                 Text(text = "Save Area")
@@ -94,7 +101,8 @@ fun CollectionAreaScreen(modifier: Modifier = Modifier, navController: NavContro
             mapSettings = MapUiSettings(zoomControlsEnabled = false, zoomGesturesEnabled = false, tiltGesturesEnabled = false, rotationGesturesEnabled = false, scrollGesturesEnabled = false)
             mapProperties = MapProperties(isMyLocationEnabled = false)
         }
-        GoogleMap(modifier = Modifier.padding(innerPadding), uiSettings = mapSettings, properties = mapProperties, onMapClick = {if(!movingEnabled){collectionAreaScreenViewModel.addPCollectionAreaPoint(it)}}){
+
+        GoogleMap(modifier = Modifier.padding(innerPadding), uiSettings = mapSettings, properties = mapProperties, cameraPositionState = cameraPositionState, onMapClick = {if(!movingEnabled){collectionAreaScreenViewModel.addPCollectionAreaPoint(it)}}){
             if(listAreaPoints.isNotEmpty()){
                 Polygon(points = listAreaPoints, fillColor = Color(255, 159, 246, 127), strokeColor = Color(255, 159, 246, 255))
             }

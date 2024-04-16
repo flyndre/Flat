@@ -27,7 +27,7 @@ fun InitialScreen(
     onLukasBUHtton: () -> Unit
 ) {
     Scaffold(
-        bottomBar = {
+        bottomBar = { BottomAppBar {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)
@@ -42,6 +42,7 @@ fun InitialScreen(
                     Text("Lukas BUHtton")
                 }
             }
+        }
         }
     ) { innerPadding ->
         modifier.padding(innerPadding)
