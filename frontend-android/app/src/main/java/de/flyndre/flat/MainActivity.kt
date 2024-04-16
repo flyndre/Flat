@@ -38,27 +38,23 @@ import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.interfaces.IConnectionService
 import de.flyndre.flat.interfaces.ITrackingService
 import de.flyndre.flat.ui.theme.FlatTheme
-import io.github.dellisd.spatialk.geojson.FeatureCollection
-import io.github.dellisd.spatialk.geojson.MultiPolygon
-import io.github.dellisd.spatialk.geojson.Polygon
-import io.github.dellisd.spatialk.geojson.Position
 import java.util.UUID
 
 class MainActivity : ComponentActivity() {
     private lateinit var connectionService : IConnectionService
-    val trakingService : ITrackingService = TrackingService()
-    lateinit var db: AppDatabase
-    val userIdKey = "USERID"
+    val trackingService : ITrackingService = TrackingService()
+    private lateinit var db: AppDatabase
+    private val userIdKey = "USERID"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //request permissions
         requestLocationPermission()
-        var preference = getPreferences(Context.MODE_PRIVATE)
+        val preference = getPreferences(Context.MODE_PRIVATE)
         if(!preference.contains(userIdKey)){
             preference.edit { putString(userIdKey,UUID.randomUUID().toString()) }
         }
-        var userId = UUID.fromString(preference.getString(userIdKey,""))
+        val userId = UUID.fromString(preference.getString(userIdKey,""))
         connectionService = ConnectionService("https:flat.buhss.de/api/rest",userId)
         db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "flat-database").build()
         val collectionAreaScreenViewModel = CollectionAreaScreenViewModel()
@@ -70,7 +66,7 @@ class MainActivity : ComponentActivity() {
             FlatTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    AppEntryPoint(modifier = Modifier, createGroupScreenViewModel, presetScreenViewModel, collectionAreaScreenViewModel, joinScreenViewModel, trackingScreenViewModel,connectionService,trakingService)
+                    AppEntryPoint(modifier = Modifier, createGroupScreenViewModel, presetScreenViewModel, collectionAreaScreenViewModel, joinScreenViewModel, trackingScreenViewModel)
                 }
             }
         }
@@ -93,7 +89,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun AppEntryPoint(modifier: Modifier, createGroupScreenViewModel: CreateGroupScreenViewModel, presetScreenViewModel: PresetScreenViewModel, collectionAreaScreenViewModel: CollectionAreaScreenViewModel, joinScreenViewModel: JoinScreenViewModel, trackingScreenViewModel: TrackingScreenViewModel,connectionService: IConnectionService,trackingService: ITrackingService){
+fun AppEntryPoint(modifier: Modifier, createGroupScreenViewModel: CreateGroupScreenViewModel, presetScreenViewModel: PresetScreenViewModel, collectionAreaScreenViewModel: CollectionAreaScreenViewModel, joinScreenViewModel: JoinScreenViewModel, trackingScreenViewModel: TrackingScreenViewModel){
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = "initial") {

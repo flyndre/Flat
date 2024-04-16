@@ -12,10 +12,7 @@ import de.flyndre.flat.models.RequestAccessResult
 import de.flyndre.flat.models.Track
 import de.flyndre.flat.models.WebSocketMessage
 import de.flyndre.flat.models.WebSocketMessageType
-import io.github.dellisd.spatialk.geojson.Feature
-import io.github.dellisd.spatialk.geojson.FeatureCollection
 import io.github.dellisd.spatialk.geojson.MultiPolygon
-import io.github.dellisd.spatialk.geojson.Polygon
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -23,135 +20,120 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import ru.gildor.coroutines.okhttp.await
-import java.security.cert.X509Certificate
 import java.util.UUID
-import java.util.stream.Stream
-import javax.net.ssl.SSLContext
-import javax.net.ssl.TrustManager
-import javax.net.ssl.X509TrustManager
 
 class ConnectionService(
-    var baseUrl:String,
-    var clientId:UUID,
-    override var onAccessResquest: ((AccessResquestMessage) -> Unit)? =null,
-    override var onCollectionClosed: ((CollectionClosedMessage) -> Unit)? =null,
-    override var onTrackUpdate: ((IncrementalTrackMessage) -> Unit)? =null
+    private var baseUrl:String,
+    private val clientId:UUID,
+    override val onAccessRequest: ArrayList<(AccessResquestMessage) -> Unit> = arrayListOf(),
+    override var onCollectionClosed: ArrayList<(CollectionClosedMessage) -> Unit> = arrayListOf(),
+    override var onTrackUpdate: ArrayList<(IncrementalTrackMessage) -> Unit> = arrayListOf(),
 ):IConnectionService {
 
-    private lateinit var restClient:OkHttpClient
-    private var webSocketClient: WebSocketClient = WebSocketClient.getInstance()
+    private val restClient = OkHttpClient.Builder().build()
+    private val webSocketClient: WebSocketClient = WebSocketClient.getInstance()
     private val socketListener = object : WebSocketClient.SocketListener {
         override fun onMessage(message: String) {
-            var obj = Json.decodeFromString<WebSocketMessage>(message)
+            val obj = Json.decodeFromString<WebSocketMessage>(message)
             when(obj.type){
-                WebSocketMessageType.IncrementalTrack -> onTrackUpdate?.let { it( obj as IncrementalTrackMessage) }
-                WebSocketMessageType.AccessRequest -> onAccessResquest?.let { it (obj as AccessResquestMessage) }
-                WebSocketMessageType.CollectionClosed -> onCollectionClosed?.let { it (obj as CollectionClosedMessage) }
+                WebSocketMessageType.IncrementalTrack -> onTrackUpdate.stream().forEach { x->x(obj as IncrementalTrackMessage) }
+                WebSocketMessageType.AccessRequest -> onAccessRequest.stream().forEach { x->x(obj as AccessResquestMessage) }
+                WebSocketMessageType.CollectionClosed -> onCollectionClosed.stream().forEach { x->x(obj as CollectionClosedMessage) }
             }
         }
     }
-    val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
-        override fun checkClientTrusted(
-            chain: Array<out X509Certificate>?,
-            authType: String?
-        ) {}
-
-        override fun checkServerTrusted(
-            chain: Array<out X509Certificate>?,
-            authType: String?
-        ) {}
-
-        override fun getAcceptedIssuers() = arrayOf<X509Certificate>()
-    })
-    val sslContext = SSLContext.getInstance("SSL")
-
-    init {
-        sslContext.init(null, trustAllCerts, java.security.SecureRandom())
-
-        // Create an ssl socket factory with our all-trusting manager
-        val sslSocketFactory = sslContext.socketFactory
-        restClient = OkHttpClient.Builder()
-            .sslSocketFactory(sslSocketFactory, trustAllCerts[0] as X509TrustManager)
-            .hostnameVerifier{ _, _ -> true }
-            .build()
-    }
-
     private val json = Json { ignoreUnknownKeys = true }
 
     override suspend fun openCollection(name: String, area: MultiPolygon
     ): CollectionInstance {
-        var request = Request.Builder()
+        val request = Request.Builder()
             .url("$baseUrl/collection")
             .post(Json.encodeToString(CollectionInstance(name,clientId,area)).toRequestBody("application/json".toMediaType()))
             .build()
-        var s = Json.encodeToString(CollectionInstance(name,clientId,area))
-        println(s);
-        var response = restClient.newCall(request).await()
+        val response = restClient.newCall(request).await()
         if(response.isSuccessful&&response.body !=null){
-            var bodyString = response.body!!.string()
+            val bodyString = response.body!!.string()
             response.close()
             return json.decodeFromString(bodyString)
         }else{
             val responseString = response.body?.string()
             response.close()
-            throw OpenCollectionException("Could not create the collection\n"+responseString)
+            throw OpenCollectionException("Could not create the collection:\n$responseString")
 
         }
     }
 
 
-    override fun closeCollection(collection: CollectionInstance) {
-        var request = Request.Builder()
+    override suspend fun closeCollection(collection: CollectionInstance) {
+        val request = Request.Builder()
             .url("$baseUrl/api/rest/collection/${collection.id}")
             .delete()
             .build()
-        var result = restClient.newCall(request).execute()
+        val result = restClient.newCall(request).await()
         if(!result.isSuccessful){
             TODO()
         }
     }
 
-    override fun setAreaDivision(collectionId: UUID, divisions: List<CollectionArea>) {
-        var url = "$baseUrl/api/rest/collection/$collectionId"
-        var request = Request.Builder()
+    override suspend fun setAreaDivision(collectionId: UUID, divisions: List<CollectionArea>) {
+        val url = "$baseUrl/api/rest/collection/$collectionId"
+        val request = Request.Builder()
             .url(url)
             .put(json.encodeToString(divisions).toRequestBody())
             .build()
-        restClient.newCall(request).execute()
+        restClient.newCall(request).await()
     }
 
-    override fun assignCollectionArea(collectionId: UUID, area: CollectionArea, clientId: UUID?) {
+    override suspend fun assignCollectionArea(collectionId: UUID, area: CollectionArea, clientId: UUID?) {
         TODO("Not yet implemented")
     }
 
-    override fun requestAccess(username: String, collectionId: UUID): RequestAccessResult {
+    override suspend fun requestAccess(username: String, collectionId: UUID): RequestAccessResult {
         TODO("Not yet implemented")
     }
 
-    override fun giveAccess(request: AccessResquestMessage) {
+    override suspend fun giveAccess(request: AccessResquestMessage) {
         TODO("Not yet implemented")
     }
 
-    override fun denyAccess(request: AccessResquestMessage) {
+    override suspend fun denyAccess(request: AccessResquestMessage) {
         TODO("Not yet implemented")
     }
 
-    override fun leaveCollection(collection: CollectionInstance) {
+    override suspend fun leaveCollection(collection: CollectionInstance) {
         TODO("Not yet implemented")
     }
 
-    override fun sendTrackUpdate(track: Track) {
-        var message = Json.encodeToString(IncrementalTrackMessage(track.trackId.toString(),track.toLineString()))
+    override suspend fun sendTrackUpdate(track: Track) {
+        val message = Json.encodeToString(IncrementalTrackMessage(track.trackId.toString(),track.toLineString()))
         webSocketClient.sendMessage(message)
     }
 
-    override fun openWebsocket() {
+    override suspend fun openWebsocket(onAccessRequest: ((AccessResquestMessage) -> Unit)?,
+                                       onCollectionClosed: ((CollectionClosedMessage) -> Unit)?,
+                                       onTrackUpdate: ((IncrementalTrackMessage) -> Unit)?) {
+
+        onAccessRequest?.let { addOnAccessRequest(it) }
+        onCollectionClosed?.let { addOnCollectionClosed(it) }
+        onTrackUpdate?.let { addOnTrackUpdate(it) }
         webSocketClient.setSocketUrl("$baseUrl/ws")
         webSocketClient.setListener(socketListener)
         webSocketClient.connect()
     }
 
-    override fun closeWebsocket() {
+    override suspend fun closeWebsocket() {
         webSocketClient.disconnect()
+    }
+
+    override fun addOnAccessRequest(callback: (AccessResquestMessage) -> Unit) {
+        onAccessRequest.add(callback)
+    }
+
+    override fun addOnCollectionClosed(callback: (CollectionClosedMessage) -> Unit) {
+        onCollectionClosed.add(callback)
+    }
+
+    override fun addOnTrackUpdate(callback: (IncrementalTrackMessage) -> Unit) {
+        onTrackUpdate.add(callback)
     }
 }
