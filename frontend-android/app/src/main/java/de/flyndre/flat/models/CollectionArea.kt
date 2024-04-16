@@ -11,7 +11,8 @@ data class CollectionArea(
     @Serializable(with = UUIDSerializer::class)
     var id:UUID = UUID.randomUUID(),
     @Serializable(with = UUIDSerializer::class)
-    var clientId:UUID?=null
+    var clientId:UUID?=null,
+    var name:String
 ) {
 
 }
