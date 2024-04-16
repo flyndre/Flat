@@ -91,6 +91,7 @@ fun AppEntryPoint(modifier: Modifier, createGroupScreenViewModel: CreateGroupScr
         composable("join"){JoinScreen(modifier = modifier, onNavigateToInitialScreen = {navController.navigate("initial")}, onNavigateToTrackingScreen = {navController.navigate("tracking")}, joinScreenViewModel = joinScreenViewModel)}
         composable("creategroup"){CreateGroupScreen(modifier = modifier,  onNavigateToInitialScreen = {navController.navigate("initial")}, onNavigateToNewPresetScreen = {navController.navigate("newpreset")}, navController = navController, createGroupScreenViewModel = createGroupScreenViewModel)}
         composable("newpreset"){
+            presetScreenViewModel.newEmptyPreset()
             PresetScreen(presetId = null, navController = navController, topBarText = "New Preset", onNavigateToCreateGroupScreen = {navController.navigate("creategroup")}, onNavigateToTrackingScreen = {navController.navigate("tracking")}, presetScreenViewModel = presetScreenViewModel)}
         composable("editpreset/{presetId}", arguments = listOf(navArgument("presetId"){type = NavType.LongType})){
             backStackEntry -> val presetId = backStackEntry.arguments?.getLong("presetId")

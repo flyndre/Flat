@@ -21,6 +21,11 @@ class CollectionAreaScreenViewModel(): ViewModel() {
     private val _cameraPosition = MutableStateFlow(CameraPosition(LatLng(0.0, 0.0), 0F, 0F, 0F))
     val cameraPosition: StateFlow<CameraPosition> = _cameraPosition.asStateFlow()
 
+    fun newEmptyCollectionArea(){
+        _cameraPosition.value = CameraPosition(LatLng(0.0, 0.0), 0F, 0F, 0F)
+        _listAreaPoints.value = arrayListOf()
+    }
+
     fun setCameraPosition(cameraPosition: CameraPosition){
         _cameraPosition.value = cameraPosition
     }

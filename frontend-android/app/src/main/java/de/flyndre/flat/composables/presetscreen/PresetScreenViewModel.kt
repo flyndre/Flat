@@ -23,6 +23,14 @@ class PresetScreenViewModel(db: AppDatabase, collectionAreaScreenViewModel: Coll
     private var _presetId: Long = 0
 
     private val _connectionService = connectionService
+
+    fun newEmptyPreset(){
+        _presetId = 0
+        _presetName.value = ""
+        _presetDescription.value = ""
+        _collectionAreaScreenViewModel.newEmptyCollectionArea()
+    }
+
     fun setPresetId(presetId: Long){
         _presetId = presetId
         viewModelScope.launch {
