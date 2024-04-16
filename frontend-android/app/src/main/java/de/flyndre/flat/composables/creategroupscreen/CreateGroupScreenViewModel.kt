@@ -7,6 +7,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.room.Room
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.database.entities.Preset
+import de.flyndre.flat.interfaces.IConnectionService
+import de.flyndre.flat.interfaces.ITrackingService
+import de.flyndre.flat.services.ConnectionService
+import de.flyndre.flat.services.TrackingService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

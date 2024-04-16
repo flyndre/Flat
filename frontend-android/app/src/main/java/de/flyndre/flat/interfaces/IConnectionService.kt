@@ -7,6 +7,7 @@ import de.flyndre.flat.models.CollectionInstance
 import de.flyndre.flat.models.IncrementalTrackMessage
 import de.flyndre.flat.models.RequestAccessResult
 import de.flyndre.flat.models.Track
+import io.github.dellisd.spatialk.geojson.MultiPolygon
 import io.github.dellisd.spatialk.geojson.Polygon
 import java.util.UUID
 
@@ -16,7 +17,7 @@ interface IConnectionService {
     var onCollectionClosed: ((CollectionClosedMessage) -> Unit)?
     var onTrackUpdate: ((IncrementalTrackMessage) -> Unit)?
 
-    fun openCollection(name: String, area: Polygon) : CollectionInstance
+    suspend fun openCollection(name: String, area: MultiPolygon) : CollectionInstance
     fun closeCollection(collection: CollectionInstance)
     fun setAreaDivision(collectionId: UUID, divisions: List<CollectionArea>)
     fun assignCollectionArea(collectionId: UUID,area: CollectionArea, clientId: UUID? = null)

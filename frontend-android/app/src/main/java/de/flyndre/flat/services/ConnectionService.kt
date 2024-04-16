@@ -12,6 +12,9 @@ import de.flyndre.flat.models.RequestAccessResult
 import de.flyndre.flat.models.Track
 import de.flyndre.flat.models.WebSocketMessage
 import de.flyndre.flat.models.WebSocketMessageType
+import io.github.dellisd.spatialk.geojson.Feature
+import io.github.dellisd.spatialk.geojson.FeatureCollection
+import io.github.dellisd.spatialk.geojson.MultiPolygon
 import io.github.dellisd.spatialk.geojson.Polygon
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -19,8 +22,10 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import ru.gildor.coroutines.okhttp.await
 import java.security.cert.X509Certificate
 import java.util.UUID
+import java.util.stream.Stream
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
@@ -73,7 +78,7 @@ class ConnectionService(
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    override fun openCollection(name: String, area: Polygon
+    override suspend fun openCollection(name: String, area: MultiPolygon
     ): CollectionInstance {
         var request = Request.Builder()
             .url("$baseUrl/collection")
@@ -81,8 +86,7 @@ class ConnectionService(
             .build()
         var s = Json.encodeToString(CollectionInstance(name,clientId,area))
         println(s);
-        var response = restClient.newCall(request).execute()
-
+        var response = restClient.newCall(request).await()
         if(response.isSuccessful&&response.body !=null){
             var bodyString = response.body!!.string()
             response.close()
@@ -94,6 +98,7 @@ class ConnectionService(
 
         }
     }
+
 
     override fun closeCollection(collection: CollectionInstance) {
         var request = Request.Builder()
