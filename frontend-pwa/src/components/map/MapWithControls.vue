@@ -20,7 +20,7 @@ import Button from 'primevue/button';
 import Card from 'primevue/card';
 import TabPanel from 'primevue/tabpanel';
 import TabView from 'primevue/tabview';
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { GoogleMap } from 'vue3-google-map';
 import MdiIcon from '../icons/MdiIcon.vue';
 import TextButtonIcon from '../icons/TextButtonIcon.vue';
@@ -30,7 +30,7 @@ import LocationSearchDialog from './LocationSearchDialog.vue';
 import MapTypeSelectButton from './MapTypeSelectButton.vue';
 import ShapeColorSelectButton from './ShapeColorSelectButton.vue';
 import ScrollPanel from 'primevue/scrollpanel';
-import { getCornerPosition } from '@/util/googleMapsUtils';
+import { getShapeBounds } from '@/util/googleMapsUtils';
 
 /**
  * The shapes drawn on the map.
@@ -66,7 +66,7 @@ const mapTypeId = ref<google.maps.MapTypeId>();
 const selectedToolRef = ref<google.maps.drawing.OverlayType>(null);
 watch(selectedToolRef, (v) => setToolType(v));
 function setToolType(type: google.maps.drawing.OverlayType) {
-    drawingManager.setDrawingMode(type);
+    drawingManager.value.setDrawingMode(type);
 }
 function panMapToPos(position: google.maps.LatLngLiteral | google.maps.LatLng) {
     try {
@@ -75,7 +75,8 @@ function panMapToPos(position: google.maps.LatLngLiteral | google.maps.LatLng) {
     map.value?.setZoom(mapZoom);
 }
 function panMapToShape(shape: TypedOverlay) {
-    panMapToPos(getCornerPosition(shape));
+    map.value.fitBounds(getShapeBounds(shape));
+    map.value.setZoom(mapZoom);
 }
 
 const selectedColorRef = ref<string>();
@@ -163,7 +164,7 @@ function shapeListChanged() {
  * @see https://stackoverflow.com/a/12006751/11793652
  */
 
-var drawingManager;
+const drawingManager = ref<google.maps.drawing.DrawingManager>();
 var all_overlays = [];
 var selectedShape;
 var colors = ['#1E90FF', '#FF1493', '#32CD32', '#FF8C00', '#4B0082'];
@@ -215,21 +216,21 @@ function selectColor(color) {
 
     // Retrieves the current options from the drawing manager and replaces the
     // stroke or fill color as appropriate.
-    var polylineOptions = drawingManager.get('polylineOptions');
+    var polylineOptions = drawingManager.value.get('polylineOptions');
     polylineOptions.strokeColor = color;
-    drawingManager.set('polylineOptions', polylineOptions);
+    drawingManager.value.set('polylineOptions', polylineOptions);
 
-    var rectangleOptions = drawingManager.get('rectangleOptions');
+    var rectangleOptions = drawingManager.value.get('rectangleOptions');
     rectangleOptions.fillColor = color;
-    drawingManager.set('rectangleOptions', rectangleOptions);
+    drawingManager.value.set('rectangleOptions', rectangleOptions);
 
-    var circleOptions = drawingManager.get('circleOptions');
+    var circleOptions = drawingManager.value.get('circleOptions');
     circleOptions.fillColor = color;
-    drawingManager.set('circleOptions', circleOptions);
+    drawingManager.value.set('circleOptions', circleOptions);
 
-    var polygonOptions = drawingManager.get('polygonOptions');
+    var polygonOptions = drawingManager.value.get('polygonOptions');
     polygonOptions.fillColor = color;
-    drawingManager.set('polygonOptions', polygonOptions);
+    drawingManager.value.set('polygonOptions', polygonOptions);
 }
 
 function setSelectedShapeColor(color) {
@@ -288,9 +289,12 @@ const lineOptions = {
 }
 
 async function initialize() {
+    if (!mapReady.value) {
+        return setTimeout(initialize, 100);
+    }
     // Creates a drawing manager attached to the map that allows the user to draw
     // markers, lines, and shapes.
-    drawingManager = new google.maps.drawing.DrawingManager({
+    drawingManager.value = new google.maps.drawing.DrawingManager({
         drawingMode: null,
         drawingControl: false,
         markerOptions: {
@@ -304,7 +308,7 @@ async function initialize() {
     });
 
     google.maps.event.addListener(
-        drawingManager,
+        drawingManager.value,
         'overlaycomplete',
         /* 🟡 Custom */ (e) => processNewOverlay(e)
     );
@@ -312,7 +316,7 @@ async function initialize() {
     // Clear the current selection when the drawing mode is changed, or when the
     // map is clicked.
     google.maps.event.addListener(
-        drawingManager,
+        drawingManager.value,
         'drawingmode_changed',
         clearSelection
     );
@@ -334,7 +338,7 @@ async function initialize() {
         map.value
     );
 }
-window.addEventListener('load', initialize);
+onMounted(initialize);
 </script>
 
 <template>
@@ -342,10 +346,10 @@ window.addEventListener('load', initialize);
         class="flex gap-2 h-full justify-stretch items-stretch pb-2"
         :class="[isOnMobile ? 'flex-col' : 'flex-col-reverse']"
     >
-        <div class="grow overflow-hidden rounded-xl">
+        <div class="grow overflow-hidden flex flex-col-reverse rounded-xl">
             <GoogleMap
                 ref="mapComponentRef"
-                style="min-height: 100vh; height: 100vh; width: 100%"
+                style="height: 100%; width: 100%"
                 :api-key
                 :libraries
                 :zoom="mapZoom"

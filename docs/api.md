@@ -9,11 +9,12 @@ The following messages and data are exchanged between the frontends and the back
     -   clientId: `UUID`
     -   (ID is generated): `UUID`
     -   collectionArea (Staked out area): `GeoJSON MultiPolygon`
--   **Set/change area division**
-    -   List of collectionArea
+-   **Set/change division of collectionArea**
+    -   List of collectionDivision
         -   area: `GeoJSON MultiPolygon`
+        -   name: `String`
         -   id: `UUID`
--   **Assign areas (participants to themselves or boss to someone else)**
+-   **Assign collectionDivision (participants to themselves or boss to someone else)**
     -   areaId: `UUID`
     -   clientId: `UUID`
 -   **Access request collection**

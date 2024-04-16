@@ -21,14 +21,14 @@ export function mapCenterWithDefaults(
     }));
 }
 
-export function getCornerPosition(shape: TypedOverlay) {
+export function getShapeBounds(shape: TypedOverlay) {
     if (
         ((overlay): overlay is google.maps.Rectangle =>
             shape.type === google.maps.drawing.OverlayType.RECTANGLE)(
             shape.overlay
         )
     ) {
-        return shape.overlay.getBounds().getNorthEast();
+        return shape.overlay.getBounds();
     }
     if (
         ((overlay): overlay is google.maps.Circle =>
@@ -36,7 +36,7 @@ export function getCornerPosition(shape: TypedOverlay) {
             shape.overlay
         )
     ) {
-        return shape.overlay.getBounds().getNorthEast();
+        return shape.overlay.getBounds();
     }
     if (
         ((overlay): overlay is google.maps.Polygon =>
@@ -44,7 +44,7 @@ export function getCornerPosition(shape: TypedOverlay) {
             shape.overlay
         )
     ) {
-        return shape.overlay.getPath().getArray()[0];
+        return latLngArrayToBounds(shape.overlay.getPath().getArray());
     }
     if (
         ((overlay): overlay is google.maps.Polyline =>
@@ -52,6 +52,13 @@ export function getCornerPosition(shape: TypedOverlay) {
             shape.overlay
         )
     ) {
-        return shape.overlay.getPath().getArray()[0];
+        return latLngArrayToBounds(shape.overlay.getPath().getArray());
     }
+}
+
+export function latLngArrayToBounds(latLngArray: google.maps.LatLng[]) {
+    return latLngArray.reduce(
+        (p, c, _i) => p.extend(c),
+        new google.maps.LatLngBounds()
+    );
 }

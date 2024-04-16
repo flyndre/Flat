@@ -1,6 +1,7 @@
 package de.flyndre.flat
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -13,6 +14,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 import androidx.navigation.NavType
 import de.flyndre.flat.services.ConnectionService
 import de.flyndre.flat.services.TrackingService
@@ -33,43 +35,33 @@ import de.flyndre.flat.composables.presetscreen.collectionareascreen.CollectionA
 import de.flyndre.flat.composables.trackingscreen.TrackingScreen
 import de.flyndre.flat.composables.trackingscreen.TrackingScreenViewModel
 import de.flyndre.flat.database.AppDatabase
+import de.flyndre.flat.interfaces.IConnectionService
+import de.flyndre.flat.interfaces.ITrackingService
 import de.flyndre.flat.ui.theme.FlatTheme
-import io.github.dellisd.spatialk.geojson.Polygon
-import io.github.dellisd.spatialk.geojson.Position
+import java.util.UUID
 
 class MainActivity : ComponentActivity() {
-    var connectionService = ConnectionService("https:flat.buhss.de/api/rest")
-    var trakingService = TrackingService()
-    lateinit var db: AppDatabase
+    private lateinit var connectionService : IConnectionService
+    val trackingService : ITrackingService = TrackingService()
+    private lateinit var db: AppDatabase
+    private val userIdKey = "USERID"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //request permissions
         requestLocationPermission()
-
-        Thread(Runnable {
-            while(true){
-                try {
-                    connectionService.openCollection("Test", Polygon(listOf(
-                        Position(0.0,0.0),
-                        Position(0.0,1.0),
-                        Position(1.1,1.1)
-                    )))
-                }catch (ex:Exception){
-                    Log.e(this.toString(),ex.toString())
-                }
-                trakingService.startTracking()
-                Thread.sleep(10000)
-                trakingService.stopTracking()
-            }
-        }).start()
-
+        val preference = getPreferences(Context.MODE_PRIVATE)
+        if(!preference.contains(userIdKey)){
+            preference.edit { putString(userIdKey,UUID.randomUUID().toString()) }
+        }
+        val userId = UUID.fromString(preference.getString(userIdKey,""))
+        connectionService = ConnectionService("https:flat.buhss.de/api/rest",userId)
         db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "flat-database").build()
         val collectionAreaScreenViewModel = CollectionAreaScreenViewModel()
         val createGroupScreenViewModel = CreateGroupScreenViewModel(db = db)
-        val presetScreenViewModel = PresetScreenViewModel(db = db, collectionAreaScreenViewModel = collectionAreaScreenViewModel)
+        val presetScreenViewModel = PresetScreenViewModel(db = db, collectionAreaScreenViewModel = collectionAreaScreenViewModel, connectionService)
         val joinScreenViewModel = JoinScreenViewModel(db = db)
         val trackingScreenViewModel = TrackingScreenViewModel(db = db)
-
         setContent {
             FlatTheme {
                 // A surface container using the 'background' color from the theme
@@ -99,11 +91,13 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppEntryPoint(modifier: Modifier, createGroupScreenViewModel: CreateGroupScreenViewModel, presetScreenViewModel: PresetScreenViewModel, collectionAreaScreenViewModel: CollectionAreaScreenViewModel, joinScreenViewModel: JoinScreenViewModel, trackingScreenViewModel: TrackingScreenViewModel){
     val navController = rememberNavController()
+
     NavHost(navController = navController, startDestination = "initial") {
-        composable("initial"){ InitialScreen(modifier = modifier, onNavigateToJoinScreen = {navController.navigate("join")}, onNavigateToCreateGroupScreen = {navController.navigate("creategroup")}, onLukasBUHtton = {})}
+        composable("initial"){ InitialScreen(modifier = modifier, onNavigateToJoinScreen = {navController.navigate("join")}, onNavigateToCreateGroupScreen = {navController.navigate("creategroup")}, onLukasBUHtton = {Log.d("Button","Pressed!")})}
         composable("join"){JoinScreen(modifier = modifier, onNavigateToInitialScreen = {navController.navigate("initial")}, onNavigateToTrackingScreen = {navController.navigate("tracking")}, joinScreenViewModel = joinScreenViewModel)}
         composable("creategroup"){CreateGroupScreen(modifier = modifier,  onNavigateToInitialScreen = {navController.navigate("initial")}, onNavigateToNewPresetScreen = {navController.navigate("newpreset")}, navController = navController, createGroupScreenViewModel = createGroupScreenViewModel)}
         composable("newpreset"){
+            presetScreenViewModel.newEmptyPreset()
             PresetScreen(presetId = null, navController = navController, topBarText = "New Preset", onNavigateToCreateGroupScreen = {navController.navigate("creategroup")}, onNavigateToTrackingScreen = {navController.navigate("tracking")}, presetScreenViewModel = presetScreenViewModel)}
         composable("editpreset/{presetId}", arguments = listOf(navArgument("presetId"){type = NavType.LongType})){
             backStackEntry -> val presetId = backStackEntry.arguments?.getLong("presetId")
