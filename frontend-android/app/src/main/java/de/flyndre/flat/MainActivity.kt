@@ -1,6 +1,7 @@
 package de.flyndre.flat
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -13,6 +14,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 import androidx.navigation.NavType
 import de.flyndre.flat.services.ConnectionService
 import de.flyndre.flat.services.TrackingService
@@ -40,16 +42,24 @@ import io.github.dellisd.spatialk.geojson.FeatureCollection
 import io.github.dellisd.spatialk.geojson.MultiPolygon
 import io.github.dellisd.spatialk.geojson.Polygon
 import io.github.dellisd.spatialk.geojson.Position
+import java.util.UUID
 
 class MainActivity : ComponentActivity() {
-    val connectionService : IConnectionService = ConnectionService("https:flat.buhss.de/api/rest")
+    private lateinit var connectionService : IConnectionService
     val trakingService : ITrackingService = TrackingService()
     lateinit var db: AppDatabase
+    val userIdKey = "USERID"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //request permissions
         requestLocationPermission()
+        var preference = getPreferences(Context.MODE_PRIVATE)
+        if(!preference.contains(userIdKey)){
+            preference.edit { putString(userIdKey,UUID.randomUUID().toString()) }
+        }
+        var userId = UUID.fromString(preference.getString(userIdKey,""))
+        connectionService = ConnectionService("https:flat.buhss.de/api/rest",userId)
         db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "flat-database").build()
         val collectionAreaScreenViewModel = CollectionAreaScreenViewModel()
         val createGroupScreenViewModel = CreateGroupScreenViewModel(db = db)
