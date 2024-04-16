@@ -1,10 +1,15 @@
 <script setup lang="ts">
+import { useSettings } from '@/plugins/SettingsPlugin';
 import { isOnMobile } from '@/util/mobileDetection';
+
+const { settings } = useSettings();
 </script>
 
 <template>
     <div class="h-screen flex flex-col">
-        <div class="fixed top-0 left-0 right-0 bottom-0 -z-50">
+        <div
+            class="fixed top-0 left-0 right-0 bottom-0 -z-50 flex flex-col justify-center items-center overflow-visible"
+        >
             <slot name="background" />
         </div>
         <header v-if="!isOnMobile || $slots.title" class="p-2">
@@ -41,14 +46,37 @@ import { isOnMobile } from '@/util/mobileDetection';
                 isOnMobile &&
                 ($slots?.['action-right'] || $slots?.['action-left'])
             "
-            class="flex flex-row-reverse justify-between items-center gap-2 p-2.5"
+            class="sticky left-0 right-0 bottom-0 p-2.5 flex justify-between items-center gap-2"
+            :class="
+                settings.handedness === 'right'
+                    ? 'flex-row'
+                    : 'flex-row-reverse'
+            "
         >
-            <slot name="action-right">
-                <div></div>
-            </slot>
-            <slot name="action-left">
-                <div></div>
-            </slot>
+            <div
+                class="flex-grow flex flex-row gap-2"
+                :class="
+                    settings.handedness === 'right'
+                        ? 'justify-start'
+                        : 'justify-end'
+                "
+            >
+                <slot name="action-left">
+                    <div></div>
+                </slot>
+            </div>
+            <div
+                class="flex-grow flex gap-2 justify-start"
+                :class="
+                    settings.handedness === 'right'
+                        ? 'flex-row-reverse'
+                        : 'flex-row'
+                "
+            >
+                <slot name="action-right">
+                    <div></div>
+                </slot>
+            </div>
         </nav>
     </div>
 </template>

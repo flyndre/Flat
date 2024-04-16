@@ -1,26 +1,31 @@
-namespace FlatBackend
+using FlatBackend.Database;
+using FlatBackend.Interfaces;
+using System.Diagnostics.Eventing.Reader;
+using System.Net;
+using System.Net.WebSockets;
+using System.Runtime.CompilerServices;
+using System.Text;
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+//builder.WebHost.UseUrls("*.44381/");
+builder.Services.AddControllers();
+
+var mongoConString = builder.Configuration.GetValue<string>("MONGODBCONNECTIONSTRING");
+builder.Services.AddSingleton<IMongoDBService>(new MongoDBService(mongoConString));
+
+var app = builder.Build();
+app.Logger.LogInformation($"MongoDbConnectionString: {mongoConString}");
+
+
+if (app.Environment.IsDevelopment())
 {
-    public class Program
-    {
-        public static string DBConnectionString;
-
-        public static void Main( string[] args )
-        {
-            var builder = WebApplication.CreateBuilder(args);
-            builder.Services.AddControllers();
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-
-            //builder.WebHost.UseUrls("https://localhost:44380/");
-            builder.Services.AddControllers();
-            var app = builder.Build();
-            DBConnectionString = "mongodb://mongodb:27017";
-            if (app.Environment.IsDevelopment())
-            {
-                DBConnectionString = "mongodb://localhost:27017";
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
             var webSocketOptions = new WebSocketOptions
             {
@@ -28,13 +33,10 @@ namespace FlatBackend
             };
             app.UseWebSockets(webSocketOptions);
 
-            //app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
-            //app.UseAuthorization();
+app.UseAuthorization();
 
-            app.MapControllers();
+app.MapControllers();
 
-            app.Run();
-        }
-    }
-}
+await app.RunAsync();

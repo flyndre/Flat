@@ -45,7 +45,7 @@ fun InitialScreen(
         }
     ) { innerPadding ->
         modifier.padding(innerPadding)
-        GoogleMap(modifier = modifier.fillMaxSize(), properties = MapProperties(isMyLocationEnabled = true)) {
+        GoogleMap(modifier = modifier.fillMaxSize()) {
         }
     }
 }
