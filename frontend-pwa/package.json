@@ -15,6 +15,7 @@
         "@types/uuid": "^9.0.8",
         "@vueuse/core": "^10.9.0",
         "@vueuse/rxjs": "^10.9.0",
+        "axios": "^1.6.8",
         "dexie": "^4.0.4",
         "naughty-words": "^1.2.0",
         "prettier": "^3.2.5",
@@ -24,7 +25,8 @@
         "uuid": "^9.0.1",
         "vue": "^3.4.21",
         "vue-router": "^4.3.0",
-        "vue3-google-map": "^0.20.0"
+        "vue3-google-map": "^0.20.0",
+        "ws": "^8.16.0"
     },
     "devDependencies": {
         "@types/google.maps": "^3.55.7",
