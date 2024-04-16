@@ -30,7 +30,7 @@ import LocationSearchDialog from './LocationSearchDialog.vue';
 import MapTypeSelectButton from './MapTypeSelectButton.vue';
 import ShapeColorSelectButton from './ShapeColorSelectButton.vue';
 import ScrollPanel from 'primevue/scrollpanel';
-import { getCornerPosition } from '@/util/googleMapsUtils';
+import { getShapeBounds } from '@/util/googleMapsUtils';
 
 /**
  * The shapes drawn on the map.
@@ -75,7 +75,8 @@ function panMapToPos(position: google.maps.LatLngLiteral | google.maps.LatLng) {
     map.value?.setZoom(mapZoom);
 }
 function panMapToShape(shape: TypedOverlay) {
-    panMapToPos(getCornerPosition(shape));
+    map.value.fitBounds(getShapeBounds(shape));
+    map.value.setZoom(mapZoom);
 }
 
 const selectedColorRef = ref<string>();
@@ -345,10 +346,10 @@ onMounted(initialize);
         class="flex gap-2 h-full justify-stretch items-stretch pb-2"
         :class="[isOnMobile ? 'flex-col' : 'flex-col-reverse']"
     >
-        <div class="grow overflow-hidden rounded-xl">
+        <div class="grow overflow-hidden flex flex-col-reverse rounded-xl">
             <GoogleMap
                 ref="mapComponentRef"
-                style="min-height: 100vh; height: 100vh; width: 100%"
+                style="height: 100%; width: 100%"
                 :api-key
                 :libraries
                 :zoom="mapZoom"

@@ -10,7 +10,7 @@ import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
 import Button from 'primevue/button';
 import { mdiArrowLeft, mdiCheck } from '@mdi/js';
-import { getCornerPosition } from '@/util/googleMapsUtils';
+import { getShapeBounds } from '@/util/googleMapsUtils';
 
 const areas = ref<TypedOverlay[]>([]);
 
@@ -44,7 +44,7 @@ const addShape = () => {
 };
 
 function _saveAreas() {
-    alert(areas.value.map((s) => s.type + getCornerPosition(s)));
+    alert(areas.value.map((s) => s.type + getShapeBounds(s)));
 }
 </script>
 
