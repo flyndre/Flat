@@ -32,7 +32,7 @@ import javax.net.ssl.X509TrustManager
 
 class ConnectionService(
     var baseUrl:String,
-    var clientId:UUID = UUID.randomUUID(),
+    var clientId:UUID,
     override var onAccessResquest: ((AccessResquestMessage) -> Unit)? =null,
     override var onCollectionClosed: ((CollectionClosedMessage) -> Unit)? =null,
     override var onTrackUpdate: ((IncrementalTrackMessage) -> Unit)? =null
