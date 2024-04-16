@@ -12,6 +12,7 @@ The following messages and data are exchanged between the frontends and the back
 -   **Set/change area division**
     -   List of collectionArea
         -   area: `GeoJSON MultiPolygon`
+        -   name: `String`
         -   id: `UUID`
 -   **Assign areas (participants to themselves or boss to someone else)**
     -   areaId: `UUID`
