@@ -8,4 +8,4 @@ For visuals, PrimeVue and Tailwind CSS are utilized.
 * [Project Structure](/docs/frontend-pwa/project-structure.md)
 * [Maps API](/docs/frontend-pwa/maps-api.md)
 * [Client Storage](/docs/frontend-pwa/client-storage.md)
-* [Plugins](/docs/frontend-pwa/plugins.md)
+* [Custom Plugins](/docs/frontend-pwa/custom-plugins.md)
