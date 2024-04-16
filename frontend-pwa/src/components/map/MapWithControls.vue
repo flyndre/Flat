@@ -8,8 +8,9 @@ import { isOnMobile } from '@/util/mobileDetection';
 import {
     mdiChartLineVariant,
     mdiCircle,
-    mdiClose,
     mdiCloseBox,
+    mdiCrosshairs,
+    mdiDeleteForever,
     mdiMap,
     mdiPalette,
     mdiPentagon,
@@ -24,18 +25,25 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { GoogleMap } from 'vue3-google-map';
 import MdiIcon from '../icons/MdiIcon.vue';
 import TextButtonIcon from '../icons/TextButtonIcon.vue';
-import DrawingToolSelectButton from './DrawingToolSelectButton.vue';
 import LocateMeButton from './LocateMeButton.vue';
 import LocationSearchDialog from './LocationSearchDialog.vue';
 import MapTypeSelectButton from './MapTypeSelectButton.vue';
 import ShapeColorSelectButton from './ShapeColorSelectButton.vue';
 import ScrollPanel from 'primevue/scrollpanel';
-import { getShapeBounds } from '@/util/googleMapsUtils';
+import { getShapeBounds, getShapeColor } from '@/util/googleMapsUtils';
+import DrawingModeSwitch from './DrawingModeSwitch.vue';
+import InputText from 'primevue/inputtext';
+import IconField from 'primevue/iconfield';
+import InputIcon from '../icons/InputIcon.vue';
+import { IdentifyableTypedOverlay } from '@/types/map/IdentifyableTypedOverlay';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * The shapes drawn on the map.
  */
-const shapes = defineModel<TypedOverlay[]>('shapes', { default: [] });
+const shapes = defineModel<IdentifyableTypedOverlay[]>('shapes', {
+    default: [],
+});
 let recentlyUpdated = false;
 
 watch(
@@ -61,13 +69,41 @@ const map = computed(() => mapComponentRef.value?.map);
 const mapZoom = 15;
 
 const placesService = ref<google.maps.places.PlacesService>();
-
+const shapeSelected = ref(false);
 const mapTypeId = ref<google.maps.MapTypeId>();
+
 const selectedToolRef = ref<google.maps.drawing.OverlayType>(null);
-watch(selectedToolRef, (v) => setToolType(v));
-function setToolType(type: google.maps.drawing.OverlayType) {
-    drawingManager.value.setDrawingMode(type);
+watch(selectedToolRef, (v) => drawingManager.value.setDrawingMode(v));
+
+const selectedColorRef = ref<string>();
+watch(selectedColorRef, (v) => setShapeColor(v));
+
+function getShapeIcon(shape: IdentifyableTypedOverlay) {
+    return shape.type === 'rectangle'
+        ? mdiRectangle
+        : shape.type === 'circle'
+          ? mdiCircle
+          : shape.type === 'polygon'
+            ? mdiPentagon
+            : mdiChartLineVariant;
 }
+
+function deleteShape(shape: IdentifyableTypedOverlay) {
+    const index = all_overlays.findIndex((o) => o.id === shape.id);
+    setSelection(all_overlays[index]?.overlay);
+    deleteSelectedShape();
+}
+function centerShape(shape: IdentifyableTypedOverlay) {
+    const index = all_overlays.findIndex((o) => o.id === shape.id);
+    setSelection(all_overlays[index]?.overlay);
+    panMapToShape(shape);
+}
+function setShapeName(id: string, name: string) {
+    const index = all_overlays.findIndex((o) => o.id === id);
+    all_overlays[index].name = name;
+    shapeListChanged();
+}
+
 function panMapToPos(position: google.maps.LatLngLiteral | google.maps.LatLng) {
     try {
         map.value?.panTo(position);
@@ -76,13 +112,7 @@ function panMapToPos(position: google.maps.LatLngLiteral | google.maps.LatLng) {
 }
 function panMapToShape(shape: TypedOverlay) {
     map.value.fitBounds(getShapeBounds(shape));
-    map.value.setZoom(mapZoom);
 }
-
-const selectedColorRef = ref<string>();
-watch(selectedColorRef, (v) => setShapeColor(v));
-
-const shapeSelected = ref(false);
 
 function addShapeChangeListeners(shape: any) {
     switch (shape.type) {
@@ -266,6 +296,8 @@ const lineOptions = {
 };
 
 /* 🟡 Custom */ function processNewOverlay(overlay: any, userCreated = true) {
+    overlay.id = uuidv4();
+    overlay.name = '';
     all_overlays.push(overlay);
     if (overlay.type != google.maps.drawing.OverlayType.MARKER) {
         // Switch back to non-drawing mode after drawing a shape.
@@ -417,9 +449,20 @@ onMounted(initialize);
                         <div
                             class="flex flex-row gap-2 items-center justify-stretch flex-wrap"
                         >
-                            <DrawingToolSelectButton
-                                v-model="selectedToolRef"
-                            />
+                            <div
+                                class="flex flex-row gap-2 items-center justify-stretch flex-nowrap grow"
+                            >
+                                <DrawingModeSwitch v-model="selectedToolRef" />
+                                <Button
+                                    severity="secondary"
+                                    :disabled="!shapeSelected"
+                                    @click="deleteSelectedShape"
+                                >
+                                    <template #icon>
+                                        <MdiIcon :icon="mdiDeleteForever" />
+                                    </template>
+                                </Button>
+                            </div>
                             <ShapeColorSelectButton
                                 v-model="selectedColorRef"
                             />
@@ -429,74 +472,54 @@ onMounted(initialize);
                         <template #header>
                             <div class="flex justify-center items-center">
                                 <TextButtonIcon :icon="mdiShape" />
-                                Shapes
+                                Areas
                             </div>
                         </template>
                         <ScrollPanel
                             class="h-[40vh] max-h-[40vh]"
                             :pt="{
                                 content: {
-                                    class: 'flex flex-col gap-2 items-center justify-start',
+                                    class: 'flex flex-col gap-3.5 items-center justify-start',
                                 },
                             }"
                         >
                             <div
-                                class="w-full flex flex-row justify-between gap-1 overflow-auto shrink-0"
+                                class="w-full flex flex-row justify-between gap-2 overflow-auto shrink-0"
                                 v-for="(shape, i) of shapes"
                             >
                                 <Button
-                                    class="w-full text-left capitalize"
-                                    :label="shape.type"
-                                    severity="contrast"
-                                    text
-                                    @click="
-                                        () => {
-                                            setSelection(
-                                                all_overlays[i]?.overlay
-                                            );
-                                            panMapToShape(shape);
-                                        }
-                                    "
+                                    severity="secondary"
+                                    @click="centerShape(shape)"
                                 >
                                     <template #icon>
-                                        <TextButtonIcon
-                                            :style="{
-                                                color:
-                                                    shape.overlay.get(
-                                                        'fillColor'
-                                                    ) ||
-                                                    shape.overlay.get(
-                                                        'strokeColor'
-                                                    ),
-                                            }"
-                                            :icon="
-                                                shape.type === 'rectangle'
-                                                    ? mdiRectangle
-                                                    : shape.type === 'circle'
-                                                      ? mdiCircle
-                                                      : shape.type === 'polygon'
-                                                        ? mdiPentagon
-                                                        : mdiChartLineVariant
-                                            "
-                                        />
+                                        <MdiIcon :icon="mdiCrosshairs" />
                                     </template>
                                 </Button>
+                                <IconField class="grow" icon-position="left">
+                                    <InputIcon
+                                        :style="{
+                                            color: getShapeColor(shape),
+                                        }"
+                                        :icon="getShapeIcon(shape)"
+                                    />
+                                    <InputText
+                                        class="w-full"
+                                        :model-value="shape.name"
+                                        placeholder="Area Name"
+                                        @update:model-value="
+                                            (v: string) =>
+                                                setShapeName(shape.id, v)
+                                        "
+                                    />
+                                </IconField>
                                 <Button
                                     class="shrink-0"
                                     severity="secondary"
-                                    rounded
                                     text
-                                    @click="
-                                        () => {
-                                            setSelection(
-                                                all_overlays[i]?.overlay
-                                            );
-                                            deleteSelectedShape();
-                                        }
-                                    "
+                                    @click="deleteShape(shape)"
                                 >
                                     <template #icon>
-                                        <MdiIcon :icon="mdiClose" />
+                                        <MdiIcon :icon="mdiDeleteForever" />
                                     </template>
                                 </Button>
                             </div>

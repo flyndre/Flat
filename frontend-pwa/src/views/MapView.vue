@@ -1,18 +1,16 @@
 <script setup lang="ts">
 import MapWithControls from '@/components/map/MapWithControls.vue';
 import { ref, watch } from 'vue';
-import { GeometryObject } from 'geojson';
-import { IdentifyableTypedOverlay } from '@/types/map/IdentifyableTypedOverlay';
-import { Overlay } from '@/types/map/Overlay';
 import { TypedOverlay } from '@/types/map/TypedOverlay';
-import { computed } from 'vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
 import Button from 'primevue/button';
 import { mdiArrowLeft, mdiCheck } from '@mdi/js';
-import { getShapeBounds } from '@/util/googleMapsUtils';
+import { shapeToGeoJSON } from '@/util/googleMapsUtils';
+import { IdentifyableTypedOverlay } from '@/types/map/IdentifyableTypedOverlay';
+import { v4 as uuidv4 } from 'uuid';
 
-const areas = ref<TypedOverlay[]>([]);
+const areas = ref<IdentifyableTypedOverlay[]>([]);
 
 const props = withDefaults(
     defineProps<{
@@ -40,11 +38,13 @@ const addShape = () => {
             fillOpacity: 0.35,
         }),
         type: google.maps.drawing.OverlayType.POLYGON,
+        id: uuidv4(),
+        name: 'Mein erstes Polygon 😊',
     });
 };
 
 function _saveAreas() {
-    alert(areas.value.map((s) => s.type + getShapeBounds(s)));
+    alert(JSON.stringify(areas.value.map((s) => shapeToGeoJSON(s))));
 }
 </script>
 

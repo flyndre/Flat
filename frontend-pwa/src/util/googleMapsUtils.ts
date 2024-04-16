@@ -1,4 +1,6 @@
+import { IdentifyableTypedOverlay } from '@/types/map/IdentifyableTypedOverlay';
 import { TypedOverlay } from '@/types/map/TypedOverlay';
+import { Geometry, GeometryObject } from 'geojson';
 import { Ref, computed } from 'vue';
 
 export function ifInfinityReplaceWith(number: number, replacement: number) {
@@ -19,6 +21,12 @@ export function mapCenterWithDefaults(
         lat: ifInfinityReplaceWith(coords.value.latitude, defaults.lat),
         lng: ifInfinityReplaceWith(coords.value.longitude, defaults.lng),
     }));
+}
+
+export function getShapeColor(shape: IdentifyableTypedOverlay | TypedOverlay) {
+    return <string>(
+        (shape.overlay.get('fillColor') || shape.overlay.get('strokeColor'))
+    );
 }
 
 export function getShapeBounds(shape: TypedOverlay) {
@@ -56,9 +64,65 @@ export function getShapeBounds(shape: TypedOverlay) {
     }
 }
 
+/**
+ * Creates a frame that contains all given location points.
+ * @param latLngArray an array of `LatLng` tuples
+ * @returns a `LatLngBounds` object that frames all points
+ */
 export function latLngArrayToBounds(latLngArray: google.maps.LatLng[]) {
     return latLngArray.reduce(
         (p, c, _i) => p.extend(c),
         new google.maps.LatLngBounds()
     );
 }
+
+export function shapeListToGeoJSONObject(shapeList: TypedOverlay[]) {
+    // GeoJSON.parse(shapeList.map((s) => shapeToGeoJSON(s)));
+}
+export function shapeToGeoJSON(shape: TypedOverlay) {
+    const overlayType = google.maps.drawing.OverlayType;
+    switch (shape.type ?? shape.overlay?.type) {
+        case overlayType.POLYGON:
+            return polygonToGeoJSON(<google.maps.Polygon>shape.overlay);
+        case overlayType.POLYLINE:
+            return polylineToGeoJSON(<google.maps.Polyline>shape.overlay);
+        case overlayType.RECTANGLE:
+        case overlayType.CIRCLE:
+        default:
+            return undefined;
+    }
+}
+
+export function polylineToGeoJSON(polyline: google.maps.Polyline) {
+    const geometry: GeoJSON.LineString = {
+        type: 'LineString',
+        coordinates: _coordinatesFromPolything(polyline),
+    };
+    return geometry;
+}
+
+export function polygonToGeoJSON(polygon: google.maps.Polygon) {
+    const geometry: GeoJSON.Polygon = {
+        type: 'Polygon',
+        coordinates: [_coordinatesFromPolything(polygon)],
+    };
+    return geometry;
+}
+
+/**
+ * Retrieves each node's coordinates of the given Google Maps overlay.
+ * @see https://stackoverflow.com/a/76009320/11793652
+ * @param polything a `google.maps.Polygon` or `google.maps.Polyline` object
+ * @returns a GeoJSON `Position` array
+ */
+function _coordinatesFromPolything(
+    polything: google.maps.Polygon | google.maps.Polyline
+): GeoJSON.Position[] {
+    return polything
+        .getPath()
+        .getArray()
+        .map((vertex) => [vertex.lng(), vertex.lat()]);
+}
+
+export function geoJSONObjectToShapeList(geoJSONObject: GeometryObject) {}
+export function geoJSONtoShape(geoJSON: Geometry) {}
