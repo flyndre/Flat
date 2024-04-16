@@ -9,6 +9,7 @@ import { TypedOverlay } from '@/types/map/TypedOverlay';
 import {
     geoJSONtoPolygon,
     getShapeBounds,
+    getShapeListBounds,
     getShapeColor,
     polygonToGeoJSON,
 } from '@/util/googleMapsUtils';
@@ -41,9 +42,11 @@ const areas = defineModel<Division[]>('areas', {
 const props = withDefaults(
     defineProps<{
         controls?: boolean;
+        panOnUpdated?: boolean;
     }>(),
     {
         controls: true,
+        panOnUpdated: true,
     }
 );
 
@@ -97,6 +100,8 @@ function syncAreas() {
     shapes.value.length = 0;
     shapes.value.push(...all_overlays);
     clearSelection();
+    if (props.panOnUpdated && shapes.value?.length > 0)
+        map.value.fitBounds(getShapeListBounds(shapes.value));
     nextTick(() => (recentlyUpdated = false));
 }
 

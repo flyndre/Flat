@@ -30,6 +30,13 @@ export function getShapeColor(shape: IdentifyableTypedOverlay | TypedOverlay) {
     );
 }
 
+export function getShapeListBounds(shapes: TypedOverlay[]) {
+    return shapes.reduce(
+        (p, c, _i) => p.union(getShapeBounds(c)),
+        new google.maps.LatLngBounds()
+    );
+}
+
 export function getShapeBounds(shape: TypedOverlay) {
     if (
         ((overlay): overlay is google.maps.Rectangle =>
