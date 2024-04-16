@@ -5,6 +5,7 @@ import { clientId } from '@/data/clientMetadata';
 import { collectionDraft, collectionService } from '@/data/collections';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { Collection } from '@/types/Collection';
+import { dbSafe } from '@/util/dbUtils';
 import { mdiArrowLeft, mdiCheck } from '@mdi/js';
 import Button from 'primevue/button';
 import { v4 as uuidv4 } from 'uuid';
@@ -54,7 +55,7 @@ async function save() {
     loading.value = true;
     try {
         if (props.edit) {
-            // await collectionService.put({ ...collection.value });
+            await collectionService.put(dbSafe(collection.value));
         } else {
             collectionDraft.set(collection.value);
         }

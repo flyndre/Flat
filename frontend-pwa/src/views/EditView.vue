@@ -21,6 +21,7 @@ import InputText from 'primevue/inputtext';
 import { v4 as uuidv4 } from 'uuid';
 import { computed, onMounted, ref } from 'vue';
 import { RouteLocationRaw, useRouter } from 'vue-router';
+import { dbSafe } from '@/util/dbUtils';
 
 const props = withDefaults(
     defineProps<{
@@ -73,10 +74,10 @@ async function _saveCollection(target: RouteLocationRaw) {
     loading.value = true;
     try {
         if (props.edit) {
-            await collectionService.put({ ...collection.value });
+            await collectionService.put(dbSafe(collection.value));
         } else {
-            await collectionService.add({ ...collection.value });
-            collectionDraft.set(undefined);
+            await collectionService.add(dbSafe(collection.value));
+            collectionDraft.set(null);
         }
         await router.push(target);
     } catch (error) {
