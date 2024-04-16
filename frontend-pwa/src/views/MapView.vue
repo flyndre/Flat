@@ -1,19 +1,20 @@
 <script setup lang="ts">
-import MapWithControls from '@/components/map/MapWithControls.vue';
-import { ref } from 'vue';
-import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import MapWithControls from '@/components/map/MapWithControls.vue';
+import { clientId } from '@/data/clientMetadata';
+import { collectionDraft, collectionService } from '@/data/collections';
+import DefaultLayout from '@/layouts/DefaultLayout.vue';
+import { Collection } from '@/types/Collection';
+import { mdiArrowLeft, mdiCheck } from '@mdi/js';
 import Button from 'primevue/button';
-import { mdiArrowLeft, mdiCheck, mdiDuck } from '@mdi/js';
 import { v4 as uuidv4 } from 'uuid';
-import { Division } from '@/types/Division';
-
-const areas = ref<Division[]>([]);
+import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const props = withDefaults(
     defineProps<{
         edit?: boolean;
-        id?: number;
+        id?: string;
     }>(),
     {
         edit: false,
@@ -21,28 +22,51 @@ const props = withDefaults(
     }
 );
 
-const addShape = () => {
-    areas.value.push({
-        area: {
-            type: 'MultiPolygon',
-            coordinates: [
-                [
-                    [
-                        [48.384521, 8.582583],
-                        [48.383178, 8.583846],
-                        [48.383348, 8.580421],
-                    ],
-                ],
-            ],
-        },
-        id: uuidv4(),
-        name: 'Mein erstes Polygon 😊',
-        color: 'lime',
-    });
+const defaultCollection: Collection = {
+    id: uuidv4(),
+    adminClientId: clientId.value,
 };
 
-function _saveAreas() {
-    console.log(areas.value);
+const router = useRouter();
+const collection = ref<Collection>({
+    ...defaultCollection,
+    ...collectionDraft.get(),
+});
+const loading = ref(false);
+
+onMounted(async () => {
+    if (props.edit) {
+        try {
+            const storedCollection = await collectionService.get(props.id);
+            if (storedCollection === undefined) {
+                // todo: show toast
+                await router.replace({ name: 'presets' });
+            }
+            collection.value = storedCollection;
+        } catch (error) {
+            // todo: show toast
+            await router.replace({ name: 'presets' });
+        }
+    }
+});
+
+async function save() {
+    loading.value = true;
+    try {
+        if (props.edit) {
+            // await collectionService.put({ ...collection.value });
+        } else {
+            collectionDraft.set(collection.value);
+        }
+        await router.push({
+            name: props.edit ? 'edit' : 'create',
+            params: { id: props.id },
+        });
+    } catch (error) {
+        // todo: show toast
+    } finally {
+        loading.value = false;
+    }
 }
 </script>
 
@@ -52,7 +76,7 @@ function _saveAreas() {
             <router-link
                 :to="{
                     name: edit ? 'edit' : 'create',
-                    params: { id: props.id },
+                    params: { id },
                 }"
             >
                 <Button label="Back" severity="secondary" text>
@@ -64,14 +88,17 @@ function _saveAreas() {
         </template>
         <template #title> Edit Map </template>
         <template #action-right>
-            <Button label="Save" severity="primary" @click="_saveAreas">
+            <Button label="Save" severity="primary" @click="save">
                 <template #icon>
                     <TextButtonIcon :icon="mdiCheck" />
                 </template>
             </Button>
         </template>
         <template #default>
-            <MapWithControls v-model:areas="areas" />
+            <MapWithControls
+                class="pb-2"
+                v-model:areas="collection.divisions"
+            />
         </template>
     </DefaultLayout>
     <!-- <div v-html="shapeHtml"></div>

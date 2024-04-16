@@ -1,15 +1,11 @@
 <script setup lang="ts">
 import InputIcon from '@/components/icons/InputIcon.vue';
 import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import MapWithControls from '@/components/map/MapWithControls.vue';
 import { clientId } from '@/data/clientMetadata';
-import { collectionService } from '@/data/collections';
-import {
-    GOOGLE_MAPS_API_KEY,
-    GOOGLE_MAPS_API_LIBRARIES,
-} from '@/data/constants';
+import { collectionDraft, collectionService } from '@/data/collections';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
-import { Collection } from '@/types/collection';
-import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
+import { Collection } from '@/types/Collection';
 import validateCollection from '@/validation/validateCollection';
 import {
     mdiArrowLeft,
@@ -18,23 +14,18 @@ import {
     mdiPlay,
     mdiViewDashboardEdit,
 } from '@mdi/js';
-import { useGeolocation } from '@vueuse/core';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import IconField from 'primevue/iconfield';
 import InputText from 'primevue/inputtext';
+import { v4 as uuidv4 } from 'uuid';
 import { computed, onMounted, ref } from 'vue';
 import { RouteLocationRaw, useRouter } from 'vue-router';
-import { GoogleMap } from 'vue3-google-map';
-
-const apiKey = GOOGLE_MAPS_API_KEY;
-const libraries = GOOGLE_MAPS_API_LIBRARIES;
-const mapCenter = mapCenterWithDefaults(useGeolocation().coords);
 
 const props = withDefaults(
     defineProps<{
         edit?: boolean;
-        id?: number;
+        id?: string;
     }>(),
     {
         edit: false,
@@ -42,22 +33,24 @@ const props = withDefaults(
     }
 );
 
+const defaultCollection: Collection = {
+    id: uuidv4(),
+    adminClientId: clientId.value,
+    name: '',
+};
+
 const router = useRouter();
 const collection = ref<Collection>({
-    name: '',
-    adminClientId: clientId.value,
+    ...defaultCollection,
+    ...collectionDraft.get(),
 });
+
 const loading = ref(false);
 const title = props.edit ? 'Edit' : 'Create';
 const submittable = computed(() => validateCollection(collection.value));
 
 onMounted(async () => {
     if (props.edit) {
-        if (Number.isNaN(props.id)) {
-            // todo: show toast
-            await router.replace({ name: 'presets' });
-            return;
-        }
         try {
             const storedCollection = await collectionService.get(props.id);
             if (storedCollection === undefined) {
@@ -83,6 +76,7 @@ async function _saveCollection(target: RouteLocationRaw) {
             await collectionService.put({ ...collection.value });
         } else {
             await collectionService.add({ ...collection.value });
+            collectionDraft.set(undefined);
         }
         await router.push(target);
     } catch (error) {
@@ -94,18 +88,21 @@ async function _saveCollection(target: RouteLocationRaw) {
 
 const save = () => _saveCollection({ name: 'presets' });
 const start = () => _saveCollection({ name: 'presets' });
+
+function back() {
+    collectionDraft.set(null);
+    router.push({ name: 'presets' });
+}
 </script>
 
 <template>
     <DefaultLayout>
         <template #action-left>
-            <router-link :to="{ name: 'presets' }">
-                <Button label="Back" severity="secondary" text>
-                    <template #icon>
-                        <TextButtonIcon :icon="mdiArrowLeft" />
-                    </template>
-                </Button>
-            </router-link>
+            <Button label="Back" severity="secondary" text @click="back">
+                <template #icon>
+                    <TextButtonIcon :icon="mdiArrowLeft" />
+                </template>
+            </Button>
         </template>
         <template #title> {{ title }} </template>
         <template #action-right>
@@ -141,13 +138,10 @@ const start = () => _saveCollection({ name: 'presets' });
                 }"
             >
                 <template #header>
-                    <GoogleMap
-                        class="w-full h-[30vh] pointer-events-none"
-                        :api-key
-                        :libraries
-                        :zoom="15"
-                        :center="mapCenter"
-                        :disable-default-ui="true"
+                    <MapWithControls
+                        class="w-full h-[30vh] min-h-[30vh] pointer-events-none [&>*]:rounded-none"
+                        :controls="false"
+                        :areas="collection.divisions"
                     />
                     <router-link
                         :to="{
