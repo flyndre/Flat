@@ -34,46 +34,20 @@ import ShapesList from './ShapesList.vue';
  * The shapes drawn on the map.
  */
 const shapes = ref<IdentifyableTypedOverlay[]>([]);
-
 const areas = defineModel<Division[]>('areas', {
     default: [],
 });
 
-let recentlyUpdated = false;
-
-watch(
-    () => areas.value,
-    () => {
-        if (recentlyUpdated) return; // Prevents infinite update loop
-        deleteAllShapes(false);
-        areas.value.forEach((a) => {
-            const shape = {
-                id: a.id,
-                name: a.name,
-                type: google.maps.drawing.OverlayType.POLYGON,
-                overlay: geoJSONtoPolygon(
-                    {
-                        type: 'Polygon',
-                        coordinates: a.area.coordinates[0],
-                    },
-                    {
-                        ...shapeOptions,
-                        strokeColor: a.color,
-                        fillColor: a.color,
-                    }
-                ),
-            };
-            shape.overlay.setMap(map.value);
-            processNewOverlay(shape, false);
-        });
-        recentlyUpdated = true;
-        shapes.value.length = 0;
-        shapes.value.push(...all_overlays);
-        clearSelection();
-        nextTick(() => (recentlyUpdated = false));
-    },
-    { deep: true }
+const props = withDefaults(
+    defineProps<{
+        controls?: boolean;
+    }>(),
+    {
+        controls: true,
+    }
 );
+
+let recentlyUpdated = false;
 
 const apiKey = GOOGLE_MAPS_API_KEY;
 const libraries = GOOGLE_MAPS_API_LIBRARIES;
@@ -85,6 +59,46 @@ const mapZoom = 15;
 const placesService = ref<google.maps.places.PlacesService>();
 const shapeSelected = ref(false);
 const mapTypeId = ref<google.maps.MapTypeId>();
+
+const stop = watch(mapReady, (v) => {
+    if (!v) return;
+    stop();
+    syncAreas();
+    if (areas.value.length > 0) {
+        nextTick(() => panMapToShape(shapes.value[0]));
+    }
+    watch(() => areas.value, syncAreas, { deep: true });
+});
+
+function syncAreas() {
+    if (recentlyUpdated) return; // Prevents infinite update loop
+    deleteAllShapes(false);
+    areas.value.forEach((a) => {
+        const shape = {
+            id: a.id,
+            name: a.name,
+            type: 'polygon',
+            overlay: geoJSONtoPolygon(
+                {
+                    type: 'Polygon',
+                    coordinates: a.area.coordinates[0],
+                },
+                {
+                    ...shapeOptions,
+                    strokeColor: a.color,
+                    fillColor: a.color,
+                }
+            ),
+        };
+        shape.overlay.setMap(map.value);
+        processNewOverlay(shape, false);
+    });
+    recentlyUpdated = true;
+    shapes.value.length = 0;
+    shapes.value.push(...all_overlays);
+    clearSelection();
+    nextTick(() => (recentlyUpdated = false));
+}
 
 const selectedToolRef = ref<google.maps.drawing.OverlayType>(null);
 watch(selectedToolRef, (v) => drawingManager.value.setDrawingMode(v));
@@ -392,7 +406,7 @@ onMounted(initialize);
 
 <template>
     <div
-        class="flex gap-2 h-full justify-stretch items-stretch pb-2"
+        class="flex gap-2 h-full justify-stretch items-stretch"
         :class="[isOnMobile ? 'flex-col' : 'flex-col-reverse']"
     >
         <div class="grow overflow-hidden flex flex-col-reverse rounded-xl">
@@ -408,6 +422,7 @@ onMounted(initialize);
             />
         </div>
         <Card
+            v-if="controls"
             :class="[{ isOnMobile: 'rounded-b-none' }]"
             :pt="{ body: { class: isOnMobile ? 'pb-0' : 'pt-0' } }"
         >
