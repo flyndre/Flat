@@ -1,5 +1,5 @@
-﻿using GeoJSON.Net;
-using GeoJSON.Net.Feature;
+﻿using FlatBackend.Models.GeoJsonModels;
+using MongoDB.Driver.GeoJsonObjectModel;
 
 namespace FlatBackend.Models
 {
@@ -7,6 +7,7 @@ namespace FlatBackend.Models
     {
         public Guid id { get; set; }
         public int clientId { get; set; }
-        public FeatureCollection area { get; set; }
+        public string name { get; set; }
+        public PolygonModel area { get; set; }
     }
 }

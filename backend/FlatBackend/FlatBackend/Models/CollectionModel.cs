@@ -1,8 +1,4 @@
-﻿using GeoJSON.Net;
-using GeoJSON.Net.Feature;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Driver.GeoJsonObjectModel;
+﻿using FlatBackend.Models.GeoJsonModels;
 using ThirdParty.Json.LitJson;
 
 namespace FlatBackend.Models
@@ -18,7 +14,7 @@ namespace FlatBackend.Models
         public Guid clientId { get; set; }
         public string? name { get; set; }
 
-        public FeatureCollection area { get; set; }
+        public MultiPolygonModel area { get; set; }
 
         public List<AreaModel>? collectionArea { get; set; }
         public List<UserModel>? confirmedUsers { get; set; }

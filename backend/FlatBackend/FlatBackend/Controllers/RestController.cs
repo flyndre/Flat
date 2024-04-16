@@ -17,9 +17,9 @@ namespace FlatBackend.Controllers
     [Route("api/[controller]")]
     public class RestController : ControllerBase
     {
-        private readonly IMongoDBService _MongoDBService; 
+        private readonly IMongoDBService _MongoDBService;
 
-        public RestController(IMongoDBService mongoDBService)
+        public RestController( IMongoDBService mongoDBService )
         {
             _MongoDBService = mongoDBService;
         }
