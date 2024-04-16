@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
-import { parseIntElse as stringParamToInt } from '@/util/parseInt';
 import EditView from '@/views/EditView.vue';
 import HomeView from '@/views/HomeView.vue';
 import JoinView from '@/views/JoinView.vue';
@@ -55,7 +54,7 @@ const router = createRouter({
             component: EditView,
             props: (r) => ({
                 edit: true,
-                id: stringParamToInt(r.params['id']),
+                id: <string>r.params['id'],
             }),
         },
         {
@@ -64,7 +63,7 @@ const router = createRouter({
             component: MapView,
             props: (r) => ({
                 edit: true,
-                id: stringParamToInt(r.params['id']),
+                id: <string>r.params['id'],
             }),
         },
         {
