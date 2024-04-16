@@ -33,48 +33,34 @@ import de.flyndre.flat.composables.presetscreen.collectionareascreen.CollectionA
 import de.flyndre.flat.composables.trackingscreen.TrackingScreen
 import de.flyndre.flat.composables.trackingscreen.TrackingScreenViewModel
 import de.flyndre.flat.database.AppDatabase
+import de.flyndre.flat.interfaces.IConnectionService
+import de.flyndre.flat.interfaces.ITrackingService
 import de.flyndre.flat.ui.theme.FlatTheme
+import io.github.dellisd.spatialk.geojson.FeatureCollection
+import io.github.dellisd.spatialk.geojson.MultiPolygon
 import io.github.dellisd.spatialk.geojson.Polygon
 import io.github.dellisd.spatialk.geojson.Position
 
 class MainActivity : ComponentActivity() {
-    var connectionService = ConnectionService("https:flat.buhss.de/api/rest")
-    var trakingService = TrackingService()
+    val connectionService : IConnectionService = ConnectionService("https:flat.buhss.de/api/rest")
+    val trakingService : ITrackingService = TrackingService()
     lateinit var db: AppDatabase
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //request permissions
         requestLocationPermission()
-
-        Thread(Runnable {
-            while(true){
-                try {
-                    connectionService.openCollection("Test", Polygon(listOf(
-                        Position(0.0,0.0),
-                        Position(0.0,1.0),
-                        Position(1.1,1.1)
-                    )))
-                }catch (ex:Exception){
-                    Log.e(this.toString(),ex.toString())
-                }
-                trakingService.startTracking()
-                Thread.sleep(10000)
-                trakingService.stopTracking()
-            }
-        }).start()
-
         db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "flat-database").build()
         val collectionAreaScreenViewModel = CollectionAreaScreenViewModel()
         val createGroupScreenViewModel = CreateGroupScreenViewModel(db = db)
-        val presetScreenViewModel = PresetScreenViewModel(db = db, collectionAreaScreenViewModel = collectionAreaScreenViewModel)
+        val presetScreenViewModel = PresetScreenViewModel(db = db, collectionAreaScreenViewModel = collectionAreaScreenViewModel, connectionService)
         val joinScreenViewModel = JoinScreenViewModel(db = db)
         val trackingScreenViewModel = TrackingScreenViewModel(db = db)
-
         setContent {
             FlatTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    AppEntryPoint(modifier = Modifier, createGroupScreenViewModel, presetScreenViewModel, collectionAreaScreenViewModel, joinScreenViewModel, trackingScreenViewModel)
+                    AppEntryPoint(modifier = Modifier, createGroupScreenViewModel, presetScreenViewModel, collectionAreaScreenViewModel, joinScreenViewModel, trackingScreenViewModel,connectionService,trakingService)
                 }
             }
         }
@@ -97,10 +83,11 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun AppEntryPoint(modifier: Modifier, createGroupScreenViewModel: CreateGroupScreenViewModel, presetScreenViewModel: PresetScreenViewModel, collectionAreaScreenViewModel: CollectionAreaScreenViewModel, joinScreenViewModel: JoinScreenViewModel, trackingScreenViewModel: TrackingScreenViewModel){
+fun AppEntryPoint(modifier: Modifier, createGroupScreenViewModel: CreateGroupScreenViewModel, presetScreenViewModel: PresetScreenViewModel, collectionAreaScreenViewModel: CollectionAreaScreenViewModel, joinScreenViewModel: JoinScreenViewModel, trackingScreenViewModel: TrackingScreenViewModel,connectionService: IConnectionService,trackingService: ITrackingService){
     val navController = rememberNavController()
+
     NavHost(navController = navController, startDestination = "initial") {
-        composable("initial"){ InitialScreen(modifier = modifier, onNavigateToJoinScreen = {navController.navigate("join")}, onNavigateToCreateGroupScreen = {navController.navigate("creategroup")}, onLukasBUHtton = {})}
+        composable("initial"){ InitialScreen(modifier = modifier, onNavigateToJoinScreen = {navController.navigate("join")}, onNavigateToCreateGroupScreen = {navController.navigate("creategroup")}, onLukasBUHtton = {Log.d("Button","Pressed!")})}
         composable("join"){JoinScreen(modifier = modifier, onNavigateToInitialScreen = {navController.navigate("initial")}, onNavigateToTrackingScreen = {navController.navigate("tracking")}, joinScreenViewModel = joinScreenViewModel)}
         composable("creategroup"){CreateGroupScreen(modifier = modifier,  onNavigateToInitialScreen = {navController.navigate("initial")}, onNavigateToNewPresetScreen = {navController.navigate("newpreset")}, navController = navController, createGroupScreenViewModel = createGroupScreenViewModel)}
         composable("newpreset"){

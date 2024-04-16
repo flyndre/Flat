@@ -39,7 +39,7 @@ fun InitialScreen(
                 Button(onClick = { onNavigateToCreateGroupScreen() }) {
                     Text("Create")
                 }
-                Button(onClick = {  }) {
+                Button(onClick = { onLukasBUHtton() }) {
                     Text("Lukas BUHtton")
                 }
             }
