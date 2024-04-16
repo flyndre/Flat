@@ -51,7 +51,7 @@ fun PresetScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)
             ) {
-                Button(onClick = { presetScreenViewModel.openCollection(); onNavigateToTrackingScreen() }) {
+                Button(onClick = { presetScreenViewModel.savePresetToDatabase(); presetScreenViewModel.openCollection(); onNavigateToTrackingScreen() }) {
                     Text("Save and Start")
                 }
                 Button(onClick = { presetScreenViewModel.savePresetToDatabase(); onNavigateToCreateGroupScreen() }) {
