@@ -21,11 +21,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Polygon
 import de.flyndre.flat.composables.presetscreen.collectionareascreen.CollectionAreaScreenViewModel
 import de.flyndre.flat.database.AppDatabase
 
@@ -68,7 +70,11 @@ fun PresetScreen(
             Card (modifier = modifier){
                 GoogleMap(onMapClick = { navController.navigate("collectionarea/" + presetScreenViewModel.getPresetId()) },
                     cameraPositionState = CameraPositionState(position = presetScreenViewModel.getCameraPosition()),
-                    uiSettings = MapUiSettings(zoomControlsEnabled = false, zoomGesturesEnabled = false, scrollGesturesEnabled = false, rotationGesturesEnabled = false, tiltGesturesEnabled = false))
+                    uiSettings = MapUiSettings(zoomControlsEnabled = false, zoomGesturesEnabled = false, scrollGesturesEnabled = false, rotationGesturesEnabled = false, tiltGesturesEnabled = false)){
+                    if(presetScreenViewModel.getCollectionArea().isNotEmpty()){
+                        Polygon(points = presetScreenViewModel.getCollectionArea(), fillColor = Color(255, 159, 246, 127), strokeColor = Color(255, 159, 246, 255))
+                    }
+                }
             }
         }
     }
