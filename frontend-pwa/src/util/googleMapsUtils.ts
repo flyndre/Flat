@@ -76,9 +76,6 @@ export function latLngArrayToBounds(latLngArray: google.maps.LatLng[]) {
     );
 }
 
-export function shapeListToGeoJSONObject(shapeList: TypedOverlay[]) {
-    // GeoJSON.parse(shapeList.map((s) => shapeToGeoJSON(s)));
-}
 export function shapeToGeoJSON(shape: TypedOverlay) {
     const overlayType = google.maps.drawing.OverlayType;
     switch (shape.type ?? shape.overlay?.type) {

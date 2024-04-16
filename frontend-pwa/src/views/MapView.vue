@@ -1,16 +1,14 @@
 <script setup lang="ts">
 import MapWithControls from '@/components/map/MapWithControls.vue';
-import { ref, watch } from 'vue';
-import { TypedOverlay } from '@/types/map/TypedOverlay';
+import { ref } from 'vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
 import Button from 'primevue/button';
 import { mdiArrowLeft, mdiCheck } from '@mdi/js';
-import { shapeToGeoJSON } from '@/util/googleMapsUtils';
-import { IdentifyableTypedOverlay } from '@/types/map/IdentifyableTypedOverlay';
 import { v4 as uuidv4 } from 'uuid';
+import { Division } from '@/types/Division';
 
-const areas = ref<IdentifyableTypedOverlay[]>([]);
+const areas = ref<Division[]>([]);
 
 const props = withDefaults(
     defineProps<{
@@ -23,28 +21,28 @@ const props = withDefaults(
     }
 );
 
-const addShape = () => {
-    areas.value.push({
-        overlay: new google.maps.Polygon({
-            paths: [
-                { lat: 48.384521, lng: 8.582583 },
-                { lat: 48.383178, lng: 8.583846 },
-                { lat: 48.383348, lng: 8.580421 },
-            ],
-            strokeColor: '#FF0000',
-            strokeOpacity: 0.8,
-            strokeWeight: 2,
-            fillColor: '#FF0000',
-            fillOpacity: 0.35,
-        }),
-        type: google.maps.drawing.OverlayType.POLYGON,
-        id: uuidv4(),
-        name: 'Mein erstes Polygon 😊',
-    });
-};
+// const addShape = () => {
+//     areas.value.push({
+//         overlay: new google.maps.Polygon({
+//             paths: [
+//                 { lat: 48.384521, lng: 8.582583 },
+//                 { lat: 48.383178, lng: 8.583846 },
+//                 { lat: 48.383348, lng: 8.580421 },
+//             ],
+//             strokeColor: '#FF0000',
+//             strokeOpacity: 0.8,
+//             strokeWeight: 2,
+//             fillColor: '#FF0000',
+//             fillOpacity: 0.35,
+//         }),
+//         type: google.maps.drawing.OverlayType.POLYGON,
+//         id: uuidv4(),
+//         name: 'Mein erstes Polygon 😊',
+//     });
+// };
 
 function _saveAreas() {
-    alert(JSON.stringify(areas.value.map((s) => shapeToGeoJSON(s))));
+    alert(JSON.stringify(areas.value));
 }
 </script>
 
@@ -75,7 +73,7 @@ function _saveAreas() {
             </div>
         </template>
         <template #default>
-            <MapWithControls v-model:shapes="areas" />
+            <MapWithControls v-model:areas="areas" />
         </template>
     </DefaultLayout>
     <!-- <div v-html="shapeHtml"></div>

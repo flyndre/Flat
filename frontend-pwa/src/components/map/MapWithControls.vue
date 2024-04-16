@@ -5,18 +5,7 @@ import {
 } from '@/data/constants';
 import { TypedOverlay } from '@/types/map/TypedOverlay';
 import { isOnMobile } from '@/util/mobileDetection';
-import {
-    mdiChartLineVariant,
-    mdiCircle,
-    mdiCloseBox,
-    mdiCrosshairs,
-    mdiDeleteForever,
-    mdiMap,
-    mdiPalette,
-    mdiPentagon,
-    mdiRectangle,
-    mdiShape,
-} from '@mdi/js';
+import { mdiDeleteForever, mdiMap, mdiPalette, mdiShape } from '@mdi/js';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import TabPanel from 'primevue/tabpanel';
@@ -29,33 +18,36 @@ import LocateMeButton from './LocateMeButton.vue';
 import LocationSearchDialog from './LocationSearchDialog.vue';
 import MapTypeSelectButton from './MapTypeSelectButton.vue';
 import ShapeColorSelectButton from './ShapeColorSelectButton.vue';
-import ScrollPanel from 'primevue/scrollpanel';
-import { getShapeBounds, getShapeColor } from '@/util/googleMapsUtils';
+import { getShapeBounds } from '@/util/googleMapsUtils';
 import DrawingModeSwitch from './DrawingModeSwitch.vue';
-import InputText from 'primevue/inputtext';
-import IconField from 'primevue/iconfield';
-import InputIcon from '../icons/InputIcon.vue';
 import { IdentifyableTypedOverlay } from '@/types/map/IdentifyableTypedOverlay';
 import { v4 as uuidv4 } from 'uuid';
 import ShapesList from './ShapesList.vue';
+import { Division } from '@/types/Division';
+import { polygonToGeoJSON } from '@/util/googleMapsUtils';
 
 /**
  * The shapes drawn on the map.
  */
-const shapes = defineModel<IdentifyableTypedOverlay[]>('shapes', {
+const shapes = ref<IdentifyableTypedOverlay[]>([]);
+
+const areas = defineModel<Division[]>('areas', {
     default: [],
 });
+
 let recentlyUpdated = false;
 
 watch(
     // TODO: watch values not length as soon as shapes are inputted geojson
-    () => shapes.value.length,
+    () => areas.value.length,
     () => {
         if (recentlyUpdated) return; // Prevents infinite update loop
         deleteAllShapes(false);
         shapes.value.forEach((s) => {
-            s.overlay?.setMap(map.value);
-            processNewOverlay(s, false);
+            // TODO: update for geojson
+            const sClone = structuredClone(s);
+            sClone.overlay?.setMap(map.value);
+            processNewOverlay(sClone, false);
         });
         recentlyUpdated = true;
         nextTick(() => (recentlyUpdated = false));
@@ -175,6 +167,16 @@ function addShapeChangeListeners(shape: any) {
 function shapeListChanged() {
     shapes.value.length = 0;
     shapes.value.push(...all_overlays);
+    areas.value = shapes.value.map((s) => ({
+        id: s.id,
+        name: s.name,
+        area: {
+            type: 'MultiPolygon',
+            coordinates: [
+                polygonToGeoJSON(<google.maps.Polygon>s.overlay).coordinates,
+            ],
+        },
+    }));
     recentlyUpdated = true;
     nextTick(() => (recentlyUpdated = false));
 }
