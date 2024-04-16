@@ -1,5 +1,6 @@
 using FlatBackend.Database;
 using FlatBackend.Interfaces;
+using MongoDB.Driver.Core.Configuration;
 using System.Diagnostics.Eventing.Reader;
 using System.Net;
 using System.Net.WebSockets;
@@ -13,13 +14,20 @@ builder.Services.AddSwaggerGen();
 
 //builder.WebHost.UseUrls("*.44381/");
 builder.Services.AddControllers();
+string mongoConString = "";
+if (builder.Environment.IsDevelopment())
+{
+    mongoConString = builder.Configuration.GetValue<string>("MONGODBCONNECTIONSTRING_DEBUG");
+}
+else
+{
+    mongoConString = builder.Configuration.GetValue<string>("MONGODBCONNECTIONSTRING");
+}
 
-var mongoConString = builder.Configuration.GetValue<string>("MONGODBCONNECTIONSTRING");
 builder.Services.AddSingleton<IMongoDBService>(new MongoDBService(mongoConString));
 
 var app = builder.Build();
 app.Logger.LogInformation($"MongoDbConnectionString: {mongoConString}");
-
 
 if (app.Environment.IsDevelopment())
 {
@@ -27,11 +35,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-            var webSocketOptions = new WebSocketOptions
-            {
-                KeepAliveInterval = TimeSpan.FromMinutes(2)
-            };
-            app.UseWebSockets(webSocketOptions);
+var webSocketOptions = new WebSocketOptions
+{
+    KeepAliveInterval = TimeSpan.FromMinutes(2)
+};
+app.UseWebSockets(webSocketOptions);
 
 //app.UseHttpsRedirection();
 
