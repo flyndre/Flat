@@ -37,6 +37,7 @@ import IconField from 'primevue/iconfield';
 import InputIcon from '../icons/InputIcon.vue';
 import { IdentifyableTypedOverlay } from '@/types/map/IdentifyableTypedOverlay';
 import { v4 as uuidv4 } from 'uuid';
+import ShapesList from './ShapesList.vue';
 
 /**
  * The shapes drawn on the map.
@@ -78,16 +79,6 @@ watch(selectedToolRef, (v) => drawingManager.value.setDrawingMode(v));
 const selectedColorRef = ref<string>();
 watch(selectedColorRef, (v) => setShapeColor(v));
 
-function getShapeIcon(shape: IdentifyableTypedOverlay) {
-    return shape.type === 'rectangle'
-        ? mdiRectangle
-        : shape.type === 'circle'
-          ? mdiCircle
-          : shape.type === 'polygon'
-            ? mdiPentagon
-            : mdiChartLineVariant;
-}
-
 function deleteShape(shape: IdentifyableTypedOverlay) {
     const index = all_overlays.findIndex((o) => o.id === shape.id);
     setSelection(all_overlays[index]?.overlay);
@@ -96,10 +87,10 @@ function deleteShape(shape: IdentifyableTypedOverlay) {
 function centerShape(shape: IdentifyableTypedOverlay) {
     const index = all_overlays.findIndex((o) => o.id === shape.id);
     setSelection(all_overlays[index]?.overlay);
-    panMapToShape(shape);
+    panMapToShape(all_overlays[index]);
 }
-function setShapeName(id: string, name: string) {
-    const index = all_overlays.findIndex((o) => o.id === id);
+function setShapeName(shape: IdentifyableTypedOverlay, name: string) {
+    const index = all_overlays.findIndex((o) => o.id === shape.id);
     all_overlays[index].name = name;
     shapeListChanged();
 }
@@ -475,67 +466,13 @@ onMounted(initialize);
                                 Areas
                             </div>
                         </template>
-                        <ScrollPanel
-                            class="h-[40vh] max-h-[40vh]"
-                            :pt="{
-                                content: {
-                                    class: 'flex flex-col gap-3.5 items-center justify-start',
-                                },
-                            }"
-                        >
-                            <div
-                                class="w-full flex flex-row justify-between gap-2 overflow-auto shrink-0"
-                                v-for="(shape, i) of shapes"
-                            >
-                                <Button
-                                    severity="secondary"
-                                    @click="centerShape(shape)"
-                                >
-                                    <template #icon>
-                                        <MdiIcon :icon="mdiCrosshairs" />
-                                    </template>
-                                </Button>
-                                <IconField class="grow" icon-position="left">
-                                    <InputIcon
-                                        :style="{
-                                            color: getShapeColor(shape),
-                                        }"
-                                        :icon="getShapeIcon(shape)"
-                                    />
-                                    <InputText
-                                        class="w-full"
-                                        :model-value="shape.name"
-                                        placeholder="Area Name"
-                                        @update:model-value="
-                                            (v: string) =>
-                                                setShapeName(shape.id, v)
-                                        "
-                                    />
-                                </IconField>
-                                <Button
-                                    class="shrink-0"
-                                    severity="secondary"
-                                    text
-                                    @click="deleteShape(shape)"
-                                >
-                                    <template #icon>
-                                        <MdiIcon :icon="mdiDeleteForever" />
-                                    </template>
-                                </Button>
-                            </div>
-                            <Button
-                                class="shrink-0"
-                                severity="danger"
-                                text
-                                :disabled="shapes.length === 0"
-                                @click="() => deleteAllShapes()"
-                            >
-                                <template #default>
-                                    <TextButtonIcon :icon="mdiCloseBox" />
-                                    Delete All
-                                </template>
-                            </Button>
-                        </ScrollPanel>
+                        <ShapesList
+                            :shapes
+                            :center-shape-hook="centerShape"
+                            :delete-shape-hook="deleteShape"
+                            :delete-all-shapes-hook="deleteAllShapes"
+                            :set-shape-name-hook="setShapeName"
+                        />
                     </TabPanel>
                 </TabView>
             </template>
