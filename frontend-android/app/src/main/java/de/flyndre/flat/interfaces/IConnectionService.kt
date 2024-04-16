@@ -24,7 +24,7 @@ interface IConnectionService {
      * @param name name of the Collection
      * @param area the base area in which the collection will be
      * @return a CollectionInstance if the request was successful
-     * @throws de.flyndre.flat.exceptions.OpenCollectionException if request was not successful
+     * @throws de.flyndre.flat.exceptions.RequestFailedException if request was not successful
      */
     suspend fun openCollection(name: String, area: MultiPolygon) : CollectionInstance
 

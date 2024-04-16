@@ -3,9 +3,9 @@ package de.flyndre.flat.models
 import java.util.UUID
 
 class AccessResquestMessage(
-    collectionId:UUID,
-    userId: UUID,
-    username: String
+    var collectionId:UUID,
+    var userId: UUID,
+    var username: String
 ) :WebSocketMessage(WebSocketMessageType.AccessRequest){
 
 }
