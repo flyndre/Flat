@@ -3,6 +3,7 @@ package de.flyndre.flat.composables.presetscreen
 import android.icu.text.Transliterator.Position
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.maps.model.CameraPosition
 import de.flyndre.flat.composables.presetscreen.collectionareascreen.CollectionAreaScreenViewModel
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.database.entities.Preset
@@ -59,6 +60,10 @@ class PresetScreenViewModel(db: AppDatabase, collectionAreaScreenViewModel: Coll
                 _db.presetDao().updatePreset(preset = preset)
             }
         }
+    }
+
+    fun getCameraPosition(): CameraPosition {
+        return _collectionAreaScreenViewModel.getCameraPosition()
     }
 
     //publish collection to backend
