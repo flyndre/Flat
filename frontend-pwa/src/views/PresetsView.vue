@@ -3,7 +3,7 @@ import MdiIcon from '@/components/icons/MdiIcon.vue';
 import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
 import { collections, collectionService } from '@/data/collections';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
-import { Collection } from '@/types/collection';
+import { Collection } from '@/types/Collection';
 import {
     mdiArrowLeft,
     mdiChevronRight,
