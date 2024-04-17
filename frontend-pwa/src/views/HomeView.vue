@@ -75,7 +75,7 @@ const mapZoomReal = useThrottle(mapZoomSlider, 25);
         </template>
         <template #default>
             <div
-                class="h-full w-full flex flex-col justify-center items-center select-none"
+                class="grow flex flex-col justify-center items-center select-none"
                 :class="{ 'pb-[10vh]': !isOnMobile }"
             >
                 <!-- ⭕ -->
