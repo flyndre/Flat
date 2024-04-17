@@ -96,10 +96,7 @@ async function save() {
             </Button>
         </template>
         <template #default>
-            <MapWithControls
-                class="pb-2"
-                v-model:areas="collection.divisions"
-            />
+            <MapWithControls v-model:areas="collection.divisions" />
         </template>
     </DefaultLayout>
     <!-- <div v-html="shapeHtml"></div>
