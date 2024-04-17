@@ -1,23 +1,21 @@
 <script setup lang="ts">
-import MapWithControls from '@/components/map/MapWithControls.vue';
-import { ref, watch } from 'vue';
-import { GeometryObject } from 'geojson';
-import { IdentifyableTypedOverlay } from '@/types/map/IdentifyableTypedOverlay';
-import { Overlay } from '@/types/map/Overlay';
-import { TypedOverlay } from '@/types/map/TypedOverlay';
-import { computed } from 'vue';
-import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
-import Button from 'primevue/button';
+import MapWithControls from '@/components/map/MapWithControls.vue';
+import { clientId } from '@/data/clientMetadata';
+import { collectionDraft, collectionService } from '@/data/collections';
+import DefaultLayout from '@/layouts/DefaultLayout.vue';
+import { Collection } from '@/types/Collection';
+import { dbSafe } from '@/util/dbUtils';
 import { mdiArrowLeft, mdiCheck } from '@mdi/js';
-import { getShapeBounds } from '@/util/googleMapsUtils';
-
-const areas = ref<TypedOverlay[]>([]);
+import Button from 'primevue/button';
+import { v4 as uuidv4 } from 'uuid';
+import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const props = withDefaults(
     defineProps<{
         edit?: boolean;
-        id?: number;
+        id?: string;
     }>(),
     {
         edit: false,
@@ -25,26 +23,51 @@ const props = withDefaults(
     }
 );
 
-const addShape = () => {
-    areas.value.push({
-        overlay: new google.maps.Polygon({
-            paths: [
-                { lat: 48.384521, lng: 8.582583 },
-                { lat: 48.383178, lng: 8.583846 },
-                { lat: 48.383348, lng: 8.580421 },
-            ],
-            strokeColor: '#FF0000',
-            strokeOpacity: 0.8,
-            strokeWeight: 2,
-            fillColor: '#FF0000',
-            fillOpacity: 0.35,
-        }),
-        type: google.maps.drawing.OverlayType.POLYGON,
-    });
+const defaultCollection: Collection = {
+    id: uuidv4(),
+    adminClientId: clientId.value,
 };
 
-function _saveAreas() {
-    alert(areas.value.map((s) => s.type + getShapeBounds(s)));
+const router = useRouter();
+const collection = ref<Collection>({
+    ...defaultCollection,
+    ...collectionDraft.get(),
+});
+const loading = ref(false);
+
+onMounted(async () => {
+    if (props.edit) {
+        try {
+            const storedCollection = await collectionService.get(props.id);
+            if (storedCollection === undefined) {
+                // todo: show toast
+                await router.replace({ name: 'presets' });
+            }
+            collection.value = storedCollection;
+        } catch (error) {
+            // todo: show toast
+            await router.replace({ name: 'presets' });
+        }
+    }
+});
+
+async function save() {
+    loading.value = true;
+    try {
+        if (props.edit) {
+            await collectionService.put(dbSafe(collection.value));
+        } else {
+            collectionDraft.set(collection.value);
+        }
+        await router.push({
+            name: props.edit ? 'edit' : 'create',
+            params: { id: props.id },
+        });
+    } catch (error) {
+        // todo: show toast
+    } finally {
+        loading.value = false;
+    }
 }
 </script>
 
@@ -54,7 +77,7 @@ function _saveAreas() {
             <router-link
                 :to="{
                     name: edit ? 'edit' : 'create',
-                    params: { id: props.id },
+                    params: { id },
                 }"
             >
                 <Button label="Back" severity="secondary" text>
@@ -66,16 +89,17 @@ function _saveAreas() {
         </template>
         <template #title> Edit Map </template>
         <template #action-right>
-            <div class="flex flex-row gap-2">
-                <Button label="Save" severity="primary" @click="_saveAreas">
-                    <template #icon>
-                        <TextButtonIcon :icon="mdiCheck" />
-                    </template>
-                </Button>
-            </div>
+            <Button label="Save" severity="primary" @click="save">
+                <template #icon>
+                    <TextButtonIcon :icon="mdiCheck" />
+                </template>
+            </Button>
         </template>
         <template #default>
-            <MapWithControls v-model:shapes="areas" />
+            <MapWithControls
+                class="pb-2"
+                v-model:areas="collection.divisions"
+            />
         </template>
     </DefaultLayout>
     <!-- <div v-html="shapeHtml"></div>

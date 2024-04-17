@@ -38,7 +38,7 @@ const { settings } = useSettings();
                 </nav>
             </template>
         </header>
-        <main class="px-2 flex flex-col flex-grow basis-0 overflow-hidden">
+        <main class="px-2 flex flex-col flex-grow basis-0 overflow-auto">
             <slot />
         </main>
         <nav

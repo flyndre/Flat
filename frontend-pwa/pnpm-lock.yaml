@@ -11,6 +11,9 @@ dependencies:
   '@mdi/js':
     specifier: ^7.4.47
     version: 7.4.47
+  '@types/geojson':
+    specifier: ^7946.0.14
+    version: 7946.0.14
   '@types/naughty-words':
     specifier: ^1.2.3
     version: 1.2.3
@@ -29,6 +32,9 @@ dependencies:
   dexie:
     specifier: ^4.0.4
     version: 4.0.4
+  geojson:
+    specifier: ^0.5.0
+    version: 0.5.0
   naughty-words:
     specifier: ^1.2.0
     version: 1.2.0
@@ -1223,7 +1229,7 @@ packages:
       babel-plugin-polyfill-corejs2: 0.4.10(@babel/core@7.24.4)
       babel-plugin-polyfill-corejs3: 0.10.4(@babel/core@7.24.4)
       babel-plugin-polyfill-regenerator: 0.6.1(@babel/core@7.24.4)
-      core-js-compat: 3.36.1
+      core-js-compat: 3.37.0
       semver: 6.3.1
     transitivePeerDependencies:
       - supports-color
@@ -1777,6 +1783,10 @@ packages:
     resolution: {integrity: sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==}
     dev: true
 
+  /@types/geojson@7946.0.14:
+    resolution: {integrity: sha512-WCfD5Ht3ZesJUsONdhvm84dmzWOiOzOAqOncN0++w0lBw1o8OuDNJF2McvvCef/yBqb/HYRahp1BYtODFQ8bRg==}
+    dev: false
+
   /@types/google.maps@3.55.7:
     resolution: {integrity: sha512-SlWFx0vo7RSAOC63+PTz8FeqLDaRYs7PrS/L0bZSKswxIN5TnCuckbeIwZpgD/S+DWalPteXfDbg5JsUER5Cyw==}
     dev: true
@@ -2074,7 +2084,7 @@ packages:
     dependencies:
       '@babel/core': 7.24.4
       '@babel/helper-define-polyfill-provider': 0.6.1(@babel/core@7.24.4)
-      core-js-compat: 3.36.1
+      core-js-compat: 3.37.0
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -2241,8 +2251,8 @@ packages:
     resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
     dev: true
 
-  /core-js-compat@3.36.1:
-    resolution: {integrity: sha512-Dk997v9ZCt3X/npqzyGdTlq6t7lDBhZwGvV94PKzDArjp7BTRm7WlDAXYd/OWdeFHO8OChQYRJNJvUCqCbrtKA==}
+  /core-js-compat@3.37.0:
+    resolution: {integrity: sha512-vYq4L+T8aS5UuFg4UwDhc7YNRWVeVZwltad9C/jV3R2LgVOpS9BDr7l/WL6BN0dbV3k1XejPTHqqEzJgsa0frA==}
     dependencies:
       browserslist: 4.23.0
     dev: true
@@ -2637,6 +2647,11 @@ packages:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
     engines: {node: '>=6.9.0'}
     dev: true
+
+  /geojson@0.5.0:
+    resolution: {integrity: sha512-/Bx5lEn+qRF4TfQ5aLu6NH+UKtvIv7Lhc487y/c8BdludrCTpiWf9wyI0RTyqg49MFefIAvFDuEi5Dfd/zgNxQ==}
+    engines: {node: '>= 0.10'}
+    dev: false
 
   /get-intrinsic@1.2.4:
     resolution: {integrity: sha512-5uYhsJH8VJBTv7oslg4BznJYhDoRI6waYCxMmCdnTrcCrHA/fCFKoTFz2JKKE0HdDFUF7/oQuhzumXJK7paBRQ==}

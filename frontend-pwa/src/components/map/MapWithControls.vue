@@ -3,55 +3,54 @@ import {
     GOOGLE_MAPS_API_KEY,
     GOOGLE_MAPS_API_LIBRARIES,
 } from '@/data/constants';
+import { Division } from '@/types/Division';
+import { IdentifyableTypedOverlay } from '@/types/map/IdentifyableTypedOverlay';
 import { TypedOverlay } from '@/types/map/TypedOverlay';
-import { isOnMobile } from '@/util/mobileDetection';
 import {
-    mdiChartLineVariant,
-    mdiCircle,
-    mdiClose,
-    mdiCloseBox,
-    mdiMap,
-    mdiPalette,
-    mdiPentagon,
-    mdiRectangle,
-    mdiShape,
-} from '@mdi/js';
+    geoJSONtoPolygon,
+    getShapeBounds,
+    getShapeListBounds,
+    getShapeColor,
+    polygonToGeoJSON,
+} from '@/util/googleMapsUtils';
+import { isOnMobile } from '@/util/mobileDetection';
+import { mdiDeleteForever, mdiMap, mdiPalette, mdiShape } from '@mdi/js';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import TabPanel from 'primevue/tabpanel';
 import TabView from 'primevue/tabview';
+import { v4 as uuidv4 } from 'uuid';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { GoogleMap } from 'vue3-google-map';
 import MdiIcon from '../icons/MdiIcon.vue';
 import TextButtonIcon from '../icons/TextButtonIcon.vue';
-import DrawingToolSelectButton from './DrawingToolSelectButton.vue';
+import DrawingModeSwitch from './DrawingModeSwitch.vue';
 import LocateMeButton from './LocateMeButton.vue';
 import LocationSearchDialog from './LocationSearchDialog.vue';
 import MapTypeSelectButton from './MapTypeSelectButton.vue';
 import ShapeColorSelectButton from './ShapeColorSelectButton.vue';
-import ScrollPanel from 'primevue/scrollpanel';
-import { getShapeBounds } from '@/util/googleMapsUtils';
+import ShapesList from './ShapesList.vue';
 
 /**
  * The shapes drawn on the map.
  */
-const shapes = defineModel<TypedOverlay[]>('shapes', { default: [] });
-let recentlyUpdated = false;
+const shapes = ref<IdentifyableTypedOverlay[]>([]);
+const areas = defineModel<Division[]>('areas', {
+    default: [],
+});
 
-watch(
-    // TODO: watch values not length as soon as shapes are inputted geojson
-    () => shapes.value.length,
-    () => {
-        if (recentlyUpdated) return; // Prevents infinite update loop
-        deleteAllShapes(false);
-        shapes.value.forEach((s) => {
-            s.overlay?.setMap(map.value);
-            processNewOverlay(s, false);
-        });
-        recentlyUpdated = true;
-        nextTick(() => (recentlyUpdated = false));
+const props = withDefaults(
+    defineProps<{
+        controls?: boolean;
+        panOnUpdated?: boolean;
+    }>(),
+    {
+        controls: true,
+        panOnUpdated: true,
     }
 );
+
+let recentlyUpdated = false;
 
 const apiKey = GOOGLE_MAPS_API_KEY;
 const libraries = GOOGLE_MAPS_API_LIBRARIES;
@@ -61,13 +60,73 @@ const map = computed(() => mapComponentRef.value?.map);
 const mapZoom = 15;
 
 const placesService = ref<google.maps.places.PlacesService>();
-
+const shapeSelected = ref(false);
 const mapTypeId = ref<google.maps.MapTypeId>();
-const selectedToolRef = ref<google.maps.drawing.OverlayType>(null);
-watch(selectedToolRef, (v) => setToolType(v));
-function setToolType(type: google.maps.drawing.OverlayType) {
-    drawingManager.value.setDrawingMode(type);
+
+const stop = watch(mapReady, (v) => {
+    if (!v) return;
+    stop();
+    syncAreas();
+    if (areas.value.length > 0) {
+        nextTick(() => panMapToShape(shapes.value[0]));
+    }
+    watch(() => areas.value, syncAreas, { deep: true });
+});
+
+function syncAreas() {
+    if (recentlyUpdated) return; // Prevents infinite update loop
+    deleteAllShapes(false);
+    areas.value.forEach((a) => {
+        const shape = {
+            id: a.id,
+            name: a.name,
+            type: 'polygon',
+            overlay: geoJSONtoPolygon(
+                {
+                    type: 'Polygon',
+                    coordinates: a.area.coordinates[0],
+                },
+                {
+                    ...shapeOptions,
+                    strokeColor: a.color,
+                    fillColor: a.color,
+                }
+            ),
+        };
+        shape.overlay.setMap(map.value);
+        processNewOverlay(shape, false);
+    });
+    recentlyUpdated = true;
+    shapes.value.length = 0;
+    shapes.value.push(...all_overlays);
+    clearSelection();
+    if (props.panOnUpdated && shapes.value?.length > 0)
+        map.value.fitBounds(getShapeListBounds(shapes.value));
+    nextTick(() => (recentlyUpdated = false));
 }
+
+const selectedToolRef = ref<google.maps.drawing.OverlayType>(null);
+watch(selectedToolRef, (v) => drawingManager.value.setDrawingMode(v));
+
+const selectedColorRef = ref<string>();
+watch(selectedColorRef, (v) => setShapeColor(v));
+
+function deleteShape(shape: IdentifyableTypedOverlay) {
+    const index = all_overlays.findIndex((o) => o.id === shape.id);
+    setSelection(all_overlays[index]?.overlay);
+    deleteSelectedShape();
+}
+function centerShape(shape: IdentifyableTypedOverlay) {
+    const index = all_overlays.findIndex((o) => o.id === shape.id);
+    setSelection(all_overlays[index]?.overlay);
+    panMapToShape(all_overlays[index]);
+}
+function setShapeName(shape: IdentifyableTypedOverlay, name: string) {
+    const index = all_overlays.findIndex((o) => o.id === shape.id);
+    all_overlays[index].name = name;
+    shapeListChanged();
+}
+
 function panMapToPos(position: google.maps.LatLngLiteral | google.maps.LatLng) {
     try {
         map.value?.panTo(position);
@@ -76,13 +135,7 @@ function panMapToPos(position: google.maps.LatLngLiteral | google.maps.LatLng) {
 }
 function panMapToShape(shape: TypedOverlay) {
     map.value.fitBounds(getShapeBounds(shape));
-    map.value.setZoom(mapZoom);
 }
-
-const selectedColorRef = ref<string>();
-watch(selectedColorRef, (v) => setShapeColor(v));
-
-const shapeSelected = ref(false);
 
 function addShapeChangeListeners(shape: any) {
     switch (shape.type) {
@@ -154,6 +207,17 @@ function addShapeChangeListeners(shape: any) {
 function shapeListChanged() {
     shapes.value.length = 0;
     shapes.value.push(...all_overlays);
+    areas.value = shapes.value.map((s) => ({
+        id: s.id,
+        name: s.name,
+        color: getShapeColor(s),
+        area: {
+            type: 'MultiPolygon',
+            coordinates: [
+                polygonToGeoJSON(<google.maps.Polygon>s.overlay).coordinates,
+            ],
+        },
+    }));
     recentlyUpdated = true;
     nextTick(() => (recentlyUpdated = false));
 }
@@ -256,8 +320,8 @@ function buildColorPalette() {
 const shapeOptions = {
     strokeWeight: 0,
     fillOpacity: 0.45,
-    editable: true,
-    draggable: true,
+    editable: false,
+    draggable: false,
 };
 const lineOptions = {
     ...shapeOptions,
@@ -266,6 +330,10 @@ const lineOptions = {
 };
 
 /* 🟡 Custom */ function processNewOverlay(overlay: any, userCreated = true) {
+    if (userCreated) {
+        overlay.id = uuidv4();
+        overlay.name = '';
+    }
     all_overlays.push(overlay);
     if (overlay.type != google.maps.drawing.OverlayType.MARKER) {
         // Switch back to non-drawing mode after drawing a shape.
@@ -343,7 +411,7 @@ onMounted(initialize);
 
 <template>
     <div
-        class="flex gap-2 h-full justify-stretch items-stretch pb-2"
+        class="flex gap-2 h-full justify-stretch items-stretch"
         :class="[isOnMobile ? 'flex-col' : 'flex-col-reverse']"
     >
         <div class="grow overflow-hidden flex flex-col-reverse rounded-xl">
@@ -359,6 +427,7 @@ onMounted(initialize);
             />
         </div>
         <Card
+            v-if="controls"
             :class="[{ isOnMobile: 'rounded-b-none' }]"
             :pt="{ body: { class: isOnMobile ? 'pb-0' : 'pt-0' } }"
         >
@@ -417,9 +486,20 @@ onMounted(initialize);
                         <div
                             class="flex flex-row gap-2 items-center justify-stretch flex-wrap"
                         >
-                            <DrawingToolSelectButton
-                                v-model="selectedToolRef"
-                            />
+                            <div
+                                class="flex flex-row gap-2 items-center justify-stretch flex-nowrap grow"
+                            >
+                                <DrawingModeSwitch v-model="selectedToolRef" />
+                                <Button
+                                    severity="secondary"
+                                    :disabled="!shapeSelected"
+                                    @click="deleteSelectedShape"
+                                >
+                                    <template #icon>
+                                        <MdiIcon :icon="mdiDeleteForever" />
+                                    </template>
+                                </Button>
+                            </div>
                             <ShapeColorSelectButton
                                 v-model="selectedColorRef"
                             />
@@ -429,90 +509,16 @@ onMounted(initialize);
                         <template #header>
                             <div class="flex justify-center items-center">
                                 <TextButtonIcon :icon="mdiShape" />
-                                Shapes
+                                Areas
                             </div>
                         </template>
-                        <ScrollPanel
-                            class="h-[40vh] max-h-[40vh]"
-                            :pt="{
-                                content: {
-                                    class: 'flex flex-col gap-2 items-center justify-start',
-                                },
-                            }"
-                        >
-                            <div
-                                class="w-full flex flex-row justify-between gap-1 overflow-auto shrink-0"
-                                v-for="(shape, i) of shapes"
-                            >
-                                <Button
-                                    class="w-full text-left capitalize"
-                                    :label="shape.type"
-                                    severity="contrast"
-                                    text
-                                    @click="
-                                        () => {
-                                            setSelection(
-                                                all_overlays[i]?.overlay
-                                            );
-                                            panMapToShape(shape);
-                                        }
-                                    "
-                                >
-                                    <template #icon>
-                                        <TextButtonIcon
-                                            :style="{
-                                                color:
-                                                    shape.overlay.get(
-                                                        'fillColor'
-                                                    ) ||
-                                                    shape.overlay.get(
-                                                        'strokeColor'
-                                                    ),
-                                            }"
-                                            :icon="
-                                                shape.type === 'rectangle'
-                                                    ? mdiRectangle
-                                                    : shape.type === 'circle'
-                                                      ? mdiCircle
-                                                      : shape.type === 'polygon'
-                                                        ? mdiPentagon
-                                                        : mdiChartLineVariant
-                                            "
-                                        />
-                                    </template>
-                                </Button>
-                                <Button
-                                    class="shrink-0"
-                                    severity="secondary"
-                                    rounded
-                                    text
-                                    @click="
-                                        () => {
-                                            setSelection(
-                                                all_overlays[i]?.overlay
-                                            );
-                                            deleteSelectedShape();
-                                        }
-                                    "
-                                >
-                                    <template #icon>
-                                        <MdiIcon :icon="mdiClose" />
-                                    </template>
-                                </Button>
-                            </div>
-                            <Button
-                                class="shrink-0"
-                                severity="danger"
-                                text
-                                :disabled="shapes.length === 0"
-                                @click="() => deleteAllShapes()"
-                            >
-                                <template #default>
-                                    <TextButtonIcon :icon="mdiCloseBox" />
-                                    Delete All
-                                </template>
-                            </Button>
-                        </ScrollPanel>
+                        <ShapesList
+                            :shapes
+                            :center-shape-hook="centerShape"
+                            :delete-shape-hook="deleteShape"
+                            :delete-all-shapes-hook="deleteAllShapes"
+                            :set-shape-name-hook="setShapeName"
+                        />
                     </TabPanel>
                 </TabView>
             </template>
