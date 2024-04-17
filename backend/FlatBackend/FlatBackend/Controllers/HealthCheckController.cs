@@ -2,6 +2,7 @@
 
 namespace FlatBackend.Controllers
 {
+    [Route("api")]
     public class HealthCheckController : ControllerBase
     {
         [Route("healthcheck")]
