@@ -88,6 +88,8 @@ function syncAreas() {
                 },
                 {
                     ...shapeOptions,
+                    editable: false,
+                    draggable: false,
                     strokeColor: a.color,
                     fillColor: a.color,
                 }
@@ -320,8 +322,8 @@ function buildColorPalette() {
 const shapeOptions = {
     strokeWeight: 0,
     fillOpacity: 0.45,
-    editable: false,
-    draggable: false,
+    editable: true,
+    draggable: true,
 };
 const lineOptions = {
     ...shapeOptions,

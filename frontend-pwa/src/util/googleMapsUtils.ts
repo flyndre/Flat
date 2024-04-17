@@ -26,7 +26,7 @@ export function mapCenterWithDefaults(
 
 export function getShapeColor(shape: IdentifyableTypedOverlay | TypedOverlay) {
     return <string>(
-        (shape.overlay.get('fillColor') || shape.overlay.get('strokeColor'))
+        (shape?.overlay?.get('fillColor') ?? shape?.overlay?.get('strokeColor'))
     );
 }
 
