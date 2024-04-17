@@ -424,131 +424,126 @@ onMounted(initialize);
 </script>
 
 <template>
-    <div
-        class="h-full basis-0 grow flex flex-col justify-stretch items-stretch gap-2"
-        :class="[]"
+    <Card
+        class="h-full basis-0 grow overflow-hidden"
+        :class="[{ 'shadow-none': !controls }]"
+        :pt="{
+            root: { class: isOnMobile ? 'flex-col' : 'flex-col-reverse' },
+            body: {
+                class: [
+                    controls ? 'p-2.5' : 'p-0',
+                    isOnMobile ? 'pb-0' : 'pt-0',
+                ],
+            },
+            header: {
+                class: 'h-full flex flex-col-reverse justify-stretch rounded-xl overflow-hidden',
+            },
+        }"
     >
-        <Card
-            class="grow overflow-hidden"
-            :class="[{ isOnMobile: 'rounded-b-none' }]"
-            :pt="{
-                root: { class: isOnMobile ? 'flex-col' : 'flex-col-reverse' },
-                body: {
-                    class: [
-                        controls ? 'p-2.5' : 'p-0',
-                        isOnMobile ? 'pb-0' : 'pt-0',
-                    ],
-                },
-                header: {
-                    class: 'h-full flex flex-col-reverse justify-stretch rounded-xl overflow-hidden',
-                },
-            }"
-        >
-            <template #header>
-                <GoogleMap
-                    ref="mapComponentRef"
-                    style="height: 100%; width: 100%"
-                    :api-key
-                    :libraries
-                    :zoom="mapZoom"
-                    :disable-default-ui="true"
-                    :map-type-id="mapTypeId"
-                    :clickable-icons="false"
-                />
-            </template>
-            <template #content v-if="controls">
-                <TabView
-                    :pt="{
-                        root: {
-                            class:
-                                'flex ' +
-                                (isOnMobile ? 'flex-col-reverse' : 'flex-col'),
-                        },
-                        nav: {
-                            class: [isOnMobile ? 'mt-2' : 'mb-2'],
-                        },
-                        inkbar: { class: 'rounded-t h-1' },
-                        panelContainer: { class: 'p-0' },
-                    }"
-                >
-                    <TabPanel>
-                        <template #header>
-                            <div class="flex justify-center items-center">
-                                <TextButtonIcon :icon="mdiMap" />
-                                Map
-                            </div>
-                        </template>
+        <template #header>
+            <GoogleMap
+                ref="mapComponentRef"
+                style="height: 100%; width: 100%"
+                :api-key
+                :libraries
+                :zoom="mapZoom"
+                :disable-default-ui="true"
+                :map-type-id="mapTypeId"
+                :clickable-icons="false"
+            />
+        </template>
+        <template #content v-if="controls">
+            <TabView
+                :pt="{
+                    root: {
+                        class:
+                            'flex ' +
+                            (isOnMobile ? 'flex-col-reverse' : 'flex-col'),
+                    },
+                    nav: {
+                        class: [isOnMobile ? 'mt-2' : 'mb-2'],
+                    },
+                    inkbar: { class: 'rounded-t h-1' },
+                    panelContainer: { class: 'p-0' },
+                }"
+            >
+                <TabPanel>
+                    <template #header>
+                        <div class="flex justify-center items-center">
+                            <TextButtonIcon :icon="mdiMap" />
+                            Map
+                        </div>
+                    </template>
+                    <div
+                        class="flex flex-row gap-2 items-center justify-stretch flex-wrap"
+                    >
                         <div
-                            class="flex flex-row gap-2 items-center justify-stretch flex-wrap"
+                            class="flex flex-row gap-2 grow text-nowrap basis-7/12"
                         >
-                            <div
-                                class="flex flex-row gap-2 grow text-nowrap basis-7/12"
-                            >
-                                <LocateMeButton
-                                    :initial-pan="true"
-                                    :locate-me-handler="(r) => panMapToPos(r)"
-                                />
-                                <LocateShapesButton
-                                    :shapes-present="shapes?.length > 0"
-                                    :locate-shapes-handler="
-                                        () => panMapToShapes(all_overlays)
-                                    "
-                                />
-                                <LocationSearchDialog
-                                    :places-service
-                                    :select-result-callback="
-                                        (r) => panMapToPos(r.geometry?.location)
-                                    "
-                                />
-                            </div>
-                            <MapTypeSelectButton
-                                class="basis-1/12"
-                                v-model="mapTypeId"
+                            <LocateMeButton
+                                :initial-pan="true"
+                                :locate-me-handler="(r) => panMapToPos(r)"
+                            />
+                            <LocateShapesButton
+                                :shapes-present="shapes?.length > 0"
+                                :locate-shapes-handler="
+                                    () => panMapToShapes(all_overlays)
+                                "
+                            />
+                            <LocationSearchDialog
+                                :places-service
+                                :select-result-callback="
+                                    (r) => panMapToPos(r.geometry?.location)
+                                "
                             />
                         </div>
-                    </TabPanel>
-                    <TabPanel>
-                        <template #header>
-                            <div class="flex justify-center items-center">
-                                <TextButtonIcon :icon="mdiPalette" />
-                                Tools
-                            </div>
-                        </template>
-                        <div
-                            class="flex flex-row gap-2 items-center justify-stretch flex-wrap"
-                        >
-                            <div
-                                class="flex flex-row gap-2 items-center justify-stretch flex-nowrap grow basis-0"
-                            >
-                                <DrawShapeButton v-model="selectedToolRef" />
-                                <DeleteShapeButton
-                                    :shape-selected
-                                    :delete-shape-handler="deleteSelectedShape"
-                                />
-                            </div>
-                            <ShapeColorSelectButton
-                                class="basis-52 min-w-[240px]"
-                                v-model="selectedColorRef"
-                            />
-                        </div>
-                    </TabPanel>
-                    <TabPanel>
-                        <template #header>
-                            <div class="flex justify-center items-center">
-                                <TextButtonIcon :icon="mdiTextureBox" />
-                                Areas
-                            </div>
-                        </template>
-                        <ShapesList
-                            :shapes
-                            :center-shape-hook="centerShape"
-                            :delete-shape-hook="deleteShape"
-                            :delete-all-shapes-hook="deleteAllShapes"
-                            :set-shape-name-hook="setShapeName"
+                        <MapTypeSelectButton
+                            class="basis-1/12"
+                            v-model="mapTypeId"
                         />
-                    </TabPanel>
-                </TabView>
-            </template>
-        </Card>
-    </div>
+                    </div>
+                </TabPanel>
+                <TabPanel>
+                    <template #header>
+                        <div class="flex justify-center items-center">
+                            <TextButtonIcon :icon="mdiPalette" />
+                            Tools
+                        </div>
+                    </template>
+                    <div
+                        class="flex flex-row gap-2 items-center justify-stretch flex-wrap"
+                    >
+                        <div
+                            class="flex flex-row gap-2 items-center justify-stretch flex-nowrap grow basis-0"
+                        >
+                            <DrawShapeButton v-model="selectedToolRef" />
+                            <DeleteShapeButton
+                                :shape-selected
+                                :delete-shape-handler="deleteSelectedShape"
+                            />
+                        </div>
+                        <ShapeColorSelectButton
+                            class="basis-52 min-w-[240px]"
+                            v-model="selectedColorRef"
+                        />
+                    </div>
+                </TabPanel>
+                <TabPanel>
+                    <template #header>
+                        <div class="flex justify-center items-center">
+                            <TextButtonIcon :icon="mdiTextureBox" />
+                            Areas
+                        </div>
+                    </template>
+                    <ShapesList
+                        :shapes
+                        :center-shape-hook="centerShape"
+                        :delete-shape-hook="deleteShape"
+                        :delete-all-shapes-hook="deleteAllShapes"
+                        :set-shape-name-hook="setShapeName"
+                    />
+                </TabPanel>
+            </TabView>
+        </template>
+    </Card>
 </template>
