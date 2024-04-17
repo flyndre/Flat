@@ -4,6 +4,7 @@ import de.flyndre.flat.models.AccessResquestMessage
 import de.flyndre.flat.models.CollectionArea
 import de.flyndre.flat.models.CollectionClosedMessage
 import de.flyndre.flat.models.CollectionInstance
+import de.flyndre.flat.models.CollectionUpdateMessage
 import de.flyndre.flat.models.IncrementalTrackMessage
 import de.flyndre.flat.models.RequestAccessResult
 import de.flyndre.flat.models.Track
@@ -18,6 +19,7 @@ interface IConnectionService {
     val onAccessRequest : ArrayList<(AccessResquestMessage) -> Unit>
     val onCollectionClosed: ArrayList<(CollectionClosedMessage) -> Unit>
     val onTrackUpdate: ArrayList<(IncrementalTrackMessage) -> Unit>
+    val onCollectionUpdate: ArrayList<(CollectionUpdateMessage)->Unit>
 
     /**
      * opens a collection to the public
@@ -86,10 +88,12 @@ interface IConnectionService {
      * @param onAccessRequest a callback to be called when an access request is made to a owned collection.
      * @param onCollectionClosed a callback to be notified if a collection is closed from the owner.
      * @param onTrackUpdate a callback to be called when a track update is received from an other user.
+     * @param onCollectionUpdate
      */
     suspend fun openWebsocket(onAccessRequest: ((AccessResquestMessage) -> Unit)? = null,
                               onCollectionClosed: ((CollectionClosedMessage) -> Unit)? = null,
-                              onTrackUpdate: ((IncrementalTrackMessage) -> Unit)? = null)
+                              onTrackUpdate: ((IncrementalTrackMessage) -> Unit)? = null,
+                              onCollectionUpdate: ((CollectionUpdateMessage)->Unit)?=null)
 
     /**
      * closes the websocket
@@ -110,6 +114,11 @@ interface IConnectionService {
      * Adds a callback when a track update is received from an other user.
      */
     fun addOnTrackUpdate(callback: (IncrementalTrackMessage) -> Unit)
+
+    /**
+     * Adds a callback to be called when an collection update is received
+     */
+    fun addOnCollectionUpdate(callback: (CollectionUpdateMessage)->Unit)
 
 
 }

@@ -7,6 +7,7 @@ import de.flyndre.flat.models.AccessResquestMessage
 import de.flyndre.flat.models.CollectionArea
 import de.flyndre.flat.models.CollectionClosedMessage
 import de.flyndre.flat.models.CollectionInstance
+import de.flyndre.flat.models.CollectionUpdateMessage
 import de.flyndre.flat.models.IncrementalTrackMessage
 import de.flyndre.flat.models.RequestAccessResult
 import de.flyndre.flat.models.Track
@@ -27,8 +28,9 @@ class ConnectionService(
     private var baseUrl:String,
     private val clientId:UUID,
     override val onAccessRequest: ArrayList<(AccessResquestMessage) -> Unit> = arrayListOf(),
-    override var onCollectionClosed: ArrayList<(CollectionClosedMessage) -> Unit> = arrayListOf(),
-    override var onTrackUpdate: ArrayList<(IncrementalTrackMessage) -> Unit> = arrayListOf(),
+    override val onCollectionClosed: ArrayList<(CollectionClosedMessage) -> Unit> = arrayListOf(),
+    override val onTrackUpdate: ArrayList<(IncrementalTrackMessage) -> Unit> = arrayListOf(),
+    override val onCollectionUpdate: ArrayList<(CollectionUpdateMessage) -> Unit> = arrayListOf(),
 ):IConnectionService {
 
     private val restClient = OkHttpClient.Builder().build()
@@ -40,6 +42,7 @@ class ConnectionService(
                 WebSocketMessageType.IncrementalTrack -> onTrackUpdate.stream().forEach { x->x(obj as IncrementalTrackMessage) }
                 WebSocketMessageType.AccessRequest -> onAccessRequest.stream().forEach { x->x(obj as AccessResquestMessage) }
                 WebSocketMessageType.CollectionClosed -> onCollectionClosed.stream().forEach { x->x(obj as CollectionClosedMessage) }
+                WebSocketMessageType.CollectionUpdate -> onCollectionUpdate.stream().forEach { x->x(obj as CollectionUpdateMessage) }
             }
         }
     }
@@ -164,13 +167,17 @@ class ConnectionService(
         webSocketClient.sendMessage(message)
     }
 
-    override suspend fun openWebsocket(onAccessRequest: ((AccessResquestMessage) -> Unit)?,
-                                       onCollectionClosed: ((CollectionClosedMessage) -> Unit)?,
-                                       onTrackUpdate: ((IncrementalTrackMessage) -> Unit)?) {
+    override suspend fun openWebsocket(
+        onAccessRequest: ((AccessResquestMessage) -> Unit)?,
+        onCollectionClosed: ((CollectionClosedMessage) -> Unit)?,
+        onTrackUpdate: ((IncrementalTrackMessage) -> Unit)?,
+        onCollectionUpdate: ((CollectionUpdateMessage) -> Unit)?
+    ) {
 
         onAccessRequest?.let { addOnAccessRequest(it) }
         onCollectionClosed?.let { addOnCollectionClosed(it) }
         onTrackUpdate?.let { addOnTrackUpdate(it) }
+        onCollectionUpdate?.let { addOnCollectionUpdate(it) }
         webSocketClient.setSocketUrl("$baseUrl/ws")
         webSocketClient.setListener(socketListener)
         webSocketClient.connect()
@@ -190,5 +197,9 @@ class ConnectionService(
 
     override fun addOnTrackUpdate(callback: (IncrementalTrackMessage) -> Unit) {
         onTrackUpdate.add(callback)
+    }
+
+    override fun addOnCollectionUpdate(callback: (CollectionUpdateMessage) -> Unit) {
+        onCollectionUpdate.add(callback)
     }
 }
