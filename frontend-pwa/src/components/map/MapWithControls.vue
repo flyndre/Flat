@@ -413,10 +413,12 @@ onMounted(initialize);
 
 <template>
     <div
-        class="flex gap-2 h-full justify-stretch items-stretch"
+        class="h-full flex flex-col justify-stretch items-stretch gap-2"
         :class="[isOnMobile ? 'flex-col' : 'flex-col-reverse']"
     >
-        <div class="grow overflow-hidden flex flex-col-reverse rounded-xl">
+        <div
+            class="grow flex flex-col-reverse justify-stretch overflow-hidden rounded-xl"
+        >
             <GoogleMap
                 ref="mapComponentRef"
                 style="height: 100%; width: 100%"

@@ -52,7 +52,7 @@ const { settings } = useSettings();
                 </template>
             </header>
             <main
-                class="px-2 pb-2 flex flex-col grow"
+                class="flex flex-col grow px-2 pb-2 h-full"
                 style="height: fill-available"
             >
                 <slot />

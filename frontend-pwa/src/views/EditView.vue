@@ -135,12 +135,12 @@ function back() {
             <Card
                 :pt="{
                     root: { class: 'overflow-hidden' },
-                    header: { class: 'relative' },
+                    header: { class: 'relative h-[30vh]' },
                 }"
             >
                 <template #header>
                     <MapWithControls
-                        class="w-full h-[30vh] min-h-[30vh] pointer-events-none [&>*]:rounded-none"
+                        class="pointer-events-none [&>*]:rounded-none"
                         :controls="false"
                         :areas="collection.divisions"
                     />
