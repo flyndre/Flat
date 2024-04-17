@@ -10,8 +10,16 @@ The following messages and data are exchanged between the frontends and the back
     -   (ID is generated): `UUID`
     -   collectionArea (Staked out area): `GeoJSON MultiPolygon`
 
-      Was implemented as Rest-API Http-Get-Endpoint
+      Was implemented as Rest-API Http-Post-Endpoint
     Endpoint-Url: /api/Rest/Collection
+
+-   **Get collection**
+    -   collectionId: `UUID`
+    -   clientId: `UUID`
+      
+
+      Was implemented as Rest-API Http-Get-Endpoint
+    Endpoint-Url: /api/Rest/Collection/{id}?userId={userId}
     
 -   **Set/change division of collectionArea**
     -   List of collectionDivision
