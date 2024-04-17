@@ -8,6 +8,7 @@ namespace FlatBackend.Models
         public Guid id { get; set; }
         public int clientId { get; set; }
         public string name { get; set; }
+        public string color { get; set; }
         public PolygonModel area { get; set; }
     }
 }
