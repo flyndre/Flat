@@ -15,6 +15,7 @@ import {
     mdiDeleteForever,
     mdiPentagon,
     mdiRectangle,
+    mdiTextureBox,
 } from '@mdi/js';
 import { getShapeColor } from '@/util/googleMapsUtils';
 
@@ -54,6 +55,7 @@ function getShapeIcon(shape: IdentifyableTypedOverlay) {
             content: {
                 class: 'flex flex-col gap-3.5 items-center justify-start',
             },
+            barX: { class: 'hidden' },
         }"
     >
         <div
@@ -70,7 +72,7 @@ function getShapeIcon(shape: IdentifyableTypedOverlay) {
                     :style="{
                         color: getShapeColor(shape),
                     }"
-                    :icon="getShapeIcon(shape)"
+                    :icon="mdiTextureBox"
                 />
                 <InputText
                     class="w-full"

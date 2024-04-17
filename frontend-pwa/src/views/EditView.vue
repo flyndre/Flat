@@ -11,6 +11,7 @@ import {
     mdiArrowLeft,
     mdiCheck,
     mdiMapMarkerPath,
+    mdiPencil,
     mdiPlay,
     mdiViewDashboardEdit,
 } from '@mdi/js';
@@ -135,12 +136,12 @@ function back() {
             <Card
                 :pt="{
                     root: { class: 'overflow-hidden' },
-                    header: { class: 'relative' },
+                    header: { class: 'relative h-[30vh]' },
                 }"
             >
                 <template #header>
                     <MapWithControls
-                        class="w-full h-[30vh] min-h-[30vh] pointer-events-none [&>*]:rounded-none"
+                        class="pointer-events-none [&>*]:rounded-none"
                         :controls="false"
                         :areas="collection.divisions"
                     />
@@ -157,7 +158,7 @@ function back() {
                             raised
                         >
                             <template #icon>
-                                <TextButtonIcon :icon="mdiViewDashboardEdit" />
+                                <TextButtonIcon :icon="mdiPencil" />
                             </template>
                         </Button>
                     </router-link>
