@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 
@@ -27,7 +28,7 @@ fun InitialScreen(
     onLukasBUHtton: () -> Unit
 ) {
     Scaffold(
-        bottomBar = {
+        bottomBar = { BottomAppBar {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)
@@ -38,14 +39,15 @@ fun InitialScreen(
                 Button(onClick = { onNavigateToCreateGroupScreen() }) {
                     Text("Create")
                 }
-                Button(onClick = {  }) {
+                Button(onClick = { onLukasBUHtton() }) {
                     Text("Lukas BUHtton")
                 }
             }
         }
+        }
     ) { innerPadding ->
         modifier.padding(innerPadding)
-        GoogleMap(modifier = modifier.fillMaxSize()) {
+        GoogleMap(modifier = modifier.fillMaxSize(), uiSettings = MapUiSettings(zoomControlsEnabled = false)) {
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using FlatBackend.Database;
+using FlatBackend.Interfaces;
 using FlatBackend.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -16,7 +17,12 @@ namespace FlatBackend.Controllers
     [Route("api/[controller]")]
     public class RestController : ControllerBase
     {
-        private MongoDBService mongoDBService = new MongoDBService();
+        private readonly IMongoDBService _MongoDBService;
+
+        public RestController( IMongoDBService mongoDBService )
+        {
+            _MongoDBService = mongoDBService;
+        }
 
         //AccessRequest Handshake
         [HttpGet("AccessRequest/{id}")]
@@ -24,7 +30,7 @@ namespace FlatBackend.Controllers
         {
             try
             {
-                var Collection = await mongoDBService.GetCollection(id);
+                var Collection = await _MongoDBService.GetCollection(id);
                 List<UserModel> users = Collection.requestedAccess;
                 var Json = JsonSerializer.Serialize(users);
                 return Ok(users);
@@ -40,12 +46,12 @@ namespace FlatBackend.Controllers
         {
             try
             {
-                var oldCol = await mongoDBService.GetCollection(id);
+                var oldCol = await _MongoDBService.GetCollection(id);
                 if (oldCol.requestedAccess == null)
                 { oldCol.requestedAccess = new List<UserModel>(); }
 
                 oldCol.requestedAccess.Add(value);
-                mongoDBService.ChangeCollection(oldCol);
+                _MongoDBService.ChangeCollection(oldCol);
                 return Ok(new object { });
             }
             catch (Exception ex)
@@ -60,11 +66,11 @@ namespace FlatBackend.Controllers
         {
             try
             {
-                var oldCol = await mongoDBService.GetCollection(id);
+                var oldCol = await _MongoDBService.GetCollection(id);
                 UserModel? user = oldCol.requestedAccess.Find(e => e.clientId == value.clientId);
                 oldCol.requestedAccess.Remove(user);
                 oldCol.confirmedUsers.Add(user);
-                mongoDBService.ChangeCollection(oldCol);
+                _MongoDBService.ChangeCollection(oldCol);
                 return Ok(new object { });
             }
             catch (Exception ex)
@@ -92,8 +98,8 @@ namespace FlatBackend.Controllers
                 {
                     value.requestedAccess = new List<UserModel>();
                 }
-                mongoDBService.AddCollection(value);
-                var result = await mongoDBService.GetCollection(value.id);
+                await _MongoDBService.AddCollection(value);
+                var result = await _MongoDBService.GetCollection(value.id);
                 var Json = JsonSerializer.Serialize(result);
                 return Json;
             }
@@ -109,13 +115,13 @@ namespace FlatBackend.Controllers
         {
             try
             {
-                var oldCol = await mongoDBService.GetCollection(id);
+                var oldCol = await _MongoDBService.GetCollection(id);
                 foreach (var area in value)
                 {
                     oldCol.collectionArea.Add(area);
                 }
-                mongoDBService.ChangeCollection(oldCol);
-                oldCol = await mongoDBService.GetCollection(id);
+                _MongoDBService.ChangeCollection(oldCol);
+                oldCol = await _MongoDBService.GetCollection(id);
                 return JsonSerializer.Serialize(oldCol);
             }
             catch (Exception ex)
@@ -130,7 +136,7 @@ namespace FlatBackend.Controllers
         {
             try
             {
-                mongoDBService.RemoveCollection(id); //and inform all clients
+                _MongoDBService.RemoveCollection(id); //and inform all clients
                 return Ok(new object { });
             }
             catch (Exception ex)

@@ -2,7 +2,9 @@ package de.flyndre.flat.composables.presetscreen.collectionareascreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.CameraPositionState
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.database.entities.Preset
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,6 +16,23 @@ class CollectionAreaScreenViewModel(): ViewModel() {
     //list of points for selection area
     private val _listAreaPoints: MutableStateFlow<ArrayList<LatLng>> = MutableStateFlow(arrayListOf())
     val listAreaPoints: StateFlow<List<LatLng>> = _listAreaPoints.asStateFlow()
+
+    //saved camera position
+    private val _cameraPosition = MutableStateFlow(CameraPosition(LatLng(0.0, 0.0), 0F, 0F, 0F))
+    val cameraPosition: StateFlow<CameraPosition> = _cameraPosition.asStateFlow()
+
+    fun newEmptyCollectionArea(){
+        _cameraPosition.value = CameraPosition(LatLng(0.0, 0.0), 0F, 0F, 0F)
+        _listAreaPoints.value = arrayListOf()
+    }
+
+    fun setCameraPosition(cameraPosition: CameraPosition){
+        _cameraPosition.value = cameraPosition
+    }
+
+    fun getCameraPosition(): CameraPosition{
+        return _cameraPosition.value
+    }
 
     fun setListAreaPoints(list: ArrayList<LatLng>){
         _listAreaPoints.value = list
