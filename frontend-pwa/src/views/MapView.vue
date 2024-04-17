@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import MapHelp from '@/components/map/MapHelp.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
 import { clientId } from '@/data/clientMetadata';
 import { collectionDraft, collectionService } from '@/data/collections';
@@ -71,6 +72,8 @@ async function save() {
         loading.value = false;
     }
 }
+
+const helpVisible = ref(false);
 </script>
 
 <template>
@@ -101,13 +104,19 @@ async function save() {
                     <TextButtonIcon :icon="mdiCheck" />
                 </template>
             </Button>
-            <Button label="Help" severity="secondary" text>
+            <Button
+                label="Help"
+                severity="secondary"
+                text
+                @click="helpVisible = true"
+            >
                 <template #icon>
                     <TextButtonIcon :icon="mdiHelp" />
                 </template>
             </Button>
         </template>
         <template #default>
+            <MapHelp v-model:visible="helpVisible" />
             <MapWithControls v-model:areas="collection.divisions" />
         </template>
     </DefaultLayout>
