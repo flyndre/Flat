@@ -11,6 +11,7 @@ import {
     mdiArrowLeft,
     mdiCheck,
     mdiMapMarkerPath,
+    mdiPencil,
     mdiPlay,
     mdiViewDashboardEdit,
 } from '@mdi/js';
@@ -157,7 +158,7 @@ function back() {
                             raised
                         >
                             <template #icon>
-                                <TextButtonIcon :icon="mdiViewDashboardEdit" />
+                                <TextButtonIcon :icon="mdiPencil" />
                             </template>
                         </Button>
                     </router-link>

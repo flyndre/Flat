@@ -22,6 +22,7 @@ import {
     mdiPalette,
     mdiShape,
     mdiShapePolygonPlus,
+    mdiTextureBox,
 } from '@mdi/js';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
@@ -434,9 +435,8 @@ onMounted(initialize);
                 root: { class: isOnMobile ? 'flex-col' : 'flex-col-reverse' },
                 body: {
                     class: [
-                        'p-2.5',
+                        controls ? 'p-2.5' : 'p-0',
                         isOnMobile ? 'pb-0' : 'pt-0',
-                        { 'p-0': !controls },
                     ],
                 },
                 header: {
@@ -535,7 +535,7 @@ onMounted(initialize);
                     <TabPanel>
                         <template #header>
                             <div class="flex justify-center items-center">
-                                <TextButtonIcon :icon="mdiShape" />
+                                <TextButtonIcon :icon="mdiTextureBox" />
                                 Areas
                             </div>
                         </template>
