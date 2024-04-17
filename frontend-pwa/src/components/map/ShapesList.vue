@@ -54,6 +54,7 @@ function getShapeIcon(shape: IdentifyableTypedOverlay) {
             content: {
                 class: 'flex flex-col gap-3.5 items-center justify-start',
             },
+            barX: { class: 'hidden' },
         }"
     >
         <div
