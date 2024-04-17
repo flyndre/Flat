@@ -40,6 +40,7 @@ import ShapeColorSelectButton from './ShapeColorSelectButton.vue';
 import ShapesList from './ShapesList.vue';
 import LocateShapesButton from './LocateShapesButton.vue';
 import DrawShapeButton from './DrawShapeButton.vue';
+import DeleteShapeButton from './DeleteShapeButton.vue';
 
 /**
  * The shapes drawn on the map.
@@ -464,7 +465,7 @@ onMounted(initialize);
                                 (isOnMobile ? 'flex-col-reverse' : 'flex-col'),
                         },
                         nav: {
-                            class: isOnMobile ? 'mt-2' : 'mb-2',
+                            class: [isOnMobile ? 'mt-2' : 'mb-2'],
                         },
                         inkbar: { class: 'rounded-t h-1' },
                         panelContainer: { class: 'p-0' },
@@ -519,17 +520,11 @@ onMounted(initialize);
                             <div
                                 class="flex flex-row gap-2 items-center justify-stretch flex-nowrap grow basis-0"
                             >
-                                <DrawingModeSwitch v-model="selectedToolRef" />
-                                <Button
-                                    class="shrink-0"
-                                    severity="secondary"
-                                    :disabled="!shapeSelected"
-                                    @click="deleteSelectedShape"
-                                >
-                                    <template #icon>
-                                        <MdiIcon :icon="mdiDeleteForever" />
-                                    </template>
-                                </Button>
+                                <DrawShapeButton v-model="selectedToolRef" />
+                                <DeleteShapeButton
+                                    :shape-selected
+                                    :delete-shape-handler="deleteSelectedShape"
+                                />
                             </div>
                             <ShapeColorSelectButton
                                 class="basis-52 min-w-[240px]"
