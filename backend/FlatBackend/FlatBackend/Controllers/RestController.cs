@@ -42,7 +42,7 @@ namespace FlatBackend.Controllers
         }
 
         [HttpPost("AccessRequest/{id}")]
-        public async Task<ObjectResult> PostAccessRequestCollection( Guid id, [FromBody] UserModel value )
+        public async Task<string> PostAccessRequestCollection( Guid id, [FromBody] UserModel value )
         {
             try
             {
@@ -52,17 +52,19 @@ namespace FlatBackend.Controllers
 
                 oldCol.requestedAccess.Add(value);
                 _MongoDBService.ChangeCollection(oldCol);
-                return Ok(new object { });
+                var result = _MongoDBService.GetCollection(id);
+                string Json = JsonSerializer.Serialize(result);
+                return Json;
             }
             catch (Exception ex)
             {
-                return NotFound(ex.ToString());
+                return ex.ToString();
             }
             //call add User to Accessrequestlist
         }
 
         [HttpPost("AccessConfirmation/{id}")]
-        public async Task<ObjectResult> PostAccessConfirmationCollection( Guid id, [FromBody] UserModel value )
+        public async Task<string> PostAccessConfirmationCollection( Guid id, [FromBody] UserModel value )
         {
             try
             {
@@ -71,15 +73,47 @@ namespace FlatBackend.Controllers
                 oldCol.requestedAccess.Remove(user);
                 oldCol.confirmedUsers.Add(user);
                 _MongoDBService.ChangeCollection(oldCol);
-                return Ok(new object { });
+                var result = await _MongoDBService.GetCollection(id);
+                string Json = JsonSerializer.Serialize(result);
+                return Json;
             }
             catch (Exception ex)
             {
-                return NotFound(ex.ToString());
+                return ex.ToString();
             }//call add User to AccessrequestConfirmedlist
         }
 
         //Collection specifik
+
+        [HttpGet("Collection/{id}")]
+        public async Task<string> GetCollection( Guid id, Guid userid )
+        {
+            try
+            {
+                var result = await _MongoDBService.GetCollection(id);
+                var user = result.confirmedUsers.Find(x => x.clientId == userid);
+                if (user != null || result.clientId == userid)
+                {
+                    var Json = JsonSerializer.Serialize(result);
+                    return Json;
+                }
+                else
+                {
+                    return Problem(
+                            type: "/docs/errors/forbidden",
+                            title: "Authenticated user is not authorized.",
+                            detail: $"User '{user}' must have been Confirmed.",
+                            statusCode: StatusCodes.Status403Forbidden,
+                            instance: HttpContext.Request.Path
+                            ).ToString();
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex.ToString() + "Maybe this collection doesn't exist. :/";
+            }
+        }
+
         // POST api/<RestController>/
         [HttpPost("Collection")]
         public async Task<string> PostOpenCollection( [FromBody] CollectionModel value )
@@ -121,8 +155,8 @@ namespace FlatBackend.Controllers
                     oldCol.collectionArea.Add(area);
                 }
                 _MongoDBService.ChangeCollection(oldCol);
-                oldCol = await _MongoDBService.GetCollection(id);
-                return JsonSerializer.Serialize(oldCol);
+                var result = await _MongoDBService.GetCollection(id);
+                return JsonSerializer.Serialize(result);
             }
             catch (Exception ex)
             {
