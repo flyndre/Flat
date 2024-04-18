@@ -63,6 +63,15 @@ const mapComponentRef = ref<InstanceType<typeof GoogleMap> | null>();
 const mapReady = computed(() => mapComponentRef.value?.ready);
 const map = computed(() => mapComponentRef.value?.map);
 const mapZoom = 15;
+const mapRestriction: google.maps.MapRestriction = {
+    strictBounds: true,
+    latLngBounds: {
+        north: 85,
+        south: -85,
+        west: -180,
+        east: 180,
+    },
+};
 
 const placesService = ref<google.maps.places.PlacesService>();
 const shapeSelected = ref(false);
@@ -460,6 +469,7 @@ onMounted(initialize);
                 :api-key
                 :libraries
                 :zoom="mapZoom"
+                :restriction="mapRestriction"
                 :disable-default-ui="true"
                 :map-type-id="mapTypeId"
                 :styles="mapStyles"
