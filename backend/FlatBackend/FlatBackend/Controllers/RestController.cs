@@ -26,18 +26,32 @@ namespace FlatBackend.Controllers
 
         //AccessRequest Handshake
         [HttpGet("AccessRequest/{id}")]
-        public async Task<ObjectResult> Get( Guid id )
+        public async Task<string> GetAccessRequest( Guid id, Guid userId )
         {
             try
             {
                 var Collection = await _MongoDBService.GetCollection(id);
-                List<UserModel> users = Collection.requestedAccess;
-                var Json = JsonSerializer.Serialize(users);
-                return Ok(users);
+                var validUser = Collection.confirmedUsers.Find(x => x.clientId == userId);
+                if (validUser.accepted)
+                {
+                    List<UserModel> users = Collection.requestedAccess;
+                    var Json = JsonSerializer.Serialize(users);
+                    return Json;
+                }
+                else
+                {
+                    return Problem(
+                            type: "/docs/errors/forbidden",
+                            title: "Authenticated user is not authorized.",
+                            detail: $"User '{validUser}' must have been Confirmed.",
+                            statusCode: StatusCodes.Status403Forbidden,
+                            instance: HttpContext.Request.Path
+                            ).ToString();
+                }
             }
             catch (Exception ex)
             {
-                return NotFound(ex.ToString());
+                return NotFound().ToString();
             }
         }
 
