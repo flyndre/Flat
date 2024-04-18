@@ -1,5 +1,6 @@
 ﻿using FlatBackend.Controllers;
 using FlatBackend.Websocket;
+using System.Net.WebSockets;
 
 namespace FlatBackend.Models
 {
@@ -7,6 +8,6 @@ namespace FlatBackend.Models
     {
         public Guid clientId { get; set; }
         public Guid collectionId { get; set; }
-        public WebsocketManager websocketManager { get; set; }
+        public WebSocket webSocket { get; set; }
     }
 }

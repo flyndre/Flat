@@ -1,10 +1,17 @@
 ﻿using System.Net.WebSockets;
+using FlatBackend.Interfaces;
+using FlatBackend.Websocket;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlatBackend.Controllers
 {
     public class WebsocketController : ControllerBase
     {
+        private readonly IWebsocketManager _WebsocketManager;
+
+        public WebsocketController( IWebsocketManager websocketManager )
+        { _WebsocketManager = websocketManager; }
+
         [Route("/ws")]
         [HttpGet]
         public async Task Get()
