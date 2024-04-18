@@ -31,11 +31,12 @@ class JoinScreenViewModel(db: AppDatabase, connectionService: ConnectionService)
         _joinName.value = joinName
     }
 
-    fun join(){
+    fun join(navigateToTrackingScreen: ()->Unit){
         viewModelScope.launch {
             val answer = _connectionService.requestAccess(_joinName.value, UUID.fromString(_joinLink.value))
             if(answer.accepted){
-                
+                //handle collection
+                navigateToTrackingScreen()
             }
         }
     }

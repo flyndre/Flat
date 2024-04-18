@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
         val collectionAreaScreenViewModel = CollectionAreaScreenViewModel()
         val createGroupScreenViewModel = CreateGroupScreenViewModel(db = db)
         val presetScreenViewModel = PresetScreenViewModel(db = db, collectionAreaScreenViewModel = collectionAreaScreenViewModel, connectionService)
-        val joinScreenViewModel = JoinScreenViewModel(db = db)
+        val joinScreenViewModel = JoinScreenViewModel(db = db, connectionService = connectionService as ConnectionService)
         val trackingScreenViewModel = TrackingScreenViewModel(db = db)
         setContent {
             FlatTheme {

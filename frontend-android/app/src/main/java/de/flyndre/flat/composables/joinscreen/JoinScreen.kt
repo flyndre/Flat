@@ -47,7 +47,7 @@ fun JoinScreen(modifier: Modifier = Modifier, onNavigateToInitialScreen: () -> U
             val modifier = Modifier.padding(10.dp)
             TextField(modifier = modifier, value = joinLink, onValueChange = {joinScreenViewModel.updateJoinLink(it)}, label = {Text(text = "Link for joining")})
             TextField(modifier = modifier, value = joinName, onValueChange = {joinScreenViewModel.updateJoinName(it)}, label = {Text(text = "Name for joining")})
-            Button(onClick = { onNavigateToTrackingScreen() }, enabled = joiningAllowed) {
+            Button(onClick = { joinScreenViewModel.join { onNavigateToTrackingScreen() } }, enabled = joiningAllowed) {
                 Text(text = "Join")
             }
         }
