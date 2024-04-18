@@ -2,7 +2,7 @@
 import { mdiFitToScreen } from '@mdi/js';
 import Button from 'primevue/button';
 import { onMounted } from 'vue';
-import MdiIcon from '../icons/MdiIcon.vue';
+import MdiIcon from '@/components/icons/MdiIcon.vue';
 
 const props = withDefaults(
     defineProps<{

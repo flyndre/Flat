@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { mdiVectorSquareEdit, mdiVectorSquareRemove } from '@mdi/js';
 import Button from 'primevue/button';
-import TextButtonIcon from '../icons/TextButtonIcon.vue';
+import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
 import { computed } from 'vue';
 
 const model = defineModel<google.maps.drawing.OverlayType>();

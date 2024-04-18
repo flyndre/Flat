@@ -2,10 +2,10 @@
 import Button from 'primevue/button';
 import IconField from 'primevue/iconfield';
 import ScrollPanel from 'primevue/scrollpanel';
-import InputIcon from '../icons/InputIcon.vue';
+import InputIcon from '@/components/icons/InputIcon.vue';
 import InputText from 'primevue/inputtext';
-import MdiIcon from '../icons/MdiIcon.vue';
-import TextButtonIcon from '../icons/TextButtonIcon.vue';
+import MdiIcon from '@/components/icons/MdiIcon.vue';
+import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
 import { IdentifyableTypedOverlay } from '@/types/map/IdentifyableTypedOverlay';
 import {
     mdiChartLineVariant,

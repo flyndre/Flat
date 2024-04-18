@@ -3,7 +3,7 @@ import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
 import { mdiCrosshairsGps } from '@mdi/js';
 import { useGeolocation } from '@vueuse/core';
 import { onMounted } from 'vue';
-import MdiIcon from '../icons/MdiIcon.vue';
+import MdiIcon from '@/components/icons/MdiIcon.vue';
 import Button from 'primevue/button';
 
 const props = withDefaults(

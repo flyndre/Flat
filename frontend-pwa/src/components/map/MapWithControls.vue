@@ -1,4 +1,13 @@
 <script setup lang="ts">
+import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import DeleteShapeButton from '@/components/map/controls/DeleteShapeButton.vue';
+import DrawShapeButton from '@/components/map/controls/DrawShapeButton.vue';
+import LocateMeButton from '@/components/map/controls/LocateMeButton.vue';
+import LocateShapesButton from '@/components/map/controls/LocateShapesButton.vue';
+import LocationSearchDialog from '@/components/map/controls/LocationSearchDialog.vue';
+import MapTypeSelectButton from '@/components/map/controls/MapTypeSelectButton.vue';
+import ShapeColorSelectButton from '@/components/map/controls/ShapeColorSelectButton.vue';
+import ShapesList from '@/components/map/controls/ShapesList.vue';
 import {
     GOOGLE_MAPS_API_KEY,
     GOOGLE_MAPS_API_LIBRARIES,
@@ -9,39 +18,18 @@ import { TypedOverlay } from '@/types/map/TypedOverlay';
 import {
     geoJSONtoPolygon,
     getShapeBounds,
-    getShapeListBounds,
     getShapeColor,
+    getShapeListBounds,
     polygonToGeoJSON,
 } from '@/util/googleMapsUtils';
 import { isOnMobile } from '@/util/mobileDetection';
-import {
-    mdiClose,
-    mdiDeleteForever,
-    mdiFitToScreen,
-    mdiMap,
-    mdiPalette,
-    mdiShape,
-    mdiShapePolygonPlus,
-    mdiTextureBox,
-} from '@mdi/js';
-import Button from 'primevue/button';
+import { mdiMap, mdiPalette, mdiTextureBox } from '@mdi/js';
 import Card from 'primevue/card';
 import TabPanel from 'primevue/tabpanel';
 import TabView from 'primevue/tabview';
 import { v4 as uuidv4 } from 'uuid';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { GoogleMap } from 'vue3-google-map';
-import MdiIcon from '../icons/MdiIcon.vue';
-import TextButtonIcon from '../icons/TextButtonIcon.vue';
-import DrawingModeSwitch from './DrawingModeSwitch.vue';
-import LocateMeButton from './LocateMeButton.vue';
-import LocationSearchDialog from './LocationSearchDialog.vue';
-import MapTypeSelectButton from './MapTypeSelectButton.vue';
-import ShapeColorSelectButton from './ShapeColorSelectButton.vue';
-import ShapesList from './ShapesList.vue';
-import LocateShapesButton from './LocateShapesButton.vue';
-import DrawShapeButton from './DrawShapeButton.vue';
-import DeleteShapeButton from './DeleteShapeButton.vue';
 
 /**
  * The shapes drawn on the map.

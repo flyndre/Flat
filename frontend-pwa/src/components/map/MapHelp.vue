@@ -4,8 +4,8 @@ import { mdiArrowLeft, mdiCheck, mdiCloseBox, mdiCrosshairs, mdiCrosshairsGps, m
 import Button from 'primevue/button';
 import ScrollPanel from 'primevue/scrollpanel';
 import Sidebar from 'primevue/sidebar';
-import TextButtonIcon from '../icons/TextButtonIcon.vue';
-import MdiIcon from '../icons/MdiIcon.vue';
+import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import MdiIcon from '@/components/icons/MdiIcon.vue';
 
 const visible = defineModel<boolean>('visible', {
     default: false,
