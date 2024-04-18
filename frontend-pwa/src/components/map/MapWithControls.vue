@@ -18,13 +18,23 @@ import { TypedOverlay } from '@/types/map/TypedOverlay';
 import { divisionToShape, shapeToDivision } from '@/util/converters';
 import { getShapeBounds, getShapeListBounds } from '@/util/googleMapsUtils';
 import { isOnMobile } from '@/util/mobileDetection';
-import { mdiMap, mdiPalette, mdiTextureBox } from '@mdi/js';
+import {
+    mdiCircle,
+    mdiCircleSlice8,
+    mdiMap,
+    mdiPalette,
+    mdiTextureBox,
+} from '@mdi/js';
 import Card from 'primevue/card';
 import TabPanel from 'primevue/tabpanel';
 import TabView from 'primevue/tabview';
 import { v4 as uuidv4 } from 'uuid';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { GoogleMap } from 'vue3-google-map';
+import {
+    POSITION_ICON_INNER,
+    POSITION_ICON_OUTER,
+} from '@/data/googleMapsPresets';
 
 /**
  * The shapes drawn on the map.
@@ -113,10 +123,33 @@ function setShapeName(shape: IdentifyableTypedOverlay, name: string) {
     shapeListChanged();
 }
 
+var marker_inner;
+var marker_outer;
+function setPositionMarker(
+    position: google.maps.LatLngLiteral | google.maps.LatLng
+) {
+    marker_inner?.setMap(null);
+    marker_outer?.setMap(null);
+    if (mapReady.value) {
+        marker_outer = new google.maps.Marker({
+            position,
+            map: map.value,
+            icon: POSITION_ICON_OUTER,
+        });
+        marker_inner = new google.maps.Marker({
+            position,
+            map: map.value,
+            icon: POSITION_ICON_INNER,
+        });
+    }
+}
+
 function panMapToPos(position: google.maps.LatLngLiteral | google.maps.LatLng) {
     try {
         map.value?.panTo(position);
-    } catch (e) {}
+    } catch (e) {
+        console.log(e);
+    }
     map.value?.setZoom(mapZoom);
 }
 function panMapToShape(shape: TypedOverlay) {
@@ -445,7 +478,12 @@ onMounted(initialize);
                         >
                             <LocateMeButton
                                 :initial-pan="true"
-                                :locate-me-handler="(r) => panMapToPos(r)"
+                                :locate-me-handler="
+                                    (r) => {
+                                        panMapToPos(r);
+                                        setPositionMarker(r);
+                                    }
+                                "
                             />
                             <LocateShapesButton
                                 :shapes-present="shapes?.length > 0"
