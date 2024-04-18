@@ -1,2 +1,6 @@
 @import url('primevue/resources/themes/aura-dark-pink/theme.css');
-/* @import url('./fixes.css'); */
+@import url('./base.css');
+
+:root {
+    background-color: #121212;
+}

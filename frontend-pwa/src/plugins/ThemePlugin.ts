@@ -1,6 +1,5 @@
 import darkTheme from '@/assets/themes/dark.css?inline';
 import lightTheme from '@/assets/themes/light.css?inline';
-import { isOnMobile } from '@/util/mobileDetection';
 import {
     ColorSchemeType,
     usePreferredColorScheme,
@@ -37,11 +36,11 @@ function loadScheme(scheme: ColorSchemeType) {
     if (scheme === 'dark') {
         unloadLightTheme();
         loadDarkTheme();
-        setThemeColor(isOnMobile ? '#090d15' : '#111827');
+        setThemeColor('#121212');
     } else {
         unloadDarkTheme();
         loadLightTheme();
-        setThemeColor(isOnMobile ? '#ffffff' : '#f9fafb');
+        setThemeColor('#f8fafc');
     }
 }
 
@@ -51,9 +50,12 @@ function setThemeColor(color: string) {
 
 const ThemePlugin: Plugin = {
     install(_app, ..._options) {
-        const element = document.createElement('meta');
+        const element =
+            document.querySelector<HTMLMetaElement>(
+                'meta[name="theme-color"]'
+            ) ?? document.createElement('meta');
         element.name = 'theme-color';
-        element.content = '#f9fafb';
+        element.content = 'transparent';
         document.head.appendChild(element);
         themeColorMetaTag.value = element;
         loadScheme(colorScheme.value);

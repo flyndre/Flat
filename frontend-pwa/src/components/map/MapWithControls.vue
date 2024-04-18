@@ -12,29 +12,29 @@ import {
     GOOGLE_MAPS_API_KEY,
     GOOGLE_MAPS_API_LIBRARIES,
 } from '@/data/constants';
+import {
+    DARK_MAP_STYLES,
+    POSITION_ICON_INNER,
+    POSITION_ICON_OUTER,
+} from '@/data/googleMapsPresets';
+import { useTheme } from '@/plugins/ThemePlugin';
 import { Division } from '@/types/Division';
 import { IdentifyableTypedOverlay } from '@/types/map/IdentifyableTypedOverlay';
 import { TypedOverlay } from '@/types/map/TypedOverlay';
 import { divisionToShape, shapeToDivision } from '@/util/converters';
-import { getShapeBounds, getShapeListBounds } from '@/util/googleMapsUtils';
-import { isOnMobile } from '@/util/mobileDetection';
 import {
-    mdiCircle,
-    mdiCircleSlice8,
-    mdiMap,
-    mdiPalette,
-    mdiTextureBox,
-} from '@mdi/js';
+    getShapeBounds,
+    getShapeListBounds,
+    shapeToGeoJSON,
+} from '@/util/googleMapsUtils';
+import { isOnMobile } from '@/util/mobileDetection';
+import { mdiMap, mdiPalette, mdiTextureBox } from '@mdi/js';
 import Card from 'primevue/card';
 import TabPanel from 'primevue/tabpanel';
 import TabView from 'primevue/tabview';
 import { v4 as uuidv4 } from 'uuid';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { GoogleMap } from 'vue3-google-map';
-import {
-    POSITION_ICON_INNER,
-    POSITION_ICON_OUTER,
-} from '@/data/googleMapsPresets';
 
 /**
  * The shapes drawn on the map.
@@ -67,6 +67,10 @@ const mapZoom = 15;
 const placesService = ref<google.maps.places.PlacesService>();
 const shapeSelected = ref(false);
 const mapTypeId = ref<google.maps.MapTypeId>();
+const { activeTheme } = useTheme();
+const mapStyles = computed<google.maps.MapTypeStyle[]>(() =>
+    activeTheme.value === 'dark' ? DARK_MAP_STYLES : []
+);
 
 const stop = watch(mapReady, (v) => {
     if (!v) return;
@@ -133,12 +137,18 @@ function setPositionMarker(
             marker_outer = new google.maps.Marker({
                 position,
                 map: map.value,
-                icon: POSITION_ICON_OUTER,
+                icon: {
+                    ...POSITION_ICON_OUTER,
+                    anchor: new google.maps.Point(12, 12),
+                },
             });
             marker_inner = new google.maps.Marker({
                 position,
                 map: map.value,
-                icon: POSITION_ICON_INNER,
+                icon: {
+                    ...POSITION_ICON_INNER,
+                    anchor: new google.maps.Point(12, 12),
+                },
             });
         }
         marker_inner.setPosition(position);
@@ -292,24 +302,19 @@ function deleteAllShapes(/* 🟡 Custom */ notify = true) {
 
 function selectColor(color) {
     selectedColor = color;
-
     // Retrieves the current options from the drawing manager and replaces the
     // stroke or fill color as appropriate.
-    var polylineOptions = drawingManager.get('polylineOptions');
-    polylineOptions.strokeColor = color;
-    drawingManager.set('polylineOptions', polylineOptions);
-
-    var rectangleOptions = drawingManager.get('rectangleOptions');
-    rectangleOptions.fillColor = color;
-    drawingManager.set('rectangleOptions', rectangleOptions);
-
-    var circleOptions = drawingManager.get('circleOptions');
-    circleOptions.fillColor = color;
-    drawingManager.set('circleOptions', circleOptions);
-
-    var polygonOptions = drawingManager.get('polygonOptions');
-    polygonOptions.fillColor = color;
-    drawingManager.set('polygonOptions', polygonOptions);
+    [
+        'polylineOptions',
+        'rectangleOptions',
+        'circleOptions',
+        'polygonOptions',
+    ].forEach((optionsKey) => {
+        const options = drawingManager.get(optionsKey);
+        options.strokeColor = color;
+        options.fillColor = color;
+        drawingManager.set(optionsKey, options);
+    });
 }
 
 function setSelectedShapeColor(color) {
@@ -341,21 +346,29 @@ const lineOptions = {
     strokeOpacity: 0.45,
 };
 
-/* 🟡 Custom */ function processNewOverlay(overlay: any, userCreated = true) {
+/* 🟡 Custom */ function processNewOverlay(
+    typedOverlay: any,
+    userCreated = true
+) {
     if (userCreated) {
-        overlay.id = uuidv4();
-        overlay.name = '';
+        if (shapeToGeoJSON(typedOverlay).coordinates?.[0]?.length <= 2) {
+            typedOverlay.overlay.setMap(null);
+            selectedToolRef.value = null;
+            return;
+        }
+        typedOverlay.id = uuidv4();
+        typedOverlay.name = '';
     }
-    all_overlays.push(overlay);
-    if (overlay.type != google.maps.drawing.OverlayType.MARKER) {
+    all_overlays.push(typedOverlay);
+    if (typedOverlay.type != google.maps.drawing.OverlayType.MARKER) {
         // Switch back to non-drawing mode after drawing a shape.
         // drawingManager.setDrawingMode(null);
         /* 🟡 Custom */ if (userCreated) selectedToolRef.value = null;
 
         // Add an event listener that selects the newly-drawn shape when the user
         // mouses down on it.
-        var newShape = overlay.overlay;
-        newShape.type = overlay.type;
+        var newShape = typedOverlay.overlay;
+        newShape.type = typedOverlay.type;
         google.maps.event.addListener(newShape, 'click', function () {
             setSelection(newShape);
         });
@@ -440,13 +453,16 @@ onMounted(initialize);
     >
         <template #header>
             <GoogleMap
+                version="beta"
                 ref="mapComponentRef"
+                background-color="transparent"
                 style="height: 100%; width: 100%"
                 :api-key
                 :libraries
                 :zoom="mapZoom"
                 :disable-default-ui="true"
                 :map-type-id="mapTypeId"
+                :styles="mapStyles"
                 :clickable-icons="false"
             />
         </template>

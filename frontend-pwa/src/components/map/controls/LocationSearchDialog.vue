@@ -69,7 +69,7 @@ function selectResult(result: google.maps.places.PlaceResult) {
         </template>
     </Button>
     <Sidebar
-        class="w-full max-w-[787px] h-fit rounded-t-xl"
+        class="w-full max-w-[787px] h-fit rounded-t-xl -bottom-px"
         v-model:visible="searchDialogVisible"
         modal
         position="bottom"
