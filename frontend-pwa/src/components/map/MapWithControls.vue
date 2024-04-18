@@ -133,12 +133,18 @@ function setPositionMarker(
             marker_outer = new google.maps.Marker({
                 position,
                 map: map.value,
-                icon: POSITION_ICON_OUTER,
+                icon: {
+                    ...POSITION_ICON_OUTER,
+                    anchor: new google.maps.Point(12, 12),
+                },
             });
             marker_inner = new google.maps.Marker({
                 position,
                 map: map.value,
-                icon: POSITION_ICON_INNER,
+                icon: {
+                    ...POSITION_ICON_INNER,
+                    anchor: new google.maps.Point(12, 12),
+                },
             });
         }
         marker_inner.setPosition(position);
