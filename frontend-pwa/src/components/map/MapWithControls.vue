@@ -123,24 +123,26 @@ function setShapeName(shape: IdentifyableTypedOverlay, name: string) {
     shapeListChanged();
 }
 
-var marker_inner;
-var marker_outer;
+let marker_inner;
+let marker_outer;
 function setPositionMarker(
     position: google.maps.LatLngLiteral | google.maps.LatLng
 ) {
-    marker_inner?.setMap(null);
-    marker_outer?.setMap(null);
     if (mapReady.value) {
-        marker_outer = new google.maps.Marker({
-            position,
-            map: map.value,
-            icon: POSITION_ICON_OUTER,
-        });
-        marker_inner = new google.maps.Marker({
-            position,
-            map: map.value,
-            icon: POSITION_ICON_INNER,
-        });
+        if (marker_inner === undefined || marker_outer === undefined) {
+            marker_outer = new google.maps.Marker({
+                position,
+                map: map.value,
+                icon: POSITION_ICON_OUTER,
+            });
+            marker_inner = new google.maps.Marker({
+                position,
+                map: map.value,
+                icon: POSITION_ICON_INNER,
+            });
+        }
+        marker_inner.setPosition(position);
+        marker_outer.setPosition(position);
     }
 }
 
