@@ -5,7 +5,8 @@ namespace FlatBackend.Models
 {
     public class WebSocketUserModel
     {
-        public UserModel User { get; set; }
+        public Guid clientId { get; set; }
+        public Guid collectionId { get; set; }
         public WebsocketManager websocketManager { get; set; }
     }
 }
