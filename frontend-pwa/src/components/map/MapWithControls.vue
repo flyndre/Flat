@@ -69,7 +69,16 @@ function syncAreas() {
     if (recentlyUpdated) return; // Prevents infinite update loop
     deleteAllShapes(false);
     divisions.value.forEach((d) => {
-        const shape = divisionToShape(d, shapeOptions);
+        const shape = divisionToShape(
+            d,
+            d.id === '0'
+                ? {
+                      ...shapeOptions,
+                      strokeOpacity: 0.1,
+                      fillOpacity: 0,
+                  }
+                : shapeOptions
+        );
         shape.overlay.setMap(map.value);
         processNewOverlay(shape, false);
     });
