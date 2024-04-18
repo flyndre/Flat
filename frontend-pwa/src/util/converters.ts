@@ -16,11 +16,11 @@ export function areaFromShapeList(
         type: 'Polygon',
         coordinates: [
             [
-                [areaBounds.west, areaBounds.north],
-                [areaBounds.east, areaBounds.north],
-                [areaBounds.east, areaBounds.south],
-                [areaBounds.west, areaBounds.south],
-                [areaBounds.west, areaBounds.north],
+                [areaBounds.north, areaBounds.west],
+                [areaBounds.north, areaBounds.east],
+                [areaBounds.south, areaBounds.east],
+                [areaBounds.south, areaBounds.west],
+                [areaBounds.north, areaBounds.west],
             ],
         ],
     };
