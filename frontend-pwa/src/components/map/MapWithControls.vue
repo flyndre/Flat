@@ -12,6 +12,12 @@ import {
     GOOGLE_MAPS_API_KEY,
     GOOGLE_MAPS_API_LIBRARIES,
 } from '@/data/constants';
+import {
+    DARK_MAP_STYLES,
+    POSITION_ICON_INNER,
+    POSITION_ICON_OUTER,
+} from '@/data/googleMapsPresets';
+import { useTheme } from '@/plugins/ThemePlugin';
 import { Division } from '@/types/Division';
 import { IdentifyableTypedOverlay } from '@/types/map/IdentifyableTypedOverlay';
 import { TypedOverlay } from '@/types/map/TypedOverlay';
@@ -22,25 +28,13 @@ import {
     shapeToGeoJSON,
 } from '@/util/googleMapsUtils';
 import { isOnMobile } from '@/util/mobileDetection';
-import {
-    mdiCircle,
-    mdiCircleSlice8,
-    mdiMap,
-    mdiPalette,
-    mdiTextureBox,
-} from '@mdi/js';
+import { mdiMap, mdiPalette, mdiTextureBox } from '@mdi/js';
 import Card from 'primevue/card';
 import TabPanel from 'primevue/tabpanel';
 import TabView from 'primevue/tabview';
 import { v4 as uuidv4 } from 'uuid';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { GoogleMap } from 'vue3-google-map';
-import {
-    DARK_MAP_STYLES,
-    POSITION_ICON_INNER,
-    POSITION_ICON_OUTER,
-} from '@/data/googleMapsPresets';
-import { useTheme } from '@/plugins/ThemePlugin';
 
 /**
  * The shapes drawn on the map.

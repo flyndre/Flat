@@ -14,7 +14,7 @@ const visible = defineModel<boolean>('visible', {
 
 <template>
     <Sidebar
-        class="w-full max-w-[787px] h-fit rounded-t-xl"
+        class="w-full max-w-[787px] h-fit rounded-t-xl -bottom-px"
         v-model:visible="visible"
         modal
         position="bottom"
