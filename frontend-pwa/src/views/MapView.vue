@@ -6,10 +6,10 @@ import { collectionDraft, collectionService } from '@/data/collections';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { Collection } from '@/types/Collection';
 import { dbSafe } from '@/util/dbUtils';
-import { mdiArrowLeft, mdiCheck } from '@mdi/js';
+import { mdiArrowLeft, mdiCheck, mdiHelp } from '@mdi/js';
 import Button from 'primevue/button';
 import { v4 as uuidv4 } from 'uuid';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const props = withDefaults(
@@ -51,6 +51,8 @@ onMounted(async () => {
     }
 });
 
+const submittable = computed(() => collection.value.divisions?.length > 0);
+
 async function save() {
     loading.value = true;
     try {
@@ -89,19 +91,24 @@ async function save() {
         </template>
         <template #title> Edit Map </template>
         <template #action-right>
-            <Button label="Save" severity="primary" @click="save">
+            <Button
+                label="Save"
+                severity="primary"
+                @click="save"
+                :disabled="!submittable"
+            >
                 <template #icon>
                     <TextButtonIcon :icon="mdiCheck" />
                 </template>
             </Button>
+            <Button label="Help" severity="secondary" text>
+                <template #icon>
+                    <TextButtonIcon :icon="mdiHelp" />
+                </template>
+            </Button>
         </template>
         <template #default>
-            <MapWithControls
-                class="pb-2"
-                v-model:areas="collection.divisions"
-            />
+            <MapWithControls v-model:areas="collection.divisions" />
         </template>
     </DefaultLayout>
-    <!-- <div v-html="shapeHtml"></div>
-    <button @click="addShape">Add Shape</button> -->
 </template>
