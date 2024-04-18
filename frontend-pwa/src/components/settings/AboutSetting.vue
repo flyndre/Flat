@@ -19,10 +19,10 @@ import Button from 'primevue/button';
         </template>
         <template #footer>
             <a href="https://github.com/flyndre/Flat">
-                <Button label="Repository" />
+                <Button class="p-0" link label="Repository" />
             </a>
             <a href="https://flyndre.github.io">
-                <Button text label="Team Website" />
+                <Button class="p-0" link label="Team Website" />
             </a>
         </template>
     </Card>

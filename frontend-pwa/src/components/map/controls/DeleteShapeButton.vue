@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { mdiDeleteForever } from '@mdi/js';
-import MdiIcon from '../icons/MdiIcon.vue';
+import MdiIcon from '@/components/icons/MdiIcon.vue';
 import Button from 'primevue/button';
 
 const props = defineProps<{

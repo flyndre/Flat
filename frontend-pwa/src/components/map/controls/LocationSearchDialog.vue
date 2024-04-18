@@ -6,11 +6,11 @@ import { mdiArrowLeft, mdiChevronRight, mdiMagnify } from '@mdi/js';
 import { isOnMobile } from '@/util/mobileDetection';
 import ScrollPanel from 'primevue/scrollpanel';
 import Button from 'primevue/button';
-import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import InputText from 'primevue/inputtext';
 import InputGroup from 'primevue/inputgroup';
-import Dialog from 'primevue/dialog';
+import Sidebar from 'primevue/sidebar';
 
 const props = defineProps<{
     placesService: google.maps.places.PlacesService;
@@ -65,23 +65,23 @@ function selectResult(result: google.maps.places.PlaceResult) {
         :pt="{ label: { class: 'text-left' } }"
     >
         <template #icon>
-            <TextButtonIcon :icon="mdiMagnify" />
+            <MdiTextButtonIcon :icon="mdiMagnify" />
         </template>
     </Button>
-    <Dialog
-        class="w-full max-w-[800px]"
+    <Sidebar
+        class="w-full max-w-[787px] h-fit rounded-t-xl"
         v-model:visible="searchDialogVisible"
         modal
-        :closable="false"
-        :draggable="false"
-        :position="isOnMobile ? 'bottom' : 'top'"
-        :dismissable-mask="true"
+        position="bottom"
+        :block-scroll="true"
+        :show-close-icon="false"
         :pt="{
             header: {
-                class: 'flex justify-stretch gap-2',
+                class: 'flex flex-row justify-stretch gap-2',
             },
-            content: { class: 'h-full overflow-hidden' },
-            footer: { class: 'justify-center' },
+            content: {
+                class: 'h-full flex flex-col justify-stretch items-stretch',
+            },
         }"
     >
         <template #header>
@@ -93,7 +93,7 @@ function selectResult(result: google.maps.places.PlaceResult) {
                 text
             >
                 <template #icon>
-                    <TextButtonIcon :icon="mdiArrowLeft" />
+                    <MdiTextButtonIcon :icon="mdiArrowLeft" />
                 </template>
             </Button>
             <InputGroup>
@@ -114,14 +114,7 @@ function selectResult(result: google.maps.places.PlaceResult) {
             </InputGroup>
         </template>
         <template #default>
-            <ScrollPanel
-                class="h-[50vh] max-h-[50vh]"
-                :pt="{
-                    content: {
-                        class: 'flex flex-col gap-2 items-center justify-start',
-                    },
-                }"
-            >
+            <ScrollPanel class="h-[65vh]">
                 <Button
                     v-for="result of searchResults"
                     class="w-full shrink-0 text-left"
@@ -141,15 +134,14 @@ function selectResult(result: google.maps.places.PlaceResult) {
                     </template>
                 </Button>
             </ScrollPanel>
-        </template>
-        <template v-if="isOnMobile" #footer>
             <Button
-                class="w-full"
+                v-if="isOnMobile"
+                class="w-full sticky bottom-0 left-0 right-0 z-10 shrink-0 mt-5"
                 label="Close"
                 severity="secondary"
                 @click="searchDialogVisible = false"
                 text
             />
         </template>
-    </Dialog>
+    </Sidebar>
 </template>

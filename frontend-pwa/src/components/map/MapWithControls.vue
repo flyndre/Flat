@@ -1,4 +1,13 @@
 <script setup lang="ts">
+import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
+import DeleteShapeButton from '@/components/map/controls/DeleteShapeButton.vue';
+import DrawShapeButton from '@/components/map/controls/DrawShapeButton.vue';
+import LocateMeButton from '@/components/map/controls/LocateMeButton.vue';
+import LocateShapesButton from '@/components/map/controls/LocateShapesButton.vue';
+import LocationSearchDialog from '@/components/map/controls/LocationSearchDialog.vue';
+import MapTypeSelectButton from '@/components/map/controls/MapTypeSelectButton.vue';
+import ShapeColorSelectButton from '@/components/map/controls/ShapeColorSelectButton.vue';
+import ShapesList from '@/components/map/controls/ShapesList.vue';
 import {
     GOOGLE_MAPS_API_KEY,
     GOOGLE_MAPS_API_LIBRARIES,
@@ -6,48 +15,32 @@ import {
 import { Division } from '@/types/Division';
 import { IdentifyableTypedOverlay } from '@/types/map/IdentifyableTypedOverlay';
 import { TypedOverlay } from '@/types/map/TypedOverlay';
-import {
-    geoJSONtoPolygon,
-    getShapeBounds,
-    getShapeListBounds,
-    getShapeColor,
-    polygonToGeoJSON,
-} from '@/util/googleMapsUtils';
+import { divisionToShape, shapeToDivision } from '@/util/converters';
+import { getShapeBounds, getShapeListBounds } from '@/util/googleMapsUtils';
 import { isOnMobile } from '@/util/mobileDetection';
 import {
-    mdiClose,
-    mdiDeleteForever,
-    mdiFitToScreen,
+    mdiCircle,
+    mdiCircleSlice8,
     mdiMap,
     mdiPalette,
-    mdiShape,
-    mdiShapePolygonPlus,
     mdiTextureBox,
 } from '@mdi/js';
-import Button from 'primevue/button';
 import Card from 'primevue/card';
 import TabPanel from 'primevue/tabpanel';
 import TabView from 'primevue/tabview';
 import { v4 as uuidv4 } from 'uuid';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { GoogleMap } from 'vue3-google-map';
-import MdiIcon from '../icons/MdiIcon.vue';
-import TextButtonIcon from '../icons/TextButtonIcon.vue';
-import DrawingModeSwitch from './DrawingModeSwitch.vue';
-import LocateMeButton from './LocateMeButton.vue';
-import LocationSearchDialog from './LocationSearchDialog.vue';
-import MapTypeSelectButton from './MapTypeSelectButton.vue';
-import ShapeColorSelectButton from './ShapeColorSelectButton.vue';
-import ShapesList from './ShapesList.vue';
-import LocateShapesButton from './LocateShapesButton.vue';
-import DrawShapeButton from './DrawShapeButton.vue';
-import DeleteShapeButton from './DeleteShapeButton.vue';
+import {
+    POSITION_ICON_INNER,
+    POSITION_ICON_OUTER,
+} from '@/data/googleMapsPresets';
 
 /**
  * The shapes drawn on the map.
  */
 const shapes = ref<IdentifyableTypedOverlay[]>([]);
-const areas = defineModel<Division[]>('areas', {
+const divisions = defineModel<Division[]>('divisions', {
     default: [],
 });
 
@@ -79,31 +72,23 @@ const stop = watch(mapReady, (v) => {
     if (!v) return;
     stop();
     syncAreas();
-    watch(() => areas.value, syncAreas, { deep: true });
+    watch(() => divisions.value, syncAreas, { deep: true });
 });
 
 function syncAreas() {
     if (recentlyUpdated) return; // Prevents infinite update loop
     deleteAllShapes(false);
-    areas.value.forEach((a) => {
-        const shape = {
-            id: a.id,
-            name: a.name,
-            type: 'polygon',
-            overlay: geoJSONtoPolygon(
-                {
-                    type: 'Polygon',
-                    coordinates: a.area.coordinates[0],
-                },
-                {
-                    ...shapeOptions,
-                    editable: false,
-                    draggable: false,
-                    strokeColor: a.color,
-                    fillColor: a.color,
-                }
-            ),
-        };
+    divisions.value.forEach((d) => {
+        const shape = divisionToShape(
+            d,
+            d.id === '0'
+                ? {
+                      ...shapeOptions,
+                      strokeOpacity: 0.1,
+                      fillOpacity: 0,
+                  }
+                : shapeOptions
+        );
         shape.overlay.setMap(map.value);
         processNewOverlay(shape, false);
     });
@@ -138,10 +123,35 @@ function setShapeName(shape: IdentifyableTypedOverlay, name: string) {
     shapeListChanged();
 }
 
+let marker_inner;
+let marker_outer;
+function setPositionMarker(
+    position: google.maps.LatLngLiteral | google.maps.LatLng
+) {
+    if (mapReady.value) {
+        if (marker_inner === undefined || marker_outer === undefined) {
+            marker_outer = new google.maps.Marker({
+                position,
+                map: map.value,
+                icon: POSITION_ICON_OUTER,
+            });
+            marker_inner = new google.maps.Marker({
+                position,
+                map: map.value,
+                icon: POSITION_ICON_INNER,
+            });
+        }
+        marker_inner.setPosition(position);
+        marker_outer.setPosition(position);
+    }
+}
+
 function panMapToPos(position: google.maps.LatLngLiteral | google.maps.LatLng) {
     try {
         map.value?.panTo(position);
-    } catch (e) {}
+    } catch (e) {
+        console.log(e);
+    }
     map.value?.setZoom(mapZoom);
 }
 function panMapToShape(shape: TypedOverlay) {
@@ -221,17 +231,7 @@ function addShapeChangeListeners(shape: any) {
 function shapeListChanged() {
     shapes.value.length = 0;
     shapes.value.push(...all_overlays);
-    areas.value = shapes.value.map((s) => ({
-        id: s.id,
-        name: s.name,
-        color: getShapeColor(s),
-        area: {
-            type: 'MultiPolygon',
-            coordinates: [
-                polygonToGeoJSON(<google.maps.Polygon>s.overlay).coordinates,
-            ],
-        },
-    }));
+    divisions.value = shapes.value.map((s) => shapeToDivision(s));
     recentlyUpdated = true;
     nextTick(() => (recentlyUpdated = false));
 }
@@ -242,6 +242,7 @@ function shapeListChanged() {
  * @see https://stackoverflow.com/a/12006751/11793652
  */
 
+/* 🟡 Custom */ var area_overlay;
 var drawingManager: google.maps.drawing.DrawingManager;
 var all_overlays = [];
 var selectedShape;
@@ -313,11 +314,8 @@ function selectColor(color) {
 
 function setSelectedShapeColor(color) {
     if (selectedShape) {
-        if (selectedShape.type == google.maps.drawing.OverlayType.POLYLINE) {
-            selectedShape.set('strokeColor', color);
-        } else {
-            selectedShape.set('fillColor', color);
-        }
+        selectedShape.set('strokeColor', color);
+        selectedShape.set('fillColor', color);
         /* 🟡 Custom */ shapeListChanged();
     }
 }
@@ -332,8 +330,8 @@ function buildColorPalette() {
 }
 
 const shapeOptions = {
-    strokeWeight: 0,
-    fillOpacity: 0.45,
+    // strokeWeight: 0,
+    // fillOpacity: 0.45,
     editable: true,
     draggable: true,
 };
@@ -470,7 +468,7 @@ onMounted(initialize);
                 <TabPanel>
                     <template #header>
                         <div class="flex justify-center items-center">
-                            <TextButtonIcon :icon="mdiMap" />
+                            <MdiTextButtonIcon :icon="mdiMap" />
                             Map
                         </div>
                     </template>
@@ -482,7 +480,12 @@ onMounted(initialize);
                         >
                             <LocateMeButton
                                 :initial-pan="true"
-                                :locate-me-handler="(r) => panMapToPos(r)"
+                                :locate-me-handler="
+                                    (r) => {
+                                        panMapToPos(r);
+                                        setPositionMarker(r);
+                                    }
+                                "
                             />
                             <LocateShapesButton
                                 :shapes-present="shapes?.length > 0"
@@ -506,7 +509,7 @@ onMounted(initialize);
                 <TabPanel>
                     <template #header>
                         <div class="flex justify-center items-center">
-                            <TextButtonIcon :icon="mdiPalette" />
+                            <MdiTextButtonIcon :icon="mdiPalette" />
                             Tools
                         </div>
                     </template>
@@ -531,7 +534,7 @@ onMounted(initialize);
                 <TabPanel>
                     <template #header>
                         <div class="flex justify-center items-center">
-                            <TextButtonIcon :icon="mdiTextureBox" />
+                            <MdiTextButtonIcon :icon="mdiTextureBox" />
                             Areas
                         </div>
                     </template>
