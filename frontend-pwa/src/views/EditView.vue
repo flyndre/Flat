@@ -52,14 +52,18 @@ const title = props.edit ? 'Edit' : 'Create';
 const submittable = computed(() => validateCollection(collection.value));
 
 const displayedDivisions = computed<Division[]>(() => [
+    ...(!collection.value.area
+        ? []
+        : <Division[]>[
+              {
+                  id: '0',
+                  area: {
+                      type: 'MultiPolygon',
+                      coordinates: [collection.value.area?.coordinates ?? [[]]],
+                  },
+              },
+          ]),
     ...(collection.value.divisions ?? []),
-    // {
-    //     id: '0',
-    //     area: {
-    //         type: 'MultiPolygon',
-    //         coordinates: [collection.value.area?.coordinates],
-    //     },
-    // },
 ]);
 
 onMounted(async () => {
@@ -70,6 +74,7 @@ onMounted(async () => {
                 // todo: show toast
                 await router.replace({ name: 'presets' });
             }
+            console.log(storedCollection.area);
             collection.value = storedCollection;
         } catch (error) {
             // todo: show toast
