@@ -62,7 +62,6 @@ async function save() {
     );
     try {
         if (props.edit) {
-            console.log(collection.value.area);
             await collectionService.put(dbSafe(collection.value));
         } else {
             collectionDraft.set(collection.value);
