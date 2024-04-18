@@ -2,6 +2,7 @@
 {
     public class GPSTrackDto
     {
-        public string track { get; set; }
+        public Guid trackId { get; set; }
+        public string track { get; set; }//LineString
     }
 }
