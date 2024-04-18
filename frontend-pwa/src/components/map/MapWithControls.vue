@@ -298,24 +298,19 @@ function deleteAllShapes(/* 🟡 Custom */ notify = true) {
 
 function selectColor(color) {
     selectedColor = color;
-
     // Retrieves the current options from the drawing manager and replaces the
     // stroke or fill color as appropriate.
-    var polylineOptions = drawingManager.get('polylineOptions');
-    polylineOptions.strokeColor = color;
-    drawingManager.set('polylineOptions', polylineOptions);
-
-    var rectangleOptions = drawingManager.get('rectangleOptions');
-    rectangleOptions.fillColor = color;
-    drawingManager.set('rectangleOptions', rectangleOptions);
-
-    var circleOptions = drawingManager.get('circleOptions');
-    circleOptions.fillColor = color;
-    drawingManager.set('circleOptions', circleOptions);
-
-    var polygonOptions = drawingManager.get('polygonOptions');
-    polygonOptions.fillColor = color;
-    drawingManager.set('polygonOptions', polygonOptions);
+    [
+        'polylineOptions',
+        'rectangleOptions',
+        'circleOptions',
+        'polygonOptions',
+    ].forEach((optionsKey) => {
+        const options = drawingManager.get(optionsKey);
+        options.strokeColor = color;
+        options.fillColor = color;
+        drawingManager.set(optionsKey, options);
+    });
 }
 
 function setSelectedShapeColor(color) {
