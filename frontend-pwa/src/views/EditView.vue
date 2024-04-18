@@ -74,7 +74,6 @@ onMounted(async () => {
                 // todo: show toast
                 await router.replace({ name: 'presets' });
             }
-            console.log(storedCollection.area);
             collection.value = storedCollection;
         } catch (error) {
             // todo: show toast
