@@ -1,5 +1,9 @@
 ﻿using System.Net.WebSockets;
+using System.Text;
+using System.Text.Json;
+using FlatBackend.DTOs;
 using FlatBackend.Interfaces;
+using FlatBackend.Models;
 using FlatBackend.Websocket;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,10 +11,14 @@ namespace FlatBackend.Controllers
 {
     public class WebsocketController : ControllerBase
     {
-        private readonly IWebsocketManager _WebsocketManager;
+        private static IWebsocketManager _WebsocketManager;
+        private static DtoJsonCategoriser _DtoJsonCategoriser;
 
         public WebsocketController( IWebsocketManager websocketManager )
-        { _WebsocketManager = websocketManager; }
+        {
+            _WebsocketManager = websocketManager;
+            _DtoJsonCategoriser = new DtoJsonCategoriser();
+        }
 
         [Route("/ws")]
         [HttpGet]
@@ -19,6 +27,7 @@ namespace FlatBackend.Controllers
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
                 using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
+
                 await Echo(webSocket);
             }
             else
@@ -43,6 +52,13 @@ namespace FlatBackend.Controllers
 
                 receiveResult = await webSocket.ReceiveAsync(
                     new ArraySegment<byte>(buffer), CancellationToken.None);
+                var Json = Encoding.ASCII.GetString(buffer);
+                Json = new string(Json.Where(c => c != '\x00').ToArray());
+                if (_DtoJsonCategoriser.isWebsocketConnectionDto(Json))
+                {
+                    var webSocketUser = JsonSerializer.Deserialize<WebsocketConnectionDto>(Json);
+                    _WebsocketManager.saveWebSocketOfUser(webSocket, webSocketUser.collectionId, webSocketUser.clientId);
+                }
             }
 
             await webSocket.CloseAsync(

@@ -18,10 +18,12 @@ namespace FlatBackend.Controllers
     public class RestController : ControllerBase
     {
         private readonly IMongoDBService _MongoDBService;
+        private readonly IWebsocketManager _WebsocketManager;
 
-        public RestController( IMongoDBService mongoDBService )
+        public RestController( IMongoDBService mongoDBService, IWebsocketManager websocketManager )
         {
             _MongoDBService = mongoDBService;
+            _WebsocketManager = websocketManager;
         }
 
         //AccessRequest Handshake
@@ -190,6 +192,7 @@ namespace FlatBackend.Controllers
                 }
                 _MongoDBService.ChangeCollection(oldCol);
                 var result = await _MongoDBService.GetCollection(id);
+                _WebsocketManager.sendUpdateCollection(id);
                 return JsonSerializer.Serialize(result);
             }
             catch (Exception ex)
