@@ -152,7 +152,17 @@ namespace FlatBackend.Controllers
                 var oldCol = await _MongoDBService.GetCollection(id);
                 foreach (var area in value)
                 {
-                    oldCol.collectionArea.Add(area);
+                    var oldArea = oldCol.collectionArea.Find(x => x.id == area.id);
+
+                    if (oldArea != null)
+                    {
+                        var index = oldCol.collectionArea.IndexOf(oldArea);
+                        oldCol.collectionArea[index] = area;
+                    }
+                    else
+                    {
+                        oldCol.collectionArea.Add(area);
+                    }
                 }
                 _MongoDBService.ChangeCollection(oldCol);
                 var result = await _MongoDBService.GetCollection(id);
