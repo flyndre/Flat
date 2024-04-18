@@ -70,8 +70,18 @@ namespace FlatBackend.Controllers
             {
                 var oldCol = await _MongoDBService.GetCollection(id);
                 UserModel? user = oldCol.requestedAccess.Find(e => e.clientId == value.clientId);
-                oldCol.requestedAccess.Remove(user);
-                oldCol.confirmedUsers.Add(user);
+                UserModel? validUser = oldCol.confirmedUsers.Find(x => x.clientId == value.clientId);
+                if (validUser == null)
+                {
+                    user.accepted = value.accepted;
+                    oldCol.requestedAccess.Remove(user);
+                    oldCol.confirmedUsers.Add(user);
+                }
+                else
+                {
+                    var index = oldCol.confirmedUsers.IndexOf(validUser);
+                    oldCol.confirmedUsers[index] = value;
+                }
                 _MongoDBService.ChangeCollection(oldCol);
                 var result = await _MongoDBService.GetCollection(id);
                 string Json = JsonSerializer.Serialize(result);
