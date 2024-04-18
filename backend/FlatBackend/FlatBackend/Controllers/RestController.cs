@@ -134,7 +134,7 @@ namespace FlatBackend.Controllers
             }
             catch (Exception ex)
             {
-                return ex.ToString() + "Maybe this collection doesn't exist. :/";
+                return NotFound().ToString();
             }
         }
 
