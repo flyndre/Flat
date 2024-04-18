@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import DivisionsList from '@/components/collections/DivisionsList.vue';
 import MdiInputIcon from '@/components/icons/MdiInputIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
@@ -9,13 +10,7 @@ import { Collection } from '@/types/Collection';
 import { Division } from '@/types/Division';
 import { dbSafe } from '@/util/dbUtils';
 import validateCollection from '@/validation/validateCollection';
-import {
-    mdiArrowLeft,
-    mdiCheck,
-    mdiMapMarkerPath,
-    mdiPencil,
-    mdiPlay,
-} from '@mdi/js';
+import { mdiArrowLeft, mdiCheck, mdiMapMarkerPath, mdiPlay } from '@mdi/js';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import IconField from 'primevue/iconfield';
@@ -106,6 +101,13 @@ async function _saveCollection(target: RouteLocationRaw) {
 const save = () => _saveCollection({ name: 'presets' });
 const start = () => _saveCollection({ name: 'presets' });
 
+function editDivisions() {
+    router.push({
+        name: props.edit ? 'edit-map' : 'create-map',
+        params: { id: props.id },
+    });
+}
+
 function back() {
     collectionDraft.set(null);
     router.push({ name: 'presets' });
@@ -160,23 +162,6 @@ function back() {
                         :controls="false"
                         :divisions="displayedDivisions"
                     />
-                    <router-link
-                        :to="{
-                            name: edit ? 'edit-map' : 'create-map',
-                            params: { id: props.id },
-                        }"
-                    >
-                        <Button
-                            class="absolute bottom-6 right-6"
-                            label="Edit Areas"
-                            severity="secondary"
-                            raised
-                        >
-                            <template #icon>
-                                <MdiTextButtonIcon :icon="mdiPencil" />
-                            </template>
-                        </Button>
-                    </router-link>
                 </template>
                 <template #content>
                     <div class="flex flex-col gap-2.5">
@@ -188,6 +173,10 @@ function back() {
                                 v-model="collection.name"
                             />
                         </IconField>
+                        <DivisionsList
+                            v-model="collection.divisions"
+                            :edit-divisions-handler="editDivisions"
+                        />
                     </div>
                 </template>
             </Card>
