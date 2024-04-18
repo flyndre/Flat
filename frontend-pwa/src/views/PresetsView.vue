@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import MdiIcon from '@/components/icons/MdiIcon.vue';
-import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import { collections, collectionService } from '@/data/collections';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { Collection } from '@/types/Collection';
@@ -32,7 +32,7 @@ function deleteSingle(id: string) {
             <router-link :to="{ name: 'home' }">
                 <Button label="Back" severity="secondary" text>
                     <template #icon>
-                        <TextButtonIcon :icon="mdiArrowLeft" />
+                        <MdiTextButtonIcon :icon="mdiArrowLeft" />
                     </template>
                 </Button>
             </router-link>
@@ -42,7 +42,7 @@ function deleteSingle(id: string) {
             <router-link :to="{ name: 'create' }">
                 <Button label="Create new" severity="primary">
                     <template #icon>
-                        <TextButtonIcon :icon="mdiPlus" />
+                        <MdiTextButtonIcon :icon="mdiPlus" />
                     </template>
                 </Button>
             </router-link>
@@ -81,7 +81,7 @@ function deleteSingle(id: string) {
                                         text
                                     >
                                         <template #icon>
-                                            <TextButtonIcon
+                                            <MdiTextButtonIcon
                                                 :icon="mdiDeleteSweep"
                                             />
                                         </template>

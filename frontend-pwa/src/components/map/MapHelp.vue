@@ -4,7 +4,7 @@ import { mdiArrowLeft, mdiCheck, mdiCloseBox, mdiCrosshairs, mdiCrosshairsGps, m
 import Button from 'primevue/button';
 import ScrollPanel from 'primevue/scrollpanel';
 import Sidebar from 'primevue/sidebar';
-import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 
 const visible = defineModel<boolean>('visible', {
@@ -41,7 +41,7 @@ const visible = defineModel<boolean>('visible', {
                     text
                 >
                     <template #icon>
-                        <TextButtonIcon :icon="mdiArrowLeft" />
+                        <MdiTextButtonIcon :icon="mdiArrowLeft" />
                     </template>
                 </Button>
             </div>

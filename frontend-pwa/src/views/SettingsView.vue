@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import MdiIcon from '@/components/icons/MdiIcon.vue';
-import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import AboutSetting from '@/components/settings/AboutSetting.vue';
 import HandednessSetting from '@/components/settings/HandednessSetting.vue';
 import HomeLocationSetting from '@/components/settings/HomeLocationSetting.vue';
@@ -48,7 +48,7 @@ const settings = [
             <router-link :to="{ name: 'home' }">
                 <Button label="Back" severity="secondary" text>
                     <template #icon>
-                        <TextButtonIcon :icon="mdiArrowLeft" />
+                        <MdiTextButtonIcon :icon="mdiArrowLeft" />
                     </template>
                 </Button>
             </router-link>

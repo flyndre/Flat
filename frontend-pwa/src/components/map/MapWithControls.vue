@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import DeleteShapeButton from '@/components/map/controls/DeleteShapeButton.vue';
 import DrawShapeButton from '@/components/map/controls/DrawShapeButton.vue';
 import LocateMeButton from '@/components/map/controls/LocateMeButton.vue';
@@ -458,7 +458,7 @@ onMounted(initialize);
                 <TabPanel>
                     <template #header>
                         <div class="flex justify-center items-center">
-                            <TextButtonIcon :icon="mdiMap" />
+                            <MdiTextButtonIcon :icon="mdiMap" />
                             Map
                         </div>
                     </template>
@@ -494,7 +494,7 @@ onMounted(initialize);
                 <TabPanel>
                     <template #header>
                         <div class="flex justify-center items-center">
-                            <TextButtonIcon :icon="mdiPalette" />
+                            <MdiTextButtonIcon :icon="mdiPalette" />
                             Tools
                         </div>
                     </template>
@@ -519,7 +519,7 @@ onMounted(initialize);
                 <TabPanel>
                     <template #header>
                         <div class="flex justify-center items-center">
-                            <TextButtonIcon :icon="mdiTextureBox" />
+                            <MdiTextButtonIcon :icon="mdiTextureBox" />
                             Areas
                         </div>
                     </template>

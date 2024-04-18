@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import MdiIcon from '@/components/icons/MdiIcon.vue';
-import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
 import { mdiCog, mdiImport, mdiMapMarkerPath } from '@mdi/js';
@@ -47,14 +47,14 @@ const mapZoomReal = useThrottle(mapZoomSlider, 25);
             <router-link :to="{ name: 'scan' }">
                 <Button label="Join a Collection">
                     <template #icon>
-                        <TextButtonIcon :icon="mdiImport" />
+                        <MdiTextButtonIcon :icon="mdiImport" />
                     </template>
                 </Button>
             </router-link>
             <router-link :to="{ name: 'presets' }">
                 <Button label="My Collections" severity="secondary">
                     <template #icon>
-                        <TextButtonIcon :icon="mdiMapMarkerPath" />
+                        <MdiTextButtonIcon :icon="mdiMapMarkerPath" />
                     </template>
                 </Button>
             </router-link>

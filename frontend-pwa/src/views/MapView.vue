@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MapHelp from '@/components/map/MapHelp.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
 import { clientId } from '@/data/clientMetadata';
@@ -87,7 +87,7 @@ const helpVisible = ref(false);
             >
                 <Button label="Back" severity="secondary" text>
                     <template #icon>
-                        <TextButtonIcon :icon="mdiArrowLeft" />
+                        <MdiTextButtonIcon :icon="mdiArrowLeft" />
                     </template>
                 </Button>
             </router-link>
@@ -101,7 +101,7 @@ const helpVisible = ref(false);
                 :disabled="!submittable"
             >
                 <template #icon>
-                    <TextButtonIcon :icon="mdiCheck" />
+                    <MdiTextButtonIcon :icon="mdiCheck" />
                 </template>
             </Button>
             <Button
@@ -111,7 +111,7 @@ const helpVisible = ref(false);
                 @click="helpVisible = true"
             >
                 <template #icon>
-                    <TextButtonIcon :icon="mdiHelp" />
+                    <MdiTextButtonIcon :icon="mdiHelp" />
                 </template>
             </Button>
         </template>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import CardProgressIndicator from '@/components/card/CardProgressIndicator.vue';
-import InputIcon from '@/components/icons/InputIcon.vue';
-import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import MdiInputIcon from '@/components/icons/MdiInputIcon.vue';
+import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import getJoinId from '@/util/getJoinId';
 import { isOnMobile } from '@/util/mobileDetection';
@@ -50,7 +50,7 @@ function cancel() {
             <router-link :to="{ name: 'home' }">
                 <Button label="Back" severity="secondary" text>
                     <template #icon>
-                        <TextButtonIcon :icon="mdiArrowLeft" />
+                        <MdiTextButtonIcon :icon="mdiArrowLeft" />
                     </template>
                 </Button>
             </router-link>
@@ -64,7 +64,7 @@ function cancel() {
                 @click="join"
             >
                 <template #icon>
-                    <TextButtonIcon :icon="mdiImport" />
+                    <MdiTextButtonIcon :icon="mdiImport" />
                 </template>
             </Button>
         </template>
@@ -90,7 +90,7 @@ function cancel() {
                             @click="cancel"
                         >
                             <template #icon>
-                                <TextButtonIcon :icon="mdiClose" />
+                                <MdiTextButtonIcon :icon="mdiClose" />
                             </template>
                         </Button>
                     </div>
@@ -107,7 +107,7 @@ function cancel() {
                 <template #content>
                     <div class="flex flex-col gap-2.5">
                         <IconField iconPosition="left">
-                            <InputIcon :icon="mdiLink" />
+                            <MdiInputIcon :icon="mdiLink" />
                             <InputText
                                 class="w-full"
                                 placeholder="Or enter a link manually"
@@ -116,7 +116,7 @@ function cancel() {
                             />
                         </IconField>
                         <IconField iconPosition="left">
-                            <InputIcon :icon="mdiAccount" />
+                            <MdiInputIcon :icon="mdiAccount" />
                             <InputText
                                 class="w-full"
                                 placeholder="Your Name"

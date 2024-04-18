@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import InputIcon from '@/components/icons/InputIcon.vue';
-import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import MdiInputIcon from '@/components/icons/MdiInputIcon.vue';
+import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
 import { clientId } from '@/data/clientMetadata';
 import { collectionDraft, collectionService } from '@/data/collections';
@@ -102,7 +102,7 @@ function back() {
         <template #action-left>
             <Button label="Back" severity="secondary" text @click="back">
                 <template #icon>
-                    <TextButtonIcon :icon="mdiArrowLeft" />
+                    <MdiTextButtonIcon :icon="mdiArrowLeft" />
                 </template>
             </Button>
         </template>
@@ -117,7 +117,7 @@ function back() {
                     :disabled="!submittable"
                 >
                     <template #icon>
-                        <TextButtonIcon :icon="mdiCheck" />
+                        <MdiTextButtonIcon :icon="mdiCheck" />
                     </template>
                 </Button>
                 <Button
@@ -127,7 +127,7 @@ function back() {
                     :disabled="!submittable"
                 >
                     <template #icon>
-                        <TextButtonIcon :icon="mdiPlay" />
+                        <MdiTextButtonIcon :icon="mdiPlay" />
                     </template>
                 </Button>
             </div>
@@ -158,7 +158,7 @@ function back() {
                             raised
                         >
                             <template #icon>
-                                <TextButtonIcon :icon="mdiPencil" />
+                                <MdiTextButtonIcon :icon="mdiPencil" />
                             </template>
                         </Button>
                     </router-link>
@@ -166,7 +166,7 @@ function back() {
                 <template #content>
                     <div class="flex flex-col gap-2.5">
                         <IconField iconPosition="left">
-                            <InputIcon :icon="mdiMapMarkerPath" />
+                            <MdiInputIcon :icon="mdiMapMarkerPath" />
                             <InputText
                                 class="w-full"
                                 placeholder="Collection Name"

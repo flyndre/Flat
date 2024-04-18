@@ -6,7 +6,7 @@ import { mdiArrowLeft, mdiChevronRight, mdiMagnify } from '@mdi/js';
 import { isOnMobile } from '@/util/mobileDetection';
 import ScrollPanel from 'primevue/scrollpanel';
 import Button from 'primevue/button';
-import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import InputText from 'primevue/inputtext';
 import InputGroup from 'primevue/inputgroup';
@@ -65,7 +65,7 @@ function selectResult(result: google.maps.places.PlaceResult) {
         :pt="{ label: { class: 'text-left' } }"
     >
         <template #icon>
-            <TextButtonIcon :icon="mdiMagnify" />
+            <MdiTextButtonIcon :icon="mdiMagnify" />
         </template>
     </Button>
     <Sidebar
@@ -93,7 +93,7 @@ function selectResult(result: google.maps.places.PlaceResult) {
                 text
             >
                 <template #icon>
-                    <TextButtonIcon :icon="mdiArrowLeft" />
+                    <MdiTextButtonIcon :icon="mdiArrowLeft" />
                 </template>
             </Button>
             <InputGroup>
