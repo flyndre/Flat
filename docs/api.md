@@ -23,7 +23,7 @@ The following messages and data are exchanged between the frontends and the back
     
 -   **Set/change division of collectionArea**
     -   List of collectionDivision
-        -   area: `GeoJSON MultiPolygon`
+        -   area: `GeoJSON Polygon`
         -   name: `String`
         -   id: `UUID`
 
