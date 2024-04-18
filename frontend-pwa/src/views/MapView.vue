@@ -4,12 +4,14 @@ import MapHelp from '@/components/map/MapHelp.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
 import { clientId } from '@/data/clientMetadata';
 import { collectionDraft, collectionService } from '@/data/collections';
+import { TOAST_LIFE } from '@/data/constants';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { Collection } from '@/types/Collection';
 import { areaFromShapeList, divisionToShape } from '@/util/converters';
 import { dbSafe } from '@/util/dbUtils';
 import { mdiArrowLeft, mdiCheck, mdiHelp } from '@mdi/js';
 import Button from 'primevue/button';
+import { useToast } from 'primevue/usetoast';
 import { v4 as uuidv4 } from 'uuid';
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -42,18 +44,28 @@ onMounted(async () => {
         try {
             const storedCollection = await collectionService.get(props.id);
             if (storedCollection === undefined) {
-                // todo: show toast
+                add({
+                    life: TOAST_LIFE,
+                    severity: 'error',
+                    summary: 'The requested collection does not exits.',
+                });
                 await router.replace({ name: 'presets' });
             }
             collection.value = storedCollection;
         } catch (error) {
-            // todo: show toast
+            add({
+                life: TOAST_LIFE,
+                severity: 'error',
+                summary: 'Failed to get the requested collection.',
+            });
             await router.replace({ name: 'presets' });
         }
     }
 });
 
 const submittable = computed(() => collection.value.divisions?.length > 0);
+
+const { add } = useToast();
 
 async function save() {
     loading.value = true;
@@ -71,7 +83,11 @@ async function save() {
             params: { id: props.id },
         });
     } catch (error) {
-        // todo: show toast
+        add({
+            life: TOAST_LIFE,
+            severity: 'error',
+            summary: 'Failed to save divisions.',
+        });
     } finally {
         loading.value = false;
     }
