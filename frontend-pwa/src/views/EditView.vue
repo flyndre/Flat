@@ -5,6 +5,7 @@ import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
 import { clientId } from '@/data/clientMetadata';
 import { collectionDraft, collectionService } from '@/data/collections';
+import { TOAST_LIFE } from '@/data/constants';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { Collection } from '@/types/Collection';
 import { Division } from '@/types/Division';
@@ -15,6 +16,7 @@ import Button from 'primevue/button';
 import Card from 'primevue/card';
 import IconField from 'primevue/iconfield';
 import InputText from 'primevue/inputtext';
+import { useToast } from 'primevue/usetoast';
 import { v4 as uuidv4 } from 'uuid';
 import { computed, onMounted, ref } from 'vue';
 import { RouteLocationRaw, useRouter } from 'vue-router';
@@ -61,17 +63,27 @@ const displayedDivisions = computed<Division[]>(() => [
     ...(collection.value.divisions ?? []),
 ]);
 
+const { add } = useToast();
+
 onMounted(async () => {
     if (props.edit) {
         try {
             const storedCollection = await collectionService.get(props.id);
             if (storedCollection === undefined) {
-                // todo: show toast
+                add({
+                    life: TOAST_LIFE,
+                    severity: 'error',
+                    summary: 'The requested collection id does not exist.',
+                });
                 await router.replace({ name: 'presets' });
             }
             collection.value = storedCollection;
         } catch (error) {
-            // todo: show toast
+            add({
+                life: TOAST_LIFE,
+                severity: 'error',
+                summary: 'Failed to get the requested collection.',
+            });
             await router.replace({ name: 'presets' });
         }
     }
@@ -79,7 +91,11 @@ onMounted(async () => {
 
 async function _saveCollection(target: RouteLocationRaw) {
     if (!submittable.value) {
-        // todo: show toast
+        add({
+            life: TOAST_LIFE,
+            severity: 'error',
+            summary: 'The collection is missing required information.',
+        });
         return;
     }
     loading.value = true;
@@ -92,7 +108,11 @@ async function _saveCollection(target: RouteLocationRaw) {
         }
         await router.push(target);
     } catch (error) {
-        // todo: show toast
+        add({
+            life: TOAST_LIFE,
+            severity: 'error',
+            summary: 'Failed to save the colelction.',
+        });
     } finally {
         loading.value = false;
     }
