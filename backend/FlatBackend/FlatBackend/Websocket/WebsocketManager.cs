@@ -103,5 +103,19 @@ namespace FlatBackend.Websocket
                 }
             }
         }
+
+        public async void sendAccessConfirmationToUser( AccessConfirmationDto request )
+        {
+            var collection = await _MongoDBService.GetCollection(request.collectionId);
+            if (collection != null)
+            {
+                var user = users.Find(x => x.collectionId == request.collectionId && x.clientId == request.clientId);
+                if (user != null)
+                {
+                    var Json = JsonSerializer.Serialize(request);
+                    await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
+                }
+            }
+        }
     }
 }
