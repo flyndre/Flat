@@ -16,7 +16,11 @@ import { Division } from '@/types/Division';
 import { IdentifyableTypedOverlay } from '@/types/map/IdentifyableTypedOverlay';
 import { TypedOverlay } from '@/types/map/TypedOverlay';
 import { divisionToShape, shapeToDivision } from '@/util/converters';
-import { getShapeBounds, getShapeListBounds } from '@/util/googleMapsUtils';
+import {
+    getShapeBounds,
+    getShapeListBounds,
+    shapeToGeoJSON,
+} from '@/util/googleMapsUtils';
 import { isOnMobile } from '@/util/mobileDetection';
 import {
     mdiCircle,
@@ -350,6 +354,11 @@ const lineOptions = {
 
 /* 🟡 Custom */ function processNewOverlay(overlay: any, userCreated = true) {
     if (userCreated) {
+        if (shapeToGeoJSON(overlay).coordinates?.[0]?.length <= 2) {
+            overlay.overlay.setMap(null);
+            selectedToolRef.value = null;
+            return;
+        }
         overlay.id = uuidv4();
         overlay.name = '';
     }
