@@ -32,9 +32,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { GoogleMap } from 'vue3-google-map';
 import {
+    DARK_MAP_STYLES,
     POSITION_ICON_INNER,
     POSITION_ICON_OUTER,
 } from '@/data/googleMapsPresets';
+import { useTheme } from '@/plugins/ThemePlugin';
 
 /**
  * The shapes drawn on the map.
@@ -67,6 +69,10 @@ const mapZoom = 15;
 const placesService = ref<google.maps.places.PlacesService>();
 const shapeSelected = ref(false);
 const mapTypeId = ref<google.maps.MapTypeId>();
+const { activeTheme } = useTheme();
+const mapStyles = computed<google.maps.MapTypeStyle[]>(() =>
+    activeTheme.value === 'dark' ? DARK_MAP_STYLES : []
+);
 
 const stop = watch(mapReady, (v) => {
     if (!v) return;
@@ -441,13 +447,16 @@ onMounted(initialize);
     >
         <template #header>
             <GoogleMap
+                version="beta"
                 ref="mapComponentRef"
+                background-color="transparent"
                 style="height: 100%; width: 100%"
                 :api-key
                 :libraries
                 :zoom="mapZoom"
                 :disable-default-ui="true"
                 :map-type-id="mapTypeId"
+                :styles="mapStyles"
                 :clickable-icons="false"
             />
         </template>
