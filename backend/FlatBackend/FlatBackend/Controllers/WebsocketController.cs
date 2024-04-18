@@ -44,6 +44,14 @@ namespace FlatBackend.Controllers
 
             while (!receiveResult.CloseStatus.HasValue)
             {
+                var Json = Encoding.ASCII.GetString(buffer);
+                Json = new string(Json.Where(c => c != '\x00').ToArray());
+                if (_DtoJsonCategoriser.isWebsocketConnectionDto(Json))
+                {
+                    var webSocketUser = JsonSerializer.Deserialize<WebsocketConnectionDto>(Json);
+                    _WebsocketManager.saveWebSocketOfUser(webSocket, webSocketUser.collectionId, webSocketUser.clientId);
+                }
+
                 await webSocket.SendAsync(
                     new ArraySegment<byte>(buffer, 0, receiveResult.Count),
                     receiveResult.MessageType,
@@ -52,13 +60,6 @@ namespace FlatBackend.Controllers
 
                 receiveResult = await webSocket.ReceiveAsync(
                     new ArraySegment<byte>(buffer), CancellationToken.None);
-                var Json = Encoding.ASCII.GetString(buffer);
-                Json = new string(Json.Where(c => c != '\x00').ToArray());
-                if (_DtoJsonCategoriser.isWebsocketConnectionDto(Json))
-                {
-                    var webSocketUser = JsonSerializer.Deserialize<WebsocketConnectionDto>(Json);
-                    _WebsocketManager.saveWebSocketOfUser(webSocket, webSocketUser.collectionId, webSocketUser.clientId);
-                }
             }
 
             await webSocket.CloseAsync(

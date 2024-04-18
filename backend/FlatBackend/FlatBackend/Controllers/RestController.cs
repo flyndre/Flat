@@ -70,6 +70,7 @@ namespace FlatBackend.Controllers
                 _MongoDBService.ChangeCollection(oldCol);
                 var result = _MongoDBService.GetCollection(id);
                 string Json = JsonSerializer.Serialize(result);
+                _WebsocketManager.sendAccessRequestToBoss(new DTOs.AccessRequestDto() { collectionId = id, clientId = value.clientId, username = value.username });
                 return "Waiting for confirmation from Collectionowner";
             }
             catch (Exception ex)
@@ -100,6 +101,7 @@ namespace FlatBackend.Controllers
                 }
                 _MongoDBService.ChangeCollection(oldCol);
                 var result = await _MongoDBService.GetCollection(id);
+                _WebsocketManager.sendUpdateCollection(id);
                 string Json = JsonSerializer.Serialize(result);
                 return Json;
             }
@@ -160,6 +162,7 @@ namespace FlatBackend.Controllers
                 }
                 await _MongoDBService.AddCollection(value);
                 var result = await _MongoDBService.GetCollection(value.id);
+                _WebsocketManager.sendUpdateCollection(value.id);
                 var Json = JsonSerializer.Serialize(result);
                 return Json;
             }
@@ -207,6 +210,7 @@ namespace FlatBackend.Controllers
         {
             try
             {
+                _WebsocketManager.sendCollectionClosedInformation(id);
                 _MongoDBService.RemoveCollection(id); //and inform all clients
                 return Ok(new object { });
             }
