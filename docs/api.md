@@ -46,7 +46,7 @@ Was implemented as Rest-API Http-Post-Endpoint
     -   clientId: `UUID`
 
 Was implemented as Rest-API Http-Get-Endpoint
-    Endpoint-Url: /api/Rest/AccessRequest/{id}
+    Endpoint-Url: /api/Rest/AccessRequest/{id}?userId={userId}
     
 -   **Access confirmation request from boss**
     -   clientId: `UUID`
