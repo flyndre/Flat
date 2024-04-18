@@ -6,6 +6,7 @@ import { clientId } from '@/data/clientMetadata';
 import { collectionDraft, collectionService } from '@/data/collections';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { Collection } from '@/types/Collection';
+import { areaFromShapeList, divisionToShape } from '@/util/converters';
 import { dbSafe } from '@/util/dbUtils';
 import { mdiArrowLeft, mdiCheck, mdiHelp } from '@mdi/js';
 import Button from 'primevue/button';
@@ -56,8 +57,12 @@ const submittable = computed(() => collection.value.divisions?.length > 0);
 
 async function save() {
     loading.value = true;
+    collection.value.area = areaFromShapeList(
+        collection.value.divisions.map((d) => divisionToShape(d))
+    );
     try {
         if (props.edit) {
+            console.log(collection.value.area);
             await collectionService.put(dbSafe(collection.value));
         } else {
             collectionDraft.set(collection.value);
@@ -117,7 +122,7 @@ const helpVisible = ref(false);
         </template>
         <template #default>
             <MapHelp v-model:visible="helpVisible" />
-            <MapWithControls v-model:areas="collection.divisions" />
+            <MapWithControls v-model:divisions="collection.divisions" />
         </template>
     </DefaultLayout>
 </template>

@@ -15,13 +15,8 @@ import {
 import { Division } from '@/types/Division';
 import { IdentifyableTypedOverlay } from '@/types/map/IdentifyableTypedOverlay';
 import { TypedOverlay } from '@/types/map/TypedOverlay';
-import {
-    geoJSONtoPolygon,
-    getShapeBounds,
-    getShapeColor,
-    getShapeListBounds,
-    polygonToGeoJSON,
-} from '@/util/googleMapsUtils';
+import { divisionToShape, shapeToDivision } from '@/util/converters';
+import { getShapeBounds, getShapeListBounds } from '@/util/googleMapsUtils';
 import { isOnMobile } from '@/util/mobileDetection';
 import { mdiMap, mdiPalette, mdiTextureBox } from '@mdi/js';
 import Card from 'primevue/card';
@@ -35,7 +30,7 @@ import { GoogleMap } from 'vue3-google-map';
  * The shapes drawn on the map.
  */
 const shapes = ref<IdentifyableTypedOverlay[]>([]);
-const areas = defineModel<Division[]>('areas', {
+const divisions = defineModel<Division[]>('divisions', {
     default: [],
 });
 
@@ -67,31 +62,14 @@ const stop = watch(mapReady, (v) => {
     if (!v) return;
     stop();
     syncAreas();
-    watch(() => areas.value, syncAreas, { deep: true });
+    watch(() => divisions.value, syncAreas, { deep: true });
 });
 
 function syncAreas() {
     if (recentlyUpdated) return; // Prevents infinite update loop
     deleteAllShapes(false);
-    areas.value.forEach((a) => {
-        const shape = {
-            id: a.id,
-            name: a.name,
-            type: 'polygon',
-            overlay: geoJSONtoPolygon(
-                {
-                    type: 'Polygon',
-                    coordinates: a.area.coordinates[0],
-                },
-                {
-                    ...shapeOptions,
-                    editable: false,
-                    draggable: false,
-                    strokeColor: a.color,
-                    fillColor: a.color,
-                }
-            ),
-        };
+    divisions.value.forEach((d) => {
+        const shape = divisionToShape(d, shapeOptions);
         shape.overlay.setMap(map.value);
         processNewOverlay(shape, false);
     });
@@ -209,17 +187,7 @@ function addShapeChangeListeners(shape: any) {
 function shapeListChanged() {
     shapes.value.length = 0;
     shapes.value.push(...all_overlays);
-    areas.value = shapes.value.map((s) => ({
-        id: s.id,
-        name: s.name,
-        color: getShapeColor(s),
-        area: {
-            type: 'MultiPolygon',
-            coordinates: [
-                polygonToGeoJSON(<google.maps.Polygon>s.overlay).coordinates,
-            ],
-        },
-    }));
+    divisions.value = shapes.value.map((s) => shapeToDivision(s));
     recentlyUpdated = true;
     nextTick(() => (recentlyUpdated = false));
 }
@@ -230,6 +198,7 @@ function shapeListChanged() {
  * @see https://stackoverflow.com/a/12006751/11793652
  */
 
+/* 🟡 Custom */ var area_overlay;
 var drawingManager: google.maps.drawing.DrawingManager;
 var all_overlays = [];
 var selectedShape;
@@ -301,11 +270,8 @@ function selectColor(color) {
 
 function setSelectedShapeColor(color) {
     if (selectedShape) {
-        if (selectedShape.type == google.maps.drawing.OverlayType.POLYLINE) {
-            selectedShape.set('strokeColor', color);
-        } else {
-            selectedShape.set('fillColor', color);
-        }
+        selectedShape.set('strokeColor', color);
+        selectedShape.set('fillColor', color);
         /* 🟡 Custom */ shapeListChanged();
     }
 }
@@ -320,8 +286,8 @@ function buildColorPalette() {
 }
 
 const shapeOptions = {
-    strokeWeight: 0,
-    fillOpacity: 0.45,
+    // strokeWeight: 0,
+    // fillOpacity: 0.45,
     editable: true,
     draggable: true,
 };

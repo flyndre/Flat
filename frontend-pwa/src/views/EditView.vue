@@ -6,6 +6,8 @@ import { clientId } from '@/data/clientMetadata';
 import { collectionDraft, collectionService } from '@/data/collections';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { Collection } from '@/types/Collection';
+import { Division } from '@/types/Division';
+import { dbSafe } from '@/util/dbUtils';
 import validateCollection from '@/validation/validateCollection';
 import {
     mdiArrowLeft,
@@ -13,7 +15,6 @@ import {
     mdiMapMarkerPath,
     mdiPencil,
     mdiPlay,
-    mdiViewDashboardEdit,
 } from '@mdi/js';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
@@ -22,7 +23,6 @@ import InputText from 'primevue/inputtext';
 import { v4 as uuidv4 } from 'uuid';
 import { computed, onMounted, ref } from 'vue';
 import { RouteLocationRaw, useRouter } from 'vue-router';
-import { dbSafe } from '@/util/dbUtils';
 
 const props = withDefaults(
     defineProps<{
@@ -50,6 +50,17 @@ const collection = ref<Collection>({
 const loading = ref(false);
 const title = props.edit ? 'Edit' : 'Create';
 const submittable = computed(() => validateCollection(collection.value));
+
+const displayedDivisions = computed<Division[]>(() => [
+    ...(collection.value.divisions ?? []),
+    // {
+    //     id: '0',
+    //     area: {
+    //         type: 'MultiPolygon',
+    //         coordinates: [collection.value.area?.coordinates],
+    //     },
+    // },
+]);
 
 onMounted(async () => {
     if (props.edit) {
@@ -143,7 +154,7 @@ function back() {
                     <MapWithControls
                         class="pointer-events-none [&>*]:rounded-none"
                         :controls="false"
-                        :areas="collection.divisions"
+                        :divisions="displayedDivisions"
                     />
                     <router-link
                         :to="{
