@@ -102,6 +102,7 @@ const save = () => _saveCollection({ name: 'presets' });
 const start = () => _saveCollection({ name: 'presets' });
 
 function editDivisions() {
+    collectionDraft.set(collection.value);
     router.push({
         name: props.edit ? 'edit-map' : 'create-map',
         params: { id: props.id },
