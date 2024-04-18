@@ -54,7 +54,7 @@ namespace FlatBackend.Controllers
                 _MongoDBService.ChangeCollection(oldCol);
                 var result = _MongoDBService.GetCollection(id);
                 string Json = JsonSerializer.Serialize(result);
-                return Json;
+                return "Waiting for confirmation from Collectionowner";
             }
             catch (Exception ex)
             {
