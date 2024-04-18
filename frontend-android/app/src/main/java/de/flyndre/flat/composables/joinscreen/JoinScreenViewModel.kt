@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.lang.IllegalArgumentException
 import java.util.UUID
 
 class JoinScreenViewModel(db: AppDatabase, connectionService: ConnectionService): ViewModel() {
@@ -33,10 +34,14 @@ class JoinScreenViewModel(db: AppDatabase, connectionService: ConnectionService)
 
     fun join(navigateToTrackingScreen: ()->Unit){
         viewModelScope.launch {
-            val answer = _connectionService.requestAccess(_joinName.value, UUID.fromString(_joinLink.value))
-            if(answer.accepted){
-                //handle collection
-                navigateToTrackingScreen()
+            try {
+                val answer = _connectionService.requestAccess(_joinName.value, UUID.fromString(_joinLink.value))
+                if(answer.accepted){
+                    //handle collection
+                    navigateToTrackingScreen()
+                }
+            }catch (e: IllegalArgumentException){
+                //
             }
         }
     }
