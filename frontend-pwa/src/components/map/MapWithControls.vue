@@ -352,26 +352,29 @@ const lineOptions = {
     strokeOpacity: 0.45,
 };
 
-/* 🟡 Custom */ function processNewOverlay(overlay: any, userCreated = true) {
+/* 🟡 Custom */ function processNewOverlay(
+    typedOverlay: any,
+    userCreated = true
+) {
     if (userCreated) {
-        if (shapeToGeoJSON(overlay).coordinates?.[0]?.length <= 2) {
-            overlay.overlay.setMap(null);
+        if (shapeToGeoJSON(typedOverlay).coordinates?.[0]?.length <= 2) {
+            typedOverlay.overlay.setMap(null);
             selectedToolRef.value = null;
             return;
         }
-        overlay.id = uuidv4();
-        overlay.name = '';
+        typedOverlay.id = uuidv4();
+        typedOverlay.name = '';
     }
-    all_overlays.push(overlay);
-    if (overlay.type != google.maps.drawing.OverlayType.MARKER) {
+    all_overlays.push(typedOverlay);
+    if (typedOverlay.type != google.maps.drawing.OverlayType.MARKER) {
         // Switch back to non-drawing mode after drawing a shape.
         // drawingManager.setDrawingMode(null);
         /* 🟡 Custom */ if (userCreated) selectedToolRef.value = null;
 
         // Add an event listener that selects the newly-drawn shape when the user
         // mouses down on it.
-        var newShape = overlay.overlay;
-        newShape.type = overlay.type;
+        var newShape = typedOverlay.overlay;
+        newShape.type = typedOverlay.type;
         google.maps.event.addListener(newShape, 'click', function () {
             setSelection(newShape);
         });
