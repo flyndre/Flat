@@ -95,7 +95,9 @@ dependencies {
     implementation(libs.androidx.fragment.ktx)
     //dependencies for serializing objects to json and back
     implementation (libs.gson)
-    implementation("ru.gildor.coroutines:kotlin-coroutines-okhttp:1.0")
+    implementation(libs.kotlin.coroutines.okhttp)
+    implementation (libs.play.services.location)
+
 }
 
 secrets {
