@@ -181,6 +181,7 @@ function back() {
                     <MapWithControls
                         class="pointer-events-none [&>*]:rounded-none"
                         :controls="false"
+                        :labels="false"
                         :divisions="displayedDivisions"
                     />
                 </template>

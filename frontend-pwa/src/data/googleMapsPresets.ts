@@ -17,6 +17,14 @@ export const POSITION_ICON_INNER = {
     scale: 0.62,
 };
 
+export const LABELS_OFF_STYLES = [
+    {
+        featureType: 'all',
+        elementType: 'labels',
+        stylers: [{ visibility: 'off' }],
+    },
+];
+
 export const DARK_MAP_STYLES = [
     { elementType: 'geometry', stylers: [{ color: '#242f3e' }] },
     { elementType: 'labels.text.stroke', stylers: [{ color: '#242f3e' }] },

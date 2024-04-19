@@ -13,6 +13,7 @@ import {
     GOOGLE_MAPS_API_LIBRARIES,
 } from '@/data/constants';
 import {
+    LABELS_OFF_STYLES,
     DARK_MAP_STYLES,
     POSITION_ICON_INNER,
     POSITION_ICON_OUTER,
@@ -47,11 +48,15 @@ const divisions = defineModel<Division[]>('divisions', {
 const props = withDefaults(
     defineProps<{
         controls?: boolean;
+        labels?: boolean;
         panOnUpdated?: boolean;
+        mapType?: `${google.maps.MapTypeId}`;
     }>(),
     {
         controls: true,
+        labels: true,
         panOnUpdated: true,
+        mapType: 'roadmap',
     }
 );
 
@@ -63,14 +68,29 @@ const mapComponentRef = ref<InstanceType<typeof GoogleMap> | null>();
 const mapReady = computed(() => mapComponentRef.value?.ready);
 const map = computed(() => mapComponentRef.value?.map);
 const mapZoom = 15;
+const mapRestriction: google.maps.MapRestriction = {
+    strictBounds: true,
+    latLngBounds: {
+        north: 85,
+        south: -85,
+        west: -180,
+        east: 180,
+    },
+};
 
 const placesService = ref<google.maps.places.PlacesService>();
 const shapeSelected = ref(false);
-const mapTypeId = ref<google.maps.MapTypeId>();
-const { activeTheme } = useTheme();
-const mapStyles = computed<google.maps.MapTypeStyle[]>(() =>
-    activeTheme.value === 'dark' ? DARK_MAP_STYLES : []
+const mapTypeId = ref<`${google.maps.MapTypeId}`>(props.mapType);
+watch(
+    () => props.mapType,
+    (v) => (mapTypeId.value = v)
 );
+
+const { activeTheme } = useTheme();
+const mapStyles = computed<google.maps.MapTypeStyle[]>(() => [
+    ...(activeTheme.value === 'dark' ? DARK_MAP_STYLES : []),
+    ...(props.labels ? [] : LABELS_OFF_STYLES),
+]);
 
 const stop = watch(mapReady, (v) => {
     if (!v) return;
@@ -460,6 +480,7 @@ onMounted(initialize);
                 :api-key
                 :libraries
                 :zoom="mapZoom"
+                :restriction="mapRestriction"
                 :disable-default-ui="true"
                 :map-type-id="mapTypeId"
                 :styles="mapStyles"
