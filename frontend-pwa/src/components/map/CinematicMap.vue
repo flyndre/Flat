@@ -21,6 +21,7 @@ const props = defineProps<{
         :libraries
         :zoom
         :center
+        version="beta"
         :map-type-id="'satellite'"
         :disable-default-ui="true"
     />
