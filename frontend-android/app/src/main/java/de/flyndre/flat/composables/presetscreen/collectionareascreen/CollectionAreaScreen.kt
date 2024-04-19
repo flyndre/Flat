@@ -46,7 +46,6 @@ import io.github.dellisd.spatialk.geojson.dsl.point
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CollectionAreaScreen(modifier: Modifier = Modifier, navController: NavController, collectionAreaScreenViewModel: CollectionAreaScreenViewModel){
-    var movingEnabled by remember { mutableStateOf(true) }
     var selectedItem by remember { mutableStateOf(0) }
     val listAreaPoints by collectionAreaScreenViewModel.listAreaPoints.collectAsState()
     val cameraPosition by collectionAreaScreenViewModel.cameraPosition.collectAsState()
@@ -55,10 +54,12 @@ fun CollectionAreaScreen(modifier: Modifier = Modifier, navController: NavContro
     }
     Scaffold(
         topBar = {
-            TopAppBar(title = { if(movingEnabled){
+            TopAppBar(title = { if(selectedItem == 0){
                 Text(text = "Zoom to the collection area")
-            }else{
+            }else if(selectedItem == 1){
                 Text(text = "Select the collection area")
+            }else if(selectedItem == 2){
+                Text(text = "Choose the area")
             }
                  }, navigationIcon = { IconButton(onClick = { navController.navigate("editpreset/0") }) {
                 Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -132,7 +133,7 @@ fun CollectionAreaScreen(modifier: Modifier = Modifier, navController: NavContro
             mapProperties = MapProperties(isMyLocationEnabled = true)
         }
 
-        GoogleMap(modifier = Modifier.padding(innerPadding), uiSettings = mapSettings, properties = mapProperties, cameraPositionState = cameraPositionState, onMapClick = {if(!movingEnabled){collectionAreaScreenViewModel.addPCollectionAreaPoint(it)}}){
+        GoogleMap(modifier = Modifier.padding(innerPadding), uiSettings = mapSettings, properties = mapProperties, cameraPositionState = cameraPositionState, onMapClick = {if(selectedItem == 1){collectionAreaScreenViewModel.addPCollectionAreaPoint(it)}}){
             if(listAreaPoints.isNotEmpty()){
                 Polygon(points = listAreaPoints, fillColor = Color(255, 159, 246, 127), strokeColor = Color(255, 159, 246, 255))
             }
