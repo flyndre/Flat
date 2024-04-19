@@ -1,22 +1,23 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+﻿using FlatBackend.Models.GeoJsonModels;
 using ThirdParty.Json.LitJson;
 
 namespace FlatBackend.Models
 {
     public class CollectionModel
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string? MongoId { get; set; }
+        //[BsonId]
+        //[BsonRepresentation(BsonType.ObjectId)]
+        //public string? mongoId { get; set; }
 
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid id { get; set; } = Guid.NewGuid();
 
-        public Guid OwnerId { get; set; }
-        public string? Name { get; set; }
+        public Guid clientId { get; set; }
+        public string? name { get; set; }
 
-        public List<AreaModel>? CollectionArea { get; set; }
-        public List<UserModel>? ConfirmedUsers { get; set; }
-        public List<UserModel>? RequestedAccess { get; set; }
+        public MultiPolygonModel area { get; set; }
+
+        public List<AreaModel>? collectionArea { get; set; }
+        public List<UserModel>? confirmedUsers { get; set; }
+        public List<UserModel>? requestedAccess { get; set; }
     }
 }

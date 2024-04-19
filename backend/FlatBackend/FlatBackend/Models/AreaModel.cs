@@ -1,9 +1,14 @@
-﻿namespace FlatBackend.Models
+﻿using FlatBackend.Models.GeoJsonModels;
+using MongoDB.Driver.GeoJsonObjectModel;
+
+namespace FlatBackend.Models
 {
     public class AreaModel
     {
-        public Guid Id { get; set; }
-        public int AssignedUserId { get; set; }
-        public string GEOJson { get; set; }
+        public Guid id { get; set; }
+        public int clientId { get; set; }
+        public string name { get; set; }
+        public string color { get; set; }
+        public PolygonModel area { get; set; }
     }
 }

@@ -9,23 +9,52 @@ The following messages and data are exchanged between the frontends and the back
     -   clientId: `UUID`
     -   (ID is generated): `UUID`
     -   collectionArea (Staked out area): `GeoJSON MultiPolygon`
--   **Set/change area division**
-    -   List of collectionArea
-        -   area: `GeoJSON MultiPolygon`
-        -   id: `UUID`
--   **Assign areas (participants to themselves or boss to someone else)**
-    -   areaId: `UUID`
+
+      Was implemented as Rest-API Http-Post-Endpoint
+    Endpoint-Url: /api/Rest/Collection
+
+-   **Get collection**
+    -   collectionId: `UUID`
     -   clientId: `UUID`
+      
+
+      Was implemented as Rest-API Http-Get-Endpoint
+    Endpoint-Url: /api/Rest/Collection/{id}?userId={userId}
+    
+-   **Set/change division of collectionArea**
+    -   List of collectionDivision
+        -   area: `GeoJSON Polygon`
+        -   name: `String`
+        -   id: `UUID`
+
+    Was implemented as Rest-API Http-Put-Endpoint
+    Endpoint-Url: /api/Rest/Collection/{id}
+    
+-   **Assign collectionDivision (participants to themselves or boss to someone else)** --> Not Implemented yet
+    -   areaId: `UUID`
+    -   clientId: `UUID`    
 -   **Access request collection**
     -   username: `String`
     -   clientId: `UUID`
     -   collectionId: `UUID`
+
+Was implemented as Rest-API Http-Post-Endpoint
+    Endpoint-Url: /api/Rest/AccessRequest/{id}
+    
 -   **Access confirmation request to boss**
     -   username: `String`
     -   clientId: `UUID`
+
+Was implemented as Rest-API Http-Get-Endpoint
+    Endpoint-Url: /api/Rest/AccessRequest/{id}?userId={userId}
+    
 -   **Access confirmation request from boss**
     -   clientId: `UUID`
     -   accepted: `boolean`
+
+Was implemented as Rest-API Http-Post-Endpoint
+    Endpoint-Url: /api/Rest/AccessConfirmation/{id}
+      
 -   **Access confirmation to participant**
     -   collectionId: `UUID`
     -   accepted: `boolean`
@@ -38,3 +67,7 @@ The following messages and data are exchanged between the frontends and the back
     -   In the form of a list of GPS tracks
 -   **Close collection**
     -   collectionId: `UUID`
+
+ Was implemented as Rest-API Http-Delete-Endpoint
+    Endpoint-Url: /api/Rest/Collection/{id}
+

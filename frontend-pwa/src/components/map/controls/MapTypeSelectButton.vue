@@ -2,9 +2,9 @@
 import SelectButton from 'primevue/selectbutton';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import { mdiRoadVariant, mdiTerrain, mdiEarth, mdiEarthPlus } from '@mdi/js';
-const selectedMapType = defineModel<google.maps.MapTypeId>({
+const selectedMapType = defineModel<`${google.maps.MapTypeId}`>({
     required: false,
-    default: 'roadmap' as google.maps.MapTypeId,
+    default: 'roadmap',
 });
 type MapTypeOption = {
     value: `${google.maps.MapTypeId}`;
@@ -37,7 +37,14 @@ const mapTypeOptions: MapTypeOption[] = [
         data-key="value"
         option-value="value"
         :allow-empty="false"
-        :pt="{ button: { class: 'h-9' } }"
+        :pt="{
+            button: {
+                class: 'h-9 w-auto grow flex flex-row justify-center',
+            },
+            root: {
+                class: 'w-auto flex flex-row grow justify-stretch',
+            },
+        }"
     >
         <template #option="slotProps">
             <MdiIcon :icon="slotProps.option.icon" />

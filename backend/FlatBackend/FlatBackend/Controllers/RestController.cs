@@ -1,4 +1,5 @@
 ﻿using FlatBackend.Database;
+using FlatBackend.Interfaces;
 using FlatBackend.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -16,52 +17,147 @@ namespace FlatBackend.Controllers
     [Route("api/[controller]")]
     public class RestController : ControllerBase
     {
-        private MongoDBService mongoDBService = new MongoDBService();
+        private readonly IMongoDBService _MongoDBService;
+
+        public RestController( IMongoDBService mongoDBService )
+        {
+            _MongoDBService = mongoDBService;
+        }
 
         //AccessRequest Handshake
         [HttpGet("AccessRequest/{id}")]
-        public async Task<ObjectResult> Get( Guid id )
+        public async Task<string> GetAccessRequest( Guid id, Guid userId )
         {
             try
             {
-                var Collection = await mongoDBService.GetCollection(id);
-                List<UserModel> users = Collection.RequestedAccess;
-                var Json = JsonSerializer.Serialize(users);
-                return Ok(users);
+                var Collection = await _MongoDBService.GetCollection(id);
+                var validUser = Collection.confirmedUsers.Find(x => x.clientId == userId);
+                if (validUser.accepted)
+                {
+                    List<UserModel> users = Collection.requestedAccess;
+                    var Json = JsonSerializer.Serialize(users);
+                    return Json;
+                }
+                else
+                {
+                    return Problem(
+                            type: "/docs/errors/forbidden",
+                            title: "Authenticated user is not authorized.",
+                            detail: $"User '{validUser}' must have been Confirmed.",
+                            statusCode: StatusCodes.Status403Forbidden,
+                            instance: HttpContext.Request.Path
+                            ).ToString();
+                }
             }
             catch (Exception ex)
             {
-                return NotFound(ex.ToString());
+                return NotFound().ToString();
             }
         }
 
         [HttpPost("AccessRequest/{id}")]
-        public async Task<ObjectResult> PostAccessConfirmationCollection( Guid id, [FromBody] UserModel value )
+        public async Task<string> PostAccessRequestCollection( Guid id, [FromBody] UserModel value )
         {
             try
             {
-                var oldCol = await mongoDBService.GetCollection(id);
-                UserModel? user = oldCol.RequestedAccess.Find(e => e.Id == value.Id);
-                oldCol.RequestedAccess.Remove(user);
-                oldCol.ConfirmedUsers.Add(user);
-                mongoDBService.ChangeCollection(oldCol);
-                return Ok(new object { });
+                var oldCol = await _MongoDBService.GetCollection(id);
+                if (oldCol.requestedAccess == null)
+                { oldCol.requestedAccess = new List<UserModel>(); }
+
+                oldCol.requestedAccess.Add(value);
+                _MongoDBService.ChangeCollection(oldCol);
+                var result = _MongoDBService.GetCollection(id);
+                string Json = JsonSerializer.Serialize(result);
+                return "Waiting for confirmation from Collectionowner";
             }
             catch (Exception ex)
             {
-                return NotFound(ex.ToString());
+                return ex.ToString();
+            }
+            //call add User to Accessrequestlist
+        }
+
+        [HttpPost("AccessConfirmation/{id}")]
+        public async Task<string> PostAccessConfirmationCollection( Guid id, [FromBody] UserModel value )
+        {
+            try
+            {
+                var oldCol = await _MongoDBService.GetCollection(id);
+                UserModel? user = oldCol.requestedAccess.Find(e => e.clientId == value.clientId);
+                UserModel? validUser = oldCol.confirmedUsers.Find(x => x.clientId == value.clientId);
+                if (validUser == null)
+                {
+                    user.accepted = value.accepted;
+                    oldCol.requestedAccess.Remove(user);
+                    oldCol.confirmedUsers.Add(user);
+                }
+                else
+                {
+                    var index = oldCol.confirmedUsers.IndexOf(validUser);
+                    oldCol.confirmedUsers[index] = value;
+                }
+                _MongoDBService.ChangeCollection(oldCol);
+                var result = await _MongoDBService.GetCollection(id);
+                string Json = JsonSerializer.Serialize(result);
+                return Json;
+            }
+            catch (Exception ex)
+            {
+                return ex.ToString();
             }//call add User to AccessrequestConfirmedlist
         }
 
         //Collection specifik
+
+        [HttpGet("Collection/{id}")]
+        public async Task<string> GetCollection( Guid id, Guid userid )
+        {
+            try
+            {
+                var result = await _MongoDBService.GetCollection(id);
+                var user = result.confirmedUsers.Find(x => x.clientId == userid);
+                if (user != null || result.clientId == userid)
+                {
+                    var Json = JsonSerializer.Serialize(result);
+                    return Json;
+                }
+                else
+                {
+                    return Problem(
+                            type: "/docs/errors/forbidden",
+                            title: "Authenticated user is not authorized.",
+                            detail: $"User '{user}' must have been Confirmed.",
+                            statusCode: StatusCodes.Status403Forbidden,
+                            instance: HttpContext.Request.Path
+                            ).ToString();
+                }
+            }
+            catch (Exception ex)
+            {
+                return NotFound().ToString();
+            }
+        }
+
         // POST api/<RestController>/
         [HttpPost("Collection")]
         public async Task<string> PostOpenCollection( [FromBody] CollectionModel value )
         {
             try
             {
-                mongoDBService.AddCollection(value);
-                var result = await mongoDBService.GetCollection(value.Id);
+                if (value.collectionArea == null)
+                {
+                    value.collectionArea = new List<AreaModel>();
+                }
+                if (value.confirmedUsers == null)
+                {
+                    value.confirmedUsers = new List<UserModel>();
+                }
+                if (value.requestedAccess == null)
+                {
+                    value.requestedAccess = new List<UserModel>();
+                }
+                await _MongoDBService.AddCollection(value);
+                var result = await _MongoDBService.GetCollection(value.id);
                 var Json = JsonSerializer.Serialize(result);
                 return Json;
             }
@@ -71,40 +167,30 @@ namespace FlatBackend.Controllers
             }
         }
 
-        [HttpPost("Collection/{id}")]
-        public async Task<ObjectResult> PostAccessRequestCollection( Guid id, [FromBody] UserModel value )
-        {
-            try
-            {
-                var oldCol = await mongoDBService.GetCollection(id);
-                if (oldCol.RequestedAccess == null)
-                { oldCol.RequestedAccess = new List<UserModel>(); }
-
-                oldCol.RequestedAccess.Add(value);
-                mongoDBService.ChangeCollection(oldCol);
-                return Ok(new object { });
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.ToString());
-            }
-            //call add User to Accessrequestlist
-        }
-
         // PUT api/<ValuesController>/Collection/5 ChangeAreaDivision
         [HttpPut("Collection/{id}")]
         public async Task<string> PutSetOrChangeAreaDivision( Guid id, [FromBody] List<AreaModel> value )
         {
             try
             {
-                var oldCol = await mongoDBService.GetCollection(id);
+                var oldCol = await _MongoDBService.GetCollection(id);
                 foreach (var area in value)
                 {
-                    oldCol.CollectionArea.Add(area);
+                    var oldArea = oldCol.collectionArea.Find(x => x.id == area.id);
+
+                    if (oldArea != null)
+                    {
+                        var index = oldCol.collectionArea.IndexOf(oldArea);
+                        oldCol.collectionArea[index] = area;
+                    }
+                    else
+                    {
+                        oldCol.collectionArea.Add(area);
+                    }
                 }
-                mongoDBService.ChangeCollection(oldCol);
-                oldCol = await mongoDBService.GetCollection(id);
-                return JsonSerializer.Serialize(oldCol);
+                _MongoDBService.ChangeCollection(oldCol);
+                var result = await _MongoDBService.GetCollection(id);
+                return JsonSerializer.Serialize(result);
             }
             catch (Exception ex)
             {
@@ -118,7 +204,7 @@ namespace FlatBackend.Controllers
         {
             try
             {
-                mongoDBService.RemoveCollection(id); //and inform all clients
+                _MongoDBService.RemoveCollection(id); //and inform all clients
                 return Ok(new object { });
             }
             catch (Exception ex)

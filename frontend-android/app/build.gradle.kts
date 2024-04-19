@@ -79,6 +79,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.geojson)
     implementation(libs.turf)
+    implementation(libs.kotlin.coroutines.okhttp)
     //navigation for jetpack compose
     implementation(libs.androidx.navigation.compose)
     //viewmodel for jetpack compose
@@ -95,6 +96,8 @@ dependencies {
     implementation(libs.androidx.fragment.ktx)
     //dependencies for serializing objects to json and back
     implementation (libs.gson)
+    //dependencies for location
+    implementation (libs.play.services.location)
 }
 
 secrets {

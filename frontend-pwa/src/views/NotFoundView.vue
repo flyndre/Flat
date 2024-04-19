@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { mdiArrowLeft, mdiHome } from '@mdi/js';
 import Button from 'primevue/button';
@@ -13,7 +13,7 @@ const router = useRouter();
         <template #action-left>
             <Button label="Back" severity="secondary" text @click="router.back">
                 <template #icon>
-                    <TextButtonIcon :icon="mdiArrowLeft" />
+                    <MdiTextButtonIcon :icon="mdiArrowLeft" />
                 </template>
             </Button>
         </template>
@@ -22,7 +22,7 @@ const router = useRouter();
             <router-link :to="{ name: 'home' }">
                 <Button label="Go Home">
                     <template #icon>
-                        <TextButtonIcon :icon="mdiHome" />
+                        <MdiTextButtonIcon :icon="mdiHome" />
                     </template>
                 </Button>
             </router-link>

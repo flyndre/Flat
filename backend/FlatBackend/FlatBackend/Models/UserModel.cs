@@ -2,7 +2,8 @@
 {
     public class UserModel
     {
-        public Guid Id { get; set; }
-        public string Name { get; set; }
+        public Guid clientId { get; set; }
+        public string username { get; set; }
+        public bool accepted { get; set; } = false;
     }
 }

@@ -1,30 +1,38 @@
 <script setup lang="ts">
 import MdiIcon from '@/components/icons/MdiIcon.vue';
-import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
-import { safeMapCenterFromGeolocationCoords } from '@/util/googleMapsUtils';
-import {
-    mdiCrosshairsGps,
-    mdiImport,
-    mdiInformationOutline,
-    mdiMapMarkerPath,
-} from '@mdi/js';
-import { useGeolocation } from '@vueuse/core';
+import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
+import { mdiCog, mdiImport, mdiMapMarkerPath } from '@mdi/js';
+import { useGeolocation, useThrottle } from '@vueuse/core';
 import Button from 'primevue/button';
-import { GoogleMap } from 'vue3-google-map';
 import brandingSrc from '@/assets/images/branding.webp?url';
+import { isOnMobile } from '@/util/mobileDetection';
+import Slider from 'primevue/slider';
+import { ref } from 'vue';
+import { useSettings } from '@/plugins/SettingsPlugin';
+import { computed } from 'vue';
+import CinematicMap from '@/components/map/CinematicMap.vue';
 
-const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-const mapCenter = safeMapCenterFromGeolocationCoords(useGeolocation().coords);
+const { settings } = useSettings();
+const homeCoordsDefaults = computed(() => ({
+    lat: settings.value.homeLatitude,
+    lng: settings.value.homeLongitude,
+}));
+const mapCenter = settings.value.homeLive
+    ? mapCenterWithDefaults(useGeolocation().coords, homeCoordsDefaults.value)
+    : homeCoordsDefaults.value;
+const mapZoomSlider = ref(15);
+const mapZoomReal = useThrottle(mapZoomSlider, 25);
 </script>
 
 <template>
     <DefaultLayout>
         <template #action-left>
-            <router-link :to="{ name: 'about' }">
+            <router-link :to="{ name: 'settings' }">
                 <Button severity="secondary">
                     <template #icon>
-                        <MdiIcon :icon="mdiInformationOutline" />
+                        <MdiIcon :icon="mdiCog" />
                     </template>
                 </Button>
             </router-link>
@@ -33,33 +41,43 @@ const mapCenter = safeMapCenterFromGeolocationCoords(useGeolocation().coords);
             <router-link :to="{ name: 'scan' }">
                 <Button label="Join a Collection">
                     <template #icon>
-                        <TextButtonIcon :icon="mdiImport" />
+                        <MdiTextButtonIcon :icon="mdiImport" />
                     </template>
                 </Button>
             </router-link>
             <router-link :to="{ name: 'presets' }">
                 <Button label="My Collections" severity="secondary">
                     <template #icon>
-                        <TextButtonIcon :icon="mdiMapMarkerPath" />
+                        <MdiTextButtonIcon :icon="mdiMapMarkerPath" />
                     </template>
                 </Button>
             </router-link>
         </template>
         <template #background>
-            <GoogleMap
-                class="w-full h-full scale-105 blur-sm"
-                :api-key
-                :zoom="15"
-                :center="mapCenter"
-                :disable-default-ui="true"
-            />
+            <CinematicMap :center="mapCenter" :zoom="mapZoomReal" />
         </template>
         <template #default>
             <div
-                class="h-full w-full flex flex-col justify-center items-center"
+                class="grow flex flex-col justify-center items-center select-none"
+                :class="{ 'pb-[10vh]': !isOnMobile }"
             >
+                <!-- ⭕ -->
                 <img class="object-contain w-full" :src="brandingSrc" />
+                <Slider
+                    class="cursor-pointer"
+                    :class="[
+                        !isOnMobile
+                            ? 'w-1/2'
+                            : `fixed h-1/2 ${settings.handedness === 'right' ? 'right-8' : 'left-8'}`,
+                    ]"
+                    v-model="mapZoomSlider"
+                    :orientation="isOnMobile ? 'vertical' : 'horizontal'"
+                    :step="0.01"
+                    :min="4"
+                    :max="20"
+                />
             </div>
+            <div id="clouds" class="animate-areal" />
         </template>
     </DefaultLayout>
 </template>
