@@ -104,7 +104,10 @@ fun CollectionAreaScreen(modifier: Modifier = Modifier, navController: NavContro
                     }*/
         },
         floatingActionButton = {
-            if(movingEnabled){
+            if(selectedItem == 1){
+
+            }
+            /*if(movingEnabled){
                 SmallFloatingActionButton(onClick = { movingEnabled = false }) {
                     Icon(Icons.Filled.Edit, contentDescription = "lock map for editing collection area")
                 }
@@ -112,18 +115,21 @@ fun CollectionAreaScreen(modifier: Modifier = Modifier, navController: NavContro
                 SmallFloatingActionButton(onClick = { movingEnabled = true }) {
                     Icon(Icons.Filled.LocationOn, contentDescription = "unlock map for zooming")
                 }
-            }
+            }*/
         }
     ) {
         innerPadding ->
         var mapSettings: MapUiSettings
         var mapProperties: MapProperties
-        if(movingEnabled){
+        if(selectedItem == 0){
             mapSettings = MapUiSettings(zoomControlsEnabled = false)
             mapProperties = MapProperties(isMyLocationEnabled = true)
-        }else{
+        }else if(selectedItem == 1){
             mapSettings = MapUiSettings(zoomControlsEnabled = false, zoomGesturesEnabled = false, tiltGesturesEnabled = false, rotationGesturesEnabled = false, scrollGesturesEnabled = false)
             mapProperties = MapProperties(isMyLocationEnabled = false)
+        }else{
+            mapSettings = MapUiSettings(zoomControlsEnabled = false)
+            mapProperties = MapProperties(isMyLocationEnabled = true)
         }
 
         GoogleMap(modifier = Modifier.padding(innerPadding), uiSettings = mapSettings, properties = mapProperties, cameraPositionState = cameraPositionState, onMapClick = {if(!movingEnabled){collectionAreaScreenViewModel.addPCollectionAreaPoint(it)}}){
