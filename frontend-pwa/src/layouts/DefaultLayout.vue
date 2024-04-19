@@ -7,9 +7,9 @@ const { settings } = useSettings();
 </script>
 
 <template>
-    <ScrollPanel class="min-h-screen h-screen max-h-screen">
+    <ScrollPanel class="min-h-[100dvh] h-[100dvh] max-h-[100dvh]">
         <div
-            class="max-w-[800px] mx-auto min-h-screen flex flex-col justify-stretch items-stretch"
+            class="max-w-[800px] mx-auto min-h-[100dvh] flex flex-col justify-stretch items-stretch"
         >
             <div
                 class="fixed top-0 left-0 right-0 bottom-0 -z-50 flex flex-col justify-center items-center overflow-visible"
@@ -51,10 +51,7 @@ const { settings } = useSettings();
                     </nav>
                 </template>
             </header>
-            <main
-                class="flex flex-col grow px-2 pb-2 h-full"
-                style="height: fill-available"
-            >
+            <main class="flex flex-col grow px-2 pb-2 h-full">
                 <slot />
             </main>
             <nav
