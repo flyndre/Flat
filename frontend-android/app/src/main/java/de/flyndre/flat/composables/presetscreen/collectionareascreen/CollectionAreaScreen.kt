@@ -16,6 +16,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
@@ -29,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.maps.android.compose.CameraPositionState
@@ -44,6 +47,7 @@ import io.github.dellisd.spatialk.geojson.dsl.point
 @Composable
 fun CollectionAreaScreen(modifier: Modifier = Modifier, navController: NavController, collectionAreaScreenViewModel: CollectionAreaScreenViewModel){
     var movingEnabled by remember { mutableStateOf(true) }
+    var selectedItem by remember { mutableStateOf(0) }
     val listAreaPoints by collectionAreaScreenViewModel.listAreaPoints.collectAsState()
     val cameraPosition by collectionAreaScreenViewModel.cameraPosition.collectAsState()
     val cameraPositionState = rememberCameraPositionState {
@@ -62,7 +66,27 @@ fun CollectionAreaScreen(modifier: Modifier = Modifier, navController: NavContro
             }})
         },
         bottomBar = {
-                    if(!movingEnabled){
+                    NavigationBar {
+                        NavigationBarItem(selected = selectedItem == 0, onClick = { selectedItem = 0 }, icon = {
+                            Icon(
+                                painter = painterResource(id = de.flyndre.flat.R.drawable.map_fill),
+                                contentDescription = "search on map"
+                            )
+                        })
+                        NavigationBarItem(selected = selectedItem == 1, onClick = { selectedItem = 1 }, icon = {
+                            Icon(
+                                painter = painterResource(id = de.flyndre.flat.R.drawable.palette_fill),
+                                contentDescription = "draw collection areas on map"
+                            )
+                        })
+                        NavigationBarItem(selected = selectedItem == 2, onClick = { selectedItem = 2 }, icon = {
+                            Icon(
+                                painter = painterResource(id = de.flyndre.flat.R.drawable.texture_fill),
+                                contentDescription = "chose available collection areas"
+                            )
+                        })
+                    }
+                    /*if(!movingEnabled){
                         Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)) {
                             Button(onClick = {
                                 collectionAreaScreenViewModel.setCameraPosition(cameraPositionState.position)
@@ -77,7 +101,7 @@ fun CollectionAreaScreen(modifier: Modifier = Modifier, navController: NavContro
                                 Icon(Icons.Filled.Delete, contentDescription = "delete the existing collection area")
                             }
                         }
-                    }
+                    }*/
         },
         floatingActionButton = {
             if(movingEnabled){
@@ -109,3 +133,4 @@ fun CollectionAreaScreen(modifier: Modifier = Modifier, navController: NavContro
         }
     }
 }
+
