@@ -1,23 +1,16 @@
 <script setup lang="ts">
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
+import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { Collection } from '@/types/Collection';
 import { downloadText } from '@/util/download';
 import { collectionListToBackup } from '@/util/importExport';
 import { isOnMobile } from '@/util/mobileDetection';
-import {
-    mdiArrowLeft,
-    mdiClose,
-    mdiContentCopy,
-    mdiFileDownload,
-} from '@mdi/js';
+import { mdiArrowLeft, mdiContentCopy, mdiFileDownload } from '@mdi/js';
 import { useClipboard, watchOnce } from '@vueuse/core';
 import Button from 'primevue/button';
-import ScrollPanel from 'primevue/scrollpanel';
 import Sidebar from 'primevue/sidebar';
 import { useToast } from 'primevue/usetoast';
 import { computed } from 'vue';
-import MdiIcon from '../icons/MdiIcon.vue';
-import DefaultLayout from '@/layouts/DefaultLayout.vue';
 
 const visible = defineModel<boolean>('visible', {
     default: false,
@@ -46,7 +39,7 @@ function copyData() {
 
 function downloadData() {
     downloadText(
-        `Flat Export ${new Date().toLocaleString()}`,
+        `Flat Export ${new Date().toLocaleString()}.txt`,
         exportData.value
     );
 }
