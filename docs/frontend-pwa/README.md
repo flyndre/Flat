@@ -5,10 +5,10 @@ For visuals, [PrimeVue](https://primevue.org/) and [Tailwind CSS](https://tailwi
 
 ## Further Documentation
 
-* [Maps API](/docs/frontend-pwa/maps-api.md)
-* [Client Storage](/docs/frontend-pwa/client-storage.md)
-* [Custom Plugins](/docs/frontend-pwa/custom-plugins.md)
-* [Deployment](/docs/frontend-pwa/deploy.md)
+-   [Maps API](/docs/frontend-pwa/maps-api.md)
+-   [Client Storage](/docs/frontend-pwa/client-storage.md)
+-   [Custom Plugins](/docs/frontend-pwa/custom-plugins.md)
+-   [Deployment](/docs/frontend-pwa/deploy.md)
 
 ## Project Structure
 
@@ -35,23 +35,23 @@ The PWA Frontend is structured like most Vue applications:
 
 Must-have:
 
-- [x]   Map display
-- [x]   Divide map into areas
-- [ ]   Track your own location via GPS (can be started and stopped)
-- [ ]   Share tracking with other team members via backend
-- [ ]   Join the team via link
-- [ ]   User name
+-   [x] Map display
+-   [x] Divide map into areas
+-   [ ] Track your own location via GPS (can be started and stopped)
+-   [ ] Share tracking with other team members via backend
+-   [ ] Join the team via link
+-   [ ] User name
 
 Optional:
 
-- [ ]   Join via QR code
-- [ ]   Leaderboard/Statistics
-- [x]   Dark Mode
-- [ ]   Define collection templates
+-   [ ] Join via QR code
+-   [ ] Leaderboard/Statistics
+-   [x] Dark Mode
+-   [x] Define collection templates
 
 Nice-to-have:
 
-- [ ]   Start/stop tracking via notification
-- [ ]   Profile pictures
-- [ ]   Team leader can send push messages to participants
-- [ ]   Suggestions for optimal route distribution
+-   [ ] Start/stop tracking via notification
+-   [ ] Profile pictures
+-   [ ] Team leader can send push messages to participants
+-   [ ] Suggestions for optimal route distribution
