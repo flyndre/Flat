@@ -17,6 +17,7 @@ import Sidebar from 'primevue/sidebar';
 import { useToast } from 'primevue/usetoast';
 import { computed } from 'vue';
 import MdiIcon from '../icons/MdiIcon.vue';
+import DefaultLayout from '@/layouts/DefaultLayout.vue';
 
 const visible = defineModel<boolean>('visible', {
     default: false,
@@ -53,27 +54,23 @@ function downloadData() {
 
 <template>
     <Sidebar
-        class="w-full max-w-[787px] h-fit rounded-t-xl -bottom-px"
+        class="w-full max-w-[787px] h-fit rounded-t-xl -bottom-px p-0 overflow-hidden"
         v-model:visible="visible"
         modal
         position="bottom"
-        header="help"
         :block-scroll="true"
         :show-close-icon="false"
         :pt="{
             header: {
-                class: 'flex flex-row justify-stretch gap-2',
+                class: 'hidden',
             },
             content: {
-                class: 'h-full flex flex-col justify-stretch items-stretch',
+                class: 'h-full flex flex-col justify-stretch items-stretch p-0',
             },
         }"
     >
-        <template #header>
-            <div
-                v-if="!isOnMobile"
-                class="grow shrink-0 basis-0 flex flex-row justify-start gap-2"
-            >
+        <DefaultLayout height="60vh">
+            <template #action-left>
                 <Button
                     label="Back"
                     severity="secondary"
@@ -84,12 +81,18 @@ function downloadData() {
                         <MdiTextButtonIcon :icon="mdiArrowLeft" />
                     </template>
                 </Button>
-            </div>
-            <span class="text-center grow basis-0 font-bold">Export</span>
-            <div
-                v-if="!isOnMobile"
-                class="grow basis-0 flex flex-row justify-end gap-2"
-            >
+            </template>
+            <template #title>Export</template>
+            <template #action-right>
+                <Button
+                    label="Download"
+                    severity="primary"
+                    @click="downloadData"
+                >
+                    <template #icon>
+                        <MdiTextButtonIcon :icon="mdiFileDownload" />
+                    </template>
+                </Button>
                 <Button
                     v-if="isSupported"
                     :label="isOnMobile ? '' : 'Copy'"
@@ -101,59 +104,12 @@ function downloadData() {
                         <MdiTextButtonIcon :icon="mdiContentCopy" />
                     </template>
                 </Button>
-                <Button
-                    label="Download"
-                    severity="primary"
-                    @click="downloadData"
-                >
-                    <template #icon>
-                        <MdiTextButtonIcon :icon="mdiFileDownload" />
-                    </template>
-                </Button>
-            </div>
-        </template>
-        <template #default>
-            <ScrollPanel class="h-[65vh]">
+            </template>
+            <template #default>
                 <div class="text-xs w-full break-words">
                     {{ exportData }}
                 </div>
-            </ScrollPanel>
-            <div
-                v-if="isOnMobile"
-                class="w-full sticky bottom-0 left-0 right-0 z-10 shrink-0 mt-5 flex flex-row gap-2"
-            >
-                <Button
-                    class="mr-auto"
-                    label="Close"
-                    severity="secondary"
-                    @click="visible = false"
-                    text
-                >
-                    <template #icon>
-                        <MdiTextButtonIcon :icon="mdiClose" />
-                    </template>
-                </Button>
-                <Button
-                    v-if="isSupported"
-                    severity="primary"
-                    text
-                    @click="copyData"
-                >
-                    <template #icon>
-                        <MdiIcon :icon="mdiContentCopy" />
-                    </template>
-                </Button>
-                <Button
-                    label="Download"
-                    severity="primary"
-                    @click="downloadData"
-                >
-                    <template #icon>
-                        <MdiTextButtonIcon :icon="mdiFileDownload" />
-                    </template>
-                </Button>
-            </div>
-        </template>
+            </template>
+        </DefaultLayout>
     </Sidebar>
 </template>
-@/util/importExport

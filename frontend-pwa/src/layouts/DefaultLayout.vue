@@ -6,12 +6,21 @@ import { isOnMobile } from '@/util/mobileDetection';
 import ScrollPanel from 'primevue/scrollpanel';
 
 const { settings } = useSettings();
+withDefaults(
+    defineProps<{
+        height?: string;
+    }>(),
+    {
+        height: '100dvh',
+    }
+);
 </script>
 
 <template>
-    <ScrollPanel class="min-h-[100dvh] h-[100dvh] max-h-[100dvh]">
+    <ScrollPanel :style="{ minHeight: height, height, maxHeight: height }">
         <div
-            class="max-w-[800px] mx-auto min-h-[100dvh] flex flex-col justify-stretch items-stretch"
+            class="max-w-[800px] mx-auto flex flex-col justify-stretch items-stretch"
+            :style="{ minHeight: height }"
         >
             <div
                 class="fixed top-0 left-0 right-0 bottom-0 -z-50 flex flex-col justify-center items-center overflow-visible"

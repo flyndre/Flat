@@ -2,14 +2,13 @@
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import { collectionService } from '@/data/collections';
 import { TOAST_LIFE } from '@/data/constants';
+import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { dbSafe } from '@/util/dbUtils';
 import { backupToCollectionList } from '@/util/importExport';
-import { isOnMobile } from '@/util/mobileDetection';
 import {
     mdiArrowLeft,
     mdiCheck,
     mdiCheckboxMultipleMarked,
-    mdiClose,
     mdiCloseBoxMultiple,
     mdiFileUpload,
 } from '@mdi/js';
@@ -95,27 +94,23 @@ async function importData() {
 
 <template>
     <Sidebar
-        class="w-full max-w-[787px] h-fit rounded-t-xl -bottom-px"
+        class="w-full max-w-[787px] h-fit rounded-t-xl -bottom-px p-0 overflow-hidden"
         v-model:visible="visible"
         modal
         position="bottom"
-        header="help"
         :block-scroll="true"
         :show-close-icon="false"
         :pt="{
             header: {
-                class: 'flex flex-row justify-stretch gap-2',
+                class: 'hidden',
             },
             content: {
-                class: 'h-full flex flex-col justify-stretch items-stretch',
+                class: 'h-full flex flex-col justify-stretch items-stretch p-0',
             },
         }"
     >
-        <template #header>
-            <div
-                v-if="!isOnMobile"
-                class="grow shrink-0 basis-0 flex flex-row justify-start gap-2"
-            >
+        <DefaultLayout height="60vh">
+            <template #action-left>
                 <Button
                     label="Back"
                     severity="secondary"
@@ -126,12 +121,9 @@ async function importData() {
                         <MdiTextButtonIcon :icon="mdiArrowLeft" />
                     </template>
                 </Button>
-            </div>
-            <span class="text-center grow basis-0 font-bold">Import</span>
-            <div
-                v-if="!isOnMobile"
-                class="grow basis-0 flex flex-row justify-end gap-2"
-            >
+            </template>
+            <template #title>Import</template>
+            <template #action-right>
                 <Button
                     label="Import"
                     severity="primary"
@@ -143,86 +135,67 @@ async function importData() {
                         <MdiTextButtonIcon :icon="mdiCheck" />
                     </template>
                 </Button>
-            </div>
-        </template>
-        <template #default>
-            <Textarea
-                v-model="importDataString"
-                class="resize-none w-full h-[40vh] text-xs"
-                placeholder="Paste data here..."
-            />
-            <div
-                class="w-full mt-2 flex flex-row justify-stretch items-stretch gap-2 flex-wrap"
-            >
-                <SelectButton
-                    v-model="overwriteExisting"
-                    :options="overwriteExistingOptions"
-                    option-value="value"
-                    option-label="label"
-                    :allow-empty="false"
-                    :pt="{
-                        root: {
-                            class: 'grow flex flex-row justify-stretch [&>*]:grow',
-                        },
-                    }"
+            </template>
+            <template #default>
+                <div
+                    class="h-full grow flex flex-col justify-stretch items-stretch gap-2"
                 >
-                    <template #option="slotProps">
-                        <div
-                            class="flex flex-row justify-center items-center flex-nowrap w-full gap-3 min-h-6"
+                    <Textarea
+                        v-model="importDataString"
+                        class="resize-none w-full text-xs grow"
+                        placeholder="Paste data here..."
+                    />
+                    <div
+                        class="w-full flex flex-row justify-stretch items-stretch gap-2 flex-wrap"
+                    >
+                        <SelectButton
+                            v-model="overwriteExisting"
+                            :options="overwriteExistingOptions"
+                            option-value="value"
+                            option-label="label"
+                            :allow-empty="false"
+                            :pt="{
+                                root: {
+                                    class: 'grow flex flex-row justify-stretch [&>*]:grow',
+                                },
+                            }"
                         >
-                            <MdiIcon :icon="slotProps.option.icon" />
-                            <span class="text-ellipsis overflow-hidden z-10">
-                                {{ slotProps.option.label }}
-                            </span>
-                        </div>
-                    </template>
-                </SelectButton>
-                <FileUpload
-                    mode="basic"
-                    chooseLabel="Upload Backup File"
-                    accept="text/plain"
-                    :multiple="false"
-                    :auto="true"
-                    :disabled="loading"
-                    custom-upload
-                    @uploader="uploader"
-                    :pt="{
-                        root: { class: 'flex-grow' },
-                        chooseButton: { class: 'w-full p-button-secondary' },
-                    }"
-                >
-                    <template #uploadicon>
-                        <MdiTextButtonIcon :icon="mdiFileUpload" />
-                    </template>
-                </FileUpload>
-            </div>
-            <div
-                v-if="isOnMobile"
-                class="w-full mt-2 flex flex-row justify-between items-stretch gap-2 flex-wrap"
-            >
-                <Button
-                    label="Close"
-                    severity="secondary"
-                    @click="visible = false"
-                    text
-                >
-                    <template #icon>
-                        <MdiTextButtonIcon :icon="mdiClose" />
-                    </template>
-                </Button>
-                <Button
-                    label="Import"
-                    severity="primary"
-                    :disabled="!importable"
-                    :loading
-                    @click="importData"
-                >
-                    <template #icon>
-                        <MdiTextButtonIcon :icon="mdiCheck" />
-                    </template>
-                </Button>
-            </div>
-        </template>
+                            <template #option="slotProps">
+                                <div
+                                    class="flex flex-row justify-center items-center flex-nowrap w-full gap-3 min-h-6"
+                                >
+                                    <MdiIcon :icon="slotProps.option.icon" />
+                                    <span
+                                        class="text-ellipsis overflow-hidden z-10"
+                                    >
+                                        {{ slotProps.option.label }}
+                                    </span>
+                                </div>
+                            </template>
+                        </SelectButton>
+                        <FileUpload
+                            mode="basic"
+                            chooseLabel="Upload Backup File"
+                            accept="text/plain"
+                            :multiple="false"
+                            :auto="true"
+                            :disabled="loading"
+                            custom-upload
+                            @uploader="uploader"
+                            :pt="{
+                                root: { class: 'flex-grow' },
+                                chooseButton: {
+                                    class: 'w-full p-button-secondary',
+                                },
+                            }"
+                        >
+                            <template #uploadicon>
+                                <MdiTextButtonIcon :icon="mdiFileUpload" />
+                            </template>
+                        </FileUpload>
+                    </div>
+                </div>
+            </template>
+        </DefaultLayout>
     </Sidebar>
 </template>
-@/util/importExport
