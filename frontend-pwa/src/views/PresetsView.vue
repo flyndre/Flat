@@ -6,9 +6,12 @@ import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import { collections, collectionService } from '@/data/collections';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { Collection } from '@/types/Collection';
+import { isOnMobile } from '@/util/mobileDetection';
 import {
     mdiArrowLeft,
+    mdiCheck,
     mdiChevronRight,
+    mdiClose,
     mdiDeleteSweep,
     mdiPlus,
     mdiTrayArrowDown,
@@ -18,6 +21,7 @@ import Button from 'primevue/button';
 import Card from 'primevue/card';
 import Column from 'primevue/column';
 import DataTable from 'primevue/datatable';
+import Dialog from 'primevue/dialog';
 import { MenuItem } from 'primevue/menuitem';
 import SplitButton from 'primevue/splitbutton';
 import { ref } from 'vue';
@@ -42,6 +46,7 @@ const selectedActions: MenuItem[] = [
 
 const exportDialogVisible = ref(false);
 const importDialogVisible = ref(false);
+const deleteDialogVisible = ref(false);
 </script>
 
 <template>
@@ -81,6 +86,47 @@ const importDialogVisible = ref(false);
                 :collections="selectedCollections"
             />
             <ImportDialog v-model:visible="importDialogVisible" />
+            <Dialog
+                v-model:visible="deleteDialogVisible"
+                :closable="false"
+                :draggable="false"
+                modal
+                :position="isOnMobile ? 'bottom' : 'top'"
+                class="overflow-hidden"
+                :header="`Delete ${selectedCollections?.length === collections?.length ? 'all' : selectedCollections?.length} Collection${selectedCollections?.length === 1 ? '' : 's'}?`"
+            >
+                Are you sure you want to delete
+                {{
+                    selectedCollections?.length === collections?.length
+                        ? 'all'
+                        : selectedCollections?.length
+                }}
+                Collection{{ selectedCollections?.length === 1 ? '' : 's' }}?
+                <template #footer>
+                    <div
+                        class="w-full flex flex-row justify-stretch gap-2 [&>*]:grow"
+                    >
+                        <Button
+                            label="Cancel"
+                            severity="secondary"
+                            @click="deleteDialogVisible = false"
+                        >
+                            <template #icon>
+                                <MdiTextButtonIcon :icon="mdiClose" />
+                            </template>
+                        </Button>
+                        <Button
+                            label="Confirm"
+                            severity="danger"
+                            @click="deleteSelected"
+                        >
+                            <template #icon>
+                                <MdiTextButtonIcon :icon="mdiCheck" />
+                            </template>
+                        </Button>
+                    </div>
+                </template>
+            </Dialog>
             <Card>
                 <template #content>
                     <div v-if="collections?.length === 0" class="opacity-30">
@@ -120,7 +166,7 @@ const importDialogVisible = ref(false);
                                         :disabled="
                                             selectedCollections.length === 0
                                         "
-                                        @click="deleteSelected"
+                                        @click="deleteDialogVisible = true"
                                     >
                                         <template #icon>
                                             <MdiTextButtonIcon

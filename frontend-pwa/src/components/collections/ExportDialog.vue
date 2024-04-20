@@ -16,6 +16,7 @@ import ScrollPanel from 'primevue/scrollpanel';
 import Sidebar from 'primevue/sidebar';
 import { useToast } from 'primevue/usetoast';
 import { computed } from 'vue';
+import MdiIcon from '../icons/MdiIcon.vue';
 
 const visible = defineModel<boolean>('visible', {
     default: false,
@@ -91,7 +92,7 @@ function downloadData() {
             >
                 <Button
                     v-if="isSupported"
-                    label="Copy"
+                    :label="isOnMobile ? '' : 'Copy'"
                     severity="primary"
                     text
                     @click="copyData"
@@ -134,13 +135,12 @@ function downloadData() {
                 </Button>
                 <Button
                     v-if="isSupported"
-                    label="Copy"
                     severity="primary"
                     text
                     @click="copyData"
                 >
                     <template #icon>
-                        <MdiTextButtonIcon :icon="mdiContentCopy" />
+                        <MdiIcon :icon="mdiContentCopy" />
                     </template>
                 </Button>
                 <Button
