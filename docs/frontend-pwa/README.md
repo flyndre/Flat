@@ -1,7 +1,7 @@
 # PWA Frontend
 
-This frontend for the Flat app is implemented using Vite and Vue.
-For visuals, PrimeVue and Tailwind CSS are utilized.
+This frontend for the Flat app is implemented using [Vite](https://vitejs.dev/) and [Vue](https://vuejs.org/).
+For visuals, [PrimeVue](https://primevue.org/) and [Tailwind CSS](https://tailwindcss.com/) are utilized.
 
 ## Further Documentation
 
