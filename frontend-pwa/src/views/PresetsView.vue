@@ -148,9 +148,11 @@ const importDialogVisible = ref(false);
                                         >
                                             <template #default>
                                                 <div
-                                                    class="w-full flex flex-row justify-between items-center"
+                                                    class="w-full flex flex-row justify-between items-center gap-2"
                                                 >
-                                                    <span>
+                                                    <span
+                                                        class="text-left whitespace-nowrap"
+                                                    >
                                                         {{
                                                             slotProps.data.name
                                                         }}

@@ -11,6 +11,7 @@ import {
     mdiCheckboxMultipleMarked,
     mdiClose,
     mdiCloseBoxMultiple,
+    mdiFileUpload,
 } from '@mdi/js';
 import { computedAsync } from '@vueuse/core';
 import Button from 'primevue/button';
@@ -189,7 +190,11 @@ async function importData() {
                         root: { class: 'flex-grow' },
                         chooseButton: { class: 'w-full p-button-secondary' },
                     }"
-                />
+                >
+                    <template #uploadicon>
+                        <MdiTextButtonIcon :icon="mdiFileUpload" />
+                    </template>
+                </FileUpload>
             </div>
             <div
                 v-if="isOnMobile"
