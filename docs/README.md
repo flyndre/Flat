@@ -19,11 +19,11 @@ Shared documentation is located in the folder this README is located in:
 
 ## Tech Stack
 
-| Component        | Technologies                                                 |
-| ---------------- | ------------------------------------------------------------ |
-| Android Frontend | Jetpack Compose, Kotlin                                      |
-| PWA Frontend     | TypeScript, Vite, Vue, Tailwind CSS, PrimeVue                |
-| Backend          | .NET, C#                                                     |
+| Component        | Technologies                                  |
+| ---------------- | --------------------------------------------- |
+| Android Frontend | Jetpack Compose, Kotlin                       |
+| PWA Frontend     | TypeScript, Vite, Vue, Tailwind CSS, PrimeVue |
+| Backend          | .NET, C#                                      |
 
 ## Requirements
 

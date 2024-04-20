@@ -18,24 +18,21 @@ To access the `google.maps.Map` instance, use the `ref` attribute like in the fo
 
 ```html
 <script setup lang="ts">
-import { GoogleMap } from 'vue3-google-map';
-import { GOOGLE_MAPS_API_KEY, GOOGLE_MAPS_API_LIBRARIES } from '@/data/constants';
+    import { GoogleMap } from "vue3-google-map";
+    import {
+        GOOGLE_MAPS_API_KEY,
+        GOOGLE_MAPS_API_LIBRARIES,
+    } from "@/data/constants";
 
-const apiKey = GOOGLE_MAPS_API_KEY;
-const libraries = GOOGLE_MAPS_API_LIBRARIES;
-const center = ref({ lat: 0, lng: 0});
-const zoom = ref(15);
-const map = ref<google.maps.Map>(null);
+    const apiKey = GOOGLE_MAPS_API_KEY;
+    const libraries = GOOGLE_MAPS_API_LIBRARIES;
+    const center = ref({ lat: 0, lng: 0 });
+    const zoom = ref(15);
+    const map = ref<google.maps.Map>(null);
 </script>
 
 <template>
-  <GoogleMap
-    ref="map"
-    :api-key
-    :libraries
-    :center
-    :zoom
-  />
+    <GoogleMap ref="map" :api-key :libraries :center :zoom />
 </template>
 ```
 
@@ -46,6 +43,6 @@ For more information visit the [documentation](https://vue3-google-map.com/).
 To centralize shared functionality concerning the Google Maps API, `src/utils/googleMapsUtils.ts` is used.
 It provides functions such as:
 
-* `mapCenterWithDefaults`: use the browser geolocation with fallback
-* `getShapeBounds`: get the bounding box of any `google.maps.Overlay`
-* Functions for working with GeoJSON
+-   `mapCenterWithDefaults`: use the browser geolocation with fallback
+-   `getShapeBounds`: get the bounding box of any `google.maps.Overlay`
+-   Functions for working with GeoJSON
