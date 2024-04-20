@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { isOnMobile } from '@/util/mobileDetection';
 import { mdiArrowLeft, mdiCheck, mdiCloseBox, mdiCrosshairs, mdiCrosshairsGps, mdiDeleteForever, mdiDotsHorizontal, mdiFitToScreen, mdiMagnify, mdiMap, mdiPalette, mdiTableColumn, mdiTableColumnRemove, mdiTextureBox, mdiVectorSquareEdit } from '@mdi/js';
 import Button from 'primevue/button';
-import ScrollPanel from 'primevue/scrollpanel';
 import Sidebar from 'primevue/sidebar';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
+import DefaultLayout from '@/layouts/DefaultLayout.vue';
 
 const visible = defineModel<boolean>('visible', {
     default: false,
@@ -14,27 +13,24 @@ const visible = defineModel<boolean>('visible', {
 
 <template>
     <Sidebar
-        class="w-full max-w-[787px] h-fit rounded-t-xl -bottom-px"
+        class="w-full max-w-[787px] h-fit rounded-t-xl -bottom-px p-0 overflow-hidden"
         v-model:visible="visible"
         modal
         position="bottom"
-        header="help"
         :block-scroll="true"
         :show-close-icon="false"
         :pt="{
             header: {
-                class: 'flex flex-row justify-stretch gap-2',
+                class: 'hidden',
             },
             content: {
-                class: 'h-full flex flex-col justify-stretch items-stretch',
+                class: 'h-full flex flex-col justify-stretch items-stretch p-0',
             },
         }"
     >
-        <template #header>
-            <div class="grow basis-0">
+        <DefaultLayout height="80vh">
+            <template #action-left>
                 <Button
-                    v-if="!isOnMobile"
-                    class="shrink-0"
                     label="Back"
                     severity="secondary"
                     @click="visible = false"
@@ -44,12 +40,9 @@ const visible = defineModel<boolean>('visible', {
                         <MdiTextButtonIcon :icon="mdiArrowLeft" />
                     </template>
                 </Button>
-            </div>
-            <span class="text-center font-bold">Help</span>
-            <div class="grow basis-0"></div>
-        </template>
-        <template #default>
-            <ScrollPanel class="h-[65vh]">
+            </template>
+            <template #title>Help</template>
+            <template #default>
                 <p>
                     This is the map edit screen. Here, you draw shapes on the
                     map, representing different divisions of the area in which
@@ -183,15 +176,7 @@ const visible = defineModel<boolean>('visible', {
                         </li>
                     </ul>
                 </p>
-            </ScrollPanel>
-            <Button
-                v-if="isOnMobile"
-                class="w-full sticky bottom-0 left-0 right-0 z-10 shrink-0 mt-5"
-                label="Close"
-                severity="secondary"
-                @click="visible = false"
-                text
-            />
-        </template>
+            </template>
+        </DefaultLayout>
     </Sidebar>
 </template>
