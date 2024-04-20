@@ -44,6 +44,11 @@ const selectedActions: MenuItem[] = [
     },
 ];
 
+function deleteDialogConfirm() {
+    deleteSelected();
+    deleteDialogVisible.value = false;
+}
+
 const exportDialogVisible = ref(false);
 const importDialogVisible = ref(false);
 const deleteDialogVisible = ref(false);
@@ -116,9 +121,9 @@ const deleteDialogVisible = ref(false);
                             </template>
                         </Button>
                         <Button
-                            label="Confirm"
+                            label="Delete"
                             severity="danger"
-                            @click="deleteSelected"
+                            @click="deleteDialogConfirm"
                         >
                             <template #icon>
                                 <MdiTextButtonIcon :icon="mdiCheck" />
