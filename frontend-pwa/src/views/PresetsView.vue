@@ -19,6 +19,7 @@ import {
     mdiTrayArrowDown,
     mdiTrayArrowUp,
 } from '@mdi/js';
+import { computedAsync } from '@vueuse/core';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import Column from 'primevue/column';
@@ -29,6 +30,9 @@ import SplitButton from 'primevue/splitbutton';
 import { v4 as uuidv4 } from 'uuid';
 import { computed, ref } from 'vue';
 
+const displayedCollections = computedAsync(() =>
+    collections.value.sort((a, b) => a.name.localeCompare(b.name))
+);
 const selectedCollections = ref<Collection[]>([]);
 const selectionEmpty = computed(() => selectedCollections.value?.length === 0);
 function deleteSelected() {
@@ -160,7 +164,7 @@ const deleteDialogVisible = ref(false);
                     <div v-else class="flex flex-col">
                         <DataTable
                             v-model:selection="selectedCollections"
-                            :value="collections"
+                            :value="displayedCollections"
                             :dataKey="(c: Collection) => c.id"
                             :pt="{
                                 bodyRow: {
