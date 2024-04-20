@@ -6,10 +6,12 @@ import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import { collections, collectionService } from '@/data/collections';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { Collection } from '@/types/Collection';
+import { dbSafe } from '@/util/dbUtils';
 import { isOnMobile } from '@/util/mobileDetection';
 import {
     mdiArrowLeft,
     mdiCheck,
+    mdiCheckboxMultipleBlank,
     mdiChevronRight,
     mdiClose,
     mdiDeleteSweep,
@@ -24,9 +26,11 @@ import DataTable from 'primevue/datatable';
 import Dialog from 'primevue/dialog';
 import { MenuItem } from 'primevue/menuitem';
 import SplitButton from 'primevue/splitbutton';
-import { ref } from 'vue';
+import { v4 as uuidv4 } from 'uuid';
+import { computed, ref } from 'vue';
 
 const selectedCollections = ref<Collection[]>([]);
+const selectionEmpty = computed(() => selectedCollections.value?.length === 0);
 function deleteSelected() {
     collectionService.bulkDelete(selectedCollections.value.map((c) => c.id));
     selectedCollections.value = [];
@@ -34,12 +38,28 @@ function deleteSelected() {
 function deleteSingle(id: string) {
     collectionService.delete(id);
 }
+function duplicateSelected() {
+    collectionService.bulkAdd([
+        ...selectedCollections.value.map((c) => ({
+            ...dbSafe(c),
+            name: `${c.name} (copy)`,
+            id: uuidv4(),
+        })),
+    ]);
+    selectedCollections.value = [];
+}
 
 const selectedActions: MenuItem[] = [
     {
+        label: 'Duplicate',
+        command: duplicateSelected,
+        disabled: () => selectionEmpty.value,
+        icon: mdiCheckboxMultipleBlank,
+    },
+    {
         label: 'Export',
         command: () => (exportDialogVisible.value = true),
-        disabled: () => selectedCollections.value.length === 0,
+        disabled: () => selectionEmpty.value,
         icon: mdiTrayArrowUp,
     },
 ];
@@ -159,7 +179,7 @@ const deleteDialogVisible = ref(false);
                                 <template #header>
                                     <div class="flex-grow text-left px-4 py-2">
                                         {{
-                                            selectedCollections.length === 0
+                                            selectionEmpty
                                                 ? ''
                                                 : `${selectedCollections.length} Selected`
                                         }}
@@ -168,9 +188,7 @@ const deleteDialogVisible = ref(false);
                                         label="Delete"
                                         severity="secondary"
                                         :model="selectedActions"
-                                        :disabled="
-                                            selectedCollections.length === 0
-                                        "
+                                        :disabled="selectionEmpty"
                                         @click="deleteDialogVisible = true"
                                     >
                                         <template #icon>
