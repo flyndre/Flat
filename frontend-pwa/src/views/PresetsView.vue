@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ExportDialog from '@/components/collections/ExportDialog.vue';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import { collections, collectionService } from '@/data/collections';
@@ -9,11 +10,15 @@ import {
     mdiChevronRight,
     mdiDeleteSweep,
     mdiPlus,
+    mdiTrayArrowDown,
+    mdiTrayArrowUp,
 } from '@mdi/js';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import Column from 'primevue/column';
 import DataTable from 'primevue/datatable';
+import { MenuItem } from 'primevue/menuitem';
+import SplitButton from 'primevue/splitbutton';
 import { ref } from 'vue';
 
 const selectedToDelete = ref<Collection[]>([]);
@@ -24,6 +29,17 @@ function deleteSelected() {
 function deleteSingle(id: string) {
     collectionService.delete(id);
 }
+
+const selectedActions: MenuItem[] = [
+    {
+        label: 'Export',
+        command: () => (exportDialogVisible.value = true),
+        disabled: () => selectedToDelete.value.length === 0,
+        icon: mdiTrayArrowUp,
+    },
+];
+
+const exportDialogVisible = ref(false);
 </script>
 
 <template>
@@ -46,8 +62,17 @@ function deleteSingle(id: string) {
                     </template>
                 </Button>
             </router-link>
+            <Button label="Import" severity="secondary" text>
+                <template #icon>
+                    <MdiTextButtonIcon :icon="mdiTrayArrowDown" />
+                </template>
+            </Button>
         </template>
         <template #default>
+            <ExportDialog
+                v-model:visible="exportDialogVisible"
+                :collections="selectedToDelete"
+            />
             <Card>
                 <template #content>
                     <div v-if="collections?.length === 0" class="opacity-30">
@@ -69,12 +94,21 @@ function deleteSingle(id: string) {
                         >
                             <Column selectionMode="multiple" header-class="w-6">
                             </Column>
-                            <Column header-class="flex flex-row justify-end">
+                            <Column
+                                header-class="flex flex-row justify-end [&>*]:contents [&>*]:whitespace-nowrap"
+                            >
                                 <template #header>
-                                    <Button
+                                    <div class="flex-grow text-left px-4 py-2">
+                                        {{
+                                            selectedToDelete.length === 0
+                                                ? ''
+                                                : `${selectedToDelete.length} Selected`
+                                        }}
+                                    </div>
+                                    <SplitButton
                                         label="Delete Selected"
                                         severity="secondary"
-                                        @click="deleteSelected"
+                                        :model="selectedActions"
                                         :disabled="
                                             selectedToDelete.length === 0
                                         "
@@ -85,7 +119,12 @@ function deleteSingle(id: string) {
                                                 :icon="mdiDeleteSweep"
                                             />
                                         </template>
-                                    </Button>
+                                        <template #menuitemicon="slotProps">
+                                            <MdiTextButtonIcon
+                                                :icon="slotProps.item.icon"
+                                            />
+                                        </template>
+                                    </SplitButton>
                                 </template>
                                 <template #body="slotProps">
                                     <router-link
