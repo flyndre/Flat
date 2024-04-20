@@ -3,7 +3,7 @@ import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import { collectionService } from '@/data/collections';
 import { TOAST_LIFE } from '@/data/constants';
 import { dbSafe } from '@/util/dbUtils';
-import { backupToCollectionList } from '@/util/import';
+import { backupToCollectionList } from '@/util/importExport';
 import { isOnMobile } from '@/util/mobileDetection';
 import {
     mdiArrowLeft,
@@ -220,3 +220,4 @@ async function importData() {
         </template>
     </Sidebar>
 </template>
+@/util/importExport

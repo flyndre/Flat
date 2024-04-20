@@ -114,13 +114,12 @@ const importDialogVisible = ref(false);
                                         }}
                                     </div>
                                     <SplitButton
-                                        label="Delete Selected"
+                                        label="Delete"
                                         severity="secondary"
                                         :model="selectedActions"
                                         :disabled="
                                             selectedCollections.length === 0
                                         "
-                                        text
                                         @click="deleteSelected"
                                     >
                                         <template #icon>

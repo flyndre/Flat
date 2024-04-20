@@ -2,7 +2,7 @@
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import { Collection } from '@/types/Collection';
 import { downloadText } from '@/util/download';
-import { collectionListToBackup } from '@/util/import';
+import { collectionListToBackup } from '@/util/importExport';
 import { isOnMobile } from '@/util/mobileDetection';
 import {
     mdiArrowLeft,
@@ -156,3 +156,4 @@ function downloadData() {
         </template>
     </Sidebar>
 </template>
+@/util/importExport
