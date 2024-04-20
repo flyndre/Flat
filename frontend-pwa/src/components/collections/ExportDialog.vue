@@ -2,6 +2,7 @@
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import { Collection } from '@/types/Collection';
 import { downloadText } from '@/util/download';
+import { collectionListToBackup } from '@/util/import';
 import { isOnMobile } from '@/util/mobileDetection';
 import {
     mdiArrowLeft,
@@ -26,7 +27,7 @@ const props = defineProps<{
 
 const { add } = useToast();
 
-const exportData = computed(() => btoa(JSON.stringify(props.collections)));
+const exportData = computed(() => collectionListToBackup(props.collections));
 const { copy, copied, isSupported } = useClipboard({ source: exportData });
 
 function copyData() {

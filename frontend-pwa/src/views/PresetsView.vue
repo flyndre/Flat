@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ExportDialog from '@/components/collections/ExportDialog.vue';
+import ImportDialog from '@/components/collections/ImportDialog.vue';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import { collections, collectionService } from '@/data/collections';
@@ -21,10 +22,10 @@ import { MenuItem } from 'primevue/menuitem';
 import SplitButton from 'primevue/splitbutton';
 import { ref } from 'vue';
 
-const selectedToDelete = ref<Collection[]>([]);
+const selectedCollections = ref<Collection[]>([]);
 function deleteSelected() {
-    collectionService.bulkDelete(selectedToDelete.value.map((c) => c.id));
-    selectedToDelete.value = [];
+    collectionService.bulkDelete(selectedCollections.value.map((c) => c.id));
+    selectedCollections.value = [];
 }
 function deleteSingle(id: string) {
     collectionService.delete(id);
@@ -34,12 +35,13 @@ const selectedActions: MenuItem[] = [
     {
         label: 'Export',
         command: () => (exportDialogVisible.value = true),
-        disabled: () => selectedToDelete.value.length === 0,
+        disabled: () => selectedCollections.value.length === 0,
         icon: mdiTrayArrowUp,
     },
 ];
 
 const exportDialogVisible = ref(false);
+const importDialogVisible = ref(false);
 </script>
 
 <template>
@@ -62,7 +64,12 @@ const exportDialogVisible = ref(false);
                     </template>
                 </Button>
             </router-link>
-            <Button label="Import" severity="secondary" text>
+            <Button
+                label="Import"
+                severity="secondary"
+                text
+                @click="importDialogVisible = true"
+            >
                 <template #icon>
                     <MdiTextButtonIcon :icon="mdiTrayArrowDown" />
                 </template>
@@ -71,8 +78,9 @@ const exportDialogVisible = ref(false);
         <template #default>
             <ExportDialog
                 v-model:visible="exportDialogVisible"
-                :collections="selectedToDelete"
+                :collections="selectedCollections"
             />
+            <ImportDialog v-model:visible="importDialogVisible" />
             <Card>
                 <template #content>
                     <div v-if="collections?.length === 0" class="opacity-30">
@@ -80,7 +88,7 @@ const exportDialogVisible = ref(false);
                     </div>
                     <div v-else class="flex flex-col">
                         <DataTable
-                            v-model:selection="selectedToDelete"
+                            v-model:selection="selectedCollections"
                             :value="collections"
                             :dataKey="(c: Collection) => c.id"
                             :pt="{
@@ -100,9 +108,9 @@ const exportDialogVisible = ref(false);
                                 <template #header>
                                     <div class="flex-grow text-left px-4 py-2">
                                         {{
-                                            selectedToDelete.length === 0
+                                            selectedCollections.length === 0
                                                 ? ''
-                                                : `${selectedToDelete.length} Selected`
+                                                : `${selectedCollections.length} Selected`
                                         }}
                                     </div>
                                     <SplitButton
@@ -110,9 +118,10 @@ const exportDialogVisible = ref(false);
                                         severity="secondary"
                                         :model="selectedActions"
                                         :disabled="
-                                            selectedToDelete.length === 0
+                                            selectedCollections.length === 0
                                         "
                                         text
+                                        @click="deleteSelected"
                                     >
                                         <template #icon>
                                             <MdiTextButtonIcon
