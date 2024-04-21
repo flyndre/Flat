@@ -48,6 +48,7 @@ Optional:
 -   [ ] Leaderboard/Statistics
 -   [x] Dark Mode
 -   [x] Define collection templates
+    -   Archieved by enabling collection duplication
 
 Nice-to-have:
 
