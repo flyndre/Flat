@@ -51,6 +51,8 @@ const props = withDefaults(
         labels?: boolean;
         panOnUpdated?: boolean;
         mapType?: `${google.maps.MapTypeId}`;
+        clientPos?: google.maps.LatLngLiteral;
+        center?: google.maps.LatLngLiteral;
     }>(),
     {
         controls: true,
@@ -59,6 +61,17 @@ const props = withDefaults(
         mapType: 'roadmap',
     }
 );
+
+const gmapClientPos = computed(() => {
+    if (
+        props.clientPos == null ||
+        props.clientPos.lat == null ||
+        props.clientPos.lng == null
+    ) {
+        return undefined;
+    }
+    return props.clientPos;
+});
 
 let recentlyUpdated = false;
 
@@ -479,6 +492,7 @@ onMounted(initialize);
                 style="height: 100%; width: 100%"
                 :api-key
                 :libraries
+                :center
                 :zoom="mapZoom"
                 :restriction="mapRestriction"
                 :disable-default-ui="true"
@@ -516,7 +530,7 @@ onMounted(initialize);
                             class="flex flex-row gap-2 grow text-nowrap basis-7/12"
                         >
                             <LocateMeButton
-                                :initial-pan="true"
+                                :client-pos="gmapClientPos"
                                 :locate-me-handler="
                                     (r) => {
                                         panMapToPos(r);
