@@ -1,6 +1,7 @@
 package de.flyndre.flat.composables.trackingscreen
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -57,7 +58,12 @@ fun TrackingScreen(modifier: Modifier = Modifier, trackingScreenViewModel: Track
         }
     }) {
         innerPadding ->
-        modifier.padding(innerPadding)
-
+        Column (modifier.padding(innerPadding)) {
+            tracklist.forEach{trackCollection ->
+                trackCollection.value.forEach{track ->
+                    Text(text = track.toLineString().toString())
+                }
+            }
+        }
     }
 }
