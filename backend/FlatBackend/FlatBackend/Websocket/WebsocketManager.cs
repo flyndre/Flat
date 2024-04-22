@@ -1,6 +1,7 @@
 ﻿using FlatBackend.DTOs;
 using FlatBackend.Interfaces;
 using FlatBackend.Models;
+using Microsoft.AspNetCore.Http;
 using MongoDB.Driver;
 using System.Net.WebSockets;
 using System.Text;
@@ -90,7 +91,7 @@ namespace FlatBackend.Websocket
             }
         }
 
-        public async void sendAccessRequestToBoss( AccessRequestDto request )
+        public async Task<UserModel> sendAccessRequestToBoss( AccessRequestDto request )
         {
             var collection = await _MongoDBService.GetCollection(request.collectionId);
             if (collection != null)
@@ -100,8 +101,16 @@ namespace FlatBackend.Websocket
                 {
                     var Json = JsonSerializer.Serialize(request);
                     await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
+                    var buffer = new byte[1024 * 4];
+                    var response = await user.webSocket.ReceiveAsync(buffer, CancellationToken.None);
+                    var JsonResult = Encoding.ASCII.GetString(buffer);
+                    JsonResult = new string(Json.Where(c => c != '\x00').ToArray());
+                    var result = JsonSerializer.Deserialize<UserModel>(JsonResult);
+                    setUserConfirmation(request.collectionId, result);
+                    return result;
                 }
             }
+            return null;
         }
 
         public async void sendAccessConfirmationToUser( AccessConfirmationDto request )
@@ -115,6 +124,30 @@ namespace FlatBackend.Websocket
                     var Json = JsonSerializer.Serialize(request);
                     await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
                 }
+            }
+        }
+
+        public async void setUserConfirmation( Guid collectionId, UserModel user )
+        {
+            var collection = await _MongoDBService.GetCollection(collectionId);
+            if (collection != null && user != null)
+            {
+                UserModel? requestedUser = collection.requestedAccess.Find(e => e.clientId == user.clientId);
+                UserModel? validUser = collection.confirmedUsers.Find(x => x.clientId == user.clientId);
+                if (validUser == null)
+                {
+                    requestedUser.accepted = user.accepted;
+                    collection.requestedAccess.Remove(requestedUser);
+                    collection.confirmedUsers.Add(requestedUser);
+                }
+                else
+                {
+                    var index = collection.confirmedUsers.IndexOf(validUser);
+                    collection.confirmedUsers[index] = user;
+                }
+                _MongoDBService.ChangeCollection(collection);
+                var result = await _MongoDBService.GetCollection(collectionId);
+                sendUpdateCollection(collectionId);
             }
         }
     }

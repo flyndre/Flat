@@ -68,14 +68,15 @@ namespace FlatBackend.Controllers
 
                 oldCol.requestedAccess.Add(value);
                 _MongoDBService.ChangeCollection(oldCol);
-                var result = _MongoDBService.GetCollection(id);
-                string Json = JsonSerializer.Serialize(result);
-                _WebsocketManager.sendAccessRequestToBoss(new DTOs.AccessRequestDto() { collectionId = id, clientId = value.clientId, username = value.username });
-                return "Waiting for confirmation from Collectionowner";
+                var result = await _MongoDBService.GetCollection(id);
+                string Json = JsonSerializer.Serialize(result.requestedAccess.Find(x => x.clientId == value.clientId));
+                var confirmedUser = await _WebsocketManager.sendAccessRequestToBoss(new DTOs.AccessRequestDto() { collectionId = id, clientId = value.clientId, username = value.username });
+                Json = JsonSerializer.Serialize(confirmedUser);
+                return Json;
             }
             catch (Exception ex)
             {
-                return ex.ToString();
+                return NotFound(ex.ToString()).ToJson();
             }
             //call add User to Accessrequestlist
         }

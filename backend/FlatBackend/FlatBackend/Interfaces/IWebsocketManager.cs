@@ -1,4 +1,5 @@
 ﻿using FlatBackend.DTOs;
+using FlatBackend.Models;
 using System.Net.WebSockets;
 
 namespace FlatBackend.Interfaces
@@ -17,7 +18,7 @@ namespace FlatBackend.Interfaces
 
         public void removeNotConfirmedWebSocketUsers( Guid collectionId, Guid userId );
 
-        public void sendAccessRequestToBoss( AccessRequestDto request );
+        public Task<UserModel> sendAccessRequestToBoss( AccessRequestDto request );
 
         public void sendAccessConfirmationToUser( AccessConfirmationDto request );
     }
