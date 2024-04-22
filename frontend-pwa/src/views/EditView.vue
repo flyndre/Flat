@@ -180,7 +180,7 @@ function back() {
                 <template #header>
                     <MapWithControls
                         class="pointer-events-none [&>*]:rounded-none"
-                        :controls="false"
+                        controls="none"
                         :labels="false"
                         :divisions="displayedDivisions"
                     />

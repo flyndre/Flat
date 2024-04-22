@@ -146,6 +146,7 @@ const mapCenter = mapCenterWithDefaults(useGeolocation().coords, {
             <MapHelp v-model:visible="helpVisible" />
             <MapWithControls
                 v-model:divisions="collection.divisions"
+                controls="drawing"
                 :client-pos="mapCenter"
             />
         </template>

@@ -304,7 +304,7 @@ function shareInvitationLink() {}
             </div> -->
 
             <MapWithControls
-                :controls="false"
+                controls="minimal"
                 :client-pos="mapCenter"
                 :center="mapCenter"
             />
