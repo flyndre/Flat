@@ -35,10 +35,16 @@ const submittable = computed(
     () => validateJoinLink(joinLink.value) && validateJoinName(joinName.value)
 );
 const dialogVisible = ref(false);
-const { start, stop } = useTimeoutFn(() => {
-    // TODO: create WS connection etc.
-    router.push({ name: 'track' });
-}, 3000);
+const { start, stop } = useTimeoutFn(
+    () => {
+        // TODO: create WS connection etc.
+        router.push({ name: 'track' });
+    },
+    3000,
+    {
+        immediate: false,
+    }
+);
 function join() {
     dialogVisible.value = true;
     start();
