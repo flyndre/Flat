@@ -3,7 +3,9 @@
 The following messages and data are exchanged between the frontends and the backend.
 
 ## ✅Implemented
-
+- George Washington
+* John Adams
++ Thomas Jefferson
 ### ⬇️POST `/api/Rest/Collection`: Open collection  
    **🐨Request-Body**  
      - name: `String`  
