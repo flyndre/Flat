@@ -62,6 +62,8 @@ const props = withDefaults(
     }
 );
 
+watch(() => props.clientPos, setPositionMarker);
+
 const gmapClientPos = computed(() => {
     if (
         props.clientPos == null ||

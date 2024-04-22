@@ -21,15 +21,14 @@ import { computed, ref } from 'vue';
 import { isOnMobile } from '@/util/mobileDetection';
 import Dialog from 'primevue/dialog';
 import Textarea from 'primevue/textarea';
-import { useGeolocation } from '@vueuse/core';
-import { watch } from 'vue';
-import ParticipantsDialog from '@/components/tracking/ParticipantsDialog.vue';
 import { useTrackingService } from '@/service/trackingService';
-import { trackingLogs } from '@/data/trackingLogs';
+import MapWithControls from '@/components/map/MapWithControls.vue';
+import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
 
 const adminView = ref(true);
 
 const {
+    coords: trackingPosition,
     isActive: trackingActive,
     start: startTracking,
     stop: stopTracking,
@@ -50,10 +49,12 @@ function toggleTracking() {
 
 const trackingLoading = ref(false);
 const locationError = computed(
-    () =>
-        trackingError.value !== undefined &&
-        trackingError.value?.code === GeolocationPositionError.PERMISSION_DENIED
+    () => trackingError.value !== undefined && trackingError.value?.code > 0
 );
+const mapCenter = mapCenterWithDefaults(trackingPosition, {
+    lat: null,
+    lng: null,
+});
 
 const adminActions: MenuItem[] = [
     {
@@ -289,7 +290,7 @@ function shareInvitationLink() {}
                 </template>
             </Dialog>
 
-            <div
+            <!-- <div
                 class="w-full h-full bg-gray-200 flex flex-col items-center justify-center text-gray-500 rounded-md gap-2"
                 :class="{ 'mb-2': !isOnMobile }"
             >
@@ -300,7 +301,13 @@ function shareInvitationLink() {}
                 >
                     {{ trackingLogs }}
                 </div>
-            </div>
+            </div> -->
+
+            <MapWithControls
+                :controls="false"
+                :client-pos="mapCenter"
+                :center="mapCenter"
+            />
         </template>
     </DefaultLayout>
 </template>

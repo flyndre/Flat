@@ -60,4 +60,5 @@ export const useTrackingService = () => ({
     stop,
     isActive,
     error,
+    coords,
 });
