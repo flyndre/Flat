@@ -6,13 +6,13 @@ The following messages and data are exchanged between the frontends and the back
 
 ### POST `/api/Rest/Collection`: Open collection  
    **Request-Body**  
-      - name: `String`  
-      - clientId: `UUID`      
-      - collectionArea: `GeoJSON MultiPolygon`    
+     - name: `String`  
+     - clientId: `UUID`      
+     - collectionArea: `GeoJSON MultiPolygon`    
 
 ### GET `/api/Rest/Collection/{CollectionId}?userId={userId}`: Get collection   
    **Request-Parameter**  
-      - userId == clientId: `UUID`    
+     - userId == clientId: `UUID`    
    **Path-Variables**   
       - CollectionId: `UUID`    
       
