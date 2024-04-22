@@ -10,7 +10,7 @@ The following messages and data are exchanged between the frontends and the back
      - clientId: `UUID`      
      - collectionArea: `GeoJSON MultiPolygon`    
 
-### ⬇️GET `/api/Rest/Collection/{CollectionId}`: Get collection   
+### ⬆️GET `/api/Rest/Collection/{CollectionId}`: Get collection   
    **Request-Parameter**  
      - userId == clientId: `UUID`    
    **Path-Variables**   
@@ -25,7 +25,7 @@ The following messages and data are exchanged between the frontends and the back
             - name: `String`  
             - id: `UUID`  
           
-### ⬆️POST `/api/Rest/AccessRequest/{clientId}`: Access request collection  
+### ⬇️POST `/api/Rest/AccessRequest/{clientId}`: Access request collection  
    **Path-Variables**  
       - clientId: `UUID`  
    **Request-Body**  
@@ -33,7 +33,7 @@ The following messages and data are exchanged between the frontends and the back
       - clientId: `UUID`  
       - collectionId: `UUID`  
     
-### ⬇️GET `/api/Rest/AccessRequest/{CollectionId}`: Access confirmation request to boss  
+### ⬆️GET `/api/Rest/AccessRequest/{CollectionId}`: Access confirmation request to boss  
    **Request-Parameter**  
       - userId == clientId: `UUID`  
    **Path-Variables**  
@@ -41,7 +41,7 @@ The following messages and data are exchanged between the frontends and the back
    **Request-Body**  
       - username: `String`  
     
-### ⬆️POST `/api/Rest/AccessConfirmation/{clientId}`: Access confirmation request from boss  
+### ⬇️POST `/api/Rest/AccessConfirmation/{clientId}`: Access confirmation request from boss  
    **Path-Variables**  
       - clientId: `UUID`  
    **Request-Body**  
