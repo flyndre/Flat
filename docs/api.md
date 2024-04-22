@@ -1,10 +1,10 @@
-# API
+# API-Docs 📃
 
 The following messages and data are exchanged between the frontends and the backend.
 
 ## ✅Implemented
 
-### ⬆️POST `/api/Rest/Collection`: Open collection  
+### ⬇️POST `/api/Rest/Collection`: Open collection  
    **Request-Body**  
      - name: `String`  
      - clientId: `UUID`      
@@ -12,13 +12,15 @@ The following messages and data are exchanged between the frontends and the back
 
 ### ⬆️GET `/api/Rest/Collection/{CollectionId}`: Get collection   
    **Request-Parameter**  
-     - userId == clientId: `UUID`    
+     - userId == clientId: `UUID` 
+     
    **Path-Variables**   
       - CollectionId: `UUID`    
       
 ### ➡️PUT `/api/Rest/Collection/{collectionId}`: Set or change division of collectionArea  
    **Path-Variables**  
       - collectionId: `UUID`    
+      
    **Request-Body**  
         - collectionDivision[]    
             - area: `GeoJSON Polygon`    
@@ -28,6 +30,7 @@ The following messages and data are exchanged between the frontends and the back
 ### ⬇️POST `/api/Rest/AccessRequest/{clientId}`: Access request collection  
    **Path-Variables**  
       - clientId: `UUID`  
+      
    **Request-Body**  
       - username: `String`  
       - clientId: `UUID`  
@@ -36,14 +39,17 @@ The following messages and data are exchanged between the frontends and the back
 ### ⬆️GET `/api/Rest/AccessRequest/{CollectionId}`: Access confirmation request to boss  
    **Request-Parameter**  
       - userId == clientId: `UUID`  
+      
    **Path-Variables**  
       - CollectionId: `UUID`  
+      
    **Request-Body**  
       - username: `String`  
     
 ### ⬇️POST `/api/Rest/AccessConfirmation/{clientId}`: Access confirmation request from boss  
    **Path-Variables**  
       - clientId: `UUID`  
+      
    **Request-Body**  
       - accepted: `boolean`  
 
