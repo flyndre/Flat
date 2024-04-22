@@ -5,52 +5,52 @@ The following messages and data are exchanged between the frontends and the back
 ## ✅Implemented
 
 ### ⬇️POST `/api/Rest/Collection`: Open collection  
-   **Request-Body**  
+   **🐨Request-Body**  
      - name: `String`  
      - clientId: `UUID`      
      - collectionArea: `GeoJSON MultiPolygon`    
 
 ### ⬆️GET `/api/Rest/Collection/{CollectionId}`: Get collection   
-   **Request-Parameter**  
+   **🦒Request-Parameter**  
      - userId == clientId: `UUID` 
      
-   **Path-Variables**   
+   **🐯Path-Variables**   
       - CollectionId: `UUID`    
       
 ### ➡️PUT `/api/Rest/Collection/{collectionId}`: Set or change division of collectionArea  
    **Path-Variables**  
       - collectionId: `UUID`    
       
-   **Request-Body**  
+   **🐨Request-Body**  
         - collectionDivision[]    
             - area: `GeoJSON Polygon`    
             - name: `String`  
             - id: `UUID`  
           
 ### ⬇️POST `/api/Rest/AccessRequest/{clientId}`: Access request collection  
-   **Path-Variables**  
+   **🐯Path-Variables**  
       - clientId: `UUID`  
       
-   **Request-Body**  
+   **🐨Request-Body**  
       - username: `String`  
       - clientId: `UUID`  
       - collectionId: `UUID`  
     
 ### ⬆️GET `/api/Rest/AccessRequest/{CollectionId}`: Access confirmation request to boss  
-   **Request-Parameter**  
+   **🦒Request-Parameter**  
       - userId == clientId: `UUID`  
       
-   **Path-Variables**  
+   **🐯Path-Variables**  
       - CollectionId: `UUID`  
       
-   **Request-Body**  
+   **🐨Request-Body**  
       - username: `String`  
     
 ### ⬇️POST `/api/Rest/AccessConfirmation/{clientId}`: Access confirmation request from boss  
-   **Path-Variables**  
+   **🐯Path-Variables**  
       - clientId: `UUID`  
       
-   **Request-Body**  
+   **🐨Request-Body**  
       - accepted: `boolean`  
 
 ### 🛑DELETE `/api/Rest/Collection/{collectionId}`: Close collection  
