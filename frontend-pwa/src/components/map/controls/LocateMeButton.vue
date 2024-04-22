@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
 import { mdiCrosshairsGps } from '@mdi/js';
-import { useGeolocation } from '@vueuse/core';
 import { onMounted } from 'vue';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import Button from 'primevue/button';
@@ -10,35 +8,30 @@ const props = withDefaults(
     defineProps<{
         /** Whether the `locateMeHandler` should be called on mounted. @default true */
         initialPan?: boolean;
+        panOnUpdate?: boolean;
+        clientPos?: google.maps.LatLngLiteral;
         /** A function to handle when the button is clicked. */
         locateMeHandler: (clientPos: google.maps.LatLngLiteral) => any;
     }>(),
     {
-        initialPan: true,
+        initialPan: false,
+        panOnUpdate: false,
     }
 );
 
-const { coords: clientPos, error: clientPosError } = useGeolocation();
-const clientPosWithFallback = mapCenterWithDefaults(clientPos, {
-    lat: 0,
-    lng: 0,
-});
-
 function locateMe() {
-    props.locateMeHandler(clientPosWithFallback.value);
+    props.locateMeHandler(props.clientPos);
 }
 
 onMounted(() => {
-    if (clientPosError.value == null) {
-        locateMe();
-    }
+    if (props.clientPos != null) locateMe();
 });
 </script>
 
 <template>
     <Button
         severity="secondary"
-        :disabled="clientPosError !== null"
+        :disabled="clientPos == null"
         @click="locateMe"
     >
         <template #icon>

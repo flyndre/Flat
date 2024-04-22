@@ -21,36 +21,40 @@ import { computed, ref } from 'vue';
 import { isOnMobile } from '@/util/mobileDetection';
 import Dialog from 'primevue/dialog';
 import Textarea from 'primevue/textarea';
-import { useGeolocation } from '@vueuse/core';
-import { watch } from 'vue';
+import { useTrackingService } from '@/service/trackingService';
+import MapWithControls from '@/components/map/MapWithControls.vue';
+import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
 
 const adminView = ref(true);
 
-const { coords, error, pause, resume } = useGeolocation({
-    enableHighAccuracy: true,
-});
-const trackingActive = ref(false);
-watch(trackingActive, (trackingOn) => {
-    if (trackingOn) {
-        resume();
-    } else {
-        pause();
-    }
-});
-const trackingLoading = ref(false);
-const locationError = computed(
-    () =>
-        error.value !== undefined &&
-        error.value?.code === GeolocationPositionError.PERMISSION_DENIED
-);
+const {
+    coords: trackingPosition,
+    isActive: trackingActive,
+    start: startTracking,
+    stop: stopTracking,
+    error: trackingError,
+} = useTrackingService();
 
-function toggleTrackingState() {
+function toggleTracking() {
     trackingLoading.value = true;
+    if (trackingActive.value) {
+        stopTracking();
+    } else {
+        startTracking();
+    }
     setTimeout(() => {
         trackingLoading.value = false;
-        trackingActive.value = !trackingActive.value;
     }, 1000);
 }
+
+const trackingLoading = ref(false);
+const locationError = computed(
+    () => trackingError.value !== undefined && trackingError.value?.code > 0
+);
+const mapCenter = mapCenterWithDefaults(trackingPosition, {
+    lat: null,
+    lng: null,
+});
 
 const adminActions: MenuItem[] = [
     {
@@ -130,7 +134,7 @@ function shareInvitationLink() {}
                 :label="trackingActive ? 'Pause Tracking' : 'Start Tracking'"
                 :loading="trackingLoading"
                 :disabled="locationError"
-                @click="toggleTrackingState"
+                @click="toggleTracking"
             >
                 <template #icon>
                     <MdiTextButtonIcon
@@ -217,7 +221,8 @@ function shareInvitationLink() {}
             </Dialog>
 
             <!-- Participant Management Dialog -->
-            <Dialog
+            <!-- <ParticipantsDialog v-model:visible="manageGroupsScreenVisible" /> -->
+            <!-- <Dialog
                 :position="isOnMobile ? 'bottom' : 'top'"
                 v-model:visible="manageGroupsScreenVisible"
                 header="Manage Participants"
@@ -240,33 +245,7 @@ function shareInvitationLink() {}
                         </Button>
                     </div>
                 </template>
-            </Dialog>
-
-            <!-- Participant Management Dialog -->
-            <Dialog
-                :position="isOnMobile ? 'bottom' : 'top'"
-                v-model:visible="manageGroupsScreenVisible"
-                header="Manage Participants"
-                :draggable="false"
-                :closable="false"
-                modal
-            >
-                <template #default> (list of participants) </template>
-                <template #footer>
-                    <div class="w-full flex flex-row justify-center gap-2">
-                        <Button
-                            label="Close"
-                            severity="secondary"
-                            text
-                            @click="manageGroupsScreenVisible = false"
-                        >
-                            <template #icon>
-                                <MdiTextButtonIcon :icon="mdiClose" />
-                            </template>
-                        </Button>
-                    </div>
-                </template>
-            </Dialog>
+            </Dialog> -->
 
             <!-- Stop Collection Confirm Dialog -->
             <Dialog
@@ -311,7 +290,7 @@ function shareInvitationLink() {}
                 </template>
             </Dialog>
 
-            <div
+            <!-- <div
                 class="w-full h-full bg-gray-200 flex flex-col items-center justify-center text-gray-500 rounded-md gap-2"
                 :class="{ 'mb-2': !isOnMobile }"
             >
@@ -320,10 +299,15 @@ function shareInvitationLink() {}
                     class="flex flex-col border border-solid rounded-md py-1 px-2"
                     :class="{ 'opacity-30': !trackingActive }"
                 >
-                    <span>Lat: {{ coords?.latitude }}</span>
-                    <span>Lon: {{ coords?.longitude }}</span>
+                    {{ trackingLogs }}
                 </div>
-            </div>
+            </div> -->
+
+            <MapWithControls
+                controls="minimal"
+                :client-pos="mapCenter"
+                :center="mapCenter"
+            />
         </template>
     </DefaultLayout>
 </template>
