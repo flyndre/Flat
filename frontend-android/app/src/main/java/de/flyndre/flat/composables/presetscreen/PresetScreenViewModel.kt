@@ -10,6 +10,7 @@ import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.database.entities.Preset
 import de.flyndre.flat.interfaces.IConnectionService
 import io.github.dellisd.spatialk.geojson.MultiPolygon
+import io.github.dellisd.spatialk.geojson.Position
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -81,8 +82,12 @@ class PresetScreenViewModel(db: AppDatabase, collectionAreaScreenViewModel: Coll
 
     //publish collection to backend
     fun openCollection(){
-        //var s = _collectionAreaScreenViewModel.getListAreaPoints()
-        //var list = arrayListOf(s.map { x->io.github.dellisd.spatialk.geojson.Position(x.longitude,x.latitude) })
-        //viewModelScope.launch { _connectionService.openCollection(_presetName.value, MultiPolygon(list) ) }
+        val areaList = _collectionAreaScreenViewModel.getListAreas()
+        val multiPolygon = arrayListOf(areaList.map {
+            area ->area.listAreaPoints.map{
+                point -> Position(point.longitude,point.latitude)
+            }
+        })
+        viewModelScope.launch { _connectionService.openCollection(_presetName.value, MultiPolygon(multiPolygon) ) }
     }
 }
