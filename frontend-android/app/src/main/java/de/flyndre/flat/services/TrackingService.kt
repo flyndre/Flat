@@ -12,11 +12,12 @@ import java.util.UUID
 class TrackingService(
     override val connectionService: IConnectionService,
     override val locationService: ILocationService,
-    override val syncInterval: Long
+    override val syncInterval: Long,
 ) : ITrackingService {
     override val ownTrack: TrackCollection = TrackCollection(UUID.randomUUID())
     override val otherTracks: MutableMap<UUID, TrackCollection> = mutableMapOf()
     override var isTracking: Boolean = false
+    override val onTrackUpdate: ArrayList<() -> Unit> = arrayListOf()
 
     init {
         locationService.addOnLocationUpdate {x-> addNewPosition(x) }
@@ -38,6 +39,7 @@ class TrackingService(
         ownTrack.last().add(position)
         var s = ownTrack.toMultiLineString().toString()
         s = ""
+        onTrackUpdate.forEach { x->x() }
     }
 
     override fun addIncrementalTrack(track: TrackCollection) {
@@ -46,5 +48,9 @@ class TrackingService(
         }else{
             otherTracks[track.id] = track
         }
+    }
+
+    override fun addOnTrackUpdate(callback: () -> Unit) {
+        onTrackUpdate.add(callback)
     }
 }
