@@ -4,18 +4,18 @@ The following messages and data are exchanged between the frontends and the back
 
 ## Implemented
 
-**POST `/api/Rest/Collection`: Open collection**
-    Request-Body:
-        -   name: `String`
-        -   clientId: `UUID`
-        -   (ID is generated): `UUID`
-        -   collectionArea: `GeoJSON MultiPolygon`
+**POST `/api/Rest/Collection`: Open collection**  
+    Request-Body:  
+        -   name: `String`  
+        -   clientId: `UUID`  
+        -   (ID is generated): `UUID`  
+        -   collectionArea: `GeoJSON MultiPolygon`  
 
-**GET `/api/Rest/Collection/{CollectionId}?userId={userId}`: Get collection**
-    Request-Parameter:
-        -   userId == clientId: `UUID`
-    Path-Variables:
-        -   CollectionId: `UUID`
+**GET `/api/Rest/Collection/{CollectionId}?userId={userId}`: Get collection**  
+    Request-Parameter:  
+        -   userId == clientId: `UUID`  
+    Path-Variables:  
+        -   CollectionId: `UUID`  
       
 **PUT `/api/Rest/Collection/{collectionId}`: Set or change division of collectionArea**
     Path-Variables:
