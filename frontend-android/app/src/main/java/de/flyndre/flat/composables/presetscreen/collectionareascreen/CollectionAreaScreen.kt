@@ -131,22 +131,6 @@ fun CollectionAreaScreen(
                         )
                     })
             }
-            /*if(!movingEnabled){
-                Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)) {
-                    Button(onClick = {
-                        collectionAreaScreenViewModel.setCameraPosition(cameraPositionState.position)
-                        navController.navigate("editpreset/0")
-                    }) {
-                        Text(text = "Save Area")
-                    }
-                    Button(onClick = { collectionAreaScreenViewModel.removeLastCollectionAreaPoint() }) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "remove the last point")
-                    }
-                    Button(onClick = { collectionAreaScreenViewModel.clearCollectionArea() }) {
-                        Icon(Icons.Filled.Delete, contentDescription = "delete the existing collection area")
-                    }
-                }
-            }*/
         },
         floatingActionButton = {
             if(selectedNavigationItem == 0){
