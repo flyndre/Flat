@@ -2,72 +2,78 @@
 
 The following messages and data are exchanged between the frontends and the backend.
 
-## Exchanged Messages
+## Implemented
 
--   **Open collection**
-    -   name: `String`
-    -   clientId: `UUID`
-    -   (ID is generated): `UUID`
-    -   collectionArea (Staked out area): `GeoJSON MultiPolygon`
-
-      Was implemented as Rest-API Http-Post-Endpoint
-    Endpoint-Url: /api/Rest/Collection
-
--   **Get collection**
-    -   collectionId: `UUID`
-    -   clientId: `UUID`
-      
-
-      Was implemented as Rest-API Http-Get-Endpoint
-    Endpoint-Url: /api/Rest/Collection/{id}?userId={userId}
-    
--   **Set/change division of collectionArea**
-    -   List of collectionDivision
-        -   area: `GeoJSON Polygon`
+**POST `/api/Rest/Collection`: Open collection**
+    Request-Body:
         -   name: `String`
-        -   id: `UUID`
+        -   clientId: `UUID`
+        -   (ID is generated): `UUID`
+        -   collectionArea: `GeoJSON MultiPolygon`
 
-    Was implemented as Rest-API Http-Put-Endpoint
-    Endpoint-Url: /api/Rest/Collection/{id}
-    
--   **Assign collectionDivision (participants to themselves or boss to someone else)** --> Not Implemented yet
-    -   areaId: `UUID`
-    -   clientId: `UUID`    
--   **Access request collection**
-    -   username: `String`
-    -   clientId: `UUID`
-    -   collectionId: `UUID`
-
-Was implemented as Rest-API Http-Post-Endpoint
-    Endpoint-Url: /api/Rest/AccessRequest/{id}
-    
--   **Access confirmation request to boss**
-    -   username: `String`
-    -   clientId: `UUID`
-
-Was implemented as Rest-API Http-Get-Endpoint
-    Endpoint-Url: /api/Rest/AccessRequest/{id}?userId={userId}
-    
--   **Access confirmation request from boss**
-    -   clientId: `UUID`
-    -   accepted: `boolean`
-
-Was implemented as Rest-API Http-Post-Endpoint
-    Endpoint-Url: /api/Rest/AccessConfirmation/{id}
+**GET `/api/Rest/Collection/{CollectionId}?userId={userId}`: Get collection**
+    Request-Parameter:
+        -   userId == clientId: `UUID`
+    Path-Variables:
+        -   CollectionId: `UUID`
       
--   **Access confirmation to participant**
-    -   collectionId: `UUID`
-    -   accepted: `boolean`
--   **Send progress in the form of GPS data**
-    -   GPX track: `GPX track`
-    -   If connection has been interrupted, resend unsent data
-    -   Start/stop GPS track
--   **Receive progress of all participants from the server**
-    -   GPX track: `GPX Track`
-    -   In the form of a list of GPS tracks
--   **Close collection**
-    -   collectionId: `UUID`
+**PUT `/api/Rest/Collection/{collectionId}`: Set or change division of collectionArea**
+    Path-Variables:
+        -   collectionId: `UUID`
+    Request-Body:
+        -   collectionDivision[]
+            -   area: `GeoJSON Polygon`
+            -   name: `String`
+            -   id: `UUID`
+          
+**POST `/api/Rest/AccessRequest/{clientId}`: Access request collection**
+    Path-Variables:
+        -   clientId: `UUID`
+    Request-Body
+        -   username: `String`
+        -   clientId: `UUID`
+        -   collectionId: `UUID`
+    
+**GET `/api/Rest/AccessRequest/{CollectionId}`: Access confirmation request to boss**
+    Request-Parameter:
+        -   userId == clientId: `UUID`
+    Path-Variables:
+        -   CollectionId: `UUID`
+    Request-Body
+        -   username: `String`
+    
+**POST `/api/Rest/AccessConfirmation/{clientId}`: Access confirmation request from boss**
+    Path-Variables:
+        -   clientId: `UUID`
+    Request-Body:
+        -   accepted: `boolean`
 
- Was implemented as Rest-API Http-Delete-Endpoint
-    Endpoint-Url: /api/Rest/Collection/{id}
+**DELETE `/api/Rest/Collection/{collectionId}`: Close collection**
+    Path-Variables:
+        -   collectionId: `UUID`
+
+ 
+## Not yet implemented
+
+**Assign collectionDivision (participants to themselves or boss to someone else)**
+    Request-Body: 
+        -   areaId: `UUID`
+        -   clientId: `UUID` 
+  
+**Access confirmation to participant**
+    Request-Body: 
+        -   collectionId: `UUID`
+        -   accepted: `boolean`
+
+**Send progress in the form of GPS data**
+    Request-Body: 
+        -   GPX track: `GPX track`
+        -   If connection has been interrupted, resend unsent data
+        -    Start/stop GPS track
+
+**Receive progress of all participants from the server**
+    Request-Body: 
+        -   GPX track: `GPX Track`
+        -   In the form of a list of GPS tracks
+
 
