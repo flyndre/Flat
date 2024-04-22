@@ -5,11 +5,10 @@ The following messages and data are exchanged between the frontends and the back
 ## Implemented
 
 ### POST `/api/Rest/Collection`: Open collection 
-    **Request-Body**:  
-        -   name: `String`  
-        -   clientId: `UUID`  
-        -   (ID is generated): `UUID`  
-        -   collectionArea: `GeoJSON MultiPolygon`  
+**Request-Body**:  
+   - name: `String`
+   - clientId: `UUID`    
+   - collectionArea: `GeoJSON MultiPolygon`  
 
 ### GET `/api/Rest/Collection/{CollectionId}?userId={userId}`: Get collection 
     **Request-Parameter**:  
