@@ -7,7 +7,7 @@ The following messages and data are exchanged between the frontends and the back
 ### ⬇️POST `/api/Rest/Collection`: Open collection
 Opens a new Collection with the given Information.
 
-**🐨Request-Body**  
+**🔵Request-Body**  
 - name: `String`  
 - clientId: `UUID`      
 - collectionArea: `GeoJSON MultiPolygon`    
