@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class CollectionAreaScreenViewModel(): ViewModel() {
     //list of points for selection area
-    val listAreaPoints = mutableStateListOf<CollectionArea>()
+    val listCollectionAreas = mutableStateListOf<CollectionArea>()
 
     //saved camera position
     private val _cameraPosition = MutableStateFlow(CameraPosition(LatLng(0.0, 0.0), 0F, 0F, 0F))
@@ -19,7 +19,7 @@ class CollectionAreaScreenViewModel(): ViewModel() {
     //used to clear viewModel for creation of new empty preset
     fun newEmptyCollectionArea(){
         _cameraPosition.value = CameraPosition(LatLng(0.0, 0.0), 0F, 0F, 0F)
-        listAreaPoints.clear()
+        listCollectionAreas.clear()
     }
 
     fun setCameraPosition(cameraPosition: CameraPosition){
@@ -31,31 +31,31 @@ class CollectionAreaScreenViewModel(): ViewModel() {
     }
 
     fun setListAreas(list: ArrayList<CollectionArea>){
-        listAreaPoints.clear()
-        listAreaPoints.addAll(list)
+        listCollectionAreas.clear()
+        listCollectionAreas.addAll(list)
     }
 
     fun getListAreas(): ArrayList<CollectionArea>{
-        return ArrayList(listAreaPoints)
+        return ArrayList(listCollectionAreas)
     }
 
     fun addPCollectionAreaPoint(point: LatLng){
-        val newList = arrayListOf<LatLng>()
-        newList.addAll(_listAreaPoints.value)
-        newList.add(point)
-        _listAreaPoints.value = newList
-    }
-
-    fun removeLastCollectionAreaPoint(){
-        if(_listAreaPoints.value.isNotEmpty()){
-            val newList = arrayListOf<LatLng>()
-            newList.addAll(_listAreaPoints.value)
-            newList.removeLast()
-            _listAreaPoints.value = newList
+        for(area in listCollectionAreas){
+            if(area.isSelected){
+                area.listAreaPoints.add(point)
+                break
+            }
         }
     }
 
-    fun clearCollectionArea(){
-        _listAreaPoints.value = arrayListOf<LatLng>()
+    fun removeLastCollectionAreaPoint(){
+        for(area in listCollectionAreas){
+            if(area.isSelected){
+                if(area.listAreaPoints.isNotEmpty()){
+                    area.listAreaPoints.removeLast()
+                }
+                break
+            }
+        }
     }
 }
