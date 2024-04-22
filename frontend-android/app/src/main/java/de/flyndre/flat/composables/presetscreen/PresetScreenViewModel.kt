@@ -1,6 +1,5 @@
 package de.flyndre.flat.composables.presetscreen
 
-import android.icu.text.Transliterator.Position
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.CameraPosition
@@ -38,7 +37,7 @@ class PresetScreenViewModel(db: AppDatabase, collectionAreaScreenViewModel: Coll
             val preset = _db.presetDao().getPresetById(presetId = presetId)
             _presetName.value = preset.presetName
             _presetDescription.value = preset.presetDescription
-            _collectionAreaScreenViewModel.setListAreaPoints(preset.presetAreaPoints)
+            _collectionAreaScreenViewModel.setListAreas(preset.presetAreaPoints)
             _collectionAreaScreenViewModel.setCameraPosition(preset.presetCameraPosition)
         }
     }
