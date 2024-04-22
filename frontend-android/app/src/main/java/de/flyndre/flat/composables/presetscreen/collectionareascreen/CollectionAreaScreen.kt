@@ -65,7 +65,6 @@ fun CollectionAreaScreen(
     //color picker based on Segmented Button
     var selectedColorItem by remember { mutableStateOf(0) }
     //map data
-    val listAreaPoints by collectionAreaScreenViewModel.listAreaPoints.collectAsState()
     val cameraPosition by collectionAreaScreenViewModel.cameraPosition.collectAsState()
     val cameraPositionState = rememberCameraPositionState {
         position = cameraPosition
@@ -220,12 +219,14 @@ fun CollectionAreaScreen(
                     collectionAreaScreenViewModel.addPCollectionAreaPoint(it)
                 }
             }) {
-            if (listAreaPoints.isNotEmpty()) {
-                Polygon(
-                    points = listAreaPoints,
-                    fillColor = Color(255, 159, 246, 127),
-                    strokeColor = Color(255, 159, 246, 255)
-                )
+            if (collectionAreaScreenViewModel.listAreaPoints.isNotEmpty()) {
+                collectionAreaScreenViewModel.listAreaPoints.forEach{area ->
+                    Polygon(
+                        points = area.listAreaPoints,
+                        fillColor = area.color.copy(alpha = 0.5f),
+                        strokeColor = area.color.copy(alpha = 1F)
+                    )
+                }
             }
         }
     }
