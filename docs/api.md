@@ -65,6 +65,7 @@ Boss affirms the Access-Request of a User with either True or False.
 
 ### 🛑DELETE `/api/Rest/Collection/{collectionId}`: Close collection
 Deletes a Collection. This can only be performed by an Owner of a Collection
+
 **🟠Path-Variables**  
 - collectionId: `UUID`  
 
