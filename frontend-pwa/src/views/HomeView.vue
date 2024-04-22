@@ -1,25 +1,19 @@
 <script setup lang="ts">
 import MdiIcon from '@/components/icons/MdiIcon.vue';
-import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
 import { mdiCog, mdiImport, mdiMapMarkerPath } from '@mdi/js';
 import { useGeolocation, useThrottle } from '@vueuse/core';
 import Button from 'primevue/button';
-import { GoogleMap } from 'vue3-google-map';
 import brandingSrc from '@/assets/images/branding.webp?url';
 import { isOnMobile } from '@/util/mobileDetection';
 import Slider from 'primevue/slider';
 import { ref } from 'vue';
 import { useSettings } from '@/plugins/SettingsPlugin';
 import { computed } from 'vue';
-import {
-    GOOGLE_MAPS_API_KEY,
-    GOOGLE_MAPS_API_LIBRARIES,
-} from '@/data/constants';
+import CinematicMap from '@/components/map/CinematicMap.vue';
 
-const apiKey = GOOGLE_MAPS_API_KEY;
-const libraries = GOOGLE_MAPS_API_LIBRARIES;
 const { settings } = useSettings();
 const homeCoordsDefaults = computed(() => ({
     lat: settings.value.homeLatitude,
@@ -47,31 +41,20 @@ const mapZoomReal = useThrottle(mapZoomSlider, 25);
             <router-link :to="{ name: 'scan' }">
                 <Button label="Join a Collection">
                     <template #icon>
-                        <TextButtonIcon :icon="mdiImport" />
+                        <MdiTextButtonIcon :icon="mdiImport" />
                     </template>
                 </Button>
             </router-link>
             <router-link :to="{ name: 'presets' }">
                 <Button label="My Collections" severity="secondary">
                     <template #icon>
-                        <TextButtonIcon :icon="mdiMapMarkerPath" />
+                        <MdiTextButtonIcon :icon="mdiMapMarkerPath" />
                     </template>
                 </Button>
             </router-link>
         </template>
         <template #background>
-            <GoogleMap
-                class="min-w-[150vmax] min-h-[150vmax] blur-[1px] bg-yellow-50 c-animate-areal"
-                :api-key
-                :libraries
-                :zoom="mapZoomReal"
-                :center="mapCenter"
-                :map-type-id="'satellite'"
-                :disable-default-ui="true"
-            />
-            <div
-                class="!z-10 fixed -top-[10%] -left-[10%] -right-[10%] -bottom-[10%] backdrop-blur c-tilt-shift-filter"
-            ></div>
+            <CinematicMap :center="mapCenter" :zoom="mapZoomReal" />
         </template>
         <template #default>
             <div
@@ -98,42 +81,3 @@ const mapZoomReal = useThrottle(mapZoomSlider, 25);
         </template>
     </DefaultLayout>
 </template>
-
-<style scoped>
-.c-animate-areal {
-    --transform-base: scale(2) perspective(35rem) rotateX(45deg)
-        translateZ(1.8vh);
-    animation: c-areal-animation calc(2 * 60s) linear infinite;
-}
-
-@keyframes c-areal-animation {
-    from {
-        transform: var(--transform-base) rotateZ(0deg);
-    }
-    to {
-        transform: var(--transform-base) rotateZ(360deg);
-    }
-}
-
-.c-tilt-shift-filter {
-    background: linear-gradient(
-        rgba(0, 133, 221, 0.1) 0,
-        rgba(0, 109, 182, 0.05) 30%,
-        transparent 45%,
-        transparent 60%,
-        rgba(71, 0, 88, 0.1) 90%,
-        rgba(51, 0, 40, 0.2) 100%
-    );
-    mask: linear-gradient(
-            black 0,
-            rgba(0, 0, 0, 0.9) 35%,
-            rgba(0, 0, 0, 0.5) 40%,
-            transparent 45%,
-            transparent 60%,
-            rgba(0, 0, 0, 0.5) 62%,
-            rgba(0, 0, 0, 0.9) 75%,
-            black 100%
-        )
-        alpha;
-}
-</style>

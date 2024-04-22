@@ -131,7 +131,7 @@ function _coordinatesFromPolything(
 
 export function geoJSONtoShape(
     geoJSON: Geometry,
-    shapeOptions: google.maps.GroundOverlayOptions = {}
+    shapeOptions: OverlayOptions = {}
 ) {
     switch (geoJSON.type) {
         case 'Polygon':
@@ -150,9 +150,9 @@ export function geoJSONtoPolygon(
     return new google.maps.Polygon({
         ...shapeOptions,
         paths: [
-            geoJSON.coordinates[0].map((coords) => ({
-                lat: coords[0],
-                lng: coords[1],
+            geoJSON.coordinates?.[0].map((coords) => ({
+                lat: coords?.[0] ?? 0,
+                lng: coords?.[1] ?? 0,
             })),
         ],
     });

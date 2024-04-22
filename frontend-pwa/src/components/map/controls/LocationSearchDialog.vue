@@ -1,16 +1,15 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useToast } from 'primevue/usetoast';
-import { TOAST_LIFE } from '@/data/constants';
-import { mdiArrowLeft, mdiChevronRight, mdiMagnify } from '@mdi/js';
-import { isOnMobile } from '@/util/mobileDetection';
-import ScrollPanel from 'primevue/scrollpanel';
-import Button from 'primevue/button';
-import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
-import InputText from 'primevue/inputtext';
+import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
+import { TOAST_LIFE } from '@/data/constants';
+import DefaultLayout from '@/layouts/DefaultLayout.vue';
+import { mdiArrowLeft, mdiChevronRight, mdiMagnify } from '@mdi/js';
+import Button from 'primevue/button';
 import InputGroup from 'primevue/inputgroup';
-import Dialog from 'primevue/dialog';
+import InputText from 'primevue/inputtext';
+import Sidebar from 'primevue/sidebar';
+import { useToast } from 'primevue/usetoast';
+import { ref } from 'vue';
 
 const props = defineProps<{
     placesService: google.maps.places.PlacesService;
@@ -18,7 +17,7 @@ const props = defineProps<{
 }>();
 
 const { add } = useToast();
-const searchDialogVisible = ref(false);
+const visible = ref(false);
 const searchTerm = ref('');
 const searchResults = ref<google.maps.places.PlaceResult[]>([]);
 const searchLoading = ref(false);
@@ -50,7 +49,7 @@ function submitSearch() {
     }
 }
 function selectResult(result: google.maps.places.PlaceResult) {
-    searchDialogVisible.value = false;
+    visible.value = false;
     props.selectResultCallback(result);
 }
 </script>
@@ -60,68 +59,62 @@ function selectResult(result: google.maps.places.PlaceResult) {
         class="grow"
         label="Search"
         severity="secondary"
-        @click="() => (searchDialogVisible = true)"
+        @click="() => (visible = true)"
         outlined
         :pt="{ label: { class: 'text-left' } }"
     >
         <template #icon>
-            <TextButtonIcon :icon="mdiMagnify" />
+            <MdiTextButtonIcon :icon="mdiMagnify" />
         </template>
     </Button>
-    <Dialog
-        class="w-full max-w-[800px]"
-        v-model:visible="searchDialogVisible"
+    <Sidebar
+        class="w-full max-w-[787px] h-fit rounded-t-xl -bottom-px p-0 overflow-hidden"
+        v-model:visible="visible"
         modal
-        :closable="false"
-        :draggable="false"
-        :position="isOnMobile ? 'bottom' : 'top'"
-        :dismissable-mask="true"
+        position="bottom"
+        :block-scroll="true"
+        :show-close-icon="false"
         :pt="{
             header: {
-                class: 'flex justify-stretch gap-2',
+                class: 'hidden',
             },
-            content: { class: 'h-full overflow-hidden' },
-            footer: { class: 'justify-center' },
+            content: {
+                class: 'h-full flex flex-col justify-stretch items-stretch p-0',
+            },
         }"
     >
-        <template #header>
-            <Button
-                v-if="!isOnMobile"
-                label="Back"
-                severity="secondary"
-                @click="searchDialogVisible = false"
-                text
-            >
-                <template #icon>
-                    <TextButtonIcon :icon="mdiArrowLeft" />
-                </template>
-            </Button>
-            <InputGroup>
-                <InputText
-                    type="search"
-                    class="grow"
-                    v-model="searchTerm"
-                    placeholder="Look for a place"
-                    @keydown.enter="submitSearch"
-                    autofocus
-                    :disabled="searchLoading"
-                />
-                <Button @click="submitSearch" :loading="searchLoading">
+        <DefaultLayout height="80vh">
+            <template #action-left>
+                <Button
+                    label="Back"
+                    severity="secondary"
+                    @click="visible = false"
+                    text
+                >
                     <template #icon>
-                        <MdiIcon :icon="mdiMagnify" />
+                        <MdiTextButtonIcon :icon="mdiArrowLeft" />
                     </template>
                 </Button>
-            </InputGroup>
-        </template>
-        <template #default>
-            <ScrollPanel
-                class="h-[50vh] max-h-[50vh]"
-                :pt="{
-                    content: {
-                        class: 'flex flex-col gap-2 items-center justify-start',
-                    },
-                }"
-            >
+            </template>
+            <template #title>
+                <InputGroup>
+                    <InputText
+                        type="search"
+                        class="grow"
+                        v-model="searchTerm"
+                        placeholder="Look for a place"
+                        @keydown.enter="submitSearch"
+                        autofocus
+                        :disabled="searchLoading"
+                    />
+                    <Button :loading="searchLoading" @click="submitSearch">
+                        <template #icon>
+                            <MdiIcon :icon="mdiMagnify" />
+                        </template>
+                    </Button>
+                </InputGroup>
+            </template>
+            <template #default>
                 <Button
                     v-for="result of searchResults"
                     class="w-full shrink-0 text-left"
@@ -140,16 +133,7 @@ function selectResult(result: google.maps.places.PlaceResult) {
                         </div>
                     </template>
                 </Button>
-            </ScrollPanel>
-        </template>
-        <template v-if="isOnMobile" #footer>
-            <Button
-                class="w-full"
-                label="Close"
-                severity="secondary"
-                @click="searchDialogVisible = false"
-                text
-            />
-        </template>
-    </Dialog>
+            </template>
+        </DefaultLayout>
+    </Sidebar>
 </template>

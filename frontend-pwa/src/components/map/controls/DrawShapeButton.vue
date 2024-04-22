@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { mdiVectorSquareEdit, mdiVectorSquareRemove } from '@mdi/js';
 import Button from 'primevue/button';
-import TextButtonIcon from '../icons/TextButtonIcon.vue';
+import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import { computed } from 'vue';
 
 const model = defineModel<google.maps.drawing.OverlayType>();
@@ -23,7 +23,7 @@ function toggle() {
         @click="toggle"
     >
         <template #icon>
-            <TextButtonIcon
+            <MdiTextButtonIcon
                 :icon="isDrawing ? mdiVectorSquareRemove : mdiVectorSquareEdit"
             />
         </template>

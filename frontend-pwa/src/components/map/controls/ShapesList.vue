@@ -2,10 +2,10 @@
 import Button from 'primevue/button';
 import IconField from 'primevue/iconfield';
 import ScrollPanel from 'primevue/scrollpanel';
-import InputIcon from '../icons/InputIcon.vue';
+import MdiInputIcon from '@/components/icons/MdiInputIcon.vue';
 import InputText from 'primevue/inputtext';
-import MdiIcon from '../icons/MdiIcon.vue';
-import TextButtonIcon from '../icons/TextButtonIcon.vue';
+import MdiIcon from '@/components/icons/MdiIcon.vue';
+import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import { IdentifyableTypedOverlay } from '@/types/map/IdentifyableTypedOverlay';
 import {
     mdiChartLineVariant,
@@ -68,7 +68,7 @@ function getShapeIcon(shape: IdentifyableTypedOverlay) {
                 </template>
             </Button>
             <IconField class="grow" icon-position="left">
-                <InputIcon
+                <MdiInputIcon
                     :style="{
                         color: getShapeColor(shape),
                     }"
@@ -102,7 +102,7 @@ function getShapeIcon(shape: IdentifyableTypedOverlay) {
             @click="deleteAllShapesHook"
         >
             <template #default>
-                <TextButtonIcon :icon="mdiCloseBox" />
+                <MdiTextButtonIcon :icon="mdiCloseBox" />
                 Delete All
             </template>
         </Button>

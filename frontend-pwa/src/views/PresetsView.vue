@@ -1,29 +1,77 @@
 <script setup lang="ts">
+import ExportDialog from '@/components/collections/ExportDialog.vue';
+import ImportDialog from '@/components/collections/ImportDialog.vue';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
-import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import { collections, collectionService } from '@/data/collections';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { Collection } from '@/types/Collection';
+import { dbSafe } from '@/util/dbUtils';
+import { isOnMobile } from '@/util/mobileDetection';
 import {
     mdiArrowLeft,
+    mdiCheck,
+    mdiCheckboxMultipleBlank,
     mdiChevronRight,
+    mdiClose,
     mdiDeleteSweep,
     mdiPlus,
+    mdiTrayArrowDown,
+    mdiTrayArrowUp,
 } from '@mdi/js';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import Column from 'primevue/column';
 import DataTable from 'primevue/datatable';
-import { ref } from 'vue';
+import Dialog from 'primevue/dialog';
+import { MenuItem } from 'primevue/menuitem';
+import SplitButton from 'primevue/splitbutton';
+import { v4 as uuidv4 } from 'uuid';
+import { computed, ref } from 'vue';
 
-const selectedToDelete = ref<Collection[]>([]);
+const selectedCollections = ref<Collection[]>([]);
+const selectionEmpty = computed(() => selectedCollections.value?.length === 0);
 function deleteSelected() {
-    collectionService.bulkDelete(selectedToDelete.value.map((c) => c.id));
-    selectedToDelete.value = [];
+    collectionService.bulkDelete(selectedCollections.value.map((c) => c.id));
+    selectedCollections.value = [];
 }
 function deleteSingle(id: string) {
     collectionService.delete(id);
 }
+function duplicateSelected() {
+    collectionService.bulkAdd([
+        ...selectedCollections.value.map((c) => ({
+            ...dbSafe(c),
+            name: `${c.name} (copy)`,
+            id: uuidv4(),
+        })),
+    ]);
+    selectedCollections.value = [];
+}
+
+const selectedActions: MenuItem[] = [
+    {
+        label: 'Duplicate',
+        command: duplicateSelected,
+        disabled: () => selectionEmpty.value,
+        icon: mdiCheckboxMultipleBlank,
+    },
+    {
+        label: 'Export',
+        command: () => (exportDialogVisible.value = true),
+        disabled: () => selectionEmpty.value,
+        icon: mdiTrayArrowUp,
+    },
+];
+
+function deleteDialogConfirm() {
+    deleteSelected();
+    deleteDialogVisible.value = false;
+}
+
+const exportDialogVisible = ref(false);
+const importDialogVisible = ref(false);
+const deleteDialogVisible = ref(false);
 </script>
 
 <template>
@@ -32,7 +80,7 @@ function deleteSingle(id: string) {
             <router-link :to="{ name: 'home' }">
                 <Button label="Back" severity="secondary" text>
                     <template #icon>
-                        <TextButtonIcon :icon="mdiArrowLeft" />
+                        <MdiTextButtonIcon :icon="mdiArrowLeft" />
                     </template>
                 </Button>
             </router-link>
@@ -42,12 +90,68 @@ function deleteSingle(id: string) {
             <router-link :to="{ name: 'create' }">
                 <Button label="Create new" severity="primary">
                     <template #icon>
-                        <TextButtonIcon :icon="mdiPlus" />
+                        <MdiTextButtonIcon :icon="mdiPlus" />
                     </template>
                 </Button>
             </router-link>
+            <Button
+                label="Import"
+                severity="secondary"
+                text
+                @click="importDialogVisible = true"
+            >
+                <template #icon>
+                    <MdiTextButtonIcon :icon="mdiTrayArrowDown" />
+                </template>
+            </Button>
         </template>
         <template #default>
+            <ExportDialog
+                v-model:visible="exportDialogVisible"
+                :collections="selectedCollections"
+            />
+            <ImportDialog v-model:visible="importDialogVisible" />
+            <Dialog
+                v-model:visible="deleteDialogVisible"
+                :closable="false"
+                :draggable="false"
+                modal
+                :position="isOnMobile ? 'bottom' : 'top'"
+                class="overflow-hidden"
+                :header="`Delete ${selectedCollections?.length === collections?.length ? 'all' : selectedCollections?.length} Collection${selectedCollections?.length === 1 ? '' : 's'}?`"
+            >
+                Are you sure you want to delete
+                {{
+                    selectedCollections?.length === collections?.length
+                        ? 'all'
+                        : selectedCollections?.length
+                }}
+                Collection{{ selectedCollections?.length === 1 ? '' : 's' }}?
+                <template #footer>
+                    <div
+                        class="w-full flex flex-row justify-stretch gap-2 [&>*]:grow"
+                    >
+                        <Button
+                            label="Cancel"
+                            severity="secondary"
+                            @click="deleteDialogVisible = false"
+                        >
+                            <template #icon>
+                                <MdiTextButtonIcon :icon="mdiClose" />
+                            </template>
+                        </Button>
+                        <Button
+                            label="Delete"
+                            severity="danger"
+                            @click="deleteDialogConfirm"
+                        >
+                            <template #icon>
+                                <MdiTextButtonIcon :icon="mdiCheck" />
+                            </template>
+                        </Button>
+                    </div>
+                </template>
+            </Dialog>
             <Card>
                 <template #content>
                     <div v-if="collections?.length === 0" class="opacity-30">
@@ -55,7 +159,7 @@ function deleteSingle(id: string) {
                     </div>
                     <div v-else class="flex flex-col">
                         <DataTable
-                            v-model:selection="selectedToDelete"
+                            v-model:selection="selectedCollections"
                             :value="collections"
                             :dataKey="(c: Collection) => c.id"
                             :pt="{
@@ -69,23 +173,35 @@ function deleteSingle(id: string) {
                         >
                             <Column selectionMode="multiple" header-class="w-6">
                             </Column>
-                            <Column header-class="flex flex-row justify-end">
+                            <Column
+                                header-class="flex flex-row justify-end [&>*]:contents [&>*]:whitespace-nowrap"
+                            >
                                 <template #header>
-                                    <Button
-                                        label="Delete Selected"
+                                    <div class="flex-grow text-left px-4 py-2">
+                                        {{
+                                            selectionEmpty
+                                                ? ''
+                                                : `${selectedCollections.length} Selected`
+                                        }}
+                                    </div>
+                                    <SplitButton
+                                        label="Delete"
                                         severity="secondary"
-                                        @click="deleteSelected"
-                                        :disabled="
-                                            selectedToDelete.length === 0
-                                        "
-                                        text
+                                        :model="selectedActions"
+                                        :disabled="selectionEmpty"
+                                        @click="deleteDialogVisible = true"
                                     >
                                         <template #icon>
-                                            <TextButtonIcon
+                                            <MdiTextButtonIcon
                                                 :icon="mdiDeleteSweep"
                                             />
                                         </template>
-                                    </Button>
+                                        <template #menuitemicon="slotProps">
+                                            <MdiTextButtonIcon
+                                                :icon="slotProps.item.icon"
+                                            />
+                                        </template>
+                                    </SplitButton>
                                 </template>
                                 <template #body="slotProps">
                                     <router-link
@@ -101,9 +217,11 @@ function deleteSingle(id: string) {
                                         >
                                             <template #default>
                                                 <div
-                                                    class="w-full flex flex-row justify-between items-center"
+                                                    class="w-full flex flex-row justify-between items-center gap-2"
                                                 >
-                                                    <span>
+                                                    <span
+                                                        class="text-left whitespace-nowrap"
+                                                    >
                                                         {{
                                                             slotProps.data.name
                                                         }}

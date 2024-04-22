@@ -1,28 +1,25 @@
 <script setup lang="ts">
-import InputIcon from '@/components/icons/InputIcon.vue';
-import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import DivisionsList from '@/components/collections/DivisionsList.vue';
+import MdiInputIcon from '@/components/icons/MdiInputIcon.vue';
+import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
 import { clientId } from '@/data/clientMetadata';
 import { collectionDraft, collectionService } from '@/data/collections';
+import { TOAST_LIFE } from '@/data/constants';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { Collection } from '@/types/Collection';
+import { Division } from '@/types/Division';
+import { dbSafe } from '@/util/dbUtils';
 import validateCollection from '@/validation/validateCollection';
-import {
-    mdiArrowLeft,
-    mdiCheck,
-    mdiMapMarkerPath,
-    mdiPencil,
-    mdiPlay,
-    mdiViewDashboardEdit,
-} from '@mdi/js';
+import { mdiArrowLeft, mdiCheck, mdiMapMarkerPath, mdiPlay } from '@mdi/js';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import IconField from 'primevue/iconfield';
 import InputText from 'primevue/inputtext';
+import { useToast } from 'primevue/usetoast';
 import { v4 as uuidv4 } from 'uuid';
 import { computed, onMounted, ref } from 'vue';
 import { RouteLocationRaw, useRouter } from 'vue-router';
-import { dbSafe } from '@/util/dbUtils';
 
 const props = withDefaults(
     defineProps<{
@@ -51,17 +48,42 @@ const loading = ref(false);
 const title = props.edit ? 'Edit' : 'Create';
 const submittable = computed(() => validateCollection(collection.value));
 
+const displayedDivisions = computed<Division[]>(() => [
+    ...(!collection.value.area
+        ? []
+        : <Division[]>[
+              {
+                  id: '0',
+                  area: {
+                      type: 'MultiPolygon',
+                      coordinates: [collection.value.area?.coordinates ?? [[]]],
+                  },
+              },
+          ]),
+    ...(collection.value.divisions ?? []),
+]);
+
+const { add } = useToast();
+
 onMounted(async () => {
     if (props.edit) {
         try {
             const storedCollection = await collectionService.get(props.id);
             if (storedCollection === undefined) {
-                // todo: show toast
+                add({
+                    life: TOAST_LIFE,
+                    severity: 'error',
+                    summary: 'The requested collection id does not exist.',
+                });
                 await router.replace({ name: 'presets' });
             }
             collection.value = storedCollection;
         } catch (error) {
-            // todo: show toast
+            add({
+                life: TOAST_LIFE,
+                severity: 'error',
+                summary: 'Failed to get the requested collection.',
+            });
             await router.replace({ name: 'presets' });
         }
     }
@@ -69,7 +91,11 @@ onMounted(async () => {
 
 async function _saveCollection(target: RouteLocationRaw) {
     if (!submittable.value) {
-        // todo: show toast
+        add({
+            life: TOAST_LIFE,
+            severity: 'error',
+            summary: 'The collection is missing required information.',
+        });
         return;
     }
     loading.value = true;
@@ -82,7 +108,11 @@ async function _saveCollection(target: RouteLocationRaw) {
         }
         await router.push(target);
     } catch (error) {
-        // todo: show toast
+        add({
+            life: TOAST_LIFE,
+            severity: 'error',
+            summary: 'Failed to save the colelction.',
+        });
     } finally {
         loading.value = false;
     }
@@ -90,6 +120,14 @@ async function _saveCollection(target: RouteLocationRaw) {
 
 const save = () => _saveCollection({ name: 'presets' });
 const start = () => _saveCollection({ name: 'presets' });
+
+function editDivisions() {
+    collectionDraft.set(collection.value);
+    router.push({
+        name: props.edit ? 'edit-map' : 'create-map',
+        params: { id: props.id },
+    });
+}
 
 function back() {
     collectionDraft.set(null);
@@ -102,7 +140,7 @@ function back() {
         <template #action-left>
             <Button label="Back" severity="secondary" text @click="back">
                 <template #icon>
-                    <TextButtonIcon :icon="mdiArrowLeft" />
+                    <MdiTextButtonIcon :icon="mdiArrowLeft" />
                 </template>
             </Button>
         </template>
@@ -117,7 +155,7 @@ function back() {
                     :disabled="!submittable"
                 >
                     <template #icon>
-                        <TextButtonIcon :icon="mdiCheck" />
+                        <MdiTextButtonIcon :icon="mdiCheck" />
                     </template>
                 </Button>
                 <Button
@@ -127,7 +165,7 @@ function back() {
                     :disabled="!submittable"
                 >
                     <template #icon>
-                        <TextButtonIcon :icon="mdiPlay" />
+                        <MdiTextButtonIcon :icon="mdiPlay" />
                     </template>
                 </Button>
             </div>
@@ -143,36 +181,24 @@ function back() {
                     <MapWithControls
                         class="pointer-events-none [&>*]:rounded-none"
                         :controls="false"
-                        :areas="collection.divisions"
+                        :labels="false"
+                        :divisions="displayedDivisions"
                     />
-                    <router-link
-                        :to="{
-                            name: edit ? 'edit-map' : 'create-map',
-                            params: { id: props.id },
-                        }"
-                    >
-                        <Button
-                            class="absolute bottom-6 right-6"
-                            label="Edit Areas"
-                            severity="secondary"
-                            raised
-                        >
-                            <template #icon>
-                                <TextButtonIcon :icon="mdiPencil" />
-                            </template>
-                        </Button>
-                    </router-link>
                 </template>
                 <template #content>
                     <div class="flex flex-col gap-2.5">
                         <IconField iconPosition="left">
-                            <InputIcon :icon="mdiMapMarkerPath" />
+                            <MdiInputIcon :icon="mdiMapMarkerPath" />
                             <InputText
                                 class="w-full"
                                 placeholder="Collection Name"
                                 v-model="collection.name"
                             />
                         </IconField>
+                        <DivisionsList
+                            v-model="collection.divisions"
+                            :edit-divisions-handler="editDivisions"
+                        />
                     </div>
                 </template>
             </Card>

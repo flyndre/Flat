@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import Button from 'primevue/button';
-import TextButtonIcon from '@/components/icons/TextButtonIcon.vue';
+import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import SplitButton from 'primevue/splitbutton';
 import {
     mdiAccountMultiple,
@@ -87,13 +87,13 @@ function shareInvitationLink() {}
                 @click="invitationScreenVisible = true"
             >
                 <template #icon>
-                    <TextButtonIcon
+                    <MdiTextButtonIcon
                         :class="{ '!mr-0': isOnMobile }"
                         :icon="mdiAccountPlus"
                     />
                 </template>
                 <template #menuitemicon="slotProps">
-                    <TextButtonIcon :icon="slotProps.item.icon" />
+                    <MdiTextButtonIcon :icon="slotProps.item.icon" />
                 </template>
             </SplitButton>
 
@@ -105,7 +105,7 @@ function shareInvitationLink() {}
                 @click="leaveCollection"
             >
                 <template #icon>
-                    <TextButtonIcon
+                    <MdiTextButtonIcon
                         class="rotate-180 mr-3.5"
                         :icon="mdiExport"
                     />
@@ -114,14 +114,14 @@ function shareInvitationLink() {}
         </template>
         <template #title>
             <template v-if="trackingActive">
-                <TextButtonIcon
+                <MdiTextButtonIcon
                     class="text-red-500 animate-ping"
                     :icon="mdiCircle"
                 />
                 Tracking
             </template>
             <template v-else>
-                <TextButtonIcon class="opacity-75" :icon="mdiPauseCircle" />
+                <MdiTextButtonIcon class="opacity-75" :icon="mdiPauseCircle" />
                 Paused
             </template>
         </template>
@@ -133,7 +133,7 @@ function shareInvitationLink() {}
                 @click="toggleTrackingState"
             >
                 <template #icon>
-                    <TextButtonIcon
+                    <MdiTextButtonIcon
                         :icon="trackingActive ? mdiPause : mdiPlay"
                     />
                 </template>
@@ -162,7 +162,7 @@ function shareInvitationLink() {}
                             text
                         >
                             <template #icon>
-                                <TextButtonIcon
+                                <MdiTextButtonIcon
                                     class="rotate-180 mr-3"
                                     :icon="mdiExport"
                                 />
@@ -204,12 +204,12 @@ function shareInvitationLink() {}
                             @click="invitationScreenVisible = false"
                         >
                             <template #icon>
-                                <TextButtonIcon :icon="mdiClose" />
+                                <MdiTextButtonIcon :icon="mdiClose" />
                             </template>
                         </Button>
                         <Button label="Share" @click="shareInvitationLink">
                             <template #icon>
-                                <TextButtonIcon :icon="mdiShare" />
+                                <MdiTextButtonIcon :icon="mdiShare" />
                             </template>
                         </Button>
                     </div>
@@ -235,7 +235,7 @@ function shareInvitationLink() {}
                             @click="manageGroupsScreenVisible = false"
                         >
                             <template #icon>
-                                <TextButtonIcon :icon="mdiClose" />
+                                <MdiTextButtonIcon :icon="mdiClose" />
                             </template>
                         </Button>
                     </div>
@@ -261,7 +261,7 @@ function shareInvitationLink() {}
                             @click="manageGroupsScreenVisible = false"
                         >
                             <template #icon>
-                                <TextButtonIcon :icon="mdiClose" />
+                                <MdiTextButtonIcon :icon="mdiClose" />
                             </template>
                         </Button>
                     </div>
@@ -295,7 +295,7 @@ function shareInvitationLink() {}
                             @click="endCollectionDialogVisible = false"
                         >
                             <template #icon>
-                                <TextButtonIcon :icon="mdiClose" />
+                                <MdiTextButtonIcon :icon="mdiClose" />
                             </template>
                         </Button>
                         <Button
@@ -304,7 +304,7 @@ function shareInvitationLink() {}
                             @click="stopCollection"
                         >
                             <template #icon>
-                                <TextButtonIcon :icon="mdiCheck" />
+                                <MdiTextButtonIcon :icon="mdiCheck" />
                             </template>
                         </Button>
                     </div>

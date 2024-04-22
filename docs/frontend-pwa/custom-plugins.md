@@ -14,10 +14,10 @@ This is done by toggeling `style` tags inside the head with `useStyleTag` from `
 The theme can be controlled via the `useTheme` hook:
 
 ```js
-import { useTheme } from '@/plugins/ThemePlugin';
+import { useTheme } from "@/plugins/ThemePlugin";
 
 const { settingsTheme, activeTheme } = useTheme();
-settingsTheme.value = 'dark';
+settingsTheme.value = "dark";
 ```
 
 > [!CAUTION]
@@ -32,8 +32,8 @@ Initially, a default settings object is stored.
 That object can be modified by code everywhere in the app using the `useSettings` hook:
 
 ```js
-import { useSettings } from '@/plugins/SettingsPlugin';
+import { useSettings } from "@/plugins/SettingsPlugin";
 
 const { settings, reset } = useSettings();
-settings.handedness = 'left';
+settings.handedness = "left";
 ```

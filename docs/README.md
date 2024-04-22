@@ -14,26 +14,20 @@ Likewise, the codebase and therefore the docs are split in the same manner.
 Shared documentation is located in the folder this README is located in:
 
 -   [Shared UI Specifications](/docs/ui.md)
-
-## API
-
-The API is defined seperately in the [API Docs](/docs/api.md).
-
-## Conventions
-
-Conventions regarding Git and coding are documented [here](/docs/conventions.md).
+-   [Backend API Docs](/docs/api.md)
+-   [Git and Code Conventions](/docs/conventions.md)
 
 ## Tech Stack
 
-| Component        | Technologies                                                 |
-| ---------------- | ------------------------------------------------------------ |
-| Android Frontend | Jetpack Compose, Kotlin                                      |
-| PWA Frontend     | TypeScript, Vite, Vue, Tailwind CSS, [ Vuetify \| PrimeVue ] |
-| Backend          | .NET, C#                                                     |
+| Component        | Technologies                                  |
+| ---------------- | --------------------------------------------- |
+| Android Frontend | Jetpack Compose, Kotlin                       |
+| PWA Frontend     | TypeScript, Vite, Vue, Tailwind CSS, PrimeVue |
+| Backend          | .NET, C#                                      |
 
 ## Requirements
 
-Must:
+Must-have:
 
 -   Map display
 -   Divide map into areas
@@ -42,14 +36,14 @@ Must:
 -   Join the team via link
 -   User name
 
-Target:
+Optional:
 
 -   Join via QR code
 -   Leaderboard/Statistics
 -   Dark Mode
 -   Define collection templates
 
-Can:
+Nice-to-have:
 
 -   Start/stop tracking via notification
 -   Profile pictures
