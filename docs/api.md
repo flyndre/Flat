@@ -10,7 +10,7 @@ Opens a new Collection with the given Information.
 **🔵Request-Body**  
 - name: `String`
 - clientId: `UUID` : required   
-- area: `GeoJSON MultiPolygon` : : required    
+- area: `GeoJSON MultiPolygon` : required    
 
 ### ⬆️GET `/api/Rest/Collection/{CollectionId}`: Get collection 
 Recieve Collection Information.
