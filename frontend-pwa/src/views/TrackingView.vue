@@ -1,14 +1,18 @@
 <script setup lang="ts">
-import DefaultLayout from '@/layouts/DefaultLayout.vue';
-import Button from 'primevue/button';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
-import SplitButton from 'primevue/splitbutton';
+import MapWithControls from '@/components/map/MapWithControls.vue';
+import { TOAST_LIFE } from '@/data/constants';
+import DefaultLayout from '@/layouts/DefaultLayout.vue';
+import { useTrackingService } from '@/service/trackingService';
+import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
+import { isOnMobile } from '@/util/mobileDetection';
 import {
     mdiAccountMultiple,
     mdiAccountPlus,
     mdiCheck,
     mdiCircle,
     mdiClose,
+    mdiContentCopy,
     mdiExport,
     mdiPause,
     mdiPauseCircle,
@@ -16,16 +20,19 @@ import {
     mdiShare,
     mdiStop,
 } from '@mdi/js';
-import { MenuItem } from 'primevue/menuitem';
-import { computed, ref } from 'vue';
-import { isOnMobile } from '@/util/mobileDetection';
+import { useClipboard, useShare, watchOnce } from '@vueuse/core';
+import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
+import { MenuItem } from 'primevue/menuitem';
+import SplitButton from 'primevue/splitbutton';
 import Textarea from 'primevue/textarea';
-import { useTrackingService } from '@/service/trackingService';
-import MapWithControls from '@/components/map/MapWithControls.vue';
-import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
+import { useToast } from 'primevue/usetoast';
+import { computed, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 const adminView = ref(true);
+const { add: pushToast } = useToast();
 
 const {
     coords: trackingPosition,
@@ -69,15 +76,47 @@ const adminActions: MenuItem[] = [
     },
 ];
 
-function leaveCollection() {}
+function leaveCollection() {
+    pushToast({
+        summary: `You left ${'<Collection Name>'}`,
+        severity: 'warn',
+        closable: true,
+        life: TOAST_LIFE,
+    });
+    router.push({ name: 'home' });
+}
 
 const endCollectionDialogVisible = ref(false);
-function stopCollection() {}
+function stopCollection() {
+    // TODO: fetch and display stats
+    router.push({ name: 'presets' });
+}
 
 const invitationScreenVisible = ref(false);
 const invitationLink = ref('https://www.flat.com/join/876372894');
 const manageGroupsScreenVisible = ref(false);
-function shareInvitationLink() {}
+
+const { isSupported: copySupported, copy, copied } = useClipboard();
+function copyInvitationLink() {
+    copy(invitationLink.value);
+    watchOnce(copied, () => {
+        pushToast({
+            summary: 'Invitation link copied!',
+            severity: 'success',
+            closable: true,
+            life: TOAST_LIFE,
+        });
+    });
+}
+
+const { isSupported: shareSupported, share } = useShare({
+    url: invitationLink.value,
+    title: `Join ${'<Collection Name>'}`,
+    text: '...',
+});
+function shareInvitationLink() {
+    share();
+}
 </script>
 
 <template>
@@ -105,7 +144,6 @@ function shareInvitationLink() {}
                 v-else
                 label="Leave Collection"
                 severity="secondary"
-                text
                 @click="leaveCollection"
             >
                 <template #icon>
@@ -211,7 +249,22 @@ function shareInvitationLink() {}
                                 <MdiTextButtonIcon :icon="mdiClose" />
                             </template>
                         </Button>
-                        <Button label="Share" @click="shareInvitationLink">
+                        <div class="grow"></div>
+                        <Button
+                            v-if="copySupported"
+                            :text="shareSupported"
+                            label="Copy"
+                            @click="copyInvitationLink"
+                        >
+                            <template #icon>
+                                <MdiTextButtonIcon :icon="mdiContentCopy" />
+                            </template>
+                        </Button>
+                        <Button
+                            v-if="shareSupported"
+                            label="Share"
+                            @click="shareInvitationLink"
+                        >
                             <template #icon>
                                 <MdiTextButtonIcon :icon="mdiShare" />
                             </template>
