@@ -8,9 +8,9 @@ The following messages and data are exchanged between the frontends and the back
 Opens a new Collection with the given Information.
 
 **🔵Request-Body**  
-- name: `String`  
-- clientId: `UUID`      
-- collectionArea: `GeoJSON MultiPolygon`    
+- name: `String`
+- clientId: `UUID` : required   
+- area: `GeoJSON MultiPolygon` : : required    
 
 ### ⬆️GET `/api/Rest/Collection/{CollectionId}`: Get collection 
 Recieve Collection Information.
