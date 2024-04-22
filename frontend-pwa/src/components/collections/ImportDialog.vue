@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
-import { collectionService } from '@/data/collections';
+import { collectionDB } from '@/data/collections';
 import { TOAST_LIFE } from '@/data/constants';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { dbSafe } from '@/util/dbUtils';
@@ -63,11 +63,11 @@ async function importData() {
     loading.value = true;
     try {
         if (overwriteExisting.value) {
-            await collectionService.bulkPut(
+            await collectionDB.bulkPut(
                 importedCollections.value.map((c) => dbSafe(c))
             );
         } else {
-            await collectionService.bulkPut(
+            await collectionDB.bulkPut(
                 importedCollections.value.map((c) => ({
                     ...dbSafe(c),
                     id: uuidv4(),

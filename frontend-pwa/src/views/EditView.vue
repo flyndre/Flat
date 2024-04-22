@@ -4,7 +4,7 @@ import MdiInputIcon from '@/components/icons/MdiInputIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
 import { clientId } from '@/data/clientMetadata';
-import { collectionDraft, collectionService } from '@/data/collections';
+import { collectionDraft, collectionDB } from '@/data/collections';
 import { TOAST_LIFE } from '@/data/constants';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { Collection } from '@/types/Collection';
@@ -68,7 +68,7 @@ const { add } = useToast();
 onMounted(async () => {
     if (props.edit) {
         try {
-            const storedCollection = await collectionService.get(props.id);
+            const storedCollection = await collectionDB.get(props.id);
             if (storedCollection === undefined) {
                 add({
                     life: TOAST_LIFE,
@@ -101,9 +101,9 @@ async function _saveCollection(target: RouteLocationRaw) {
     loading.value = true;
     try {
         if (props.edit) {
-            await collectionService.put(dbSafe(collection.value));
+            await collectionDB.put(dbSafe(collection.value));
         } else {
-            await collectionService.add(dbSafe(collection.value));
+            await collectionDB.add(dbSafe(collection.value));
             collectionDraft.set(null);
         }
         await router.push(target);

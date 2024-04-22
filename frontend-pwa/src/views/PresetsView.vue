@@ -3,7 +3,7 @@ import ExportDialog from '@/components/collections/ExportDialog.vue';
 import ImportDialog from '@/components/collections/ImportDialog.vue';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
-import { collections, collectionService } from '@/data/collections';
+import { collections, collectionDB } from '@/data/collections';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { Collection } from '@/types/Collection';
 import { dbSafe } from '@/util/dbUtils';
@@ -32,14 +32,14 @@ import { computed, ref } from 'vue';
 const selectedCollections = ref<Collection[]>([]);
 const selectionEmpty = computed(() => selectedCollections.value?.length === 0);
 function deleteSelected() {
-    collectionService.bulkDelete(selectedCollections.value.map((c) => c.id));
+    collectionDB.bulkDelete(selectedCollections.value.map((c) => c.id));
     selectedCollections.value = [];
 }
 function deleteSingle(id: string) {
-    collectionService.delete(id);
+    collectionDB.delete(id);
 }
 function duplicateSelected() {
-    collectionService.bulkAdd([
+    collectionDB.bulkAdd([
         ...selectedCollections.value.map((c) => ({
             ...dbSafe(c),
             name: `${c.name} (copy)`,

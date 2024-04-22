@@ -23,34 +23,37 @@ import Dialog from 'primevue/dialog';
 import Textarea from 'primevue/textarea';
 import { useGeolocation } from '@vueuse/core';
 import { watch } from 'vue';
+import ParticipantsDialog from '@/components/tracking/ParticipantsDialog.vue';
+import { useTrackingService } from '@/service/trackingService';
+import { trackingLogs } from '@/data/trackingLogs';
 
 const adminView = ref(true);
 
-const { coords, error, pause, resume } = useGeolocation({
-    enableHighAccuracy: true,
-});
-const trackingActive = ref(false);
-watch(trackingActive, (trackingOn) => {
-    if (trackingOn) {
-        resume();
+const {
+    isActive: trackingActive,
+    start: startTracking,
+    stop: stopTracking,
+    error: trackingError,
+} = useTrackingService();
+
+function toggleTracking() {
+    trackingLoading.value = true;
+    if (trackingActive.value) {
+        stopTracking();
     } else {
-        pause();
+        startTracking();
     }
-});
+    setTimeout(() => {
+        trackingLoading.value = false;
+    }, 1000);
+}
+
 const trackingLoading = ref(false);
 const locationError = computed(
     () =>
-        error.value !== undefined &&
-        error.value?.code === GeolocationPositionError.PERMISSION_DENIED
+        trackingError.value !== undefined &&
+        trackingError.value?.code === GeolocationPositionError.PERMISSION_DENIED
 );
-
-function toggleTrackingState() {
-    trackingLoading.value = true;
-    setTimeout(() => {
-        trackingLoading.value = false;
-        trackingActive.value = !trackingActive.value;
-    }, 1000);
-}
 
 const adminActions: MenuItem[] = [
     {
@@ -130,7 +133,7 @@ function shareInvitationLink() {}
                 :label="trackingActive ? 'Pause Tracking' : 'Start Tracking'"
                 :loading="trackingLoading"
                 :disabled="locationError"
-                @click="toggleTrackingState"
+                @click="toggleTracking"
             >
                 <template #icon>
                     <MdiTextButtonIcon
@@ -217,7 +220,8 @@ function shareInvitationLink() {}
             </Dialog>
 
             <!-- Participant Management Dialog -->
-            <Dialog
+            <!-- <ParticipantsDialog v-model:visible="manageGroupsScreenVisible" /> -->
+            <!-- <Dialog
                 :position="isOnMobile ? 'bottom' : 'top'"
                 v-model:visible="manageGroupsScreenVisible"
                 header="Manage Participants"
@@ -240,33 +244,7 @@ function shareInvitationLink() {}
                         </Button>
                     </div>
                 </template>
-            </Dialog>
-
-            <!-- Participant Management Dialog -->
-            <Dialog
-                :position="isOnMobile ? 'bottom' : 'top'"
-                v-model:visible="manageGroupsScreenVisible"
-                header="Manage Participants"
-                :draggable="false"
-                :closable="false"
-                modal
-            >
-                <template #default> (list of participants) </template>
-                <template #footer>
-                    <div class="w-full flex flex-row justify-center gap-2">
-                        <Button
-                            label="Close"
-                            severity="secondary"
-                            text
-                            @click="manageGroupsScreenVisible = false"
-                        >
-                            <template #icon>
-                                <MdiTextButtonIcon :icon="mdiClose" />
-                            </template>
-                        </Button>
-                    </div>
-                </template>
-            </Dialog>
+            </Dialog> -->
 
             <!-- Stop Collection Confirm Dialog -->
             <Dialog
@@ -320,8 +298,7 @@ function shareInvitationLink() {}
                     class="flex flex-col border border-solid rounded-md py-1 px-2"
                     :class="{ 'opacity-30': !trackingActive }"
                 >
-                    <span>Lat: {{ coords?.latitude }}</span>
-                    <span>Lon: {{ coords?.longitude }}</span>
+                    {{ trackingLogs }}
                 </div>
             </div>
         </template>
