@@ -3,14 +3,14 @@
 The following messages and data are exchanged between the frontends and the backend.
 
 ## ✅Implemented
-- George Washington
-* John Adams
-+ Thomas Jefferson
-### ⬇️POST `/api/Rest/Collection`: Open collection  
-   **🐨Request-Body**  
-     - name: `String`  
-     - clientId: `UUID`      
-     - collectionArea: `GeoJSON MultiPolygon`    
+
+### ⬇️POST `/api/Rest/Collection`: Open collection
+Opens a new Collection with the given Information.
+
+**🐨Request-Body**  
+- name: `String`  
+- clientId: `UUID`      
+- collectionArea: `GeoJSON MultiPolygon`    
 
 ### ⬆️GET `/api/Rest/Collection/{CollectionId}`: Get collection   
    **🦒Request-Parameter**  
