@@ -12,12 +12,14 @@ Opens a new Collection with the given Information.
 - clientId: `UUID`      
 - collectionArea: `GeoJSON MultiPolygon`    
 
-### ⬆️GET `/api/Rest/Collection/{CollectionId}`: Get collection   
-   **🦒Request-Parameter**  
-     - userId == clientId: `UUID` 
+### ⬆️GET `/api/Rest/Collection/{CollectionId}`: Get collection 
+Recieve Collection Information.
+
+**🦒Request-Parameter**  
+- userId == clientId: `UUID` 
      
-   **🐯Path-Variables**   
-      - CollectionId: `UUID`    
+**🐯Path-Variables**   
+- CollectionId: `UUID`    
       
 ### ➡️PUT `/api/Rest/Collection/{collectionId}`: Set or change division of collectionArea  
    **Path-Variables**  
