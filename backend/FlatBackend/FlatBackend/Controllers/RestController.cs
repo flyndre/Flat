@@ -150,9 +150,9 @@ namespace FlatBackend.Controllers
         {
             try
             {
-                if (value.collectionArea == null)
+                if (value.collectionDivision == null)
                 {
-                    value.collectionArea = new List<AreaModel>();
+                    value.collectionDivision = new List<AreaModel>();
                 }
                 if (value.confirmedUsers == null)
                 {
@@ -183,16 +183,16 @@ namespace FlatBackend.Controllers
                 var oldCol = await _MongoDBService.GetCollection(id);
                 foreach (var area in value)
                 {
-                    var oldArea = oldCol.collectionArea.Find(x => x.id == area.id);
+                    var oldArea = oldCol.collectionDivision.Find(x => x.id == area.id);
 
                     if (oldArea != null)
                     {
-                        var index = oldCol.collectionArea.IndexOf(oldArea);
-                        oldCol.collectionArea[index] = area;
+                        var index = oldCol.collectionDivision.IndexOf(oldArea);
+                        oldCol.collectionDivision[index] = area;
                     }
                     else
                     {
-                        oldCol.collectionArea.Add(area);
+                        oldCol.collectionDivision.Add(area);
                     }
                 }
                 _MongoDBService.ChangeCollection(oldCol);
