@@ -1,10 +1,10 @@
 package de.flyndre.flat.composables.presetscreen
 
-import android.icu.text.Transliterator.Position
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import de.flyndre.flat.composables.presetscreen.collectionareascreen.CollectionArea
 import de.flyndre.flat.composables.presetscreen.collectionareascreen.CollectionAreaScreenViewModel
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.database.entities.Preset
@@ -38,7 +38,7 @@ class PresetScreenViewModel(db: AppDatabase, collectionAreaScreenViewModel: Coll
             val preset = _db.presetDao().getPresetById(presetId = presetId)
             _presetName.value = preset.presetName
             _presetDescription.value = preset.presetDescription
-            _collectionAreaScreenViewModel.setListAreaPoints(preset.presetAreaPoints)
+            _collectionAreaScreenViewModel.setListAreas(preset.presetCollectionAreas)
             _collectionAreaScreenViewModel.setCameraPosition(preset.presetCameraPosition)
         }
     }
@@ -61,7 +61,7 @@ class PresetScreenViewModel(db: AppDatabase, collectionAreaScreenViewModel: Coll
 
     //function for saving preset
     fun savePresetToDatabase(){
-        val preset = Preset(_presetId, _presetName.value, _presetDescription.value, _collectionAreaScreenViewModel.getListAreaPoints(), _collectionAreaScreenViewModel.getCameraPosition())
+        val preset = Preset(_presetId, _presetName.value, _presetDescription.value, _collectionAreaScreenViewModel.getListAreas(), _collectionAreaScreenViewModel.getCameraPosition())
         viewModelScope.launch {
             if(_presetId == 0.toLong()){
                 _db.presetDao().insertPreset(preset = preset)
@@ -75,14 +75,14 @@ class PresetScreenViewModel(db: AppDatabase, collectionAreaScreenViewModel: Coll
         return _collectionAreaScreenViewModel.getCameraPosition()
     }
 
-    fun getCollectionArea(): ArrayList<LatLng>{
-        return _collectionAreaScreenViewModel.getListAreaPoints()
+    fun getCollectionArea(): ArrayList<CollectionArea>{
+        return _collectionAreaScreenViewModel.getListAreas()
     }
 
     //publish collection to backend
     fun openCollection(){
-        var s = _collectionAreaScreenViewModel.getListAreaPoints()
-        var list = arrayListOf(s.map { x->io.github.dellisd.spatialk.geojson.Position(x.longitude,x.latitude) })
-        viewModelScope.launch { _connectionService.openCollection(_presetName.value, MultiPolygon(list) ) }
+        //var s = _collectionAreaScreenViewModel.getListAreaPoints()
+        //var list = arrayListOf(s.map { x->io.github.dellisd.spatialk.geojson.Position(x.longitude,x.latitude) })
+        //viewModelScope.launch { _connectionService.openCollection(_presetName.value, MultiPolygon(list) ) }
     }
 }

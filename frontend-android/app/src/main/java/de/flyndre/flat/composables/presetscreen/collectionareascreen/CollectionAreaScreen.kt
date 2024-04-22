@@ -14,12 +14,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -35,7 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -65,7 +62,6 @@ fun CollectionAreaScreen(
     //color picker based on Segmented Button
     var selectedColorItem by remember { mutableStateOf(0) }
     //map data
-    val listAreaPoints by collectionAreaScreenViewModel.listAreaPoints.collectAsState()
     val cameraPosition by collectionAreaScreenViewModel.cameraPosition.collectAsState()
     val cameraPositionState = rememberCameraPositionState {
         position = cameraPosition
@@ -131,22 +127,6 @@ fun CollectionAreaScreen(
                         )
                     })
             }
-            /*if(!movingEnabled){
-                Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)) {
-                    Button(onClick = {
-                        collectionAreaScreenViewModel.setCameraPosition(cameraPositionState.position)
-                        navController.navigate("editpreset/0")
-                    }) {
-                        Text(text = "Save Area")
-                    }
-                    Button(onClick = { collectionAreaScreenViewModel.removeLastCollectionAreaPoint() }) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "remove the last point")
-                    }
-                    Button(onClick = { collectionAreaScreenViewModel.clearCollectionArea() }) {
-                        Icon(Icons.Filled.Delete, contentDescription = "delete the existing collection area")
-                    }
-                }
-            }*/
         },
         floatingActionButton = {
             if(selectedNavigationItem == 0){
@@ -236,12 +216,14 @@ fun CollectionAreaScreen(
                     collectionAreaScreenViewModel.addPCollectionAreaPoint(it)
                 }
             }) {
-            if (listAreaPoints.isNotEmpty()) {
-                Polygon(
-                    points = listAreaPoints,
-                    fillColor = Color(255, 159, 246, 127),
-                    strokeColor = Color(255, 159, 246, 255)
-                )
+            if (collectionAreaScreenViewModel.listCollectionAreas.isNotEmpty()) {
+                collectionAreaScreenViewModel.listCollectionAreas.forEach{ area ->
+                    Polygon(
+                        points = area.listAreaPoints,
+                        fillColor = area.color.copy(alpha = 0.5f),
+                        strokeColor = area.color.copy(alpha = 1F)
+                    )
+                }
             }
         }
     }
