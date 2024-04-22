@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
+import { clientId } from '@/data/clientMetadata';
 import { TOAST_LIFE } from '@/data/constants';
+import { trackingLogs } from '@/data/trackingLogs';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { useTrackingService } from '@/service/trackingService';
+import { ParticipantTrack } from '@/types/ParticipantTrack';
 import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
 import { isOnMobile } from '@/util/mobileDetection';
 import {
@@ -117,6 +120,20 @@ const { isSupported: shareSupported, share } = useShare({
 function shareInvitationLink() {
     share();
 }
+
+const tracks = computed<ParticipantTrack[]>(() => [
+    {
+        id: clientId.value,
+        name: 'barbapapa',
+        color: '#ff9922',
+        progress: [
+            {
+                type: 'LineString',
+                coordinates: trackingLogs.value?.map((l) => l.position),
+            },
+        ],
+    },
+]);
 </script>
 
 <template>
@@ -360,6 +377,7 @@ function shareInvitationLink() {
                 controls="minimal"
                 :client-pos="mapCenter"
                 :center="mapCenter"
+                :tracks
             />
         </template>
     </DefaultLayout>

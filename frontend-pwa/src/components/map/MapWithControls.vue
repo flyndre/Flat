@@ -13,8 +13,8 @@ import {
     GOOGLE_MAPS_API_LIBRARIES,
 } from '@/data/constants';
 import {
-    LABELS_OFF_STYLES,
     DARK_MAP_STYLES,
+    LABELS_OFF_STYLES,
     POSITION_ICON_INNER,
     POSITION_ICON_OUTER,
 } from '@/data/googleMapsPresets';
@@ -22,7 +22,12 @@ import { useTheme } from '@/plugins/ThemePlugin';
 import { Division } from '@/types/Division';
 import { IdentifyableTypedOverlay } from '@/types/map/IdentifyableTypedOverlay';
 import { TypedOverlay } from '@/types/map/TypedOverlay';
-import { divisionToShape, shapeToDivision } from '@/util/converters';
+import { ParticipantTrack } from '@/types/ParticipantTrack';
+import {
+    divisionToShape,
+    shapeToDivision,
+    trackToShapeList,
+} from '@/util/converters';
 import {
     getShapeBounds,
     getShapeListBounds,
@@ -53,6 +58,7 @@ const props = withDefaults(
         mapType?: `${google.maps.MapTypeId}`;
         clientPos?: google.maps.LatLngLiteral;
         center?: google.maps.LatLngLiteral;
+        tracks?: ParticipantTrack[];
     }>(),
     {
         controls: 'minimal',
@@ -112,6 +118,8 @@ const stop = watch(mapReady, (v) => {
     stop();
     syncAreas();
     watch(() => divisions.value, syncAreas, { deep: true });
+    drawTracks();
+    watch(() => props.tracks, drawTracks, { deep: true });
 });
 
 function syncAreas() {
@@ -138,6 +146,24 @@ function syncAreas() {
     if (props.panOnUpdated && shapes.value?.length > 0)
         panMapToShapes(all_overlays);
     nextTick(() => (recentlyUpdated = false));
+}
+
+let progressLines: IdentifyableTypedOverlay[] = [];
+function drawTracks() {
+    progressLines.forEach((l) => l.overlay.setMap(null));
+    progressLines.length = 0;
+    props.tracks.forEach((t) => {
+        const shapes = trackToShapeList(t, {
+            strokeColor: t.color,
+            fillColor: t.color,
+            editable: false,
+            draggable: false,
+        });
+        console.log(shapes);
+        shapes.forEach((s) => s.overlay.setMap(map.value));
+        progressLines.push(...shapes);
+        // TODO add username label to lines
+    });
 }
 
 const selectedToolRef = ref<google.maps.drawing.OverlayType>(null);
@@ -621,3 +647,4 @@ onMounted(initialize);
         </template>
     </Card>
 </template>
+@/types/ParticipantTrack
