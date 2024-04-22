@@ -15,7 +15,7 @@ No license is provided.
 Since this is a public repository, you may however view and fork the code according to GitHub's [Terms of Service](https://help.github.com/articles/github-terms-of-service).
 Permission for usage that exceeds those terms is not granted.
 
-> Copyright (c) 2023 Lukas Burkhardt, Micha Hölle, Ruben Kraft, Paul Lehmann, David Maier
+> Copyright (c) 2024 Lukas Burkhardt, Micha Hölle, Ruben Kraft, Paul Lehmann, David Maier
 >
 > All rights reserved.
 >
