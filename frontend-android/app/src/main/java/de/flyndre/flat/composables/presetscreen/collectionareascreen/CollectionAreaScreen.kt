@@ -47,6 +47,11 @@ import com.google.maps.android.compose.Polygon
 import com.google.maps.android.compose.rememberCameraPositionState
 import de.flyndre.flat.composables.customComponents.SegmentedButtonItem
 import de.flyndre.flat.composables.customComponents.SegmentedButtons
+import de.flyndre.flat.ui.theme.AreaBlue
+import de.flyndre.flat.ui.theme.AreaGreen
+import de.flyndre.flat.ui.theme.AreaOrange
+import de.flyndre.flat.ui.theme.AreaPink
+import de.flyndre.flat.ui.theme.AreaPurple
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -164,12 +169,32 @@ fun CollectionAreaScreen(
                             modifier = Modifier
                                 .size(24.dp)
                                 .clip(shape = RoundedCornerShape(5.dp))
-                                .background(color = Color(255, 159, 246, 255))
+                                .background(color = AreaBlue)
                         )})
-                        SegmentedButtonItem(selected = selectedColorItem == 1, onClick = { selectedColorItem = 1 })
-                        SegmentedButtonItem(selected = selectedColorItem == 2, onClick = { selectedColorItem = 2 })
-                        SegmentedButtonItem(selected = selectedColorItem == 3, onClick = { selectedColorItem = 3 })
-                        SegmentedButtonItem(selected = selectedColorItem == 4, onClick = { selectedColorItem = 4 })
+                        SegmentedButtonItem(selected = selectedColorItem == 1, onClick = { selectedColorItem = 1 }, icon = { Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(shape = RoundedCornerShape(5.dp))
+                                .background(color = AreaPink)
+                        )})
+                        SegmentedButtonItem(selected = selectedColorItem == 2, onClick = { selectedColorItem = 2 }, icon = { Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(shape = RoundedCornerShape(5.dp))
+                                .background(color = AreaGreen)
+                        )})
+                        SegmentedButtonItem(selected = selectedColorItem == 3, onClick = { selectedColorItem = 3 }, icon = { Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(shape = RoundedCornerShape(5.dp))
+                                .background(color = AreaOrange)
+                        )})
+                        SegmentedButtonItem(selected = selectedColorItem == 4, onClick = { selectedColorItem = 4 }, icon = { Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(shape = RoundedCornerShape(5.dp))
+                                .background(color = AreaPurple)
+                        )})
                     }
                     SmallFloatingActionButton(onClick = { /*TODO*/ }) {
                         Icon(Icons.Filled.Edit, contentDescription = "create new area")
