@@ -227,11 +227,13 @@ fun CollectionAreaScreen(
             }) {
             if (collectionAreaScreenViewModel.listCollectionAreas.isNotEmpty()) {
                 collectionAreaScreenViewModel.listCollectionAreas.forEach{ area ->
-                    Polygon(
-                        points = area.listAreaPoints,
-                        fillColor = area.color.copy(alpha = 0.5f),
-                        strokeColor = area.color.copy(alpha = 1F)
-                    )
+                    if(area.listAreaPoints.isNotEmpty()){
+                        Polygon(
+                            points = area.listAreaPoints,
+                            fillColor = area.color.copy(alpha = 0.5f),
+                            strokeColor = area.color.copy(alpha = 1F)
+                        )
+                    }
                 }
             }
         }
