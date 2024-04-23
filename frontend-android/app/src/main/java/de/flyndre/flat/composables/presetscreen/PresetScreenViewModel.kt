@@ -3,11 +3,12 @@ package de.flyndre.flat.composables.presetscreen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
 import de.flyndre.flat.composables.presetscreen.collectionareascreen.CollectionArea
 import de.flyndre.flat.composables.presetscreen.collectionareascreen.CollectionAreaScreenViewModel
+import de.flyndre.flat.composables.trackingscreen.TrackingScreenViewModel
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.database.entities.Preset
+import de.flyndre.flat.exceptions.RequestFailedException
 import de.flyndre.flat.interfaces.IConnectionService
 import io.github.dellisd.spatialk.geojson.MultiPolygon
 import io.github.dellisd.spatialk.geojson.Position
@@ -16,11 +17,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class PresetScreenViewModel(db: AppDatabase, collectionAreaScreenViewModel: CollectionAreaScreenViewModel, connectionService: IConnectionService) :ViewModel() {
+class PresetScreenViewModel(db: AppDatabase, collectionAreaScreenViewModel: CollectionAreaScreenViewModel,trackingScreenViewModel: TrackingScreenViewModel, connectionService: IConnectionService) :ViewModel() {
     //appdatabase
     private var _db = db
     //collectionAreaScreenViewModel
     private var _collectionAreaScreenViewModel = collectionAreaScreenViewModel
+    private var _trackingScreenViewModel = trackingScreenViewModel
     //preset id
     private var _presetId: Long = 0
 
@@ -81,13 +83,25 @@ class PresetScreenViewModel(db: AppDatabase, collectionAreaScreenViewModel: Coll
     }
 
     //publish collection to backend
-    fun openCollection(){
-        val areaList = _collectionAreaScreenViewModel.getListAreas()
-        val multiPolygon = arrayListOf(areaList.map {
-            area ->area.listAreaPoints.map{
-                point -> Position(point.longitude,point.latitude)
+    fun openCollection(onSuccess:(()->Unit),onFailure:((String)->Unit)?=null){
+        viewModelScope.launch {
+            savePresetToDatabase()
+            try{
+                val result = _connectionService.openCollection(
+                    _presetName.value,
+                    MultiPolygon(arrayListOf(_collectionAreaScreenViewModel.getListAreas().map {
+                      area ->area.listAreaPoints.map{
+                        point -> Position(point.longitude,point.latitude)
+                      }
+                    }))
+                )
+                _trackingScreenViewModel.collectionInstance=result
+                onSuccess()
+            }catch (e:RequestFailedException){
+                if (onFailure != null) {
+                    e.message?.let { onFailure(it) }
+                }
             }
-        })
-        viewModelScope.launch { _connectionService.openCollection(_presetName.value, MultiPolygon(multiPolygon) ) }
+        }
     }
 }
