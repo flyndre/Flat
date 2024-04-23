@@ -50,13 +50,18 @@ namespace FlatBackend.Controllers
                 {
                     var webSocketUser = JsonSerializer.Deserialize<WebsocketConnectionDto>(Json);
                     _WebsocketManager.saveWebSocketOfUser(webSocket, webSocketUser.collectionId, webSocketUser.clientId);
+                    await webSocket.SendAsync(
+                        new ArraySegment<byte>(buffer, 0, receiveResult.Count),
+                        receiveResult.MessageType,
+                        receiveResult.EndOfMessage,
+                        CancellationToken.None);
                 }
 
-                await webSocket.SendAsync(
-                    new ArraySegment<byte>(buffer, 0, receiveResult.Count),
-                    receiveResult.MessageType,
-                    receiveResult.EndOfMessage,
-                    CancellationToken.None);
+                //await webSocket.SendAsync(
+                //    new ArraySegment<byte>(buffer, 0, receiveResult.Count),
+                //    receiveResult.MessageType,
+                //    receiveResult.EndOfMessage,
+                //    CancellationToken.None);
 
                 receiveResult = await webSocket.ReceiveAsync(
                     new ArraySegment<byte>(buffer), CancellationToken.None);
