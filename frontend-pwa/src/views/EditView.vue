@@ -173,14 +173,13 @@ function back() {
         <template #default>
             <Card
                 :pt="{
-                    root: { class: 'overflow-hidden' },
                     header: { class: 'relative h-[30vh]' },
                 }"
             >
                 <template #header>
                     <MapWithControls
-                        class="[&>*]:rounded-none"
                         controls="none"
+                        center="area"
                         :locked="true"
                         :labels="false"
                         :divisions="displayedDivisions"

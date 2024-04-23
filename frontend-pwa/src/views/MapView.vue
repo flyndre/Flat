@@ -96,7 +96,7 @@ async function save() {
 }
 
 const helpVisible = ref(false);
-const mapCenter = mapCenterWithDefaults(useGeolocation().coords, {
+const clientPos = mapCenterWithDefaults(useGeolocation().coords, {
     lat: null,
     lng: null,
 });
@@ -146,7 +146,8 @@ const mapCenter = mapCenterWithDefaults(useGeolocation().coords, {
             <MapWithControls
                 v-model:divisions="collection.divisions"
                 controls="drawing"
-                :client-pos="mapCenter"
+                :center="edit ? 'area' : 'position'"
+                :client-pos
             />
         </template>
     </DefaultLayout>

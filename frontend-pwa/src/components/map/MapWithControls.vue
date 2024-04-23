@@ -230,6 +230,9 @@ function setPositionMarker(
 }
 
 function panMapToPos(position: google.maps.LatLngLiteral | google.maps.LatLng) {
+    if (position == null || Object.values(position).includes(null)) {
+        return;
+    }
     try {
         map.value?.panTo(position);
     } catch (e) {
@@ -509,7 +512,7 @@ onMounted(initialize);
 
 <template>
     <Card
-        class="h-full basis-0 grow overflow-hidden"
+        class="h-full basis-0 grow"
         :class="[
             {
                 'shadow-none': controls === 'none',
@@ -525,7 +528,7 @@ onMounted(initialize);
                 ],
             },
             header: {
-                class: 'h-full flex flex-col-reverse justify-stretch rounded-xl overflow-hidden relative',
+                class: 'h-full flex flex-col-reverse justify-stretch relative rounded-2xl overflow-hidden',
             },
         }"
     >
@@ -548,7 +551,7 @@ onMounted(initialize);
             />
             <MdiIcon
                 v-if="locked"
-                class="absolute top-4 right-4 opacity-50"
+                class="absolute bottom-3 left-[5.2rem] stroke-black stroke-[0.8px] !opacity-100 fill-white"
                 :icon="mdiLock"
             />
         </template>
@@ -669,4 +672,3 @@ onMounted(initialize);
         </template>
     </Card>
 </template>
-@/types/ParticipantTrack
