@@ -512,7 +512,7 @@ onMounted(initialize);
 
 <template>
     <Card
-        class="h-full basis-0 grow overflow-hidden"
+        class="h-full basis-0 grow"
         :class="[
             {
                 'shadow-none': controls === 'none',
@@ -528,7 +528,7 @@ onMounted(initialize);
                 ],
             },
             header: {
-                class: 'h-full flex flex-col-reverse justify-stretch rounded-xl overflow-hidden relative',
+                class: 'h-full flex flex-col-reverse justify-stretch relative rounded-2xl overflow-hidden',
             },
         }"
     >

@@ -178,7 +178,6 @@ function back() {
             >
                 <template #header>
                     <MapWithControls
-                        class="[&>*]:rounded-none"
                         controls="none"
                         center="area"
                         :locked="true"
