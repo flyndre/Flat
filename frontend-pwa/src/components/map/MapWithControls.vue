@@ -152,7 +152,7 @@ let progressLines: IdentifyableTypedOverlay[] = [];
 function drawTracks() {
     progressLines.forEach((l) => l.overlay.setMap(null));
     progressLines.length = 0;
-    props.tracks.forEach((t) => {
+    props.tracks?.forEach((t) => {
         const shapes = trackToShapeList(t, {
             strokeColor: t.color,
             fillColor: t.color,
@@ -160,7 +160,7 @@ function drawTracks() {
             draggable: false,
         });
         console.log(shapes);
-        shapes.forEach((s) => s.overlay.setMap(map.value));
+        shapes?.forEach((s) => s.overlay?.setMap(map.value));
         progressLines.push(...shapes);
         // TODO add username label to lines
     });
