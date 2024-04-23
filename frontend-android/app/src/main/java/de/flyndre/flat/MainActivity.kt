@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
         }
         val userId = UUID.fromString(preference.getString(userIdKey,""))
         connectionService = ConnectionService("https:flat.buhss.de/api/rest",userId)
-        locationService = LocationService(5000,
+        locationService = LocationService(1000,
             LocationServices.getFusedLocationProviderClient(this),this
         )
         trackingService = TrackingService(connectionService,locationService,10000)

@@ -17,7 +17,8 @@ class TrackingService(
     override val ownTrack: TrackCollection = TrackCollection(UUID.randomUUID())
     override val otherTracks: MutableMap<UUID, TrackCollection> = mutableMapOf()
     override var isTracking: Boolean = false
-    override val onTrackUpdate: ArrayList<() -> Unit> = arrayListOf()
+    override val onLocalTrackUpdate: ArrayList<() -> Unit> = arrayListOf()
+    override val onRemoteTrackUpdate: ArrayList<() -> Unit> = arrayListOf()
 
     init {
         locationService.addOnLocationUpdate {x-> addNewPosition(x) }
@@ -39,7 +40,7 @@ class TrackingService(
         ownTrack.last().add(position)
         var s = ownTrack.toMultiLineString().toString()
         s = ""
-        onTrackUpdate.forEach { x->x() }
+        onLocalTrackUpdate.forEach { x->x() }
     }
 
     override fun addIncrementalTrack(track: TrackCollection) {
@@ -50,7 +51,11 @@ class TrackingService(
         }
     }
 
-    override fun addOnTrackUpdate(callback: () -> Unit) {
-        onTrackUpdate.add(callback)
+    override fun addOnLocalTrackUpdate(callback: () -> Unit) {
+        onLocalTrackUpdate.add(callback)
+    }
+
+    override fun addOnRemoteTrackUpdate(callback: () -> Unit) {
+        onRemoteTrackUpdate.add(callback)
     }
 }

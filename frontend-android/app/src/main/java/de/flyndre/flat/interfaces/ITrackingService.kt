@@ -11,10 +11,12 @@ interface ITrackingService {
     val otherTracks : MutableMap<UUID,TrackCollection>
     val syncInterval: Long
     var isTracking:Boolean
-    val onTrackUpdate : ArrayList<()->Unit>
+    val onLocalTrackUpdate : ArrayList<()->Unit>
+    val onRemoteTrackUpdate : ArrayList<()->Unit>
     fun startTracking()
     fun stopTracking()
     fun addNewPosition(position: Position)
     fun addIncrementalTrack(track: TrackCollection)
-    fun addOnTrackUpdate(callback:()->Unit)
+    fun addOnLocalTrackUpdate(callback:()->Unit)
+    fun addOnRemoteTrackUpdate(callback:()->Unit)
 }
