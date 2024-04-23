@@ -172,7 +172,6 @@ function drawTracks() {
             editable: false,
             draggable: false,
         });
-        console.log(shapes);
         shapes?.forEach((s) => s.overlay?.setMap(map.value));
         progressLines.push(...shapes);
         // TODO add username label to lines
