@@ -406,7 +406,12 @@ const tracks = computed<ParticipantTrack[]>(() => [
             <Card
                 class="h-full grow"
                 :pt="{
-                    root: { class: 'overflow-hidden' },
+                    root: {
+                        class: [
+                            'overflow-hidden flex',
+                            { 'flex flex-col-reverse': !isOnMobile },
+                        ],
+                    },
                     header: {
                         class: 'h-full flex flex-col grow',
                     },
