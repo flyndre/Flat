@@ -230,6 +230,9 @@ function setPositionMarker(
 }
 
 function panMapToPos(position: google.maps.LatLngLiteral | google.maps.LatLng) {
+    if (position == null || Object.values(position).includes(null)) {
+        return;
+    }
     try {
         map.value?.panTo(position);
     } catch (e) {

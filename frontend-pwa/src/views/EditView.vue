@@ -181,6 +181,7 @@ function back() {
                     <MapWithControls
                         class="[&>*]:rounded-none"
                         controls="none"
+                        center="area"
                         :locked="true"
                         :labels="false"
                         :divisions="displayedDivisions"
