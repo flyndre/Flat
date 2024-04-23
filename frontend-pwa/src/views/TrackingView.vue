@@ -89,7 +89,7 @@ const mapCenterOptions: {
     },
 ];
 const mapCenterSelected = ref<undefined | 'area' | 'position'>(
-    mapCenterOptions[1].value
+    mapCenterOptions[adminView.value ? 2 : 1].value
 );
 const clientPos = mapCenterWithDefaults(trackingPosition, {
     lat: null,
