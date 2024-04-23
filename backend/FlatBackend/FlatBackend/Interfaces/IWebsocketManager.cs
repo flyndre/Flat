@@ -14,7 +14,7 @@ namespace FlatBackend.Interfaces
 
         public void sendGPSTrackCollection( TrackCollectionDto tracks, Guid collectionId );
 
-        public void sendGPSTrack( GPSTrackDto track, Guid collectionId );
+        public void sendGPSTrack( IncrementalTrackDto track, Guid collectionId );
 
         public void removeNotConfirmedWebSocketUsers( Guid collectionId, Guid userId );
 

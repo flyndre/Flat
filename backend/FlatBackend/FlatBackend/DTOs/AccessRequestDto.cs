@@ -2,8 +2,10 @@
 {
     public class AccessRequestDto
     {
+        public WebSocketMessageType type = WebSocketMessageType.AccessRequest;
+        public Guid collectionId { get; set; }
         public Guid clientId { get; set; }
         public string username { get; set; }
-        public Guid collectionId { get; set; } //Added cause Boss can have multiple Collections...
+        //Added cause Boss can have multiple Collections...
     }
 }

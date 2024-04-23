@@ -2,6 +2,7 @@
 {
     public enum WebSocketMessageType
     {
+        WebsocketConnection,
         IncrementalTrack,
         AccessRequest,
         CollectionClosed,

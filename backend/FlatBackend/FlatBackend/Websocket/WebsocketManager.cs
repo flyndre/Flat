@@ -83,7 +83,7 @@ namespace FlatBackend.Websocket
         public async void sendGPSTrackCollection( TrackCollectionDto tracks, Guid collectionId )
         { }
 
-        public async void sendGPSTrack( GPSTrackDto track, Guid collectionId )
+        public async void sendGPSTrack( IncrementalTrackDto track, Guid collectionId )
         { }
 
         public void removeNotConfirmedWebSocketUsers( Guid collectionId, Guid userId )

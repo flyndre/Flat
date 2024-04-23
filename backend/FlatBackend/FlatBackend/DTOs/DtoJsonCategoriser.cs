@@ -45,7 +45,7 @@ namespace FlatBackend.DTOs
         {
             try
             {
-                GPSTrackDto result = JsonSerializer.Deserialize<GPSTrackDto>(gpsTrackDtoJson);
+                IncrementalTrackDto result = JsonSerializer.Deserialize<IncrementalTrackDto>(gpsTrackDtoJson);
                 if (result == null)
                 {
                     return false;
@@ -63,23 +63,6 @@ namespace FlatBackend.DTOs
             try
             {
                 WebsocketConnectionDto result = JsonSerializer.Deserialize<WebsocketConnectionDto>(websocketConnectionDtoJson);
-                if (result == null)
-                {
-                    return false;
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                return false;
-            }
-        }
-
-        public bool isAreaAssignmentDto( string areaAssignmentDtoJson )
-        {
-            try
-            {
-                AreaAssingmentDto result = JsonSerializer.Deserialize<AreaAssingmentDto>(areaAssignmentDtoJson);
                 if (result == null)
                 {
                     return false;
