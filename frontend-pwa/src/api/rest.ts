@@ -1,4 +1,8 @@
+
+import { useNavigatorLanguage } from "@vueuse/core";
 import api from "./api";
+import { Division } from "@/types/Division";
+import { Collection } from "@/types/Collection";
 
 /**
  * opens the collection.
@@ -6,22 +10,34 @@ import api from "./api";
  * @param name of the collection
  * @param clientId of the owner
  * @param collectionArea as the Area in witch the collection is taking place
- * @returns The Response of the Request
+ * @returns the created Collection 
  */
-export async function openCollection(name : string, clientId : string, collectionArea : any){
-    const response = await api.post("collection", {name : name, clientId : clientId, collectionArea : collectionArea}); 
+export async function openCollection(collection : Collection){
+    const response = await api.post("api/rest/collection", collection); 
     return response; 
 }
 
 /**
- * change the collection Area of a given Collection.
+ * get the requested collection.
+ * 
+ * @param collectionId of the collection
+ * @returns the requested collection
+ */
+export async function getCollection(collectionId : string){
+    const response = await api.get(`api/rest/collection/${collectionId}`); 
+    return response;
+}
+
+//TODO: Datentyp für Area also Farbe, usw muss auch angegeben werden
+/**
+ * divides the collection Area into smaller Fractions.
  * 
  * @param collectionId of the collection that is going to be changed
  * @param collectionArea as the new Area in witch the collection is taking place
  * @returns 
  */
-export async function changeCollectionArea(collectionId : string, collectionArea : any[]){
-    const response = await api.put(`collection/${collectionId}`, {value: collectionArea}); 
+export async function divideCollectionArea(collectionId : string, collectionAreas : Division[]){
+    const response = await api.put(`api/rest/collection/${collectionId}`, collectionAreas); 
     return response;
 }
 
@@ -32,19 +48,33 @@ export async function changeCollectionArea(collectionId : string, collectionArea
  * @returns 
  */
 export async function deleteCollection(collectionId : string){
-    const response = await api.delete(`collection/${collectionId}`); 
+    const response = await api.delete(`api/rest/collection/${collectionId}`); 
     return response;
 }
 
 /**
- * access Request to a Collection. The Request is forwated to the Owner who is accepting or declining the Accessrequest.
+ * access Request to a Collection. The Request is forwarded to the Owner who is accepting or declining the Access-Request.
  * 
- * @param username of wich the User want to be displayed
+ * @param username of which the User want to be displayed
  * @param clientId of the User
  * @param collectionId of the Collection
- * @returns 
+ * @returns True or False
  */
 export async function accessRequest(username : string, clientId : string, collectionId : string){
-    const response = await api.post(`collection/${collectionId}`, {value: clientId}); 
+    const response = await api.post(`api/rest/collection/${collectionId}`, {username: username, clientId: clientId}); 
     return response;
 }
+
+/**
+ * access Request to a Collection. The Request is forwarded to the Owner who is accepting or declining the Access-Request.
+ * 
+ * @param username of which the User want to be displayed
+ * @param clientId of the User
+ * @param collectionId of the Collection
+ * @returns True or False
+ */
+export async function confirmRequest(username : string, clientId : string, accepted : string, collectionId : string){
+    const response = await api.post(`api/rest/collection/${collectionId}`, {username: username, clientId: clientId, accepted: accepted}); 
+    return response;
+}
+
