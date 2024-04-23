@@ -672,4 +672,3 @@ onMounted(initialize);
         </template>
     </Card>
 </template>
-@/types/ParticipantTrack
