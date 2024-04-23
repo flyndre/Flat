@@ -8,7 +8,7 @@ export const collections = useObservable<Collection[]>(
     liveQuery(() => db.collections.toArray())
 );
 
-export const collectionService = db.collections;
+export const collectionDB = db.collections;
 
 export const collectionDraft = {
     get: (): Collection => JSON.parse(localStorage.getItem('collectionDraft')),
