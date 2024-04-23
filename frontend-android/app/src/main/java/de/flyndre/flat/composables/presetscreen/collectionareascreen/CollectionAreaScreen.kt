@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -61,6 +62,8 @@ fun CollectionAreaScreen(
     var selectedNavigationItem by remember { mutableStateOf(0) }
     //color picker based on Segmented Button
     var selectedColorItem by remember { mutableStateOf(0) }
+    //drawing state
+    var drawingEnabled by remember { mutableStateOf(false) }
     //map data
     val cameraPosition by collectionAreaScreenViewModel.cameraPosition.collectAsState()
     val cameraPositionState = rememberCameraPositionState {
@@ -176,13 +179,19 @@ fun CollectionAreaScreen(
                                 .background(color = AreaPurple)
                         )})
                     }
-                    SmallFloatingActionButton(onClick = { /*TODO*/ }) {
-                        Icon(Icons.Filled.Edit, contentDescription = "create new area")
+                    if(drawingEnabled){
+                        SmallFloatingActionButton(onClick = { drawingEnabled = false }) {
+                            Icon(Icons.Filled.Check, contentDescription = "finish drawing of area")
+                        }
+                    }else{
+                        SmallFloatingActionButton(onClick = { drawingEnabled = true }) {
+                            Icon(Icons.Filled.Edit, contentDescription = "draw new area")
+                        }
                     }
                 }
             }else{
                 SmallFloatingActionButton(onClick = { /*TODO*/ }) {
-                    Icon(Icons.AutoMirrored.Filled.List, contentDescription = "search for location")
+                    Icon(Icons.AutoMirrored.Filled.List, contentDescription = "open list of areas")
                 }
             }
         }
