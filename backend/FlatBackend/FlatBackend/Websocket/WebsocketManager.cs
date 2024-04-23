@@ -3,6 +3,7 @@ using FlatBackend.Interfaces;
 using FlatBackend.Models;
 using Microsoft.AspNetCore.Http;
 using MongoDB.Driver;
+using System.Collections.Concurrent;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
@@ -13,12 +14,21 @@ namespace FlatBackend.Websocket
     {
         private readonly IMongoDBService _MongoDBService;
         public List<WebSocketUserModel> users;
-        public bool blocked = false;
+        public BlockingCollection<WebsocketConnectionDto> connectionsWaiting;
+        public BlockingCollection<AccessConfirmationDto> accessConfirmationWaiting;
+        public BlockingCollection<CollectionClosedDto> collectionClosedWaiting;
+        public BlockingCollection<IncrementalTrackDto> incrementalTrackWaiting;
+        public BlockingCollection<CollectionUpdateDto> updateWaiting;
 
         public WebsocketManager( IMongoDBService mongoDBService )
         {
             _MongoDBService = mongoDBService;
             users = new List<WebSocketUserModel>();
+            connectionsWaiting = new BlockingCollection<WebsocketConnectionDto>();
+            accessConfirmationWaiting = new BlockingCollection<AccessConfirmationDto>();
+            collectionClosedWaiting = new BlockingCollection<CollectionClosedDto>();
+            incrementalTrackWaiting = new BlockingCollection<IncrementalTrackDto>();
+            updateWaiting = new BlockingCollection<CollectionUpdateDto>();
         }
 
         public async void saveWebSocketOfUser( WebSocket webSocket, Guid collectionId, Guid userId )//only if User is allready confirmed else not saved

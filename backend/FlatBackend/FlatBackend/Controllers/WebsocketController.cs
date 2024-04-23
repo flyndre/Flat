@@ -3,8 +3,6 @@ using System.Text;
 using System.Text.Json;
 using FlatBackend.DTOs;
 using FlatBackend.Interfaces;
-using FlatBackend.Models;
-using FlatBackend.Websocket;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlatBackend.Controllers
@@ -13,6 +11,7 @@ namespace FlatBackend.Controllers
     {
         private static IWebsocketManager _WebsocketManager;
         private static DtoJsonCategoriser _DtoJsonCategoriser;
+        private static JavaScriptSerializer
 
         public WebsocketController( IWebsocketManager websocketManager )
         {
@@ -46,6 +45,7 @@ namespace FlatBackend.Controllers
             {
                 var Json = Encoding.ASCII.GetString(buffer);
                 Json = new string(Json.Where(c => c != '\x00').ToArray());
+
                 if (_DtoJsonCategoriser.isWebsocketConnectionDto(Json))
                 {
                     var webSocketUser = JsonSerializer.Deserialize<WebsocketConnectionDto>(Json);
