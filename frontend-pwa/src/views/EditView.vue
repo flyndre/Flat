@@ -173,7 +173,6 @@ function back() {
         <template #default>
             <Card
                 :pt="{
-                    root: { class: 'overflow-hidden' },
                     header: { class: 'relative h-[30vh]' },
                 }"
             >
