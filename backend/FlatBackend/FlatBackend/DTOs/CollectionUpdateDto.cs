@@ -4,7 +4,7 @@ namespace FlatBackend.DTOs
 {
     public class CollectionUpdateDto
     {
-        public WebSocketMessageType type = WebSocketMessageType.CollectionUpdate;
+        public WebSocketMessageType type { get; set; } = WebSocketMessageType.CollectionUpdate;
         public CollectionModel collection { get; set; }
     }
 }

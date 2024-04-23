@@ -1,11 +1,14 @@
 ﻿using FlatBackend.DTOs;
 using FlatBackend.Models;
+using System.Collections.Concurrent;
 using System.Net.WebSockets;
 
 namespace FlatBackend.Interfaces
 {
     public interface IWebsocketManager
     {
+        public void setAccessConfirmationWaiting( AccessConfirmationDto accessConfirmationDto );
+
         public void saveWebSocketOfUser( WebSocket webSocket, Guid collectionId, Guid userId );
 
         public void sendUpdateCollection( Guid collectionId );

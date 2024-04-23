@@ -2,6 +2,7 @@
 {
     public class CollectionClosedDto
     {
-        public WebSocketMessageType type = WebSocketMessageType.CollectionClosed;
+        public WebSocketMessageType type { get; set; } = WebSocketMessageType.CollectionClosed;
+        public Guid collectionId { get; set; }
     }
 }

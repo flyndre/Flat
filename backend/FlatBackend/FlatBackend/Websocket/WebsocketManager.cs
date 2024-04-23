@@ -31,6 +31,11 @@ namespace FlatBackend.Websocket
             updateWaiting = new BlockingCollection<CollectionUpdateDto>();
         }
 
+        public void setAccessConfirmationWaiting( AccessConfirmationDto accessConfirmationDto )
+        {
+            accessConfirmationWaiting.Add(accessConfirmationDto);
+        }
+
         public async void saveWebSocketOfUser( WebSocket webSocket, Guid collectionId, Guid userId )//only if User is allready confirmed else not saved
         {
             var collection = await _MongoDBService.GetCollection(collectionId);
