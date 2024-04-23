@@ -40,6 +40,7 @@ fun PresetScreen(
     val presetName by presetScreenViewModel.presetName.collectAsState()
     val presetDescription by presetScreenViewModel.presetDescription.collectAsState()
 
+
     Scaffold(topBar = {
         CenterAlignedTopAppBar(title = { Text(text = topBarText) }, navigationIcon = { IconButton(
             onClick = { onNavigateToCreateGroupScreen() }) {
@@ -54,7 +55,7 @@ fun PresetScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)
             ) {
-                Button(onClick = { presetScreenViewModel.savePresetToDatabase(); presetScreenViewModel.openCollection(); onNavigateToTrackingScreen() }) {
+                Button(onClick = { presetScreenViewModel.openCollection(onNavigateToTrackingScreen);  }) {
                     Text("Save and Start")
                 }
                 Button(onClick = { presetScreenViewModel.savePresetToDatabase(); onNavigateToCreateGroupScreen() }) {
@@ -72,7 +73,13 @@ fun PresetScreen(
                     cameraPositionState = CameraPositionState(position = presetScreenViewModel.getCameraPosition()),
                     uiSettings = MapUiSettings(zoomControlsEnabled = false, zoomGesturesEnabled = false, scrollGesturesEnabled = false, rotationGesturesEnabled = false, tiltGesturesEnabled = false)){
                     if(presetScreenViewModel.getCollectionArea().isNotEmpty()){
-                        Polygon(points = presetScreenViewModel.getCollectionArea(), fillColor = Color(255, 159, 246, 127), strokeColor = Color(255, 159, 246, 255))
+                        presetScreenViewModel.getCollectionArea().forEach{ area ->
+                            Polygon(
+                                points = area.listAreaPoints,
+                                fillColor = area.color.copy(alpha = 0.5f),
+                                strokeColor = area.color.copy(alpha = 1F)
+                            )
+                        }
                     }
                 }
             }

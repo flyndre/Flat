@@ -65,11 +65,12 @@ class MainActivity : ComponentActivity() {
         )
         trackingService = TrackingService(connectionService,locationService,10000)
         db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "flat-database").build()
+        val trackingScreenViewModel = TrackingScreenViewModel(db = db, trackingService,)
         val collectionAreaScreenViewModel = CollectionAreaScreenViewModel()
         val createGroupScreenViewModel = CreateGroupScreenViewModel(db = db)
-        val presetScreenViewModel = PresetScreenViewModel(db = db, collectionAreaScreenViewModel = collectionAreaScreenViewModel, connectionService)
-        val joinScreenViewModel = JoinScreenViewModel(db = db, connectionService = connectionService as ConnectionService)
-        val trackingScreenViewModel = TrackingScreenViewModel(db = db)
+        val presetScreenViewModel = PresetScreenViewModel(db = db, collectionAreaScreenViewModel = collectionAreaScreenViewModel,trackingScreenViewModel, connectionService)
+        val joinScreenViewModel = JoinScreenViewModel(db = db,trackingScreenViewModel, connectionService = connectionService)
+
         setContent {
             FlatTheme {
                 // A surface container using the 'background' color from the theme
