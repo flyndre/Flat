@@ -61,7 +61,7 @@ fun CollectionAreaScreen(
     //bottom navigation bar
     var selectedNavigationItem by remember { mutableStateOf(0) }
     //color picker based on Segmented Button
-    var selectedColorItem by remember { mutableStateOf(0) }
+    var selectedColorItem by remember { mutableStateOf(AreaBlue) }
     //drawing state
     var drawingEnabled by remember { mutableStateOf(false) }
     //map data
@@ -148,31 +148,31 @@ fun CollectionAreaScreen(
                     SegmentedButtons(modifier = Modifier
                         .width((LocalConfiguration.current.screenWidthDp * 0.7).dp)
                         .height(40.dp)) {
-                        SegmentedButtonItem(selected = selectedColorItem == 0, onClick = { selectedColorItem = 0 }, icon = { Box(
+                        SegmentedButtonItem(selected = selectedColorItem.equals(AreaBlue), onClick = { selectedColorItem = AreaBlue }, icon = { Box(
                             modifier = Modifier
                                 .size(24.dp)
                                 .clip(shape = RoundedCornerShape(5.dp))
                                 .background(color = AreaBlue)
                         )})
-                        SegmentedButtonItem(selected = selectedColorItem == 1, onClick = { selectedColorItem = 1 }, icon = { Box(
+                        SegmentedButtonItem(selected = selectedColorItem.equals(AreaPink), onClick = { selectedColorItem = AreaPink }, icon = { Box(
                             modifier = Modifier
                                 .size(24.dp)
                                 .clip(shape = RoundedCornerShape(5.dp))
                                 .background(color = AreaPink)
                         )})
-                        SegmentedButtonItem(selected = selectedColorItem == 2, onClick = { selectedColorItem = 2 }, icon = { Box(
+                        SegmentedButtonItem(selected = selectedColorItem.equals(AreaGreen), onClick = { selectedColorItem = AreaGreen }, icon = { Box(
                             modifier = Modifier
                                 .size(24.dp)
                                 .clip(shape = RoundedCornerShape(5.dp))
                                 .background(color = AreaGreen)
                         )})
-                        SegmentedButtonItem(selected = selectedColorItem == 3, onClick = { selectedColorItem = 3 }, icon = { Box(
+                        SegmentedButtonItem(selected = selectedColorItem.equals(AreaOrange), onClick = { selectedColorItem = AreaOrange }, icon = { Box(
                             modifier = Modifier
                                 .size(24.dp)
                                 .clip(shape = RoundedCornerShape(5.dp))
                                 .background(color = AreaOrange)
                         )})
-                        SegmentedButtonItem(selected = selectedColorItem == 4, onClick = { selectedColorItem = 4 }, icon = { Box(
+                        SegmentedButtonItem(selected = selectedColorItem.equals(AreaPurple), onClick = { selectedColorItem = AreaPurple }, icon = { Box(
                             modifier = Modifier
                                 .size(24.dp)
                                 .clip(shape = RoundedCornerShape(5.dp))
@@ -180,11 +180,11 @@ fun CollectionAreaScreen(
                         )})
                     }
                     if(drawingEnabled){
-                        SmallFloatingActionButton(onClick = { drawingEnabled = false }) {
+                        SmallFloatingActionButton(onClick = { drawingEnabled = false; collectionAreaScreenViewModel.checkNewCollectionIsEmpty() }) {
                             Icon(Icons.Filled.Check, contentDescription = "finish drawing of area")
                         }
                     }else{
-                        SmallFloatingActionButton(onClick = { drawingEnabled = true }) {
+                        SmallFloatingActionButton(onClick = { drawingEnabled = true; collectionAreaScreenViewModel.addNewCollectionArea(selectedColorItem) }) {
                             Icon(Icons.Filled.Edit, contentDescription = "draw new area")
                         }
                     }
