@@ -550,8 +550,8 @@ onMounted(initialize);
                 :draggable="!locked"
             />
             <MdiIcon
-                v-if="locked"
-                class="absolute bottom-[0.65rem] left-[5.15rem] text-white opacity-60 dark:opacity-100 stroke-black stroke-[0.8px] transition-opacity"
+                v-if="mapReady && locked"
+                class="absolute bottom-[0.65rem] left-[5.15rem] text-white [&:not(dark)]:opacity-60 dark:!opacity-100 stroke-black stroke-[0.8px] transition-opacity"
                 :icon="mdiLock"
             />
         </template>
