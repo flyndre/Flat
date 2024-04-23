@@ -1,6 +1,7 @@
 package de.flyndre.flat.composables.presetscreen.collectionareascreen
 
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -10,7 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class CollectionAreaScreenViewModel(): ViewModel() {
     //list of points for selection area
-    val listCollectionAreas = mutableStateListOf<CollectionArea>()
+    var listCollectionAreas = mutableStateListOf<CollectionArea>()
 
     //saved camera position
     private val _cameraPosition = MutableStateFlow(CameraPosition(LatLng(0.0, 0.0), 0F, 0F, 0F))
@@ -37,6 +38,27 @@ class CollectionAreaScreenViewModel(): ViewModel() {
 
     fun getListAreas(): ArrayList<CollectionArea>{
         return ArrayList(listCollectionAreas)
+    }
+
+    fun addNewCollectionArea(color: Color){
+        for(area in listCollectionAreas){
+            if(area.isSelected){
+                area.isSelected = false
+            }
+        }
+        listCollectionAreas.add(CollectionArea(color = color, isSelected = true, listAreaPoints = arrayListOf()))
+    }
+
+    fun checkNewCollectionIsEmpty(){
+        for(area in listCollectionAreas){
+            if(area.isSelected){
+                if(area.listAreaPoints.isEmpty()){
+                    listCollectionAreas.remove(area)
+                }else{
+                    area.isSelected = false
+                }
+            }
+        }
     }
 
     fun addPCollectionAreaPoint(point: LatLng){
