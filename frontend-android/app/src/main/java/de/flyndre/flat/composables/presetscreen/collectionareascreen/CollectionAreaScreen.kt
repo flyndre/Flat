@@ -65,6 +65,7 @@ fun CollectionAreaScreen(
     //drawing state
     var drawingEnabled by remember { mutableStateOf(false) }
     //map data
+    val collectionAreas by collectionAreaScreenViewModel.listCollectionAreas.collectAsState()
     val cameraPosition by collectionAreaScreenViewModel.cameraPosition.collectAsState()
     val cameraPositionState = rememberCameraPositionState {
         position = cameraPosition
@@ -225,8 +226,8 @@ fun CollectionAreaScreen(
                     collectionAreaScreenViewModel.addPCollectionAreaPoint(it)
                 }
             }) {
-            if (collectionAreaScreenViewModel.listCollectionAreas.isNotEmpty()) {
-                collectionAreaScreenViewModel.listCollectionAreas.forEach{ area ->
+            if (collectionAreas.isNotEmpty()) {
+                collectionAreas.forEach{ area ->
                     if(area.listAreaPoints.isNotEmpty()){
                         Polygon(
                             points = area.listAreaPoints,

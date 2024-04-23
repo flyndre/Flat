@@ -8,10 +8,12 @@ import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 class CollectionAreaScreenViewModel(): ViewModel() {
     //list of points for selection area
-    var listCollectionAreas = mutableStateListOf<CollectionArea>()
+    private val _listCollectionAreas = MutableStateFlow<ArrayList<CollectionArea>>(arrayListOf())
+    var listCollectionAreas = _listCollectionAreas.asStateFlow()
 
     //saved camera position
     private val _cameraPosition = MutableStateFlow(CameraPosition(LatLng(0.0, 0.0), 0F, 0F, 0F))
@@ -20,7 +22,7 @@ class CollectionAreaScreenViewModel(): ViewModel() {
     //used to clear viewModel for creation of new empty preset
     fun newEmptyCollectionArea(){
         _cameraPosition.value = CameraPosition(LatLng(0.0, 0.0), 0F, 0F, 0F)
-        listCollectionAreas.clear()
+        _listCollectionAreas.value.clear()
     }
 
     fun setCameraPosition(cameraPosition: CameraPosition){
@@ -32,52 +34,74 @@ class CollectionAreaScreenViewModel(): ViewModel() {
     }
 
     fun setListAreas(list: ArrayList<CollectionArea>){
-        listCollectionAreas.clear()
-        listCollectionAreas.addAll(list)
+        _listCollectionAreas.value.clear()
+        _listCollectionAreas.value.addAll(list)
     }
 
     fun getListAreas(): ArrayList<CollectionArea>{
-        return ArrayList(listCollectionAreas)
+        return ArrayList(_listCollectionAreas.value)
     }
 
     fun addNewCollectionArea(color: Color){
-        for(area in listCollectionAreas){
-            if(area.isSelected){
-                area.isSelected = false
+        _listCollectionAreas.update {
+            for(area in it){
+                if(area.isSelected){
+                    val tempArea = area.copy(isSelected = false)
+                    it.remove(area)
+                    it.add(tempArea)
+                }
             }
+            it.add(CollectionArea(color = color, isSelected = true, listAreaPoints = arrayListOf()))
+            it
         }
-        listCollectionAreas.add(CollectionArea(color = color, isSelected = true, listAreaPoints = arrayListOf()))
     }
 
     fun checkNewCollectionIsEmpty(){
-        for(area in listCollectionAreas){
-            if(area.isSelected){
-                if(area.listAreaPoints.size < 3){
-                    listCollectionAreas.remove(area)
-                }else{
-                    area.isSelected = false
+        _listCollectionAreas.update {
+            for(area in it){
+                if(area.isSelected){
+                    if(area.listAreaPoints.size < 3){
+                        it.remove(area)
+                    }else{
+                        val tempArea = area.copy(isSelected = false)
+                        it.remove(area)
+                        it.add(tempArea)
+                    }
                 }
             }
+            it
         }
     }
 
     fun addPCollectionAreaPoint(point: LatLng){
-        for(area in listCollectionAreas){
-            if(area.isSelected){
-                area.listAreaPoints.add(point)
-                break
+        _listCollectionAreas.update {
+            for(area in it){
+                if(area.isSelected){
+                    val tempArea = area.copy()
+                    tempArea.listAreaPoints.add(point)
+                    it.remove(area)
+                    it.add(tempArea)
+                    break
+                }
             }
+            it
         }
     }
 
     fun removeLastCollectionAreaPoint(){
-        for(area in listCollectionAreas){
-            if(area.isSelected){
-                if(area.listAreaPoints.isNotEmpty()){
-                    area.listAreaPoints.removeLast()
+        _listCollectionAreas.update {
+            for(area in it){
+                if(area.isSelected){
+                    if(area.listAreaPoints.isNotEmpty()){
+                        val tempArea = area.copy()
+                        tempArea.listAreaPoints.removeLast()
+                        it.remove(area)
+                        it.add(tempArea)
+                    }
+                    break
                 }
-                break
             }
+            it
         }
     }
 }
