@@ -52,7 +52,7 @@ class CollectionAreaScreenViewModel(): ViewModel() {
     fun checkNewCollectionIsEmpty(){
         for(area in listCollectionAreas){
             if(area.isSelected){
-                if(area.listAreaPoints.isEmpty()){
+                if(area.listAreaPoints.size < 3){
                     listCollectionAreas.remove(area)
                 }else{
                     area.isSelected = false
