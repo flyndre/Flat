@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import MdiIcon from '@/components/icons/MdiIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
 import { clientId } from '@/data/clientMetadata';
@@ -16,7 +17,10 @@ import {
     mdiCircle,
     mdiClose,
     mdiContentCopy,
+    mdiCrosshairsGps,
     mdiExport,
+    mdiFitToScreen,
+    mdiHandBackRight,
     mdiPause,
     mdiPauseCircle,
     mdiPlay,
@@ -25,8 +29,10 @@ import {
 } from '@mdi/js';
 import { useClipboard, useShare, watchOnce } from '@vueuse/core';
 import Button from 'primevue/button';
+import Card from 'primevue/card';
 import Dialog from 'primevue/dialog';
 import { MenuItem } from 'primevue/menuitem';
+import SelectButton from 'primevue/selectbutton';
 import SplitButton from 'primevue/splitbutton';
 import Textarea from 'primevue/textarea';
 import { useToast } from 'primevue/usetoast';
@@ -61,7 +67,31 @@ const trackingLoading = ref(false);
 const locationError = computed(
     () => trackingError.value !== undefined && trackingError.value?.code > 0
 );
-const mapCenter = mapCenterWithDefaults(trackingPosition, {
+const mapCenterOptions: {
+    value?: 'area' | 'position';
+    icon: string;
+    label: string;
+}[] = [
+    {
+        value: undefined,
+        label: 'Unlock',
+        icon: mdiHandBackRight,
+    },
+    {
+        value: 'position',
+        label: 'Location',
+        icon: mdiCrosshairsGps,
+    },
+    {
+        value: 'area',
+        label: 'Area',
+        icon: mdiFitToScreen,
+    },
+];
+const mapCenterSelected = ref<undefined | 'area' | 'position'>(
+    mapCenterOptions[1].value
+);
+const clientPos = mapCenterWithDefaults(trackingPosition, {
     lat: null,
     lng: null,
 });
@@ -373,12 +403,49 @@ const tracks = computed<ParticipantTrack[]>(() => [
                 </div>
             </div> -->
 
-            <MapWithControls
-                controls="minimal"
-                :client-pos="mapCenter"
-                :center="mapCenter"
-                :tracks
-            />
+            <Card
+                class="h-full grow"
+                :pt="{
+                    root: { class: 'overflow-hidden' },
+                    header: {
+                        class: 'h-full flex flex-col grow',
+                    },
+                    body: { class: 'p-2.5' },
+                }"
+            >
+                <template #header>
+                    <MapWithControls
+                        controls="none"
+                        :center="mapCenterSelected"
+                        :locked="mapCenterSelected != null"
+                        :client-pos
+                        :tracks
+                    />
+                </template>
+                <template #content>
+                    <SelectButton
+                        class="flex w-full flex-row"
+                        v-model="mapCenterSelected"
+                        :options="mapCenterOptions"
+                        :option-value="(o) => o.value"
+                        :allow-empty="false"
+                        :pt="{ button: { class: 'w-full' } }"
+                    >
+                        <template #option="slotProps">
+                            <div
+                                class="flex flex-row justify-center items-center flex-nowrap w-full gap-3 min-h-6"
+                            >
+                                <MdiIcon :icon="slotProps.option.icon" />
+                                <span
+                                    class="max-[400px]:hidden text-ellipsis overflow-hidden z-10"
+                                >
+                                    {{ slotProps.option.label }}
+                                </span>
+                            </div>
+                        </template>
+                    </SelectButton>
+                </template>
+            </Card>
         </template>
     </DefaultLayout>
 </template>

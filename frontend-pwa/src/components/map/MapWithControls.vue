@@ -34,13 +34,14 @@ import {
     shapeToGeoJSON,
 } from '@/util/googleMapsUtils';
 import { isOnMobile } from '@/util/mobileDetection';
-import { mdiMap, mdiPalette, mdiTextureBox } from '@mdi/js';
+import { mdiLock, mdiMap, mdiPalette, mdiTextureBox } from '@mdi/js';
 import Card from 'primevue/card';
 import TabPanel from 'primevue/tabpanel';
 import TabView from 'primevue/tabview';
 import { v4 as uuidv4 } from 'uuid';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { GoogleMap } from 'vue3-google-map';
+import MdiIcon from '../icons/MdiIcon.vue';
 
 /**
  * The shapes drawn on the map.
@@ -54,21 +55,33 @@ const props = withDefaults(
     defineProps<{
         controls?: 'none' | 'drawing' | 'minimal';
         labels?: boolean;
-        panOnUpdated?: boolean;
         mapType?: `${google.maps.MapTypeId}`;
         clientPos?: google.maps.LatLngLiteral;
-        center?: google.maps.LatLngLiteral;
+        center?: google.maps.LatLngLiteral | 'area' | 'position';
         tracks?: ParticipantTrack[];
+        locked?: boolean;
     }>(),
     {
         controls: 'minimal',
         labels: true,
-        panOnUpdated: true,
         mapType: 'roadmap',
+        locked: false,
     }
 );
 
 watch(() => props.clientPos, setPositionMarker);
+
+const mapCenter = computed(() => {
+    if (props.center === 'position') {
+        panMapToPos(props.clientPos);
+        return props.clientPos;
+    }
+    if (props.center === 'area') {
+        if (all_overlays?.length > 0) panMapToShapes(all_overlays);
+        return map.value?.getCenter();
+    }
+    return props.center ?? map.value?.getCenter();
+});
 
 const sanitizedClientPos = computed(() => {
     if (
@@ -143,7 +156,7 @@ function syncAreas() {
     shapes.value.length = 0;
     shapes.value.push(...all_overlays);
     clearSelection();
-    if (props.panOnUpdated && shapes.value?.length > 0)
+    if (props.center === 'area' && shapes.value?.length > 0)
         panMapToShapes(all_overlays);
     nextTick(() => (recentlyUpdated = false));
 }
@@ -498,7 +511,11 @@ onMounted(initialize);
 <template>
     <Card
         class="h-full basis-0 grow overflow-hidden"
-        :class="[{ 'shadow-none': controls === 'none' }]"
+        :class="[
+            {
+                'shadow-none': controls === 'none',
+            },
+        ]"
         :pt="{
             root: { class: isOnMobile ? 'flex-col' : 'flex-col-reverse' },
             body: {
@@ -509,7 +526,7 @@ onMounted(initialize);
                 ],
             },
             header: {
-                class: 'h-full flex flex-col-reverse justify-stretch rounded-xl overflow-hidden',
+                class: 'h-full flex flex-col-reverse justify-stretch rounded-xl overflow-hidden relative',
             },
         }"
     >
@@ -521,13 +538,19 @@ onMounted(initialize);
                 style="height: 100%; width: 100%"
                 :api-key
                 :libraries
-                :center
+                :center="mapCenter"
                 :zoom="mapZoom"
                 :restriction="mapRestriction"
                 :disable-default-ui="true"
                 :map-type-id="mapTypeId"
                 :styles="mapStyles"
                 :clickable-icons="false"
+                :draggable="!locked"
+            />
+            <MdiIcon
+                v-if="locked"
+                class="absolute top-4 right-4 opacity-50"
+                :icon="mdiLock"
             />
         </template>
         <template #content v-if="controls === 'minimal'">
