@@ -1,5 +1,8 @@
 using FlatBackend.Database;
+using FlatBackend.DTOs;
 using FlatBackend.Interfaces;
+using FlatBackend.Websocket;
+using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver.Core.Configuration;
 using System.Diagnostics.Eventing.Reader;
 using System.Net;
@@ -25,6 +28,7 @@ else
 }
 
 builder.Services.AddSingleton<IMongoDBService>(new MongoDBService(mongoConString));
+builder.Services.AddSingleton<IWebsocketManager>(new WebsocketManager(new MongoDBService(mongoConString)));
 
 var app = builder.Build();
 app.Logger.LogInformation($"MongoDbConnectionString: {mongoConString}");

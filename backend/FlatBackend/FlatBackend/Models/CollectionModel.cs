@@ -16,7 +16,7 @@ namespace FlatBackend.Models
 
         public MultiPolygonModel area { get; set; }
 
-        public List<AreaModel>? collectionArea { get; set; }
+        public List<AreaModel>? collectionDivision { get; set; }
         public List<UserModel>? confirmedUsers { get; set; }
         public List<UserModel>? requestedAccess { get; set; }
     }

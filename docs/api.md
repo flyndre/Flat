@@ -8,9 +8,9 @@ The following messages and data are exchanged between the frontends and the back
 Opens a new Collection with the given Information.
 
 **🔵Request-Body**  
-- name: `String`  
-- clientId: `UUID`      
-- collectionArea: `GeoJSON MultiPolygon`    
+- name: `String`
+- clientId: `UUID` : required   
+- area: `GeoJSON MultiPolygon` : required    
 
 ### ⬆️GET `/api/Rest/Collection/{CollectionId}`: Get collection 
 Recieve Collection Information.
@@ -84,13 +84,13 @@ Deletes a Collection. This can only be performed by an Owner of a Collection
 
 ### ➡️Send progress in the form of GPS data  
    **Request-Body**  
-      - GPX track: `GPX track`  
+      - progress: `GeoJSON LineString`  
       - If connection has been interrupted, resend unsent data  
       - Start/stop GPS track  
 
 ### ➡️Receive progress of all participants from the server  
    ***Request-Body***  
-      - GPX track: `GPX Track`  
-      - In the form of a list of GPS tracks  
+      - progress: `GeoJSON LineString`
+      - In the form of a list of GPS tracks
 
 

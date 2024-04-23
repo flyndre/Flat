@@ -2,7 +2,7 @@
 {
     public class WebsocketConnectionDto
     {
-        public Guid ClientId { get; set; }
-        public Guid CollectionId { get; set; }
+        public Guid clientId { get; set; }
+        public Guid collectionId { get; set; }
     }
 }

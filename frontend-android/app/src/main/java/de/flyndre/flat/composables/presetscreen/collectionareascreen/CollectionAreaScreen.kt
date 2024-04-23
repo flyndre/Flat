@@ -14,12 +14,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -35,7 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -47,6 +44,11 @@ import com.google.maps.android.compose.Polygon
 import com.google.maps.android.compose.rememberCameraPositionState
 import de.flyndre.flat.composables.customComponents.SegmentedButtonItem
 import de.flyndre.flat.composables.customComponents.SegmentedButtons
+import de.flyndre.flat.ui.theme.AreaBlue
+import de.flyndre.flat.ui.theme.AreaGreen
+import de.flyndre.flat.ui.theme.AreaOrange
+import de.flyndre.flat.ui.theme.AreaPink
+import de.flyndre.flat.ui.theme.AreaPurple
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,7 +62,6 @@ fun CollectionAreaScreen(
     //color picker based on Segmented Button
     var selectedColorItem by remember { mutableStateOf(0) }
     //map data
-    val listAreaPoints by collectionAreaScreenViewModel.listAreaPoints.collectAsState()
     val cameraPosition by collectionAreaScreenViewModel.cameraPosition.collectAsState()
     val cameraPositionState = rememberCameraPositionState {
         position = cameraPosition
@@ -126,22 +127,6 @@ fun CollectionAreaScreen(
                         )
                     })
             }
-            /*if(!movingEnabled){
-                Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)) {
-                    Button(onClick = {
-                        collectionAreaScreenViewModel.setCameraPosition(cameraPositionState.position)
-                        navController.navigate("editpreset/0")
-                    }) {
-                        Text(text = "Save Area")
-                    }
-                    Button(onClick = { collectionAreaScreenViewModel.removeLastCollectionAreaPoint() }) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "remove the last point")
-                    }
-                    Button(onClick = { collectionAreaScreenViewModel.clearCollectionArea() }) {
-                        Icon(Icons.Filled.Delete, contentDescription = "delete the existing collection area")
-                    }
-                }
-            }*/
         },
         floatingActionButton = {
             if(selectedNavigationItem == 0){
@@ -164,12 +149,32 @@ fun CollectionAreaScreen(
                             modifier = Modifier
                                 .size(24.dp)
                                 .clip(shape = RoundedCornerShape(5.dp))
-                                .background(color = Color(255, 159, 246, 255))
+                                .background(color = AreaBlue)
                         )})
-                        SegmentedButtonItem(selected = selectedColorItem == 1, onClick = { selectedColorItem = 1 })
-                        SegmentedButtonItem(selected = selectedColorItem == 2, onClick = { selectedColorItem = 2 })
-                        SegmentedButtonItem(selected = selectedColorItem == 3, onClick = { selectedColorItem = 3 })
-                        SegmentedButtonItem(selected = selectedColorItem == 4, onClick = { selectedColorItem = 4 })
+                        SegmentedButtonItem(selected = selectedColorItem == 1, onClick = { selectedColorItem = 1 }, icon = { Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(shape = RoundedCornerShape(5.dp))
+                                .background(color = AreaPink)
+                        )})
+                        SegmentedButtonItem(selected = selectedColorItem == 2, onClick = { selectedColorItem = 2 }, icon = { Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(shape = RoundedCornerShape(5.dp))
+                                .background(color = AreaGreen)
+                        )})
+                        SegmentedButtonItem(selected = selectedColorItem == 3, onClick = { selectedColorItem = 3 }, icon = { Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(shape = RoundedCornerShape(5.dp))
+                                .background(color = AreaOrange)
+                        )})
+                        SegmentedButtonItem(selected = selectedColorItem == 4, onClick = { selectedColorItem = 4 }, icon = { Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(shape = RoundedCornerShape(5.dp))
+                                .background(color = AreaPurple)
+                        )})
                     }
                     SmallFloatingActionButton(onClick = { /*TODO*/ }) {
                         Icon(Icons.Filled.Edit, contentDescription = "create new area")
@@ -211,12 +216,14 @@ fun CollectionAreaScreen(
                     collectionAreaScreenViewModel.addPCollectionAreaPoint(it)
                 }
             }) {
-            if (listAreaPoints.isNotEmpty()) {
-                Polygon(
-                    points = listAreaPoints,
-                    fillColor = Color(255, 159, 246, 127),
-                    strokeColor = Color(255, 159, 246, 255)
-                )
+            if (collectionAreaScreenViewModel.listCollectionAreas.isNotEmpty()) {
+                collectionAreaScreenViewModel.listCollectionAreas.forEach{ area ->
+                    Polygon(
+                        points = area.listAreaPoints,
+                        fillColor = area.color.copy(alpha = 0.5f),
+                        strokeColor = area.color.copy(alpha = 1F)
+                    )
+                }
             }
         }
     }

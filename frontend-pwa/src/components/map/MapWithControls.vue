@@ -47,18 +47,33 @@ const divisions = defineModel<Division[]>('divisions', {
 
 const props = withDefaults(
     defineProps<{
-        controls?: boolean;
+        controls?: 'none' | 'drawing' | 'minimal';
         labels?: boolean;
         panOnUpdated?: boolean;
         mapType?: `${google.maps.MapTypeId}`;
+        clientPos?: google.maps.LatLngLiteral;
+        center?: google.maps.LatLngLiteral;
     }>(),
     {
-        controls: true,
+        controls: 'minimal',
         labels: true,
         panOnUpdated: true,
         mapType: 'roadmap',
     }
 );
+
+watch(() => props.clientPos, setPositionMarker);
+
+const sanitizedClientPos = computed(() => {
+    if (
+        props.clientPos == null ||
+        props.clientPos.lat == null ||
+        props.clientPos.lng == null
+    ) {
+        return undefined;
+    }
+    return props.clientPos;
+});
 
 let recentlyUpdated = false;
 
@@ -457,13 +472,14 @@ onMounted(initialize);
 <template>
     <Card
         class="h-full basis-0 grow overflow-hidden"
-        :class="[{ 'shadow-none': !controls }]"
+        :class="[{ 'shadow-none': controls === 'none' }]"
         :pt="{
             root: { class: isOnMobile ? 'flex-col' : 'flex-col-reverse' },
             body: {
                 class: [
-                    controls ? 'p-2.5' : 'p-0',
-                    isOnMobile ? 'pb-0' : 'pt-0',
+                    controls !== 'none' ? 'p-2.5' : 'p-0',
+                    { 'pb-0': controls === 'drawing' && isOnMobile },
+                    { 'pt-0': controls === 'drawing' && !isOnMobile },
                 ],
             },
             header: {
@@ -479,6 +495,7 @@ onMounted(initialize);
                 style="height: 100%; width: 100%"
                 :api-key
                 :libraries
+                :center
                 :zoom="mapZoom"
                 :restriction="mapRestriction"
                 :disable-default-ui="true"
@@ -487,7 +504,24 @@ onMounted(initialize);
                 :clickable-icons="false"
             />
         </template>
-        <template #content v-if="controls">
+        <template #content v-if="controls === 'minimal'">
+            <div class="flex flex-row gap-2">
+                <LocateMeButton
+                    :client-pos="sanitizedClientPos"
+                    :locate-me-handler="
+                        (r) => {
+                            panMapToPos(r);
+                            setPositionMarker(r);
+                        }
+                    "
+                />
+                <LocateShapesButton
+                    :shapes-present="shapes?.length > 0"
+                    :locate-shapes-handler="() => panMapToShapes(all_overlays)"
+                />
+            </div>
+        </template>
+        <template #content v-if="controls === 'drawing'">
             <TabView
                 :pt="{
                     root: {
@@ -516,7 +550,7 @@ onMounted(initialize);
                             class="flex flex-row gap-2 grow text-nowrap basis-7/12"
                         >
                             <LocateMeButton
-                                :initial-pan="true"
+                                :client-pos="sanitizedClientPos"
                                 :locate-me-handler="
                                     (r) => {
                                         panMapToPos(r);
