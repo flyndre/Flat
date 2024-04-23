@@ -551,7 +551,7 @@ onMounted(initialize);
             />
             <MdiIcon
                 v-if="locked"
-                class="absolute bottom-3 left-[5.2rem] stroke-black stroke-[0.8px] !opacity-100 fill-white"
+                class="absolute bottom-[0.65rem] left-[5.15rem] text-white opacity-60 dark:opacity-100 stroke-black stroke-[0.8px] transition-opacity"
                 :icon="mdiLock"
             />
         </template>
