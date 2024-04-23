@@ -50,7 +50,7 @@ function getShapeIcon(shape: IdentifyableTypedOverlay) {
 
 <template>
     <ScrollPanel
-        class="h-[40vh] max-h-[40vh]"
+        class="h-[50vh] max-h-[50vh]"
         :pt="{
             content: {
                 class: 'flex flex-col gap-3.5 items-center justify-start',

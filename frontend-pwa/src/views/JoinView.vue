@@ -14,6 +14,7 @@ import {
     mdiImport,
     mdiLink,
 } from '@mdi/js';
+import { useTimeoutFn } from '@vueuse/core';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import Dialog from 'primevue/dialog';
@@ -34,13 +35,25 @@ const submittable = computed(
     () => validateJoinLink(joinLink.value) && validateJoinName(joinName.value)
 );
 const dialogVisible = ref(false);
+const { start, stop } = useTimeoutFn(
+    () => {
+        // TODO: create WS connection etc.
+        router.push({ name: 'track' });
+    },
+    3000,
+    {
+        immediate: false,
+    }
+);
 function join() {
     dialogVisible.value = true;
-    // todo: send request
+    start();
+    // TODO: send request
 }
 function cancel() {
     dialogVisible.value = false;
-    // todo: cancel request or send cancelation request
+    stop();
+    // TODO: cancel request or send cancelation request
 }
 </script>
 

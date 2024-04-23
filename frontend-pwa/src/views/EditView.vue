@@ -4,7 +4,7 @@ import MdiInputIcon from '@/components/icons/MdiInputIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
 import { clientId } from '@/data/clientMetadata';
-import { collectionDraft, collectionDB } from '@/data/collections';
+import { collectionDB, collectionDraft } from '@/data/collections';
 import { TOAST_LIFE } from '@/data/constants';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { Collection } from '@/types/Collection';
@@ -179,8 +179,9 @@ function back() {
             >
                 <template #header>
                     <MapWithControls
-                        class="pointer-events-none [&>*]:rounded-none"
+                        class="[&>*]:rounded-none"
                         controls="none"
+                        :locked="true"
                         :labels="false"
                         :divisions="displayedDivisions"
                     />

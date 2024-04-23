@@ -137,7 +137,7 @@ export function geoJSONtoShape(
         case 'Polygon':
             return geoJSONtoPolygon(geoJSON, shapeOptions);
         case 'LineString':
-
+            return geoJSONtoPolyline(geoJSON, shapeOptions);
         default:
             return undefined;
     }
@@ -155,5 +155,18 @@ export function geoJSONtoPolygon(
                 lng: coords?.[1] ?? 0,
             })),
         ],
+    });
+}
+
+export function geoJSONtoPolyline(
+    geoJSON: GeoJSON.LineString,
+    shapeOptions: OverlayOptions = {}
+) {
+    return new google.maps.Polyline({
+        ...shapeOptions,
+        path: geoJSON.coordinates?.map((coords) => ({
+            lat: coords?.[0] ?? 0,
+            lng: coords?.[1] ?? 0,
+        })),
     });
 }

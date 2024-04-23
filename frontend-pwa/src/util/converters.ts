@@ -1,11 +1,14 @@
 import { Division } from '@/types/Division';
+import { ParticipantTrack } from '@/types/ParticipantTrack';
 import { IdentifyableTypedOverlay } from '@/types/map/IdentifyableTypedOverlay';
 import { OverlayOptions } from '@/types/map/OverlayOptions';
 import {
     geoJSONtoPolygon,
+    geoJSONtoPolyline,
     getShapeColor,
     getShapeListBounds,
     polygonToGeoJSON,
+    polylineToGeoJSON,
 } from './googleMapsUtils';
 
 export function areaFromShapeList(
@@ -63,4 +66,28 @@ export function divisionToShape(
             }
         ),
     };
+}
+
+export function shapeListToTrack(
+    shapeList: IdentifyableTypedOverlay[]
+): ParticipantTrack {
+    return {
+        id: shapeList?.[0]?.id,
+        name: shapeList?.[0]?.name,
+        progress: shapeList.map((s) =>
+            polylineToGeoJSON(<google.maps.Polyline>s.overlay)
+        ),
+    };
+}
+
+export function trackToShapeList(
+    track: ParticipantTrack,
+    shapeOptions: OverlayOptions = {}
+): IdentifyableTypedOverlay[] {
+    return track.progress.map((p) => ({
+        id: track.id,
+        name: track.name,
+        type: <google.maps.drawing.OverlayType>'polyline',
+        overlay: geoJSONtoPolyline(p, shapeOptions),
+    }));
 }
