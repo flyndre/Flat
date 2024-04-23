@@ -121,12 +121,10 @@ namespace FlatBackend.Websocket
                     var Json = JsonSerializer.Serialize(request);
                     await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
                     var buffer = new byte[1024 * 4];
-                    var response = await user.webSocket.ReceiveAsync(buffer, CancellationToken.None);
-                    var JsonResult = Encoding.ASCII.GetString(buffer);
-                    JsonResult = new string(JsonResult.Where(c => c != '\x00').ToArray());
-                    var result = JsonSerializer.Deserialize<UserModel>(JsonResult);
-                    setUserConfirmation(request.collectionId, result);
-                    return result;
+                    var response = accessConfirmationWaiting.Take();
+                    UserModel model = new UserModel { clientId = response.clientId, username = request.username, accepted = response.accepted };
+                    setUserConfirmation(request.collectionId, model);
+                    return model;
                 }
             }
             return null;
