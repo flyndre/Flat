@@ -3,7 +3,6 @@ package de.flyndre.flat.composables.presetscreen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
 import de.flyndre.flat.composables.presetscreen.collectionareascreen.CollectionArea
 import de.flyndre.flat.composables.presetscreen.collectionareascreen.CollectionAreaScreenViewModel
 import de.flyndre.flat.composables.trackingscreen.TrackingScreenViewModel
@@ -90,12 +89,13 @@ class PresetScreenViewModel(db: AppDatabase, collectionAreaScreenViewModel: Coll
             try{
                 val result = _connectionService.openCollection(
                     _presetName.value,
-                    MultiPolygon(arrayListOf(areaList.map {
+                    MultiPolygon(arrayListOf(_collectionAreaScreenViewModel.getListAreas().map {
                       area ->area.listAreaPoints.map{
                         point -> Position(point.longitude,point.latitude)
                       }
                     }))
-                  _trackingScreenViewModel.collectionInstance=result
+                )
+                _trackingScreenViewModel.collectionInstance=result
                 onSuccess()
             }catch (e:RequestFailedException){
                 if (onFailure != null) {
