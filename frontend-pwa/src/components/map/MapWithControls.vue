@@ -446,6 +446,7 @@ const lineOptions = {
         var newShape = typedOverlay.overlay;
         newShape.type = typedOverlay.type;
         google.maps.event.addListener(newShape, 'click', function () {
+            if (props.locked) return;
             setSelection(newShape);
         });
         if (userCreated) {
