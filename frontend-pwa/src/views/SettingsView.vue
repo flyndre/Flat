@@ -64,6 +64,7 @@ const settings = [
                         <AccordionTab
                             v-for="setting of settings"
                             :key="setting.label"
+                            :pt="{ headerAction: { class: 'bg-transparent' } }"
                         >
                             <template #header>
                                 <span class="mr-auto">{{ setting.label }}</span>
