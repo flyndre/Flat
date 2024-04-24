@@ -446,6 +446,7 @@ const lineOptions = {
         var newShape = typedOverlay.overlay;
         newShape.type = typedOverlay.type;
         google.maps.event.addListener(newShape, 'click', function () {
+            if (props.locked) return;
             setSelection(newShape);
         });
         if (userCreated) {
@@ -550,8 +551,8 @@ onMounted(initialize);
                 :draggable="!locked"
             />
             <MdiIcon
-                v-if="locked"
-                class="absolute bottom-3 left-[5.2rem] stroke-black stroke-[0.8px] !opacity-100 fill-white"
+                v-if="mapReady && locked"
+                class="absolute bottom-[0.65rem] left-[5.15rem] text-white [&:not(dark)]:opacity-60 dark:!opacity-100 stroke-black stroke-[0.8px] transition-opacity"
                 :icon="mdiLock"
             />
         </template>
