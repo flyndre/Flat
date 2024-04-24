@@ -1,8 +1,8 @@
 ﻿using FlatBackend.Models.GeoJsonModels;
 
-namespace FlatBackend.DTOs
+namespace FlatBackend.Models
 {
-    public class TrackCollectionDto
+    public class TrackCollectionModel
     {
         public Guid trackId { get; set; }
         public Guid clientId { get; set; }
