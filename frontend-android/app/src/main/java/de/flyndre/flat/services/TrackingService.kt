@@ -4,6 +4,7 @@ import android.util.Log
 import de.flyndre.flat.interfaces.IConnectionService
 import de.flyndre.flat.interfaces.ILocationService
 import de.flyndre.flat.interfaces.ITrackingService
+import de.flyndre.flat.models.IncrementalTrackMessage
 import de.flyndre.flat.models.Track
 import de.flyndre.flat.models.TrackCollection
 import io.github.dellisd.spatialk.geojson.Position
@@ -14,8 +15,8 @@ class TrackingService(
     override val locationService: ILocationService,
     override val syncInterval: Long,
 ) : ITrackingService {
-    override val ownTrack: TrackCollection = TrackCollection(UUID.randomUUID())
-    override val otherTracks: MutableMap<UUID, TrackCollection> = mutableMapOf()
+    override val localTrack: TrackCollection = TrackCollection(UUID.randomUUID())
+    override val remoteTracks: MutableMap<UUID, TrackCollection> = mutableMapOf()
     override var isTracking: Boolean = false
     override val onLocalTrackUpdate: ArrayList<() -> Unit> = arrayListOf()
     override val onRemoteTrackUpdate: ArrayList<() -> Unit> = arrayListOf()
@@ -24,7 +25,7 @@ class TrackingService(
         locationService.addOnLocationUpdate {x-> addNewPosition(x) }
     }
     override fun startTracking() {
-        ownTrack.add(Track())
+        localTrack.add(Track())
         locationService.startTracking()
         Log.d(this.toString(),"tracking started")
         isTracking = true
@@ -37,18 +38,17 @@ class TrackingService(
     }
 
     override fun addNewPosition(position: Position) {
-        ownTrack.last().add(position)
-        var s = ownTrack.toMultiLineString().toString()
-        s = ""
+        localTrack.last().add(position)
         onLocalTrackUpdate.forEach { x->x() }
     }
 
-    override fun addIncrementalTrack(track: TrackCollection) {
-        if(otherTracks.containsKey(track.id)) {
-            otherTracks[track.id]!!.addAll(track)
-        }else{
-            otherTracks[track.id] = track
+    override fun addIncrementalTrack(track: IncrementalTrackMessage) {
+        if(!remoteTracks.containsKey(track.clientId)) {
+
+            remoteTracks[track.clientId] = TrackCollection(track.clientId)
         }
+        remoteTracks[track.clientId]?.addIncrementalTrack(track.trackId,track.track)
+        onRemoteTrackUpdate.forEach { x->x() }
     }
 
     override fun addOnLocalTrackUpdate(callback: () -> Unit) {

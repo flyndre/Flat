@@ -1,10 +1,11 @@
 package de.flyndre.flat.models
 
 import io.github.dellisd.spatialk.geojson.MultiLineString
+import io.github.dellisd.spatialk.geojson.LineString
 import io.github.dellisd.spatialk.geojson.Position
 import java.util.UUID
 
-class TrackCollection(var id:UUID = UUID.randomUUID()): ArrayList<Track>() {
+class TrackCollection(var clientId:UUID = UUID.randomUUID()): ArrayList<Track>() {
     fun toMultiLineString(): MultiLineString {
         val list : ArrayList<ArrayList<Position>> = arrayListOf()
         this.forEach { x->
@@ -16,5 +17,12 @@ class TrackCollection(var id:UUID = UUID.randomUUID()): ArrayList<Track>() {
             }
         }
         return MultiLineString(list)
+    }
+
+    fun addIncrementalTrack(trackId: UUID, track: LineString) {
+        if(this.none { x -> x.trackId == trackId }){
+            this.add(Track(trackId))
+        }
+        this.findLast { x->x.trackId==trackId }?.addAll(track.coordinates)
     }
 }

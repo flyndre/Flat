@@ -29,6 +29,7 @@ fun TrackingScreen(modifier: Modifier = Modifier, trackingScreenViewModel: Track
     val startStopButtonText by trackingScreenViewModel.startStopButtonText.collectAsState()
     val localTrackList by trackingScreenViewModel.trackList.collectAsState()
     val remoteTrackList by trackingScreenViewModel.remoteTrackList.collectAsState()
+
     Scaffold (topBar = {
         TopAppBar(title = { Text(text = trackingScreenViewModel.collectionInstance.name) }, navigationIcon = {
             IconButton(onClick = { onNavigateToInitialScreen() }) {

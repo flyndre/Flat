@@ -24,6 +24,7 @@ class TrackingScreenViewModel(
     private val _remoteTrackList: MutableStateFlow<Map<UUID,TrackCollection>> = MutableStateFlow(mapOf())
     val remoteTrackList: StateFlow<Map<UUID,TrackCollection>> = _remoteTrackList.asStateFlow()
 
+
     init {
         trackingService.addOnLocalTrackUpdate{ onLocalTrackUpdate() }
         trackingService.addOnRemoteTrackUpdate { onRemoteTrackUpdate() }
@@ -40,10 +41,10 @@ class TrackingScreenViewModel(
     }
 
     private fun onLocalTrackUpdate(){
-        _trackList.value = _trackingService.ownTrack
+        _trackList.value = _trackingService.localTrack
     }
     private fun onRemoteTrackUpdate(){
-        _remoteTrackList.value = _trackingService.otherTracks
+        _remoteTrackList.value = _trackingService.remoteTracks
     }
 
 }
