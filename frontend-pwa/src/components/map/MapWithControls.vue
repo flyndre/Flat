@@ -73,7 +73,7 @@ const props = withDefaults(
 watch(() => props.clientPos, setPositionMarker);
 
 const mapCenter = computedWithControl(
-    () => [props.center, props.clientPos, divisions.value?.length],
+    () => [props.center, props.clientPos, shapes.value],
     () => {
         if (props.center === 'position') {
             panMapToPos(props.clientPos);
