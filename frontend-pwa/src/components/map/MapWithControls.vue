@@ -42,6 +42,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { GoogleMap } from 'vue3-google-map';
 import MdiIcon from '../icons/MdiIcon.vue';
+import { computedWithControl } from '@vueuse/core';
 
 /**
  * The shapes drawn on the map.
@@ -71,17 +72,20 @@ const props = withDefaults(
 
 watch(() => props.clientPos, setPositionMarker);
 
-const mapCenter = computed(() => {
-    if (props.center === 'position') {
-        panMapToPos(props.clientPos);
-        return props.clientPos;
+const mapCenter = computedWithControl(
+    () => [props.center, props.clientPos, divisions.value?.length],
+    () => {
+        if (props.center === 'position') {
+            panMapToPos(props.clientPos);
+            return props.clientPos;
+        }
+        if (props.center === 'area') {
+            if (all_overlays?.length > 0) panMapToShapes(all_overlays);
+            return map.value?.getCenter();
+        }
+        return props.center ?? map.value?.getCenter();
     }
-    if (props.center === 'area') {
-        if (all_overlays?.length > 0) panMapToShapes(all_overlays);
-        return map.value?.getCenter();
-    }
-    return props.center ?? map.value?.getCenter();
-});
+);
 
 const sanitizedClientPos = computed(() => {
     if (
