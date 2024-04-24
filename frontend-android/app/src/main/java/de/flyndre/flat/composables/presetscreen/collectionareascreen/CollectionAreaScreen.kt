@@ -79,7 +79,7 @@ fun CollectionAreaScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "Edit Collection Area")
+                    Text(text = "area count: " + collectionAreas.size)
                     IconButton(onClick = {
                         collectionAreaScreenViewModel.setCameraPosition(cameraPositionState.position)
                         navController.navigate("editpreset/0")
