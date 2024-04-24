@@ -40,6 +40,7 @@ fun PresetScreen(
     val presetName by presetScreenViewModel.presetName.collectAsState()
     val presetDescription by presetScreenViewModel.presetDescription.collectAsState()
 
+
     Scaffold(topBar = {
         CenterAlignedTopAppBar(title = { Text(text = topBarText) }, navigationIcon = { IconButton(
             onClick = { onNavigateToCreateGroupScreen() }) {
@@ -54,7 +55,7 @@ fun PresetScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)
             ) {
-                Button(onClick = { presetScreenViewModel.savePresetToDatabase(); presetScreenViewModel.openCollection(); onNavigateToTrackingScreen() }) {
+                Button(onClick = { presetScreenViewModel.openCollection(onNavigateToTrackingScreen);  }) {
                     Text("Save and Start")
                 }
                 Button(onClick = { presetScreenViewModel.savePresetToDatabase(); onNavigateToCreateGroupScreen() }) {

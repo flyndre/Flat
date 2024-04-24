@@ -13,8 +13,8 @@ import {
     GOOGLE_MAPS_API_LIBRARIES,
 } from '@/data/constants';
 import {
-    LABELS_OFF_STYLES,
     DARK_MAP_STYLES,
+    LABELS_OFF_STYLES,
     POSITION_ICON_INNER,
     POSITION_ICON_OUTER,
 } from '@/data/googleMapsPresets';
@@ -22,20 +22,26 @@ import { useTheme } from '@/plugins/ThemePlugin';
 import { Division } from '@/types/Division';
 import { IdentifyableTypedOverlay } from '@/types/map/IdentifyableTypedOverlay';
 import { TypedOverlay } from '@/types/map/TypedOverlay';
-import { divisionToShape, shapeToDivision } from '@/util/converters';
+import { ParticipantTrack } from '@/types/ParticipantTrack';
+import {
+    divisionToShape,
+    shapeToDivision,
+    trackToShapeList,
+} from '@/util/converters';
 import {
     getShapeBounds,
     getShapeListBounds,
     shapeToGeoJSON,
 } from '@/util/googleMapsUtils';
 import { isOnMobile } from '@/util/mobileDetection';
-import { mdiMap, mdiPalette, mdiTextureBox } from '@mdi/js';
+import { mdiLock, mdiMap, mdiPalette, mdiTextureBox } from '@mdi/js';
 import Card from 'primevue/card';
 import TabPanel from 'primevue/tabpanel';
 import TabView from 'primevue/tabview';
 import { v4 as uuidv4 } from 'uuid';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { GoogleMap } from 'vue3-google-map';
+import MdiIcon from '../icons/MdiIcon.vue';
 
 /**
  * The shapes drawn on the map.
@@ -47,18 +53,46 @@ const divisions = defineModel<Division[]>('divisions', {
 
 const props = withDefaults(
     defineProps<{
-        controls?: boolean;
+        controls?: 'none' | 'drawing' | 'minimal';
         labels?: boolean;
-        panOnUpdated?: boolean;
         mapType?: `${google.maps.MapTypeId}`;
+        clientPos?: google.maps.LatLngLiteral;
+        center?: google.maps.LatLngLiteral | 'area' | 'position';
+        tracks?: ParticipantTrack[];
+        locked?: boolean;
     }>(),
     {
-        controls: true,
+        controls: 'minimal',
         labels: true,
-        panOnUpdated: true,
         mapType: 'roadmap',
+        locked: false,
     }
 );
+
+watch(() => props.clientPos, setPositionMarker);
+
+const mapCenter = computed(() => {
+    if (props.center === 'position') {
+        panMapToPos(props.clientPos);
+        return props.clientPos;
+    }
+    if (props.center === 'area') {
+        if (all_overlays?.length > 0) panMapToShapes(all_overlays);
+        return map.value?.getCenter();
+    }
+    return props.center ?? map.value?.getCenter();
+});
+
+const sanitizedClientPos = computed(() => {
+    if (
+        props.clientPos == null ||
+        props.clientPos.lat == null ||
+        props.clientPos.lng == null
+    ) {
+        return undefined;
+    }
+    return props.clientPos;
+});
 
 let recentlyUpdated = false;
 
@@ -97,6 +131,8 @@ const stop = watch(mapReady, (v) => {
     stop();
     syncAreas();
     watch(() => divisions.value, syncAreas, { deep: true });
+    drawTracks();
+    watch(() => props.tracks, drawTracks, { deep: true });
 });
 
 function syncAreas() {
@@ -120,9 +156,26 @@ function syncAreas() {
     shapes.value.length = 0;
     shapes.value.push(...all_overlays);
     clearSelection();
-    if (props.panOnUpdated && shapes.value?.length > 0)
+    if (props.center === 'area' && shapes.value?.length > 0)
         panMapToShapes(all_overlays);
     nextTick(() => (recentlyUpdated = false));
+}
+
+let progressLines: IdentifyableTypedOverlay[] = [];
+function drawTracks() {
+    progressLines.forEach((l) => l.overlay.setMap(null));
+    progressLines.length = 0;
+    props.tracks?.forEach((t) => {
+        const shapes = trackToShapeList(t, {
+            strokeColor: t.color,
+            fillColor: t.color,
+            editable: false,
+            draggable: false,
+        });
+        shapes?.forEach((s) => s.overlay?.setMap(map.value));
+        progressLines.push(...shapes);
+        // TODO add username label to lines
+    });
 }
 
 const selectedToolRef = ref<google.maps.drawing.OverlayType>(null);
@@ -177,6 +230,9 @@ function setPositionMarker(
 }
 
 function panMapToPos(position: google.maps.LatLngLiteral | google.maps.LatLng) {
+    if (position == null || Object.values(position).includes(null)) {
+        return;
+    }
     try {
         map.value?.panTo(position);
     } catch (e) {
@@ -390,6 +446,7 @@ const lineOptions = {
         var newShape = typedOverlay.overlay;
         newShape.type = typedOverlay.type;
         google.maps.event.addListener(newShape, 'click', function () {
+            if (props.locked) return;
             setSelection(newShape);
         });
         if (userCreated) {
@@ -456,18 +513,23 @@ onMounted(initialize);
 
 <template>
     <Card
-        class="h-full basis-0 grow overflow-hidden"
-        :class="[{ 'shadow-none': !controls }]"
+        class="h-full basis-0 grow"
+        :class="[
+            {
+                'shadow-none': controls === 'none',
+            },
+        ]"
         :pt="{
             root: { class: isOnMobile ? 'flex-col' : 'flex-col-reverse' },
             body: {
                 class: [
-                    controls ? 'p-2.5' : 'p-0',
-                    isOnMobile ? 'pb-0' : 'pt-0',
+                    controls !== 'none' ? 'p-2.5' : 'p-0',
+                    { 'pb-0': controls === 'drawing' && isOnMobile },
+                    { 'pt-0': controls === 'drawing' && !isOnMobile },
                 ],
             },
             header: {
-                class: 'h-full flex flex-col-reverse justify-stretch rounded-xl overflow-hidden',
+                class: 'h-full flex flex-col-reverse justify-stretch relative rounded-2xl overflow-hidden',
             },
         }"
     >
@@ -479,15 +541,39 @@ onMounted(initialize);
                 style="height: 100%; width: 100%"
                 :api-key
                 :libraries
+                :center="mapCenter"
                 :zoom="mapZoom"
                 :restriction="mapRestriction"
                 :disable-default-ui="true"
                 :map-type-id="mapTypeId"
                 :styles="mapStyles"
                 :clickable-icons="false"
+                :draggable="!locked"
+            />
+            <MdiIcon
+                v-if="mapReady && locked"
+                class="absolute bottom-[0.65rem] left-[5.15rem] text-white [&:not(dark)]:opacity-60 dark:!opacity-100 stroke-black stroke-[0.8px] transition-opacity"
+                :icon="mdiLock"
             />
         </template>
-        <template #content v-if="controls">
+        <template #content v-if="controls === 'minimal'">
+            <div class="flex flex-row gap-2">
+                <LocateMeButton
+                    :client-pos="sanitizedClientPos"
+                    :locate-me-handler="
+                        (r) => {
+                            panMapToPos(r);
+                            setPositionMarker(r);
+                        }
+                    "
+                />
+                <LocateShapesButton
+                    :shapes-present="shapes?.length > 0"
+                    :locate-shapes-handler="() => panMapToShapes(all_overlays)"
+                />
+            </div>
+        </template>
+        <template #content v-if="controls === 'drawing'">
             <TabView
                 :pt="{
                     root: {
@@ -516,7 +602,7 @@ onMounted(initialize);
                             class="flex flex-row gap-2 grow text-nowrap basis-7/12"
                         >
                             <LocateMeButton
-                                :initial-pan="true"
+                                :client-pos="sanitizedClientPos"
                                 :locate-me-handler="
                                     (r) => {
                                         panMapToPos(r);
