@@ -138,11 +138,11 @@ fun CollectionAreaScreen(
             }
         },
         floatingActionButton = {
-            if(selectedNavigationItem == 0){
+            if (selectedNavigationItem == 0) {
                 SmallFloatingActionButton(onClick = { /*TODO*/ }) {
                     Icon(Icons.Filled.Search, contentDescription = "search for location")
                 }
-            }else if (selectedNavigationItem == 1) {
+            } else if (selectedNavigationItem == 1) {
                 Row(
                     modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(
@@ -151,51 +151,86 @@ fun CollectionAreaScreen(
                     ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    SegmentedButtons(modifier = Modifier
-                        .width((LocalConfiguration.current.screenWidthDp * 0.7).dp)
-                        .height(40.dp)) {
-                        SegmentedButtonItem(selected = selectedColorItem.equals(AreaBlue), onClick = { selectedColorItem = AreaBlue }, icon = { Box(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .clip(shape = RoundedCornerShape(5.dp))
-                                .background(color = AreaBlue)
-                        )})
-                        SegmentedButtonItem(selected = selectedColorItem.equals(AreaPink), onClick = { selectedColorItem = AreaPink }, icon = { Box(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .clip(shape = RoundedCornerShape(5.dp))
-                                .background(color = AreaPink)
-                        )})
-                        SegmentedButtonItem(selected = selectedColorItem.equals(AreaGreen), onClick = { selectedColorItem = AreaGreen }, icon = { Box(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .clip(shape = RoundedCornerShape(5.dp))
-                                .background(color = AreaGreen)
-                        )})
-                        SegmentedButtonItem(selected = selectedColorItem.equals(AreaOrange), onClick = { selectedColorItem = AreaOrange }, icon = { Box(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .clip(shape = RoundedCornerShape(5.dp))
-                                .background(color = AreaOrange)
-                        )})
-                        SegmentedButtonItem(selected = selectedColorItem.equals(AreaPurple), onClick = { selectedColorItem = AreaPurple }, icon = { Box(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .clip(shape = RoundedCornerShape(5.dp))
-                                .background(color = AreaPurple)
-                        )})
+                    SegmentedButtons(
+                        modifier = Modifier
+                            .width((LocalConfiguration.current.screenWidthDp * 0.7).dp)
+                            .height(40.dp)
+                    ) {
+                        SegmentedButtonItem(
+                            selected = selectedColorItem.equals(AreaBlue),
+                            onClick = { selectedColorItem = AreaBlue },
+                            icon = {
+                                Box(
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .clip(shape = RoundedCornerShape(5.dp))
+                                        .background(color = AreaBlue)
+                                )
+                            })
+                        SegmentedButtonItem(
+                            selected = selectedColorItem.equals(AreaPink),
+                            onClick = { selectedColorItem = AreaPink },
+                            icon = {
+                                Box(
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .clip(shape = RoundedCornerShape(5.dp))
+                                        .background(color = AreaPink)
+                                )
+                            })
+                        SegmentedButtonItem(
+                            selected = selectedColorItem.equals(AreaGreen),
+                            onClick = { selectedColorItem = AreaGreen },
+                            icon = {
+                                Box(
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .clip(shape = RoundedCornerShape(5.dp))
+                                        .background(color = AreaGreen)
+                                )
+                            })
+                        SegmentedButtonItem(
+                            selected = selectedColorItem.equals(AreaOrange),
+                            onClick = { selectedColorItem = AreaOrange },
+                            icon = {
+                                Box(
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .clip(shape = RoundedCornerShape(5.dp))
+                                        .background(color = AreaOrange)
+                                )
+                            })
+                        SegmentedButtonItem(
+                            selected = selectedColorItem.equals(AreaPurple),
+                            onClick = { selectedColorItem = AreaPurple },
+                            icon = {
+                                Box(
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .clip(shape = RoundedCornerShape(5.dp))
+                                        .background(color = AreaPurple)
+                                )
+                            })
                     }
-                    if(drawingEnabled){
-                        SmallFloatingActionButton(onClick = { drawingEnabled = false; collectionAreaScreenViewModel.checkNewCollectionIsEmpty() }) {
+                    if (drawingEnabled) {
+                        SmallFloatingActionButton(onClick = {
+                            drawingEnabled =
+                                false; collectionAreaScreenViewModel.checkNewCollectionIsEmpty()
+                        }) {
                             Icon(Icons.Filled.Check, contentDescription = "finish drawing of area")
                         }
-                    }else{
-                        SmallFloatingActionButton(onClick = { drawingEnabled = true; collectionAreaScreenViewModel.addNewCollectionArea(selectedColorItem) }) {
+                    } else {
+                        SmallFloatingActionButton(onClick = {
+                            drawingEnabled =
+                                true; collectionAreaScreenViewModel.addNewCollectionArea(
+                            selectedColorItem
+                        )
+                        }) {
                             Icon(Icons.Filled.Edit, contentDescription = "draw new area")
                         }
                     }
                 }
-            }else{
+            } else {
 
             }
         }
@@ -234,8 +269,8 @@ fun CollectionAreaScreen(
                     }
                 }) {
                 if (collectionAreas.isNotEmpty()) {
-                    collectionAreas.forEach{ area ->
-                        if(area.listAreaPoints.isNotEmpty()){
+                    collectionAreas.forEach { area ->
+                        if (area.listAreaPoints.isNotEmpty()) {
                             Polygon(
                                 points = area.listAreaPoints,
                                 fillColor = area.color.copy(alpha = 0.5f),
@@ -246,16 +281,30 @@ fun CollectionAreaScreen(
                 }
             }
             //list of areas if navigation is set to
-            if(selectedNavigationItem == 2){
+            if (selectedNavigationItem == 2) {
                 LazyColumn {
-                    items(collectionAreas){
-                        ListItem(headlineContent = { Text(text = "Area " + (collectionAreas.indexOf(it) + 1)) }, supportingContent = {Box(
-                            modifier = Modifier
-                                .size(12.dp)
-                                .clip(shape = RoundedCornerShape(3.dp))
-                                .background(color = it.color)
-                        )},
-                            trailingContent = {Icon(Icons.Filled.Delete, contentDescription = "delete area")})
+                    items(collectionAreas) {
+                        ListItem(headlineContent = {
+                            Text(
+                                text = "Area " + (collectionAreas.indexOf(
+                                    it
+                                ) + 1)
+                            )
+                        },
+                            supportingContent = {
+                                Box(
+                                    modifier = Modifier
+                                        .size(12.dp)
+                                        .clip(shape = RoundedCornerShape(3.dp))
+                                        .background(color = it.color)
+                                )
+                            },
+                            trailingContent = {
+                                Icon(
+                                    Icons.Filled.Delete,
+                                    contentDescription = "delete area"
+                                )
+                            })
                     }
                 }
             }
