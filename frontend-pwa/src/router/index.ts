@@ -6,6 +6,7 @@ import JoinView from '@/views/JoinView.vue';
 import MapView from '@/views/MapView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
 import PresetsView from '@/views/PresetsView.vue';
+import ScanView from '@/views/ScanView.vue';
 import SettingsView from '@/views/SettingsView.vue';
 import TrackingView from '@/views/TrackingView.vue';
 
@@ -25,7 +26,7 @@ const router = createRouter({
         {
             path: '/join',
             name: 'scan',
-            component: JoinView,
+            component: ScanView,
         },
         {
             path: '/join/:id',
