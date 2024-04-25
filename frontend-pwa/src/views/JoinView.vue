@@ -66,14 +66,19 @@ const { videoInputs: cameras, permissionGranted } = useDevicesList({
 });
 
 const video = ref<HTMLVideoElement>();
-const { stream, enabled, start, stop } = useUserMedia({
+const {
+    stream,
+    enabled,
+    start: startUserMedia,
+    stop: stopUserMedia,
+} = useUserMedia({
     constraints: { video: { deviceId: currentCamera.value } },
 });
 
 watchEffect(() => {
     if (video.value) {
         video.value.srcObject = stream.value;
-        start();
+        startUserMedia();
     }
 });
 </script>
