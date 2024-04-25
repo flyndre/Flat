@@ -191,9 +191,7 @@ fun CollectionAreaScreen(
                     }
                 }
             }else{
-                SmallFloatingActionButton(onClick = { /*TODO*/ }) {
-                    Icon(Icons.AutoMirrored.Filled.List, contentDescription = "open list of areas")
-                }
+               
             }
         }
     ) { innerPadding ->
