@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -20,6 +22,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -242,6 +245,18 @@ fun CollectionAreaScreen(
                 }
             }
             //list of areas if navigation is set to
+            if(selectedNavigationItem == 2){
+                LazyColumn {
+                    items(collectionAreas){
+                        ListItem(headlineContent = { Text(text = "Area " + (collectionAreas.indexOf(it) + 1)) }, supportingContent = {Box(
+                            modifier = Modifier
+                                .size(12.dp)
+                                .clip(shape = RoundedCornerShape(3.dp))
+                                .background(color = it.color)
+                        )})
+                    }
+                }
+            }
         }
     }
 }
