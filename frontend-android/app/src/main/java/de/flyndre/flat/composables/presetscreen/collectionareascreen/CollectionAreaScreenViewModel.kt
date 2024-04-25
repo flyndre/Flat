@@ -1,17 +1,22 @@
 package de.flyndre.flat.composables.presetscreen.collectionareascreen
 
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class CollectionAreaScreenViewModel(): ViewModel() {
     //list of points for selection area
-    var listCollectionAreas = mutableStateListOf<CollectionArea>()
+    private val _listCollectionAreas = MutableStateFlow<List<CollectionArea>>(listOf())
+    var listCollectionAreas = _listCollectionAreas.asStateFlow()
 
     //saved camera position
     private val _cameraPosition = MutableStateFlow(CameraPosition(LatLng(0.0, 0.0), 0F, 0F, 0F))
@@ -20,7 +25,7 @@ class CollectionAreaScreenViewModel(): ViewModel() {
     //used to clear viewModel for creation of new empty preset
     fun newEmptyCollectionArea(){
         _cameraPosition.value = CameraPosition(LatLng(0.0, 0.0), 0F, 0F, 0F)
-        listCollectionAreas.clear()
+        _listCollectionAreas.value = listOf()
     }
 
     fun setCameraPosition(cameraPosition: CameraPosition){
@@ -32,52 +37,77 @@ class CollectionAreaScreenViewModel(): ViewModel() {
     }
 
     fun setListAreas(list: ArrayList<CollectionArea>){
-        listCollectionAreas.clear()
-        listCollectionAreas.addAll(list)
+        _listCollectionAreas.value = list
     }
 
     fun getListAreas(): ArrayList<CollectionArea>{
-        return ArrayList(listCollectionAreas)
+        return ArrayList(_listCollectionAreas.value)
     }
 
     fun addNewCollectionArea(color: Color){
-        for(area in listCollectionAreas){
+        val arrayList: ArrayList<CollectionArea> = ArrayList(_listCollectionAreas.value)
+
+        for(area in arrayList){
             if(area.isSelected){
-                area.isSelected = false
+                val tempArea = area.copy(isSelected = false)
+                arrayList.remove(area)
+                arrayList.add(tempArea)
             }
         }
-        listCollectionAreas.add(CollectionArea(color = color, isSelected = true, listAreaPoints = arrayListOf()))
+        arrayList.add(CollectionArea(color = color, isSelected = true, listAreaPoints = arrayListOf()))
+
+        _listCollectionAreas.value = arrayList
     }
 
     fun checkNewCollectionIsEmpty(){
-        for(area in listCollectionAreas){
+        val arrayList: ArrayList<CollectionArea> = ArrayList(_listCollectionAreas.value)
+
+        for(area in arrayList){
             if(area.isSelected){
                 if(area.listAreaPoints.size < 3){
-                    listCollectionAreas.remove(area)
+                    arrayList.remove(area)
                 }else{
-                    area.isSelected = false
+                    val tempArea = area.copy(isSelected = false)
+                    arrayList.remove(area)
+                    arrayList.add(tempArea)
                 }
             }
         }
+
+        _listCollectionAreas.value = arrayList
     }
 
     fun addPCollectionAreaPoint(point: LatLng){
-        for(area in listCollectionAreas){
+        val arrayList: ArrayList<CollectionArea> = ArrayList(_listCollectionAreas.value)
+
+        for(area in arrayList){
             if(area.isSelected){
-                area.listAreaPoints.add(point)
+                val tempArea = area.copy()
+                tempArea.listAreaPoints.add(point)
+                arrayList.remove(area)
+                arrayList.add(tempArea)
                 break
             }
         }
+
+        _listCollectionAreas.value = arrayList
     }
 
     fun removeLastCollectionAreaPoint(){
-        for(area in listCollectionAreas){
+        val arrayList: ArrayList<CollectionArea> = ArrayList(_listCollectionAreas.value)
+
+        for(area in arrayList){
             if(area.isSelected){
                 if(area.listAreaPoints.isNotEmpty()){
-                    area.listAreaPoints.removeLast()
+                    val tempArea = area.copy()
+                    tempArea.listAreaPoints.removeLast()
+                    arrayList.remove(area)
+                    arrayList.add(tempArea)
                 }
                 break
             }
         }
+
+        _listCollectionAreas.value = arrayList
     }
 }
