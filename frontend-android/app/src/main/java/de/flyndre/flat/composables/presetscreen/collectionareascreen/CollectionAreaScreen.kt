@@ -191,10 +191,11 @@ fun CollectionAreaScreen(
                     }
                 }
             }else{
-               
+
             }
         }
     ) { innerPadding ->
+        var mapsModifier = Modifier.padding(innerPadding)
         var mapSettings: MapUiSettings
         var mapProperties: MapProperties
         if (selectedNavigationItem == 0) {
@@ -212,10 +213,11 @@ fun CollectionAreaScreen(
         } else {
             mapSettings = MapUiSettings(zoomControlsEnabled = false)
             mapProperties = MapProperties(isMyLocationEnabled = true)
+            mapsModifier = mapsModifier.height((LocalConfiguration.current.screenHeightDp * 0.5).dp)
         }
 
         GoogleMap(
-            modifier = Modifier.padding(innerPadding),
+            modifier = mapsModifier,
             uiSettings = mapSettings,
             properties = mapProperties,
             cameraPositionState = cameraPositionState,
