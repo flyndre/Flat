@@ -3,16 +3,14 @@ import CardProgressIndicator from '@/components/card/CardProgressIndicator.vue';
 import MdiInputIcon from '@/components/icons/MdiInputIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
-import getJoinId from '@/util/getJoinId';
 import { isOnMobile } from '@/util/mobileDetection';
-import validateJoinLink from '@/validation/validateJoinLink';
 import validateJoinName from '@/validation/validateJoinName';
 import {
     mdiAccount,
     mdiArrowLeft,
     mdiClose,
+    mdiIdentifier,
     mdiImport,
-    mdiLink,
 } from '@mdi/js';
 import { useTimeoutFn } from '@vueuse/core';
 import Button from 'primevue/button';
@@ -24,16 +22,12 @@ import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const props = defineProps<{
-    id?: string;
+    id: string;
 }>();
 
 const router = useRouter();
-const joinLink = ref(props.id ? window.location.href : '');
-const joinId = computed(() => getJoinId(joinLink.value));
 const joinName = ref('');
-const submittable = computed(
-    () => validateJoinLink(joinLink.value) && validateJoinName(joinName.value)
-);
+const submittable = computed(() => validateJoinName(joinName.value));
 const dialogVisible = ref(false);
 const { start, stop } = useTimeoutFn(
     () => {
@@ -60,7 +54,7 @@ function cancel() {
 <template>
     <DefaultLayout>
         <template #action-left>
-            <router-link :to="{ name: 'home' }">
+            <router-link :to="{ name: 'scan' }">
                 <Button label="Back" severity="secondary" text>
                     <template #icon>
                         <MdiTextButtonIcon :icon="mdiArrowLeft" />
@@ -112,19 +106,19 @@ function cancel() {
             <Card :pt="{ root: { class: 'overflow-hidden' } }">
                 <template #header>
                     <div
-                        class="w-full flex-grow bg-gray-500 bg-opacity-50 h-96 flex flex-col items-center justify-center text-gray-500 select-none"
+                        class="w-full h-[40vh] bg-gray-500 bg-opacity-50 flex flex-col justify-center items-center select-none rounded-2xl overflow-hidden"
                     >
-                        Camera Placeholder
+                        [ collection map preview ]
                     </div>
                 </template>
                 <template #content>
                     <div class="flex flex-col gap-2.5">
                         <IconField iconPosition="left">
-                            <MdiInputIcon :icon="mdiLink" />
+                            <MdiInputIcon :icon="mdiIdentifier" />
                             <InputText
                                 class="w-full"
                                 placeholder="Or enter a link manually"
-                                v-model="joinLink"
+                                :value="id"
                                 :disabled="id !== undefined"
                             />
                         </IconField>
