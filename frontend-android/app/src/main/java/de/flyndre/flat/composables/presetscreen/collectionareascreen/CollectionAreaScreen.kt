@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -253,7 +254,8 @@ fun CollectionAreaScreen(
                                 .size(12.dp)
                                 .clip(shape = RoundedCornerShape(3.dp))
                                 .background(color = it.color)
-                        )})
+                        )},
+                            trailingContent = {Icon(Icons.Filled.Delete, contentDescription = "delete area")})
                     }
                 }
             }
