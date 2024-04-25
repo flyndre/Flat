@@ -13,8 +13,9 @@ const pwaProps = {
     ],
     manifest: {
         name: 'Fleet Live Area Tracking',
-        short_name: 'FLAT',
-        description: 'FLAT is an Area Tracking Platform to orchestrate a Fleet',
+        short_name: 'Flat',
+        description:
+            'The modern cross-platform route tracking app to orchestrate volunteer collection campaigns in your neighborhood.',
         theme_color: '#f8fafc',
         start_url: '/',
         icons: [

@@ -42,6 +42,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { GoogleMap } from 'vue3-google-map';
 import MdiIcon from '../icons/MdiIcon.vue';
+import { computedWithControl } from '@vueuse/core';
 
 /**
  * The shapes drawn on the map.
@@ -71,17 +72,20 @@ const props = withDefaults(
 
 watch(() => props.clientPos, setPositionMarker);
 
-const mapCenter = computed(() => {
-    if (props.center === 'position') {
-        panMapToPos(props.clientPos);
-        return props.clientPos;
+const mapCenter = computedWithControl(
+    () => [props.center, props.clientPos, shapes.value],
+    () => {
+        if (props.center === 'position') {
+            panMapToPos(props.clientPos);
+            return props.clientPos;
+        }
+        if (props.center === 'area') {
+            if (all_overlays?.length > 0) panMapToShapes(all_overlays);
+            return map.value?.getCenter();
+        }
+        return props.center ?? map.value?.getCenter();
     }
-    if (props.center === 'area') {
-        if (all_overlays?.length > 0) panMapToShapes(all_overlays);
-        return map.value?.getCenter();
-    }
-    return props.center ?? map.value?.getCenter();
-});
+);
 
 const sanitizedClientPos = computed(() => {
     if (
@@ -446,6 +450,7 @@ const lineOptions = {
         var newShape = typedOverlay.overlay;
         newShape.type = typedOverlay.type;
         google.maps.event.addListener(newShape, 'click', function () {
+            if (props.locked) return;
             setSelection(newShape);
         });
         if (userCreated) {
@@ -550,8 +555,8 @@ onMounted(initialize);
                 :draggable="!locked"
             />
             <MdiIcon
-                v-if="locked"
-                class="absolute bottom-3 left-[5.2rem] stroke-black stroke-[0.8px] !opacity-100 fill-white"
+                v-if="mapReady && locked"
+                class="absolute bottom-[0.65rem] left-[5.15rem] text-white [&:not(dark)]:opacity-60 dark:!opacity-100 stroke-black stroke-[0.8px] transition-opacity"
                 :icon="mdiLock"
             />
         </template>

@@ -1,10 +1,11 @@
-﻿using System.Net.WebSockets;
+﻿using System.Linq;
+using System.Net.WebSockets;
+using System.Runtime.InteropServices.JavaScript;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using FlatBackend.DTOs;
 using FlatBackend.Interfaces;
-using FlatBackend.Models;
-using FlatBackend.Websocket;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlatBackend.Controllers
@@ -44,19 +45,48 @@ namespace FlatBackend.Controllers
 
             while (!receiveResult.CloseStatus.HasValue)
             {
-                var Json = Encoding.ASCII.GetString(buffer);
+                string Json = Encoding.ASCII.GetString(buffer);
                 Json = new string(Json.Where(c => c != '\x00').ToArray());
-                if (_DtoJsonCategoriser.isWebsocketConnectionDto(Json))
-                {
-                    var webSocketUser = JsonSerializer.Deserialize<WebsocketConnectionDto>(Json);
-                    _WebsocketManager.saveWebSocketOfUser(webSocket, webSocketUser.collectionId, webSocketUser.clientId);
-                }
+                var index = Json.IndexOf("\"type\":");
+                string z = Json.Substring(index + 8, 1);
 
-                await webSocket.SendAsync(
-                    new ArraySegment<byte>(buffer, 0, receiveResult.Count),
-                    receiveResult.MessageType,
-                    receiveResult.EndOfMessage,
-                    CancellationToken.None);
+                if (int.TryParse(z, out int type))
+                    switch (type)
+                    {
+                        case 0:
+                            var webSocketUser = JsonSerializer.Deserialize<WebsocketConnectionDto>(Json);
+                            _WebsocketManager.saveWebSocketOfUser(webSocket, webSocketUser.collectionId, webSocketUser.clientId);
+                            await webSocket.SendAsync(
+                                new ArraySegment<byte>(buffer, 0, receiveResult.Count),
+                                receiveResult.MessageType,
+                                receiveResult.EndOfMessage,
+                                CancellationToken.None);
+                            break;
+
+                        case 1://IncrementalTrack
+                            break;
+
+                        case 2://AccessRequest
+                            _WebsocketManager.setAccessConfirmationWaiting(JsonSerializer.Deserialize<AccessConfirmationDto>(Json));
+                            break;
+
+                        case 3://CollectionClosed kp was das hier tun soll
+                            var result = JsonSerializer.Deserialize<CollectionClosedDto>(Json);
+                            _WebsocketManager.sendCollectionClosedInformation(result.collectionId);
+                            break;
+
+                        case 4://CollectionUpdate kp was das hier tun soll
+                            break;
+
+                        default:
+                            break;
+                    };
+
+                //await webSocket.SendAsync(
+                //    new ArraySegment<byte>(buffer, 0, receiveResult.Count),
+                //    receiveResult.MessageType,
+                //    receiveResult.EndOfMessage,
+                //    CancellationToken.None);
 
                 receiveResult = await webSocket.ReceiveAsync(
                     new ArraySegment<byte>(buffer), CancellationToken.None);

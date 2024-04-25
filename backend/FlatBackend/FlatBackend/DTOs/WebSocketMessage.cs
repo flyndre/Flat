@@ -2,6 +2,6 @@
 {
     public class WebSocketMessage
     {
-        public WebSocketMessageType type { get; set; }
+        private WebSocketMessageType type { get; set; }
     }
 }

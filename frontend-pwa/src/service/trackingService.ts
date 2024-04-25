@@ -1,5 +1,5 @@
 import { TRACKING_INTERVAL } from '@/data/constants';
-import { logPosition } from '@/data/trackingLogs';
+import { logPosition, trackingLogDB } from '@/data/trackingLogs';
 import { useGeolocation, useIntervalFn } from '@vueuse/core';
 import { computed, ref } from 'vue';
 
@@ -55,7 +55,12 @@ function start() {
     resumeInterval();
 }
 
+function reset() {
+    trackingLogDB.clear();
+}
+
 export const useTrackingService = () => ({
+    reset,
     start,
     stop,
     isActive,

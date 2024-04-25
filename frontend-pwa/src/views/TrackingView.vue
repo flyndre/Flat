@@ -7,6 +7,7 @@ import { TOAST_LIFE } from '@/data/constants';
 import { trackingLogs } from '@/data/trackingLogs';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { useTrackingService } from '@/service/trackingService';
+import { Division } from '@/types/Division';
 import { ParticipantTrack } from '@/types/ParticipantTrack';
 import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
 import { isOnMobile } from '@/util/mobileDetection';
@@ -164,6 +165,52 @@ const tracks = computed<ParticipantTrack[]>(() => [
         ],
     },
 ]);
+
+const divisions: Division[] = [
+    {
+        id: 'e8581ff9-b53c-4307-aa5c-2d294b770f29',
+        name: 'Dürrenmettstetten',
+        color: '#1E90FF',
+        area: {
+            type: 'MultiPolygon',
+            coordinates: [
+                [
+                    [
+                        [48.39479146042227, 8.57364691580809],
+                        [48.39559467209357, 8.575929475679764],
+                        [48.395977573415905, 8.578324688330063],
+                        [48.3961592279191, 8.5818973907379],
+                        [48.396034563133774, 8.583699835195908],
+                        [48.39584044164562, 8.585456682100663],
+                        [48.39573981874792, 8.586026651516327],
+                        [48.3954183584227, 8.587594402685532],
+                        [48.394392521309335, 8.590185416593918],
+                        [48.393861784962056, 8.591267687931428],
+                        [48.392105684967454, 8.593701792612443],
+                        [48.389946988142086, 8.594557417288193],
+                        [48.38765282711779, 8.594965113058457],
+                        [48.384161514074385, 8.593581093206772],
+                        [48.38286467965901, 8.591845703974137],
+                        [48.38173882958217, 8.589659703627],
+                        [48.38084810776395, 8.586813879862198],
+                        [48.38012839315009, 8.582047594442734],
+                        [48.38020054321759, 8.57834212268866],
+                        [48.38063611367502, 8.576331807031998],
+                        [48.38236945120565, 8.572729600324998],
+                        [48.38344362767722, 8.571192694559464],
+                        [48.384774292467746, 8.569859636679062],
+                        [48.3862955185641, 8.568797481909165],
+                        [48.38803400699896, 8.568094743147263],
+                        [48.38950704447006, 8.568108154192338],
+                        [48.39060956819524, 8.568475616827378],
+                        [48.39201306949216, 8.569569958105454],
+                        [48.39348777280142, 8.571071995153794],
+                    ],
+                ],
+            ],
+        },
+    },
+];
 </script>
 
 <template>
@@ -406,7 +453,12 @@ const tracks = computed<ParticipantTrack[]>(() => [
             <Card
                 class="h-full grow"
                 :pt="{
-                    root: { class: 'overflow-hidden' },
+                    root: {
+                        class: [
+                            'overflow-hidden flex',
+                            { 'flex flex-col-reverse': !isOnMobile },
+                        ],
+                    },
                     header: {
                         class: 'h-full flex flex-col grow',
                     },
@@ -418,6 +470,7 @@ const tracks = computed<ParticipantTrack[]>(() => [
                         controls="none"
                         :center="mapCenterSelected"
                         :locked="mapCenterSelected != null"
+                        :divisions
                         :client-pos
                         :tracks
                     />
