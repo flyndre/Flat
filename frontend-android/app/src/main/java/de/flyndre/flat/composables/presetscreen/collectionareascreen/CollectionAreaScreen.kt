@@ -3,6 +3,7 @@ package de.flyndre.flat.composables.presetscreen.collectionareascreen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -195,7 +196,7 @@ fun CollectionAreaScreen(
             }
         }
     ) { innerPadding ->
-        var mapsModifier = Modifier.padding(innerPadding)
+        var mapsModifier: Modifier = Modifier
         var mapSettings: MapUiSettings
         var mapProperties: MapProperties
         if (selectedNavigationItem == 0) {
@@ -216,27 +217,31 @@ fun CollectionAreaScreen(
             mapsModifier = mapsModifier.height((LocalConfiguration.current.screenHeightDp * 0.5).dp)
         }
 
-        GoogleMap(
-            modifier = mapsModifier,
-            uiSettings = mapSettings,
-            properties = mapProperties,
-            cameraPositionState = cameraPositionState,
-            onMapClick = {
-                if (selectedNavigationItem == 1) {
-                    collectionAreaScreenViewModel.addPCollectionAreaPoint(it)
-                }
-            }) {
-            if (collectionAreas.isNotEmpty()) {
-                collectionAreas.forEach{ area ->
-                    if(area.listAreaPoints.isNotEmpty()){
-                        Polygon(
-                            points = area.listAreaPoints,
-                            fillColor = area.color.copy(alpha = 0.5f),
-                            strokeColor = area.color.copy(alpha = 1F)
-                        )
+        Column(modifier = Modifier.padding(innerPadding)) {
+            //map
+            GoogleMap(
+                modifier = mapsModifier,
+                uiSettings = mapSettings,
+                properties = mapProperties,
+                cameraPositionState = cameraPositionState,
+                onMapClick = {
+                    if (selectedNavigationItem == 1) {
+                        collectionAreaScreenViewModel.addPCollectionAreaPoint(it)
+                    }
+                }) {
+                if (collectionAreas.isNotEmpty()) {
+                    collectionAreas.forEach{ area ->
+                        if(area.listAreaPoints.isNotEmpty()){
+                            Polygon(
+                                points = area.listAreaPoints,
+                                fillColor = area.color.copy(alpha = 0.5f),
+                                strokeColor = area.color.copy(alpha = 1F)
+                            )
+                        }
                     }
                 }
             }
+            //list of areas if navigation is set to
         }
     }
 }
