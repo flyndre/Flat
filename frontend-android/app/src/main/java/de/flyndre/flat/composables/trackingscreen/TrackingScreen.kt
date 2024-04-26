@@ -15,6 +15,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -94,7 +95,7 @@ fun AdminMenu(){
             HorizontalDivider()
             DropdownMenuItem(text = { Text(text = "Manage Groups") }, onClick = { /*TODO*/ })
         }
-        IconButton(onClick = { expanded = true }) {
+        FloatingActionButton(onClick = { expanded = true }) {
             Icon(Icons.Filled.MoreVert, contentDescription = "open collection management")
         }
     }
