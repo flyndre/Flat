@@ -300,10 +300,12 @@ fun CollectionAreaScreen(
                                 )
                             },
                             trailingContent = {
-                                Icon(
-                                    Icons.Filled.Delete,
-                                    contentDescription = "delete area"
-                                )
+                                IconButton(onClick = { collectionAreaScreenViewModel.removeCollectionArea(it) }) {
+                                    Icon(
+                                        Icons.Filled.Delete,
+                                        contentDescription = "delete area",
+                                    )
+                                }
                             })
                     }
                 }
