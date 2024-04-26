@@ -58,6 +58,7 @@ class ConnectionService(
         if(response.isSuccessful&&response.body !=null){
             val bodyString = response.body!!.string()
             response.close()
+            openWebsocket()
             return json.decodeFromString(bodyString)
         }else{
             val responseString = response.body?.string()
