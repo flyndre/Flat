@@ -116,4 +116,12 @@ class CollectionAreaScreenViewModel() : ViewModel() {
 
         _listCollectionAreas.value = arrayList
     }
+
+    fun removeCollectionArea(collectionArea: CollectionArea){
+        val arrayList: ArrayList<CollectionArea> = ArrayList(_listCollectionAreas.value)
+
+        arrayList.remove(collectionArea)
+
+        _listCollectionAreas.value = arrayList
+    }
 }
