@@ -17,10 +17,13 @@ class TrackingScreenViewModel(
     private var _db = db
     private val _trackingService = trackingService
     lateinit var collectionInstance: CollectionInstance
-    private val _startStopButtonText: MutableStateFlow<String> = MutableStateFlow("Start tracking")
-    val startStopButtonText: StateFlow<String> = _startStopButtonText.asStateFlow()
+
+    private val _trackingEnabled = MutableStateFlow(false)
+    val trackingEnabled = _trackingEnabled.asStateFlow()
+
     private val _trackList: MutableStateFlow<TrackCollection> = MutableStateFlow(TrackCollection())
     val trackList: StateFlow<TrackCollection> = _trackList.asStateFlow()
+
     private val _remoteTrackList: MutableStateFlow<Map<UUID,TrackCollection>> = MutableStateFlow(mapOf())
     val remoteTrackList: StateFlow<Map<UUID,TrackCollection>> = _remoteTrackList.asStateFlow()
 
@@ -31,12 +34,12 @@ class TrackingScreenViewModel(
     }
 
     fun toggleTracking(){
-        if(_trackingService.isTracking){
+        if(_trackingEnabled.value){
             _trackingService.stopTracking()
-            _startStopButtonText.value= "Start tracking"
+            _trackingEnabled.value = false
         }else{
             _trackingService.startTracking()
-            _startStopButtonText.value = "Stop tracking"
+            _trackingEnabled.value = true
         }
     }
 
