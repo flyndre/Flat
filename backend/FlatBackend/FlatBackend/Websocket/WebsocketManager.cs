@@ -111,14 +111,6 @@ namespace FlatBackend.Websocket
 
         public async void sendGPSTrackCollection( TrackCollectionDto tracks, Guid collectionId )
         {
-            foreach (var user in users)
-            {
-                if (user.collectionId == collectionId)
-                {
-                    string Json = JsonSerializer.Serialize(tracks);
-                    await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
-                }
-            }
         }
 
         public async void sendGPSTrack( IncrementalTrackDto track, Guid collectionId )
