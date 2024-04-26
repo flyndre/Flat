@@ -67,7 +67,7 @@ fun TrackingScreen(modifier: Modifier = Modifier, trackingScreenViewModel: Track
                 }
             }
         }
-    }) {
+    }, floatingActionButton = {AdminMenu()}) {
         innerPadding ->
         Column (modifier.padding(innerPadding)) {
             Text(text = "Local Tracks:")
