@@ -13,7 +13,7 @@ namespace FlatBackend.Interfaces
 
         public void setAccessConfirmationWaiting( AccessConfirmationDto accessConfirmationDto );
 
-        public void sendSummaryToBoss( TrackCollectionDto tracks, Guid collectionId, Guid clientId );
+        public void sendSummaryToBoss( TrackCollectionModel tracks, Guid collectionId, Guid clientId );
 
         public void saveWebSocketOfUser( WebSocket webSocket, Guid collectionId, Guid userId );
 

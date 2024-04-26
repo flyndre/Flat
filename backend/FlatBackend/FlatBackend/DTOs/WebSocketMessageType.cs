@@ -6,6 +6,7 @@
         IncrementalTrack,
         AccessRequest,
         CollectionClosed,
-        CollectionUpdate
+        CollectionUpdate,
+        Summary
     }
 }
