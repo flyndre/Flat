@@ -1,6 +1,7 @@
 package de.flyndre.flat.composables.presetscreen.collectionareascreen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,7 +43,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
@@ -284,7 +287,10 @@ fun CollectionAreaScreen(
             if (selectedNavigationItem == 2) {
                 LazyColumn {
                     items(collectionAreas) {
-                        ListItem(headlineContent = {
+                        ListItem(modifier = Modifier.clickable {
+                            collectionAreaScreenViewModel.animateCameraPositionToCollectionArea(it, cameraPositionState)
+                        },
+                            headlineContent = {
                             Text(
                                 text = "Area " + (collectionAreas.indexOf(
                                     it
