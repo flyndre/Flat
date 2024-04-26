@@ -32,24 +32,32 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import de.flyndre.flat.models.Track
+import java.util.UUID
 import kotlin.math.exp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TrackingScreen(modifier: Modifier = Modifier, trackingScreenViewModel: TrackingScreenViewModel, onNavigateToInitialScreen: () -> Unit){
+fun TrackingScreen(
+    modifier: Modifier = Modifier,
+    trackingScreenViewModel: TrackingScreenViewModel,
+    onNavigateToInitialScreen: () -> Unit,
+    userId: UUID,
+) {
     val trackingEnabled by trackingScreenViewModel.trackingEnabled.collectAsState()
     val localTrackList by trackingScreenViewModel.trackList.collectAsState()
     val remoteTrackList by trackingScreenViewModel.remoteTrackList.collectAsState()
 
-    Scaffold (topBar = {
-        TopAppBar(title = { Text(text = trackingScreenViewModel.collectionInstance.name) }, navigationIcon = {
-            IconButton(onClick = { onNavigateToInitialScreen() }) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "back to start screen"
-                )
-            }
-        })
+    Scaffold(topBar = {
+        TopAppBar(
+            title = { Text(text = trackingScreenViewModel.collectionInstance.name) },
+            navigationIcon = {
+                IconButton(onClick = { onNavigateToInitialScreen() }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "back to start screen"
+                    )
+                }
+            })
     }, bottomBar = {
         BottomAppBar() {
             Row(
@@ -57,27 +65,32 @@ fun TrackingScreen(modifier: Modifier = Modifier, trackingScreenViewModel: Track
                 horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)
             ) {
                 Button(onClick = { trackingScreenViewModel.toggleTracking() }) {
-                    if(trackingEnabled){
+                    if (trackingEnabled) {
                         Text(text = "Stop Tracking")
-                    }else{
+                    } else {
                         Text(text = "Start Tracking")
                     }
                 }
-                Button(onClick = {}){
-                    Text(text = "Add Participant")
+                if (userId.equals(trackingScreenViewModel.collectionInstance.clientId)) {//if this user is admin
+                    Button(onClick = {}) {
+                        Text(text = "Add Participant")
+                    }
                 }
             }
         }
-    }, floatingActionButton = {AdminMenu()}) {
-        innerPadding ->
-        Column (modifier.padding(innerPadding)) {
+    }, floatingActionButton = {
+        if(userId.equals(trackingScreenViewModel.collectionInstance.clientId)){
+            AdminMenu()
+        }
+    }) { innerPadding ->
+        Column(modifier.padding(innerPadding)) {
             Text(text = "Local Tracks:")
-            localTrackList.forEach{track: Track -> 
+            localTrackList.forEach { track: Track ->
                 Text(text = track.toLineString().toString())
             }
             Text(text = "Remote Tracks:")
-            remoteTrackList.forEach{trackCollection ->
-                trackCollection.value.forEach{track ->
+            remoteTrackList.forEach { trackCollection ->
+                trackCollection.value.forEach { track ->
                     Text(text = track.toLineString().toString())
                 }
             }
@@ -86,10 +99,10 @@ fun TrackingScreen(modifier: Modifier = Modifier, trackingScreenViewModel: Track
 }
 
 @Composable
-fun AdminMenu(){
+fun AdminMenu() {
     var expanded by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier){
+    Box(modifier = Modifier) {
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(text = { Text(text = "End Collection") }, onClick = { /*TODO*/ })
             HorizontalDivider()
