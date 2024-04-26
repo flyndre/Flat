@@ -18,6 +18,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -26,7 +29,7 @@ import de.flyndre.flat.models.Track
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TrackingScreen(modifier: Modifier = Modifier, trackingScreenViewModel: TrackingScreenViewModel, onNavigateToInitialScreen: () -> Unit){
-    val startStopButtonText by trackingScreenViewModel.startStopButtonText.collectAsState()
+    val trackingEnabled by trackingScreenViewModel.trackingEnabled.collectAsState()
     val localTrackList by trackingScreenViewModel.trackList.collectAsState()
     val remoteTrackList by trackingScreenViewModel.remoteTrackList.collectAsState()
 
@@ -46,7 +49,11 @@ fun TrackingScreen(modifier: Modifier = Modifier, trackingScreenViewModel: Track
                 horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)
             ) {
                 Button(onClick = { trackingScreenViewModel.toggleTracking() }) {
-                    Text(startStopButtonText)
+                    if(trackingEnabled){
+                        Text(text = "Stop Tracking")
+                    }else{
+                        Text(text = "Start Tracking")
+                    }
                 }
             }
         }
