@@ -1,7 +1,6 @@
 package de.flyndre.flat.composables.trackingscreen
 
 import androidx.lifecycle.ViewModel
-import com.google.android.gms.maps.model.LatLng
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.interfaces.ITrackingService
 import de.flyndre.flat.models.CollectionInstance
@@ -20,11 +19,15 @@ class TrackingScreenViewModel(
     lateinit var collectionInstance: CollectionInstance
     private val _startStopButtonText: MutableStateFlow<String> = MutableStateFlow("Start tracking")
     val startStopButtonText: StateFlow<String> = _startStopButtonText.asStateFlow()
-    private val _trackList: MutableStateFlow<Map<UUID,TrackCollection>> = MutableStateFlow(mapOf())
-    val trackList: StateFlow<Map<UUID,TrackCollection>> = _trackList.asStateFlow()
+    private val _trackList: MutableStateFlow<TrackCollection> = MutableStateFlow(TrackCollection())
+    val trackList: StateFlow<TrackCollection> = _trackList.asStateFlow()
+    private val _remoteTrackList: MutableStateFlow<Map<UUID,TrackCollection>> = MutableStateFlow(mapOf())
+    val remoteTrackList: StateFlow<Map<UUID,TrackCollection>> = _remoteTrackList.asStateFlow()
+
 
     init {
-        trackingService.addOnTrackUpdate{->onTrackUpdate()}
+        trackingService.addOnLocalTrackUpdate{ onLocalTrackUpdate() }
+        trackingService.addOnRemoteTrackUpdate { onRemoteTrackUpdate() }
     }
 
     fun toggleTracking(){
@@ -37,8 +40,11 @@ class TrackingScreenViewModel(
         }
     }
 
-    private fun onTrackUpdate(){
-        _trackList.value = mapOf(Pair(UUID.randomUUID(),_trackingService.ownTrack))
+    private fun onLocalTrackUpdate(){
+        _trackList.value = _trackingService.localTrack
+    }
+    private fun onRemoteTrackUpdate(){
+        _remoteTrackList.value = _trackingService.remoteTracks
     }
 
 }
