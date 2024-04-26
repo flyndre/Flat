@@ -7,6 +7,10 @@ namespace FlatBackend.Interfaces
 {
     public interface IWebsocketManager
     {
+        public Guid getCollectionId( WebSocket websocket );
+
+        public void addTrackToTrackCollection( IncrementalTrackDto track, Guid collectionId );
+
         public void setAccessConfirmationWaiting( AccessConfirmationDto accessConfirmationDto );
 
         public void saveWebSocketOfUser( WebSocket webSocket, Guid collectionId, Guid userId );

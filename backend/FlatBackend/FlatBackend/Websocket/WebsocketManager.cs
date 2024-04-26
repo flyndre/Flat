@@ -13,7 +13,8 @@ namespace FlatBackend.Websocket
     public class WebsocketManager : IWebsocketManager
     {
         private readonly IMongoDBService _MongoDBService;
-        public List<WebSocketUserModel> users;
+        private List<WebSocketUserModel> users;
+        private List<TrackCollectionModel> trackCollections;
         public BlockingCollection<WebsocketConnectionDto> connectionsWaiting;
         public BlockingCollection<AccessConfirmationDto> accessConfirmationWaiting;
         public BlockingCollection<CollectionClosedDto> collectionClosedWaiting;
@@ -29,6 +30,18 @@ namespace FlatBackend.Websocket
             collectionClosedWaiting = new BlockingCollection<CollectionClosedDto>();
             incrementalTrackWaiting = new BlockingCollection<IncrementalTrackDto>();
             updateWaiting = new BlockingCollection<CollectionUpdateDto>();
+        }
+
+        public Guid getCollectionId( WebSocket websocket )
+        {
+            var user = users.Where(x => x.webSocket == websocket).First();
+            return user.clientId;
+        }
+
+        public void addTrackToTrackCollection( IncrementalTrackDto track, Guid collectionId )
+        {
+            var trackCollection = trackCollections.Where(x => x.collectionId == collectionId).First();
+            trackCollection.tracks.Add(track);
         }
 
         public void setAccessConfirmationWaiting( AccessConfirmationDto accessConfirmationDto )

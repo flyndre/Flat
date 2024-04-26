@@ -1,12 +1,13 @@
-﻿using FlatBackend.Models.GeoJsonModels;
+﻿using FlatBackend.DTOs;
+using FlatBackend.Models.GeoJsonModels;
 
 namespace FlatBackend.Models
 {
     public class TrackCollectionModel
     {
-        public Guid trackId { get; set; }
-        public Guid clientId { get; set; }
+        public Guid trackId { get; set; } = Guid.NewGuid();
+
         public Guid collectionId { get; set; }
-        public List<LineString> tracks { get; set; }
+        public List<IncrementalTrackDto> tracks { get; set; }
     }
 }

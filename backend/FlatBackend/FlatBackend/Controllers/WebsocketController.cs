@@ -64,6 +64,10 @@ namespace FlatBackend.Controllers
                             break;
 
                         case 1://IncrementalTrack
+                            var track = JsonSerializer.Deserialize<IncrementalTrackDto>(Json);
+                            var collectionId = _WebsocketManager.getCollectionId(webSocket);
+                            //_WebsocketManager.addTrackToTrackCollection(track, collectionId);
+                            _WebsocketManager.sendGPSTrack(track, collectionId);
                             break;
 
                         case 2://AccessRequest
