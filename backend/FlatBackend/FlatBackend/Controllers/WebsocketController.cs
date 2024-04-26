@@ -21,7 +21,7 @@ namespace FlatBackend.Controllers
             _DtoJsonCategoriser = new DtoJsonCategoriser();
         }
 
-        [Route("/ws")]
+        [Route("/api/ws")]
         [HttpGet]
         public async Task Get()
         {

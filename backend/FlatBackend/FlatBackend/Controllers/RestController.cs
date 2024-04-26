@@ -71,6 +71,20 @@ namespace FlatBackend.Controllers
                 var result = await _MongoDBService.GetCollection(id);
                 string Json = JsonSerializer.Serialize(result.requestedAccess.Find(x => x.clientId == value.clientId));
                 var confirmedUser = await _WebsocketManager.sendAccessRequestToBoss(new DTOs.AccessRequestDto() { collectionId = id, clientId = value.clientId, username = value.username });
+                UserModel? validUser = oldCol.confirmedUsers.Find(x => x.clientId == value.clientId);
+                if (validUser == null)
+                {
+                    oldCol.requestedAccess.Remove(value);
+                    oldCol.confirmedUsers.Add(confirmedUser);
+                }
+                else
+                {
+                    var index = oldCol.confirmedUsers.IndexOf(validUser);
+                    oldCol.confirmedUsers[index] = confirmedUser;
+                }
+                _MongoDBService.ChangeCollection(oldCol);
+                //_WebsocketManager.sendAccessConfirmationToUser(new DTOs.AccessConfirmationDto() { collectionId = id, clientId = value.clientId, accepted = value.accepted });
+                _WebsocketManager.sendUpdateCollection(id);
                 Json = JsonSerializer.Serialize(confirmedUser);
                 return Json;
             }
@@ -156,7 +170,7 @@ namespace FlatBackend.Controllers
                 }
                 if (value.confirmedUsers == null)
                 {
-                    value.confirmedUsers = new List<UserModel>();
+                    value.confirmedUsers = new List<UserModel>() { new UserModel() { clientId = value.clientId, username = "admin", accepted = true } };
                 }
                 if (value.requestedAccess == null)
                 {

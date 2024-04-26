@@ -30,6 +30,7 @@ namespace FlatBackend.Websocket
             collectionClosedWaiting = new BlockingCollection<CollectionClosedDto>();
             incrementalTrackWaiting = new BlockingCollection<IncrementalTrackDto>();
             updateWaiting = new BlockingCollection<CollectionUpdateDto>();
+            trackCollections = new List<TrackCollectionModel>();
         }
 
         public Guid getCollectionId( WebSocket websocket )
@@ -67,7 +68,14 @@ namespace FlatBackend.Websocket
                 {
                     users.Add(newUser);
                 }
-                sendGPSTrackCollection(trackCollections.Where(x => x.collectionId == collectionId).First(), collectionId, userId);
+                if (trackCollections.Count > 0)
+                {
+                    var TrackCollection = trackCollections.Where(x => x.collectionId == collectionId).First();
+                    if (TrackCollection != null)
+                    {
+                        sendGPSTrackCollection(TrackCollection, collectionId, userId);
+                    }
+                }
             }
             else
             {
