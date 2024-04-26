@@ -72,7 +72,8 @@ namespace FlatBackend.Websocket
                     var validUser = collection.confirmedUsers.Find(x => x.clientId == user.clientId);
                     if (validUser != null && validUser.accepted)
                     {
-                        string Json = JsonSerializer.Serialize(collection);
+                        CollectionUpdateDto update = new CollectionUpdateDto() { collection = collection };
+                        string Json = JsonSerializer.Serialize(update);
                         await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
                     }
                 }
@@ -86,7 +87,7 @@ namespace FlatBackend.Websocket
             {
                 if (user.collectionId == collectionId)
                 {
-                    CollectionClosedDto collectionClosedDto = new CollectionClosedDto();
+                    CollectionClosedDto collectionClosedDto = new CollectionClosedDto() { collectionId = collectionId };
                     string Json = JsonSerializer.Serialize(collectionClosedDto);
                     await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
                     await user.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "The Collection was closed so the Connection is closed too.", CancellationToken.None);
