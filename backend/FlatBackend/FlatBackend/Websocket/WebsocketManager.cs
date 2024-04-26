@@ -67,6 +67,7 @@ namespace FlatBackend.Websocket
                 {
                     users.Add(newUser);
                 }
+                sendGPSTrackCollection(trackCollections.Where(x => x.collectionId == collectionId).First(), collectionId, userId);
             }
             else
             {
@@ -109,8 +110,20 @@ namespace FlatBackend.Websocket
             }
         }
 
-        public async void sendGPSTrackCollection( TrackCollectionDto tracks, Guid collectionId )
+        public async void sendGPSTrackCollection( TrackCollectionModel tracks, Guid collectionId, Guid clientId )
         {
+            var user = users.Where(x => x.clientId == clientId && x.collectionId == collectionId).First();
+            List<IncrementalTrackDto> tracksList = tracks.tracks;
+            string Json = JsonSerializer.Serialize(tracks);
+            user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
+        }
+
+        public async void sendSummaryToBoss( TrackCollectionDto tracks, Guid collectionId, Guid clientId )
+        {
+            var user = users.Where(x => x.clientId == clientId && x.collectionId == collectionId).First();
+            List<IncrementalTrackDto> tracksList = tracks.tracks;
+            string Json = JsonSerializer.Serialize(tracks);
+            user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
         }
 
         public async void sendGPSTrack( IncrementalTrackDto track, Guid collectionId )
