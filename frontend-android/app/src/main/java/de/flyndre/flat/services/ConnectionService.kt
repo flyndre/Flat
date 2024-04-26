@@ -163,7 +163,7 @@ class ConnectionService(
     }
 
     override suspend fun sendTrackUpdate(track: Track) {
-        val message = Json.encodeToString(IncrementalTrackMessage(track.trackId.toString(),track.toLineString()))
+        val message = Json.encodeToString(IncrementalTrackMessage(track.trackId,clientId,track.toLineString()))
         webSocketClient.sendMessage(message)
     }
 
