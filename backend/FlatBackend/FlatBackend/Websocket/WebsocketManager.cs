@@ -30,6 +30,7 @@ namespace FlatBackend.Websocket
             collectionClosedWaiting = new BlockingCollection<CollectionClosedDto>();
             incrementalTrackWaiting = new BlockingCollection<IncrementalTrackDto>();
             updateWaiting = new BlockingCollection<CollectionUpdateDto>();
+            trackCollections = new List<TrackCollectionModel>();
         }
 
         public Guid getCollectionId( WebSocket websocket )
@@ -67,6 +68,14 @@ namespace FlatBackend.Websocket
                 {
                     users.Add(newUser);
                 }
+                if (trackCollections.Count > 0)
+                {
+                    var TrackCollection = trackCollections.Where(x => x.collectionId == collectionId).First();
+                    if (TrackCollection != null)
+                    {
+                        sendGPSTrackCollection(TrackCollection, collectionId, userId);
+                    }
+                }
             }
             else
             {
@@ -103,14 +112,33 @@ namespace FlatBackend.Websocket
                     CollectionClosedDto collectionClosedDto = new CollectionClosedDto() { collectionId = collectionId };
                     string Json = JsonSerializer.Serialize(collectionClosedDto);
                     await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
+                    if (user.clientId == collection.clientId)
+                    {
+                        sendSummaryToBoss(trackCollections.Where(x => x.collectionId == collectionId).First(), collectionId, user.clientId);
+                    }
                     await user.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "The Collection was closed so the Connection is closed too.", CancellationToken.None);
+
                     users.Remove(user);
                 }
             }
         }
 
-        public async void sendGPSTrackCollection( TrackCollectionDto tracks, Guid collectionId )
+        public async void sendGPSTrackCollection( TrackCollectionModel tracks, Guid collectionId, Guid clientId )
         {
+            var user = users.Where(x => x.clientId == clientId && x.collectionId == collectionId).First();
+            List<IncrementalTrackDto> tracksList = tracks.tracks;
+            string Json = JsonSerializer.Serialize(tracksList);
+            user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
+        }
+
+        public async void sendSummaryToBoss( TrackCollectionModel tracks, Guid collectionId, Guid clientId )
+        {
+            var collection = await _MongoDBService.GetCollection(collectionId);
+            var user = users.Where(x => x.clientId == clientId && x.collectionId == collectionId).First();
+            SummaryModel summary = new SummaryModel() { collection = collection, trackCollection = tracks };
+
+            string Json = JsonSerializer.Serialize(summary);
+            user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
         }
 
         public async void sendGPSTrack( IncrementalTrackDto track, Guid collectionId )
