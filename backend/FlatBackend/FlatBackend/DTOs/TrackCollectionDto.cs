@@ -2,7 +2,7 @@
 
 namespace FlatBackend.DTOs
 {
-    public class TrackCollectionDto
+    public class TrackCollectionDto 
     {
         public Guid trackCollectionId { get; set; } = Guid.NewGuid();
 

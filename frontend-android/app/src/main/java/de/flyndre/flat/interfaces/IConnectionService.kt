@@ -90,7 +90,8 @@ interface IConnectionService {
      * @param onTrackUpdate a callback to be called when a track update is received from an other user.
      * @param onCollectionUpdate
      */
-    suspend fun openWebsocket(onAccessRequest: ((AccessResquestMessage) -> Unit)? = null,
+    suspend fun openWebsocket(collectionId: UUID,
+                              onAccessRequest: ((AccessResquestMessage) -> Unit)? = null,
                               onCollectionClosed: ((CollectionClosedMessage) -> Unit)? = null,
                               onTrackUpdate: ((IncrementalTrackMessage) -> Unit)? = null,
                               onCollectionUpdate: ((CollectionUpdateMessage)->Unit)?=null)
