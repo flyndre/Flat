@@ -59,7 +59,7 @@ class MainActivity : ComponentActivity() {
             preference.edit { putString(userIdKey,UUID.randomUUID().toString()) }
         }
         val userId = UUID.fromString(preference.getString(userIdKey,""))
-        connectionService = ConnectionService("https:flat.buhss.de/api/rest",userId)
+        connectionService = ConnectionService("https:flat.buhss.de/api/rest","wss:flat.buhss.de/api/ws",userId)
         locationService = LocationService(1000,
             LocationServices.getFusedLocationProviderClient(this),this
         )

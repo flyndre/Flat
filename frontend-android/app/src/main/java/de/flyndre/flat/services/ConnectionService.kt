@@ -26,7 +26,8 @@ import ru.gildor.coroutines.okhttp.await
 import java.util.UUID
 
 class ConnectionService(
-    private var baseUrl:String,
+    private val baseUrl:String,
+    private val webSocketUrl:String,
     private val clientId:UUID,
     override val onAccessRequest: ArrayList<(AccessResquestMessage) -> Unit> = arrayListOf(),
     override val onCollectionClosed: ArrayList<(CollectionClosedMessage) -> Unit> = arrayListOf(),
@@ -184,7 +185,7 @@ class ConnectionService(
         onCollectionClosed?.let { addOnCollectionClosed(it) }
         onTrackUpdate?.let { addOnTrackUpdate(it) }
         onCollectionUpdate?.let { addOnCollectionUpdate(it) }
-        webSocketClient.setSocketUrl("$baseUrl/ws")
+        webSocketClient.setSocketUrl(webSocketUrl)
         webSocketClient.setListener(socketListener)
         webSocketClient.connect()
         webSocketClient.sendMessage(Json.encodeToString(WebsocketConnectionMessage(clientId,collectionId)))
