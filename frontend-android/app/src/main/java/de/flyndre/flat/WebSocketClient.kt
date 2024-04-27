@@ -66,7 +66,7 @@ class WebSocketClient {
             .sslSocketFactory(sslSocketFactory, trustAllCerts[0] as X509TrustManager)
             .hostnameVerifier{ _, _ -> true }
             .build()
-        val request = Request.Builder().url(url = socketUrl).build()
+        val request = Request.Builder().url(url = "wss://flat.buhss.de/api/rest/ws").build()
         webSocket = client!!.newWebSocket(request, webSocketListener)
         //this must me done else memory leak will be caused
         client!!.dispatcher.executorService.shutdown()

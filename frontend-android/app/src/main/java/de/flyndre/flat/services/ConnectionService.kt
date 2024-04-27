@@ -14,6 +14,7 @@ import de.flyndre.flat.models.Track
 import de.flyndre.flat.models.UserModel
 import de.flyndre.flat.models.WebSocketMessage
 import de.flyndre.flat.models.WebSocketMessageType
+import de.flyndre.flat.models.WebsocketConnectionMessage
 import io.github.dellisd.spatialk.geojson.MultiPolygon
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -35,14 +36,16 @@ class ConnectionService(
 
     private val restClient = OkHttpClient.Builder().build()
     private val webSocketClient: WebSocketClient = WebSocketClient.getInstance()
+
     private val socketListener = object : WebSocketClient.SocketListener {
         override fun onMessage(message: String) {
-            val obj = Json.decodeFromString<WebSocketMessage>(message)
+            val obj = json.decodeFromString<WebSocketMessage>(message)
             when(obj.type){
                 WebSocketMessageType.IncrementalTrack -> onTrackUpdate.stream().forEach { x->x(obj as IncrementalTrackMessage) }
                 WebSocketMessageType.AccessRequest -> onAccessRequest.stream().forEach { x->x(obj as AccessResquestMessage) }
                 WebSocketMessageType.CollectionClosed -> onCollectionClosed.stream().forEach { x->x(obj as CollectionClosedMessage) }
                 WebSocketMessageType.CollectionUpdate -> onCollectionUpdate.stream().forEach { x->x(obj as CollectionUpdateMessage) }
+                else -> {}
             }
         }
     }
@@ -57,9 +60,10 @@ class ConnectionService(
         val response = restClient.newCall(request).await()
         if(response.isSuccessful&&response.body !=null){
             val bodyString = response.body!!.string()
+            val collection: CollectionInstance = json.decodeFromString(bodyString)
             response.close()
-            openWebsocket()
-            return json.decodeFromString(bodyString)
+            openWebsocket(collection.id!!)
+            return collection
         }else{
             val responseString = response.body?.string()
             response.close()
@@ -169,6 +173,7 @@ class ConnectionService(
     }
 
     override suspend fun openWebsocket(
+        collectionId: UUID,
         onAccessRequest: ((AccessResquestMessage) -> Unit)?,
         onCollectionClosed: ((CollectionClosedMessage) -> Unit)?,
         onTrackUpdate: ((IncrementalTrackMessage) -> Unit)?,
@@ -182,6 +187,7 @@ class ConnectionService(
         webSocketClient.setSocketUrl("$baseUrl/ws")
         webSocketClient.setListener(socketListener)
         webSocketClient.connect()
+        webSocketClient.sendMessage(Json.encodeToString(WebsocketConnectionMessage(clientId,collectionId)))
     }
 
     override suspend fun closeWebsocket() {
