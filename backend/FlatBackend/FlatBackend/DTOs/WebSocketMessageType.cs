@@ -17,5 +17,7 @@ namespace FlatBackend.DTOs
         CollectionClosed,
         [EnumMember(Value = nameof(CollectionUpdate))]
         CollectionUpdate
+        [EnumMember(Value = nameof(Summary))]
+        Summary
     }
 }

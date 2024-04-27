@@ -75,7 +75,7 @@ class MainActivity : ComponentActivity() {
             FlatTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    AppEntryPoint(modifier = Modifier, createGroupScreenViewModel, presetScreenViewModel, collectionAreaScreenViewModel, joinScreenViewModel, trackingScreenViewModel,trackingService)
+                    AppEntryPoint(modifier = Modifier, createGroupScreenViewModel, presetScreenViewModel, collectionAreaScreenViewModel, joinScreenViewModel, trackingScreenViewModel,trackingService, userId)
                 }
             }
         }
@@ -98,7 +98,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun AppEntryPoint(modifier: Modifier, createGroupScreenViewModel: CreateGroupScreenViewModel, presetScreenViewModel: PresetScreenViewModel, collectionAreaScreenViewModel: CollectionAreaScreenViewModel, joinScreenViewModel: JoinScreenViewModel, trackingScreenViewModel: TrackingScreenViewModel,trackingService: ITrackingService){
+fun AppEntryPoint(modifier: Modifier, createGroupScreenViewModel: CreateGroupScreenViewModel, presetScreenViewModel: PresetScreenViewModel, collectionAreaScreenViewModel: CollectionAreaScreenViewModel, joinScreenViewModel: JoinScreenViewModel, trackingScreenViewModel: TrackingScreenViewModel, trackingService: ITrackingService, userId: UUID){
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = "initial") {
@@ -118,7 +118,7 @@ fun AppEntryPoint(modifier: Modifier, createGroupScreenViewModel: CreateGroupScr
             CollectionAreaScreen(navController = navController, collectionAreaScreenViewModel = collectionAreaScreenViewModel)
         }
         composable("tracking"){
-            TrackingScreen(trackingScreenViewModel = trackingScreenViewModel, onNavigateToInitialScreen = {navController.navigate("initial")})
+            TrackingScreen(trackingScreenViewModel = trackingScreenViewModel, onNavigateToInitialScreen = {navController.navigate("initial")}, userId = userId)
         }
     }
 }
