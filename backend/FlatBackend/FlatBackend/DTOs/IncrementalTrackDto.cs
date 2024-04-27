@@ -2,7 +2,7 @@
 
 namespace FlatBackend.DTOs
 {
-    public class IncrementalTrackDto
+    public class IncrementalTrackDto 
     {
         public WebSocketMessageType type { get; set; } = WebSocketMessageType.IncrementalTrack;
         public string trackId { get; set; }
