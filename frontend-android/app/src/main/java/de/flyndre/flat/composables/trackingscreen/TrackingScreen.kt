@@ -88,7 +88,8 @@ fun TrackingScreen(
             AdminMenu()
         }
     }) { innerPadding ->
-        Column(modifier.padding(innerPadding)) {
+        Modifier.padding(innerPadding)
+        /*Column(modifier.padding(innerPadding)) {
             Text(text = "Local Tracks:")
             localTrackList.forEach { track: Track ->
                 Text(text = track.toLineString().toString())
@@ -99,7 +100,7 @@ fun TrackingScreen(
                     Text(text = track.toLineString().toString())
                 }
             }
-        }
+        }*/
     }
 }
 
