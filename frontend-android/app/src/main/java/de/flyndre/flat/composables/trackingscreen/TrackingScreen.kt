@@ -40,6 +40,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Polygon
 import com.google.maps.android.compose.Polyline
 import de.flyndre.flat.models.Track
 import java.util.UUID
@@ -94,15 +95,19 @@ fun TrackingScreen(
         }
     }) { innerPadding ->
         GoogleMap(modifier = Modifier.padding(innerPadding), properties = MapProperties(isMyLocationEnabled = true), uiSettings = MapUiSettings(zoomControlsEnabled = false)){
+            //rendering local track
             if(localTrackList.isNotEmpty()){
                 for(track in localTrackList){
                     var list = arrayListOf<LatLng>()
                     for(position in track){
                         list.add(LatLng(position.latitude, position.longitude))
                     }
-                    Polyline(points = list)
+                    if(list.isNotEmpty()){
+                        Polyline(points = list)
+                    }
                 }
             }
+            //rendering remote tracks
             if(remoteTrackList.isNotEmpty()){
                 for(trackCollection in remoteTrackList){
                     for(track in trackCollection.value){
@@ -110,8 +115,24 @@ fun TrackingScreen(
                         for(position in track){
                             list.add(LatLng(position.latitude, position.longitude))
                         }
-                        Polyline(points = list)
+                        if(list.isNotEmpty()){
+                            Polyline(points = list)
+                        }
                     }
+                }
+            }
+            //rendering collection areas
+            if(trackingScreenViewModel.collectionInstance.divisions.isNotEmpty()){
+                for(collectionArea in trackingScreenViewModel.collectionInstance.divisions){
+                    //get inner list of multipolygon and draw it on map
+                    val area = collectionArea.area.coordinates[0][0]
+                    //convert list<position> in list<latlong>
+                    val list = arrayListOf<LatLng>()
+                    for(position in area){
+                        list.add(LatLng(position.latitude, position.longitude))
+                    }
+
+                    Polygon(points = list)
                 }
             }
         }
