@@ -38,6 +38,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Polyline
 import de.flyndre.flat.models.Track
 import java.util.UUID
@@ -91,7 +93,7 @@ fun TrackingScreen(
             AdminMenu()
         }
     }) { innerPadding ->
-        GoogleMap(modifier = Modifier.padding(innerPadding)){
+        GoogleMap(modifier = Modifier.padding(innerPadding), properties = MapProperties(isMyLocationEnabled = true), uiSettings = MapUiSettings(zoomControlsEnabled = false)){
             if(localTrackList.isNotEmpty()){
                 for(track in localTrackList){
                     var list = arrayListOf<LatLng>()
