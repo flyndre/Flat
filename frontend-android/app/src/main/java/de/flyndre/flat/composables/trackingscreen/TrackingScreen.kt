@@ -103,6 +103,17 @@ fun TrackingScreen(
                     Polyline(points = list)
                 }
             }
+            if(remoteTrackList.isNotEmpty()){
+                for(trackCollection in remoteTrackList){
+                    for(track in trackCollection.value){
+                        var list = arrayListOf<LatLng>()
+                        for(position in track){
+                            list.add(LatLng(position.latitude, position.longitude))
+                        }
+                        Polyline(points = list)
+                    }
+                }
+            }
         }
         /*Column(modifier.padding(innerPadding)) {
             Text(text = "Local Tracks:")
