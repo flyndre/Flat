@@ -56,3 +56,11 @@ Nice-to-have:
 -   [ ] Profile pictures
 -   [ ] Team leader can send push messages to participants
 -   [ ] Suggestions for optimal route distribution
+
+Unplanned:
+
+-   [x] Import/Export of collection presets
+-   [x] Home screen with current or custom location
+-   [x] Setting for handedness
+-   [ ] I18n
+-   [x] Help for division drawing
