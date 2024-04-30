@@ -3,6 +3,7 @@ import MdiIcon from '@/components/icons/MdiIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
 import InvitationDialog from '@/components/tracking/InvitationDialog.vue';
+import ParticipantsDialog from '@/components/tracking/ParticipantsDialog.vue';
 import { clientId } from '@/data/clientMetadata';
 import { TOAST_LIFE } from '@/data/constants';
 import { trackingLogs } from '@/data/trackingLogs';
@@ -293,7 +294,10 @@ const divisions: Division[] = [
             />
 
             <!-- Participant Management Dialog -->
-            <!-- <ParticipantsDialog v-model:visible="manageGroupsScreenVisible" /> -->
+            <ParticipantsDialog
+                v-model:visible="manageGroupsScreenVisible"
+                :participants="[]"
+            />
             <!-- <Dialog
                 :position="isOnMobile ? 'bottom' : 'top'"
                 v-model:visible="manageGroupsScreenVisible"
