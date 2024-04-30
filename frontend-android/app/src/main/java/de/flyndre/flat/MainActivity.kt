@@ -114,7 +114,7 @@ fun AppEntryPoint(modifier: Modifier, createGroupScreenViewModel: CreateGroupScr
                 presetScreenViewModel.setPresetId(presetId = presetId)
             }
             PresetScreen(presetId = presetId, navController = navController, topBarText = "Edit Preset", onNavigateToCreateGroupScreen = { navController.navigate("creategroup") }, onNavigateToTrackingScreen = {navController.navigate("tracking")}, presetScreenViewModel = presetScreenViewModel) }
-        composable("collectionarea/{presetId}", arguments = listOf(navArgument("presetId"){type = NavType.LongType})){ backStackEntry -> val presetId = backStackEntry.arguments!!.getLong("presetId")
+        composable("collectionarea"){
             CollectionAreaScreen(navController = navController, collectionAreaScreenViewModel = collectionAreaScreenViewModel)
         }
         composable("tracking"){
