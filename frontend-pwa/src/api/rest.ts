@@ -1,80 +1,98 @@
-
-import { useNavigatorLanguage } from "@vueuse/core";
-import api from "./api";
-import { Division } from "@/types/Division";
-import { Collection } from "@/types/Collection";
+import { Collection } from '@/types/Collection';
+import { Division } from '@/types/Division';
+import api from './api';
 
 /**
  * opens the collection.
- * 
+ *
  * @param name of the collection
  * @param clientId of the owner
  * @param collectionArea as the Area in witch the collection is taking place
- * @returns the created Collection 
+ * @returns the created Collection
  */
-export async function openCollection(collection : Collection){
-    const response = await api.post("api/rest/collection", collection); 
-    return response; 
+export async function openCollection(collection: Collection) {
+    const response = await api.post('api/rest/collection', collection);
+    return response;
 }
 
 /**
  * get the requested collection.
- * 
+ *
  * @param collectionId of the collection
  * @returns the requested collection
  */
-export async function getCollection(collectionId : string){
-    const response = await api.get(`api/rest/collection/${collectionId}`); 
+export async function getCollection(collectionId: string) {
+    const response = await api.get(`api/rest/collection/${collectionId}`);
     return response;
 }
 
-//TODO: Datentyp für Area also Farbe, usw muss auch angegeben werden
 /**
  * divides the collection Area into smaller Fractions.
- * 
+ *
  * @param collectionId of the collection that is going to be changed
  * @param collectionArea as the new Area in witch the collection is taking place
- * @returns 
+ * @returns
  */
-export async function divideCollectionArea(collectionId : string, collectionAreas : Division[]){
-    const response = await api.put(`api/rest/collection/${collectionId}`, collectionAreas); 
+export async function divideCollectionArea(
+    collectionId: string,
+    collectionAreas: Division[]
+) {
+    const response = await api.put(
+        `api/rest/collection/${collectionId}`,
+        collectionAreas
+    );
     return response;
 }
 
 /**
  * delete the given Collection
- * 
+ *
  * @param collectionId of the collection that is going to be deleted
- * @returns 
+ * @returns
  */
-export async function deleteCollection(collectionId : string){
-    const response = await api.delete(`api/rest/collection/${collectionId}`); 
+export async function deleteCollection(collectionId: string) {
+    const response = await api.delete(`api/rest/collection/${collectionId}`);
     return response;
 }
 
 /**
  * access Request to a Collection. The Request is forwarded to the Owner who is accepting or declining the Access-Request.
- * 
+ *
  * @param username of which the User want to be displayed
  * @param clientId of the User
  * @param collectionId of the Collection
  * @returns True or False
  */
-export async function accessRequest(username : string, clientId : string, collectionId : string){
-    const response = await api.post(`api/rest/collection/${collectionId}`, {username: username, clientId: clientId}); 
+export async function accessRequest(
+    username: string,
+    clientId: string,
+    collectionId: string
+) {
+    const response = await api.post(`api/rest/collection/${collectionId}`, {
+        username: username,
+        clientId: clientId,
+    });
     return response;
 }
 
 /**
  * access Request to a Collection. The Request is forwarded to the Owner who is accepting or declining the Access-Request.
- * 
+ *
  * @param username of which the User want to be displayed
  * @param clientId of the User
  * @param collectionId of the Collection
  * @returns True or False
  */
-export async function confirmRequest(username : string, clientId : string, accepted : string, collectionId : string){
-    const response = await api.post(`api/rest/collection/${collectionId}`, {username: username, clientId: clientId, accepted: accepted}); 
+export async function confirmRequest(
+    username: string,
+    clientId: string,
+    accepted: string,
+    collectionId: string
+) {
+    const response = await api.post(`api/rest/collection/${collectionId}`, {
+        username: username,
+        clientId: clientId,
+        accepted: accepted,
+    });
     return response;
 }
-
