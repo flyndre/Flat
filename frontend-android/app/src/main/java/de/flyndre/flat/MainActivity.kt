@@ -2,7 +2,9 @@ package de.flyndre.flat
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -63,6 +65,10 @@ class MainActivity : ComponentActivity() {
         locationService = LocationService(1000,
             LocationServices.getFusedLocationProviderClient(this),this
         )
+        val appLinkIntent: Intent = intent
+        val appLinkAction: String? = appLinkIntent.action
+        val appLinkData: Uri? = appLinkIntent.data
+
         trackingService = TrackingService(connectionService,locationService,10000)
         db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "flat-database").build()
         val trackingScreenViewModel = TrackingScreenViewModel(db = db, trackingService,)
@@ -81,6 +87,26 @@ class MainActivity : ComponentActivity() {
         }
 
     }
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent) {
+        val appLinkAction = intent.action
+        val appLinkData: Uri? = intent.data
+        if (Intent.ACTION_VIEW == appLinkAction) {
+            appLinkData?.lastPathSegment?.also { recipeId ->
+                Uri.parse("content://com.recipe_app/recipe/")
+                    .buildUpon()
+                    .appendPath(recipeId)
+                    .build().also { appData ->
+                        showRecipe(appData)
+                    }
+            }
+        }
+    }
+
 
     private fun requestLocationPermission(){
         val requestPermissionLauncher =
@@ -122,3 +148,5 @@ fun AppEntryPoint(modifier: Modifier, createGroupScreenViewModel: CreateGroupScr
         }
     }
 }
+
+
