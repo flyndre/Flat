@@ -8,6 +8,8 @@ import Sidebar from 'primevue/sidebar';
 import Textarea from 'primevue/textarea';
 import { useToast } from 'primevue/usetoast';
 import MdiTextButtonIcon from '../icons/MdiTextButtonIcon.vue';
+import QRCodeVue3 from 'qrcode-vue3';
+import InputText from 'primevue/inputtext';
 
 const visible = defineModel<boolean>('visible', {
     default: false,
@@ -71,8 +73,17 @@ function shareInvitationLink() {
                     </template>
                 </Button>
             </template>
-            <template #title>Manage Participants</template>
+            <template #title>Invite Participants</template>
             <template #action-right>
+                <Button
+                    v-if="shareSupported"
+                    label="Share"
+                    @click="shareInvitationLink"
+                >
+                    <template #icon>
+                        <MdiTextButtonIcon :icon="mdiShare" />
+                    </template>
+                </Button>
                 <Button
                     v-if="copySupported"
                     :text="shareSupported"
@@ -83,27 +94,31 @@ function shareInvitationLink() {
                         <MdiTextButtonIcon :icon="mdiContentCopy" />
                     </template>
                 </Button>
-                <Button
-                    v-if="shareSupported"
-                    label="Share"
-                    @click="shareInvitationLink"
-                >
-                    <template #icon>
-                        <MdiTextButtonIcon :icon="mdiShare" />
-                    </template>
-                </Button>
             </template>
             <template #default>
-                <span>
-                    To invite people to parttake in your collection campaign,
-                    share this invitation link:
-                </span>
-                <Textarea
-                    class="w-full text-center"
-                    readonly
-                    auto-resize
-                    :model-value="link"
-                />
+                <div
+                    class="h-full w-full flex flex-col justify-start items-center gap-4"
+                >
+                    <QRCodeVue3
+                        imgclass="bg-white p-4"
+                        :value="link"
+                        :dots-options="{
+                            type: 'square',
+                        }"
+                        :corners-square-options="{
+                            type: undefined,
+                        }"
+                        :corners-dot-options="{
+                            type: undefined,
+                        }"
+                    />
+                    <InputText
+                        class="w-full text-center"
+                        readonly
+                        auto-resize
+                        :model-value="link"
+                    />
+                </div>
             </template>
         </DefaultLayout>
     </Sidebar>
