@@ -136,18 +136,6 @@ fun TrackingScreen(
                 }
             }
         }
-        /*Column(modifier.padding(innerPadding)) {
-            Text(text = "Local Tracks:")
-            localTrackList.forEach { track: Track ->
-                Text(text = track.toLineString().toString())
-            }
-            Text(text = "Remote Tracks:")
-            remoteTrackList.forEach { trackCollection ->
-                trackCollection.value.forEach { track ->
-                    Text(text = track.toLineString().toString())
-                }
-            }
-        }*/
     }
 }
 
