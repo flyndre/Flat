@@ -104,6 +104,20 @@ class PresetScreenViewModel(
         viewModelScope.launch {
             savePresetToDatabase()
             try {
+                //open the collection
+                val result = _connectionService.openCollection(
+                    _presetName.value,
+                    MultiPolygon(
+                        arrayListOf(
+                            _collectionAreaScreenViewModel.getListAreas().map { area ->
+                                area.listAreaPoints.map { point ->
+                                    Position(point.longitude, point.latitude)
+                                }
+                            })
+                    )
+                )
+                _trackingScreenViewModel.collectionInstance = result
+
                 //convert collection areas from collectionAreaViewModel for server
                 val collectionAreaModelList = arrayListOf<de.flyndre.flat.models.CollectionArea>()
                 for (area in _collectionAreaScreenViewModel.getListAreas()) {
@@ -123,19 +137,6 @@ class PresetScreenViewModel(
                 //upload collection areas to server
                 _connectionService.setAreaDivision(UUID.randomUUID(), collectionAreaModelList)
 
-                //open the collection and start the tracking
-                val result = _connectionService.openCollection(
-                    _presetName.value,
-                    MultiPolygon(
-                        arrayListOf(
-                            _collectionAreaScreenViewModel.getListAreas().map { area ->
-                                area.listAreaPoints.map { point ->
-                                    Position(point.longitude, point.latitude)
-                                }
-                            })
-                    )
-                )
-                _trackingScreenViewModel.collectionInstance = result
                 onSuccess()
             } catch (e: RequestFailedException) {
                 if (onFailure != null) {
