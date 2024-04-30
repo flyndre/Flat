@@ -66,8 +66,6 @@ class MainActivity : ComponentActivity() {
             LocationServices.getFusedLocationProviderClient(this),this
         )
         val appLinkIntent: Intent = intent
-        val appLinkAction: String? = appLinkIntent.action
-        val appLinkData: Uri? = appLinkIntent.data
 
         trackingService = TrackingService(connectionService,locationService,10000)
         db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "flat-database").build()
@@ -81,32 +79,12 @@ class MainActivity : ComponentActivity() {
             FlatTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    AppEntryPoint(modifier = Modifier, createGroupScreenViewModel, presetScreenViewModel, collectionAreaScreenViewModel, joinScreenViewModel, trackingScreenViewModel,trackingService, userId)
+                    AppEntryPoint(modifier = Modifier,intent, createGroupScreenViewModel, presetScreenViewModel, collectionAreaScreenViewModel, joinScreenViewModel, trackingScreenViewModel,trackingService, userId)
                 }
             }
         }
 
     }
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        handleIntent(intent)
-    }
-
-    private fun handleIntent(intent: Intent) {
-        val appLinkAction = intent.action
-        val appLinkData: Uri? = intent.data
-        if (Intent.ACTION_VIEW == appLinkAction) {
-            appLinkData?.lastPathSegment?.also { recipeId ->
-                Uri.parse("content://com.recipe_app/recipe/")
-                    .buildUpon()
-                    .appendPath(recipeId)
-                    .build().also { appData ->
-                        showRecipe(appData)
-                    }
-            }
-        }
-    }
-
 
     private fun requestLocationPermission(){
         val requestPermissionLauncher =
@@ -124,10 +102,18 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun AppEntryPoint(modifier: Modifier, createGroupScreenViewModel: CreateGroupScreenViewModel, presetScreenViewModel: PresetScreenViewModel, collectionAreaScreenViewModel: CollectionAreaScreenViewModel, joinScreenViewModel: JoinScreenViewModel, trackingScreenViewModel: TrackingScreenViewModel, trackingService: ITrackingService, userId: UUID){
+fun AppEntryPoint(modifier: Modifier,intent:Intent, createGroupScreenViewModel: CreateGroupScreenViewModel, presetScreenViewModel: PresetScreenViewModel, collectionAreaScreenViewModel: CollectionAreaScreenViewModel, joinScreenViewModel: JoinScreenViewModel, trackingScreenViewModel: TrackingScreenViewModel, trackingService: ITrackingService, userId: UUID){
     val navController = rememberNavController()
+    var _startDestination = "initial"
+    if(intent.action.equals(Intent.ACTION_VIEW)){
+        val url = intent.data
+        if (url !=null&&url.pathSegments[0].equals("join")){
+            _startDestination = "join"
+            joinScreenViewModel.updateJoinLink(url.toString())
+        }
+    }
 
-    NavHost(navController = navController, startDestination = "initial") {
+    NavHost(navController = navController, startDestination = _startDestination) {
         composable("initial"){ InitialScreen(modifier = modifier, onNavigateToJoinScreen = {navController.navigate("join")}, onNavigateToCreateGroupScreen = {navController.navigate("creategroup")}, onLukasBUHtton = {if(trackingService.isTracking){trackingService.stopTracking()}else{trackingService.startTracking()};Log.d("Button","Pressed!")})}
         composable("join"){JoinScreen(modifier = modifier, onNavigateToInitialScreen = {navController.navigate("initial")}, onNavigateToTrackingScreen = {navController.navigate("tracking")}, joinScreenViewModel = joinScreenViewModel)}
         composable("creategroup"){CreateGroupScreen(modifier = modifier,  onNavigateToInitialScreen = {navController.navigate("initial")}, onNavigateToNewPresetScreen = {navController.navigate("newpreset")}, navController = navController, createGroupScreenViewModel = createGroupScreenViewModel)}

@@ -27,20 +27,19 @@
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Flat">
-            <intent-filter>
+
+            <tools:validation testUrl="https://flat.buhss.de/join/dec51b37-0264-4f6c-af61-598fc6686b42" />
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
 
+                <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="https" />
                 <data android:host="flat.buhss.de" />
-                <data android:pathPattern="/join" />
+                <data android:pathAdvancedPattern="/join/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}" />
             </intent-filter>
         </activity>
     </application>
