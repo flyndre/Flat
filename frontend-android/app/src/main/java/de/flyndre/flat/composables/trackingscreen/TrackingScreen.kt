@@ -52,6 +52,7 @@ fun TrackingScreen(
     modifier: Modifier = Modifier,
     trackingScreenViewModel: TrackingScreenViewModel,
     onNavigateToInitialScreen: () -> Unit,
+    onNavigateToParticipantScreen: ()->Unit,
     userId: UUID,
 ) {
     val trackingEnabled by trackingScreenViewModel.trackingEnabled.collectAsState()
@@ -91,7 +92,7 @@ fun TrackingScreen(
         }
     }, floatingActionButton = {
         if(userId.equals(trackingScreenViewModel.collectionInstance.clientId)){
-            AdminMenu()
+            AdminMenu(onNavigateToParticipantScreen = onNavigateToParticipantScreen)
         }
     }) { innerPadding ->
         GoogleMap(modifier = Modifier.padding(innerPadding), properties = MapProperties(isMyLocationEnabled = true), uiSettings = MapUiSettings(zoomControlsEnabled = false)){
@@ -140,14 +141,14 @@ fun TrackingScreen(
 }
 
 @Composable
-fun AdminMenu() {
+fun AdminMenu(onNavigateToParticipantScreen: ()->Unit) {
     var expanded by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier) {
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(text = { Text(text = "End Collection") }, onClick = { /*TODO*/ })
             HorizontalDivider()
-            DropdownMenuItem(text = { Text(text = "Manage Groups") }, onClick = { /*TODO*/ })
+            DropdownMenuItem(text = { Text(text = "Manage Groups") }, onClick = { onNavigateToParticipantScreen() })
         }
         FloatingActionButton(onClick = { expanded = true }) {
             Icon(Icons.Filled.MoreVert, contentDescription = "open collection management")
