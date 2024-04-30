@@ -37,14 +37,14 @@ Must-have:
 
 -   [x] Map display
 -   [x] Divide map into areas
--   [ ] Track your own location via GPS (can be started and stopped)
+-   [x] Track your own location via GPS (can be started and stopped)
 -   [ ] Share tracking with other team members via backend
 -   [ ] Join the team via link
 -   [ ] User name
 
 Optional:
 
--   [ ] Join via QR code
+-   [x] Join via QR code
 -   [ ] Leaderboard/Statistics
 -   [x] Dark Mode
 -   [x] Define collection templates
