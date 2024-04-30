@@ -89,9 +89,10 @@ class ConnectionService(
 
     override suspend fun setAreaDivision(collectionId: UUID, divisions: List<CollectionArea>) {
         val url = "$baseUrl/collection/$collectionId"
+        val jsonString = json.encodeToString(divisions)
         val request = Request.Builder()
             .url(url)
-            .put(json.encodeToString(divisions).toRequestBody())
+            .put(jsonString.toRequestBody("application/json".toMediaType()))
             .build()
         val response = restClient.newCall(request).await()
         if(!response.isSuccessful){

@@ -112,7 +112,7 @@ class PresetScreenViewModel(
                         positionList.add(Position(point.longitude, point.latitude))
                     }
                     val multiPolygon =
-                        MultiPolygon(coordinates = listOf(listOf(positionList)), null)
+                        Polygon(coordinates = listOf(positionList), null)
                     val collectionArea = de.flyndre.flat.models.CollectionArea(
                         multiPolygon,
                         name = "Area" + _collectionAreaScreenViewModel.getListAreas().indexOf(area),
