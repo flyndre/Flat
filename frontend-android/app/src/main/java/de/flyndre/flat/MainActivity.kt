@@ -2,7 +2,9 @@ package de.flyndre.flat
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -63,6 +65,8 @@ class MainActivity : ComponentActivity() {
         locationService = LocationService(1000,
             LocationServices.getFusedLocationProviderClient(this),this
         )
+        val appLinkIntent: Intent = intent
+
         trackingService = TrackingService(connectionService,locationService,10000)
         db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "flat-database").build()
         val trackingScreenViewModel = TrackingScreenViewModel(db = db, trackingService,)
@@ -75,7 +79,7 @@ class MainActivity : ComponentActivity() {
             FlatTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    AppEntryPoint(modifier = Modifier, createGroupScreenViewModel, presetScreenViewModel, collectionAreaScreenViewModel, joinScreenViewModel, trackingScreenViewModel,trackingService, userId)
+                    AppEntryPoint(modifier = Modifier,intent, createGroupScreenViewModel, presetScreenViewModel, collectionAreaScreenViewModel, joinScreenViewModel, trackingScreenViewModel,trackingService, userId)
                 }
             }
         }
@@ -98,10 +102,18 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun AppEntryPoint(modifier: Modifier, createGroupScreenViewModel: CreateGroupScreenViewModel, presetScreenViewModel: PresetScreenViewModel, collectionAreaScreenViewModel: CollectionAreaScreenViewModel, joinScreenViewModel: JoinScreenViewModel, trackingScreenViewModel: TrackingScreenViewModel, trackingService: ITrackingService, userId: UUID){
+fun AppEntryPoint(modifier: Modifier,intent:Intent, createGroupScreenViewModel: CreateGroupScreenViewModel, presetScreenViewModel: PresetScreenViewModel, collectionAreaScreenViewModel: CollectionAreaScreenViewModel, joinScreenViewModel: JoinScreenViewModel, trackingScreenViewModel: TrackingScreenViewModel, trackingService: ITrackingService, userId: UUID){
     val navController = rememberNavController()
+    var _startDestination = "initial"
+    if(intent.action.equals(Intent.ACTION_VIEW)){
+        val url = intent.data
+        if (url !=null&&url.pathSegments[0].equals("join")){
+            _startDestination = "join"
+            joinScreenViewModel.updateJoinLink(url.toString())
+        }
+    }
 
-    NavHost(navController = navController, startDestination = "initial") {
+    NavHost(navController = navController, startDestination = _startDestination) {
         composable("initial"){ InitialScreen(modifier = modifier, onNavigateToJoinScreen = {navController.navigate("join")}, onNavigateToCreateGroupScreen = {navController.navigate("creategroup")}, onLukasBUHtton = {if(trackingService.isTracking){trackingService.stopTracking()}else{trackingService.startTracking()};Log.d("Button","Pressed!")})}
         composable("join"){JoinScreen(modifier = modifier, onNavigateToInitialScreen = {navController.navigate("initial")}, onNavigateToTrackingScreen = {navController.navigate("tracking")}, joinScreenViewModel = joinScreenViewModel)}
         composable("creategroup"){CreateGroupScreen(modifier = modifier,  onNavigateToInitialScreen = {navController.navigate("initial")}, onNavigateToNewPresetScreen = {navController.navigate("newpreset")}, navController = navController, createGroupScreenViewModel = createGroupScreenViewModel)}
@@ -122,3 +134,5 @@ fun AppEntryPoint(modifier: Modifier, createGroupScreenViewModel: CreateGroupScr
         }
     }
 }
+
+
