@@ -21,6 +21,7 @@ const submittable = computed(() => validateJoinLink(joinLink.value));
 function processScan(scans: string[]) {
     const id = scans.map((s) => getJoinId(s)).find((s) => s != null);
     if (id == null) return;
+    // TODO: check if recognized collection is present in backend
     router.push({ name: 'join', params: { id } });
 }
 

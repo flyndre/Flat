@@ -112,6 +112,8 @@ const adminActions: MenuItem[] = [
     },
 ];
 
+// TODO: onMounted websocket aufmachen
+
 function leaveCollection() {
     pushToast({
         summary: `You left ${'<Collection Name>'}`,

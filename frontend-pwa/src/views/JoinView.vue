@@ -29,9 +29,9 @@ const router = useRouter();
 const joinName = ref('');
 const submittable = computed(() => validateJoinName(joinName.value));
 const dialogVisible = ref(false);
+// TODO: remove this debug redirect
 const { start, stop } = useTimeoutFn(
     () => {
-        // TODO: create WS connection etc.
         router.push({ name: 'track' });
     },
     3000,
@@ -42,12 +42,12 @@ const { start, stop } = useTimeoutFn(
 function join() {
     dialogVisible.value = true;
     start();
-    // TODO: send request
+    // TODO: send join request
 }
 function cancel() {
     dialogVisible.value = false;
     stop();
-    // TODO: cancel request or send cancelation request
+    // TODO: cancel join request or send cancelation request
 }
 </script>
 

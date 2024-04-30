@@ -119,7 +119,10 @@ async function _saveCollection(target: RouteLocationRaw) {
 }
 
 const save = () => _saveCollection({ name: 'presets' });
-const start = () => _saveCollection({ name: 'presets' });
+function start() {
+    _saveCollection({ name: 'presets' });
+    // TODO: start collection and redirect to /track
+}
 
 function editDivisions() {
     collectionDraft.set(collection.value);
