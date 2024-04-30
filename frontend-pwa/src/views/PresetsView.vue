@@ -167,6 +167,7 @@ const deleteDialogVisible = ref(false);
                             :value="displayedCollections"
                             :dataKey="(c: Collection) => c.id"
                             :pt="{
+                                root: { class: 'max-w-full' },
                                 bodyRow: {
                                     class: '[&>*]:p-2 first:[&>*]:pl-0 last:[&>*]:pr-0 [&>*]:last:border-b-0 [&>*]:last:pb-0',
                                 },
@@ -224,7 +225,7 @@ const deleteDialogVisible = ref(false);
                                                     class="w-full flex flex-row justify-between items-center gap-2"
                                                 >
                                                     <span
-                                                        class="text-left whitespace-nowrap"
+                                                        class="text-left break-all"
                                                     >
                                                         {{
                                                             slotProps.data.name
