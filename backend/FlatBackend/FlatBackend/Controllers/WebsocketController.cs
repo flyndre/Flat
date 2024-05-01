@@ -46,7 +46,7 @@ namespace FlatBackend.Controllers
                 string Json = Encoding.ASCII.GetString(buffer);
                 Json = new string(Json.Where(c => c != '\x00').ToArray());
                 var message = JsonConvert.DeserializeObject<WebSocketMessage>(Json);
-                if(message != null)
+                if (message != null)
                 {
                     switch (message.type)
                     {

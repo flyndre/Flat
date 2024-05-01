@@ -6,7 +6,9 @@ using MongoDB.Driver;
 using System.Collections.Concurrent;
 using System.Net.WebSockets;
 using System.Text;
-using System.Text.Json;
+
+//using System.Text.Json;
+using Newtonsoft.Json;
 
 namespace FlatBackend.Websocket
 {
@@ -36,7 +38,7 @@ namespace FlatBackend.Websocket
         public Guid getCollectionId( WebSocket websocket )
         {
             var user = users.Where(x => x.webSocket == websocket).First();
-            return user.clientId;
+            return user.collectionId;
         }
 
         public void addTrackToTrackCollection( IncrementalTrackDto track, Guid collectionId )
@@ -95,7 +97,7 @@ namespace FlatBackend.Websocket
                     if (validUser != null && validUser.accepted)
                     {
                         CollectionUpdateDto update = new CollectionUpdateDto() { collection = collection };
-                        string Json = JsonSerializer.Serialize(update);
+                        string Json = JsonConvert.SerializeObject(update);
                         await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
                     }
                 }
@@ -110,7 +112,7 @@ namespace FlatBackend.Websocket
                 if (user.collectionId == collectionId)
                 {
                     CollectionClosedDto collectionClosedDto = new CollectionClosedDto() { collectionId = collectionId };
-                    string Json = JsonSerializer.Serialize(collectionClosedDto);
+                    string Json = JsonConvert.SerializeObject(collectionClosedDto);
                     await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
                     if (user.clientId == collection.clientId)
                     {
@@ -127,7 +129,7 @@ namespace FlatBackend.Websocket
         {
             var user = users.Where(x => x.clientId == clientId && x.collectionId == collectionId).First();
             List<IncrementalTrackDto> tracksList = tracks.tracks;
-            string Json = JsonSerializer.Serialize(tracksList);
+            string Json = JsonConvert.SerializeObject(tracksList);
             user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
         }
 
@@ -137,7 +139,7 @@ namespace FlatBackend.Websocket
             var user = users.Where(x => x.clientId == clientId && x.collectionId == collectionId).First();
             SummaryModel summary = new SummaryModel() { collection = collection, trackCollection = tracks };
 
-            string Json = JsonSerializer.Serialize(summary);
+            string Json = JsonConvert.SerializeObject(summary);
             user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
         }
 
@@ -147,7 +149,7 @@ namespace FlatBackend.Websocket
             {
                 if (user.collectionId == collectionId)
                 {
-                    string Json = JsonSerializer.Serialize(track);
+                    string Json = JsonConvert.SerializeObject(track);
                     await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
                 }
             }
@@ -170,7 +172,7 @@ namespace FlatBackend.Websocket
                 var user = users.Find(x => x.collectionId == collection.id && x.clientId == collection.clientId);
                 if (user != null)
                 {
-                    var Json = JsonSerializer.Serialize(request);
+                    var Json = JsonConvert.SerializeObject(request);
                     await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
                     var buffer = new byte[1024 * 4];
                     var response = accessConfirmationWaiting.Take();
@@ -190,7 +192,7 @@ namespace FlatBackend.Websocket
                 var user = users.Find(x => x.collectionId == request.collectionId && x.clientId == request.clientId);
                 if (user != null)
                 {
-                    var Json = JsonSerializer.Serialize(request);
+                    var Json = JsonConvert.SerializeObject(request);
                     await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
                 }
             }

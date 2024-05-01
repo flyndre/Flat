@@ -1,4 +1,5 @@
 ﻿using FlatBackend.Database;
+using FlatBackend.DTOs;
 using FlatBackend.Interfaces;
 using FlatBackend.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -7,7 +8,9 @@ using Microsoft.VisualBasic;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.IdGenerators;
 using MongoDB.Bson.Serialization.Serializers;
-using System.Text.Json;
+
+//using System.Text.Json;
+using Newtonsoft.Json;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -37,7 +40,7 @@ namespace FlatBackend.Controllers
                 if (validUser.accepted)
                 {
                     List<UserModel> users = Collection.requestedAccess;
-                    var Json = JsonSerializer.Serialize(users);
+                    var Json = JsonConvert.SerializeObject(users);
                     return Json;
                 }
                 else
@@ -69,8 +72,12 @@ namespace FlatBackend.Controllers
                 oldCol.requestedAccess.Add(value);
                 _MongoDBService.ChangeCollection(oldCol);
                 var result = await _MongoDBService.GetCollection(id);
-                string Json = JsonSerializer.Serialize(result.requestedAccess.Find(x => x.clientId == value.clientId));
-                var confirmedUser = await _WebsocketManager.sendAccessRequestToBoss(new DTOs.AccessRequestDto() { collectionId = id, clientId = value.clientId, username = value.username });
+                string Json = JsonConvert.SerializeObject(result.requestedAccess.Find(x => x.clientId == value.clientId));
+                var accessRequest = new AccessRequestDto();
+                accessRequest.clientId = value.clientId;
+                accessRequest.collectionId = id;
+                accessRequest.username = value.username;
+                var confirmedUser = await _WebsocketManager.sendAccessRequestToBoss(accessRequest);
                 UserModel? validUser = oldCol.confirmedUsers.Find(x => x.clientId == value.clientId);
                 if (validUser == null)
                 {
@@ -85,7 +92,7 @@ namespace FlatBackend.Controllers
                 _MongoDBService.ChangeCollection(oldCol);
                 //_WebsocketManager.sendAccessConfirmationToUser(new DTOs.AccessConfirmationDto() { collectionId = id, clientId = value.clientId, accepted = value.accepted });
                 _WebsocketManager.sendUpdateCollection(id);
-                Json = JsonSerializer.Serialize(confirmedUser);
+                Json = JsonConvert.SerializeObject(confirmedUser);
                 return Json;
             }
             catch (Exception ex)
@@ -118,7 +125,7 @@ namespace FlatBackend.Controllers
                 var result = await _MongoDBService.GetCollection(id);
                 _WebsocketManager.sendAccessConfirmationToUser(new DTOs.AccessConfirmationDto() { collectionId = id, clientId = value.clientId, accepted = value.accepted });
                 _WebsocketManager.sendUpdateCollection(id);
-                string Json = JsonSerializer.Serialize(result);
+                string Json = JsonConvert.SerializeObject(result);
                 return Json;
             }
             catch (Exception ex)
@@ -138,7 +145,7 @@ namespace FlatBackend.Controllers
                 var user = result.confirmedUsers.Find(x => x.clientId == userid);
                 if (user != null || result.clientId == userid)
                 {
-                    var Json = JsonSerializer.Serialize(result);
+                    var Json = JsonConvert.SerializeObject(result);
                     return Json;
                 }
                 else
@@ -168,7 +175,7 @@ namespace FlatBackend.Controllers
                 {
                     value.collectionDivision = new List<AreaModel>();
                 }
-                if (value.confirmedUsers == null)
+                if (value.confirmedUsers.Count == 0)
                 {
                     value.confirmedUsers = new List<UserModel>() { new UserModel() { clientId = value.clientId, username = "admin", accepted = true } };
                 }
@@ -179,7 +186,7 @@ namespace FlatBackend.Controllers
                 await _MongoDBService.AddCollection(value);
                 var result = await _MongoDBService.GetCollection(value.id);
                 _WebsocketManager.sendUpdateCollection(value.id);
-                var Json = JsonSerializer.Serialize(result);
+                var Json = JsonConvert.SerializeObject(result);
                 return Json;
             }
             catch (Exception ex)
@@ -212,7 +219,7 @@ namespace FlatBackend.Controllers
                 _MongoDBService.ChangeCollection(oldCol);
                 var result = await _MongoDBService.GetCollection(id);
                 _WebsocketManager.sendUpdateCollection(id);
-                return JsonSerializer.Serialize(result);
+                return JsonConvert.SerializeObject(result);
             }
             catch (Exception ex)
             {
