@@ -92,7 +92,7 @@ fun TrackingScreen(
         }
     }, floatingActionButton = {
         if(userId.equals(trackingScreenViewModel.collectionInstance.clientId)){
-            AdminMenu(onNavigateToParticipantScreen = onNavigateToParticipantScreen)
+            AdminMenu(onNavigateToInitialScreen = onNavigateToInitialScreen, onNavigateToParticipantScreen = onNavigateToParticipantScreen)
         }
     }) { innerPadding ->
         GoogleMap(modifier = Modifier.padding(innerPadding), properties = MapProperties(isMyLocationEnabled = true), uiSettings = MapUiSettings(zoomControlsEnabled = false)){
@@ -141,12 +141,12 @@ fun TrackingScreen(
 }
 
 @Composable
-fun AdminMenu(onNavigateToParticipantScreen: ()->Unit) {
+fun AdminMenu(onNavigateToInitialScreen: () -> Unit, onNavigateToParticipantScreen: () -> Unit) {
     var expanded by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier) {
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(text = { Text(text = "End Collection") }, onClick = { /*TODO*/ })
+            DropdownMenuItem(text = { Text(text = "End Collection") }, onClick = { onNavigateToInitialScreen() })
             HorizontalDivider()
             DropdownMenuItem(text = { Text(text = "Manage Groups") }, onClick = { onNavigateToParticipantScreen() })
         }
