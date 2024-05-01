@@ -1,6 +1,7 @@
 package de.flyndre.flat.composables.trackingscreen
 
 import androidx.lifecycle.ViewModel
+import de.flyndre.flat.composables.trackingscreen.participantscreen.ParticipantScreenViewModel
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.interfaces.ITrackingService
 import de.flyndre.flat.models.CollectionInstance
@@ -13,8 +14,10 @@ import java.util.UUID
 class TrackingScreenViewModel(
     db: AppDatabase,
     trackingService: ITrackingService,
+    participantScreenViewModel: ParticipantScreenViewModel
 ): ViewModel() {
     private var _db = db
+    private val _participantScreenViewModel: ParticipantScreenViewModel = participantScreenViewModel
     private val _trackingService = trackingService
     lateinit var collectionInstance: CollectionInstance
 
@@ -50,4 +53,8 @@ class TrackingScreenViewModel(
         _remoteTrackList.value = _trackingService.remoteTracks
     }
 
+    fun updateParticipantScreenViewModel(){
+        _participantScreenViewModel.setUsers(collectionInstance.confirmedUsers)
+        _participantScreenViewModel.setDivisions(collectionInstance.divisions)
+    }
 }

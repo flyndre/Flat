@@ -74,7 +74,8 @@ class MainActivity : ComponentActivity() {
         trackingService = TrackingService(connectionService, locationService, 10000)
         db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "flat-database")
             .build()
-        val trackingScreenViewModel = TrackingScreenViewModel(db = db, trackingService)
+        val participantScreenViewModel = ParticipantScreenViewModel()
+        val trackingScreenViewModel = TrackingScreenViewModel(db = db, trackingService, participantScreenViewModel)
         val collectionAreaScreenViewModel = CollectionAreaScreenViewModel()
         val createGroupScreenViewModel = CreateGroupScreenViewModel(db = db)
         val presetScreenViewModel = PresetScreenViewModel(
@@ -88,7 +89,6 @@ class MainActivity : ComponentActivity() {
             trackingScreenViewModel,
             connectionService = connectionService
         )
-        val participantScreenViewModel = ParticipantScreenViewModel()
 
         setContent {
             FlatTheme {
