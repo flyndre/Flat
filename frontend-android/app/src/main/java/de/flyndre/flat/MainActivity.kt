@@ -75,7 +75,8 @@ class MainActivity : ComponentActivity() {
         db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "flat-database")
             .build()
         val participantScreenViewModel = ParticipantScreenViewModel()
-        val trackingScreenViewModel = TrackingScreenViewModel(db = db, trackingService, participantScreenViewModel)
+        val trackingScreenViewModel =
+            TrackingScreenViewModel(db = db, trackingService, participantScreenViewModel)
         val collectionAreaScreenViewModel = CollectionAreaScreenViewModel()
         val createGroupScreenViewModel = CreateGroupScreenViewModel(db = db)
         val presetScreenViewModel = PresetScreenViewModel(
@@ -231,8 +232,9 @@ fun AppEntryPoint(
             )
         }
         composable("participant") {
-            ParticipantScreen(participantScreenViewModel = participantScreenViewModel) {
-            }
+            ParticipantScreen(
+                participantScreenViewModel = participantScreenViewModel,
+                onNavigateToTrackingScreen = { navController.navigate("tracking") })
         }
     }
 }
