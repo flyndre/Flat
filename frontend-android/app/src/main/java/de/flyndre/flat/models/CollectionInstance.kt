@@ -2,7 +2,6 @@ package de.flyndre.flat.models
 
 import de.flyndre.flat.helper.UUIDSerializer
 import io.github.dellisd.spatialk.geojson.MultiPolygon
-import io.github.dellisd.spatialk.geojson.Polygon
 import kotlinx.serialization.Serializable
 import java.util.UUID
 
@@ -15,7 +14,9 @@ data class CollectionInstance(
     var area: MultiPolygon,
     @Serializable(with = UUIDSerializer::class)
     var id: UUID?=null,
-    var divisions: ArrayList<CollectionArea> = arrayListOf()
+    var divisions: ArrayList<CollectionArea> = arrayListOf(),
+    var confirmedUsers: ArrayList<UserModel> = arrayListOf(),
+    var requestedAccess: ArrayList<UserModel> = arrayListOf()
 ) {
 
 
