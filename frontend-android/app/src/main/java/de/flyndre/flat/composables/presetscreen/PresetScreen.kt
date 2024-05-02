@@ -55,7 +55,7 @@ fun PresetScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)
             ) {
-                Button(onClick = { presetScreenViewModel.openCollection(onNavigateToTrackingScreen);  }) {
+                Button(onClick = { presetScreenViewModel.openCollection(onNavigateToTrackingScreen)  }) {
                     Text("Save and Start")
                 }
                 Button(onClick = { presetScreenViewModel.savePresetToDatabase(); onNavigateToCreateGroupScreen() }) {
@@ -69,7 +69,7 @@ fun PresetScreen(
             TextField(modifier = modifier, value = presetName, onValueChange = {presetScreenViewModel.updatePresetName(it)}, label = {Text(text = "Preset Name")})
             TextField(modifier = modifier, value = presetDescription, onValueChange = {presetScreenViewModel.updatePresetDescription(it)}, label = {Text(text = "Preset Description")})
             Card (modifier = modifier){
-                GoogleMap(onMapClick = { navController.navigate("collectionarea/" + presetScreenViewModel.getPresetId()) },
+                GoogleMap(onMapClick = { navController.navigate("collectionarea") },
                     cameraPositionState = CameraPositionState(position = presetScreenViewModel.getCameraPosition()),
                     uiSettings = MapUiSettings(zoomControlsEnabled = false, zoomGesturesEnabled = false, scrollGesturesEnabled = false, rotationGesturesEnabled = false, tiltGesturesEnabled = false)){
                     if(presetScreenViewModel.getCollectionArea().isNotEmpty()){

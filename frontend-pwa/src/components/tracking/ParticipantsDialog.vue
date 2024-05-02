@@ -1,21 +1,5 @@
 <script setup lang="ts">
-import {
-    mdiArrowLeft,
-    mdiCheck,
-    mdiCloseBox,
-    mdiCrosshairs,
-    mdiCrosshairsGps,
-    mdiDeleteForever,
-    mdiDotsHorizontal,
-    mdiFitToScreen,
-    mdiMagnify,
-    mdiMap,
-    mdiPalette,
-    mdiTableColumn,
-    mdiTableColumnRemove,
-    mdiTextureBox,
-    mdiVectorSquareEdit,
-} from '@mdi/js';
+import { mdiArrowLeft } from '@mdi/js';
 import Button from 'primevue/button';
 import Sidebar from 'primevue/sidebar';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
@@ -27,9 +11,12 @@ const visible = defineModel<boolean>('visible', {
 });
 const props = defineProps<{
     participants: any[];
-    assignDivisionHandler: (participantId: string, divisionId: string) => any;
-    unassignDivisionHandler: (participantId: string, divisionId: string) => any;
-    removeParticipantHandler: (participantId: string) => any;
+    assignDivisionHandler?: (participantId: string, divisionId: string) => any;
+    unassignDivisionHandler?: (
+        participantId: string,
+        divisionId: string
+    ) => any;
+    removeParticipantHandler?: (participantId: string) => any;
 }>();
 
 const participants = [
