@@ -1,6 +1,5 @@
 ﻿using FlatBackend.DTOs;
 using FlatBackend.Models;
-using System.Collections.Concurrent;
 using System.Net.WebSockets;
 
 namespace FlatBackend.Interfaces
@@ -13,7 +12,7 @@ namespace FlatBackend.Interfaces
 
         public void setAccessConfirmationWaiting( AccessConfirmationDto accessConfirmationDto );
 
-        public void sendSummaryToBoss( TrackCollectionModel tracks, Guid collectionId, Guid clientId );
+        public Task sendSummaryToBoss( TrackCollectionModel tracks, Guid collectionId, Guid clientId );
 
         public void saveWebSocketOfUser( WebSocket webSocket, Guid collectionId, Guid userId );
 
@@ -30,5 +29,9 @@ namespace FlatBackend.Interfaces
         public Task<UserModel> sendAccessRequestToBoss( AccessRequestDto request );
 
         public void sendAccessConfirmationToUser( AccessConfirmationDto request );
+
+        public void deleteCollection( Guid collectionId );
+
+        public void removeWebsocketUser( WebSocket webSocket );
     }
 }

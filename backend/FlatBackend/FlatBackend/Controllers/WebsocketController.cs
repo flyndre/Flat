@@ -63,7 +63,7 @@ namespace FlatBackend.Controllers
                         case WebSocketMessageType.IncrementalTrack:
                             var track = JsonConvert.DeserializeObject<IncrementalTrackDto>(Json);
                             var collectionId = _WebsocketManager.getCollectionId(webSocket);
-                            //_WebsocketManager.addTrackToTrackCollection(track, collectionId);
+                            _WebsocketManager.addTrackToTrackCollection(track, collectionId);
                             _WebsocketManager.sendGPSTrack(track, collectionId);
                             break;
 
@@ -74,6 +74,7 @@ namespace FlatBackend.Controllers
                         case WebSocketMessageType.CollectionClosed://CollectionClosed kp was das hier tun soll
                             var result = JsonConvert.DeserializeObject<CollectionClosedDto>(Json);
                             _WebsocketManager.sendCollectionClosedInformation(result.collectionId);
+                            _WebsocketManager.deleteCollection(result.collectionId);
                             break;
 
                         case WebSocketMessageType.CollectionUpdate://CollectionUpdate kp was das hier tun soll
@@ -93,7 +94,7 @@ namespace FlatBackend.Controllers
                 receiveResult = await webSocket.ReceiveAsync(
                     new ArraySegment<byte>(buffer), CancellationToken.None);
             }
-
+            _WebsocketManager.removeWebsocketUser(webSocket);
             await webSocket.CloseAsync(
                 receiveResult.CloseStatus.Value,
                 receiveResult.CloseStatusDescription,
