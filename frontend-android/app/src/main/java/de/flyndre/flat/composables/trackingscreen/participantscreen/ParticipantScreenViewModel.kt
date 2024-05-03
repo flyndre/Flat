@@ -22,4 +22,13 @@ class ParticipantScreenViewModel: ViewModel() {
         _divisions.value = arrayListOf()
         _divisions.value.addAll(divisions)
     }
+
+    fun setUserOfDivision(division: CollectionArea, user: UserModel){
+        var tempList = arrayListOf<CollectionArea>()
+        tempList.addAll(_divisions.value)
+        tempList.remove(division)
+        division.clientId = user.clientId
+        tempList.add(division)
+        _divisions.value = tempList
+    }
 }
