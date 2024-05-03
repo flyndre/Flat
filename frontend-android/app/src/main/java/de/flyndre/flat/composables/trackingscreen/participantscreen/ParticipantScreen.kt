@@ -21,11 +21,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import de.flyndre.flat.models.CollectionArea
+import de.flyndre.flat.models.UserModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ParticipantScreen(participantScreenViewModel: ParticipantScreenViewModel, onNavigateToTrackingScreen: () -> Unit,){
     val divisions by participantScreenViewModel.divisions.collectAsState()
+    val users by participantScreenViewModel.users.collectAsState()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -43,7 +47,7 @@ fun ParticipantScreen(participantScreenViewModel: ParticipantScreenViewModel, on
         innerPadding ->
         LazyColumn(Modifier.padding(innerPadding)) {
             items(divisions){
-                ListItem(headlineContent = { Text(text = it.name) }, trailingContent = { DropDownUserSelection()})
+                ListItem(headlineContent = { Text(text = it.name) }, trailingContent = { DropDownUserSelection(participantScreenViewModel, it, users)})
             }
         }
     }
@@ -51,8 +55,9 @@ fun ParticipantScreen(participantScreenViewModel: ParticipantScreenViewModel, on
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DropDownUserSelection(){
+fun DropDownUserSelection(participantScreenViewModel: ParticipantScreenViewModel, division: CollectionArea, users: List<UserModel>){
     var expanded by remember { mutableStateOf(false) }
+    var selectedUser: UserModel? by remember { mutableStateOf(users.find { it.clientId.equals(division.clientId) }) }
     ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = {expanded = it}) {
         
     }
