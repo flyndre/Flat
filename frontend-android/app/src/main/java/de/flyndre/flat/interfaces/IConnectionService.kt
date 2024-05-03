@@ -62,14 +62,16 @@ interface IConnectionService {
     /**
      * Grants a user access to an owned collection. Results in a positive RequestAccessResult for the requested user.
      * @param request the access request from the user
+     * @return the actual collectionInstance from backend
      */
-    suspend fun giveAccess(request: AccessResquestMessage)
+    suspend fun giveAccess(request: AccessResquestMessage):CollectionInstance
 
     /**
      * Denys a user access to an owned collection. Results in a negative RequestAccessResult for the requested user.
      * @param request the access request from the user
+     * @return the actual collectionInstance from backend
      */
-    suspend fun denyAccess(request: AccessResquestMessage)
+    suspend fun denyAccess(request: AccessResquestMessage):CollectionInstance
 
     /**
      * Notify the backend and other users, that this user is leaving the collection
