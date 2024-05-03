@@ -68,11 +68,13 @@ fun TrackingScreen(
         TopAppBar(
             title = { Text(text = trackingScreenViewModel.collectionInstance.name) },
             navigationIcon = {
-                IconButton(onClick = { onNavigateToInitialScreen() }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "back to start screen"
-                    )
+                if(!userId.equals(trackingScreenViewModel.collectionInstance.clientId)){//if this user is no admin
+                    IconButton(onClick = { onNavigateToInitialScreen() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "back to start screen"
+                        )
+                    }
                 }
             })
     }, bottomBar = {
