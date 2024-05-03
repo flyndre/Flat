@@ -26,7 +26,6 @@ import androidx.compose.ui.Modifier
 @Composable
 fun ParticipantScreen(participantScreenViewModel: ParticipantScreenViewModel, onNavigateToTrackingScreen: () -> Unit,){
     val divisions by participantScreenViewModel.divisions.collectAsState()
-    var expanded by remember { mutableStateOf(false) }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -44,13 +43,17 @@ fun ParticipantScreen(participantScreenViewModel: ParticipantScreenViewModel, on
         innerPadding ->
         LazyColumn(Modifier.padding(innerPadding)) {
             items(divisions){
-                ListItem(headlineContent = { Text(text = it.name) }, trailingContent = { ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = {expanded != expanded}
-                ) {
-
-                }})
+                ListItem(headlineContent = { Text(text = it.name) }, trailingContent = { DropDownUserSelection()})
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DropDownUserSelection(){
+    var expanded by remember { mutableStateOf(false) }
+    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = {expanded = it}) {
+        
     }
 }
