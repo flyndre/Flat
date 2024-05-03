@@ -26,7 +26,6 @@ class TrackingScreenViewModel(
     private val _trackingService = trackingService
     private val _connectionService = connectionService
     lateinit var collectionInstance: CollectionInstance
-    lateinit var accessResquestMessage: AccessResquestMessage
 
     private val _trackingEnabled = MutableStateFlow(false)
     val trackingEnabled = _trackingEnabled.asStateFlow()
@@ -37,8 +36,8 @@ class TrackingScreenViewModel(
     private val _remoteTrackList: MutableStateFlow<Map<UUID,TrackCollection>> = MutableStateFlow(mapOf())
     val remoteTrackList: StateFlow<Map<UUID,TrackCollection>> = _remoteTrackList.asStateFlow()
 
-    private val _showParticipantJoinDialog = MutableStateFlow(false)
-    val showParticipantJoinDialog = _showParticipantJoinDialog.asStateFlow()
+    private val _participantsToJoin = MutableStateFlow(arrayListOf<AccessResquestMessage>())
+    val participantsToJoin = _participantsToJoin.asStateFlow()
 
     init {
         trackingService.addOnLocalTrackUpdate{ onLocalTrackUpdate() }
@@ -64,26 +63,45 @@ class TrackingScreenViewModel(
     }
 
     private fun onAccessRequestMessage(message: AccessResquestMessage){
-        accessResquestMessage = message
-        _showParticipantJoinDialog.value = true
+        val tempList = arrayListOf<AccessResquestMessage>()
+        tempList.addAll(_participantsToJoin.value)
+        tempList.add(message)
+        _participantsToJoin.value = tempList
     }
 
     fun updateParticipantScreenViewModel(){
-        _participantScreenViewModel.setUsers(collectionInstance.confirmedUsers)
-        _participantScreenViewModel.setDivisions(collectionInstance.divisions)
+        _participantScreenViewModel.initialValues(collectionInstance)
     }
 
-    fun declineParticipantJoinDialog(){
+    fun declineParticipantJoinDialog(message: AccessResquestMessage){
         viewModelScope.launch {
-            collectionInstance = _connectionService.denyAccess(accessResquestMessage)
-            _showParticipantJoinDialog.value = false
+            collectionInstance = _connectionService.denyAccess(message)
+            val tempList = arrayListOf<AccessResquestMessage>()
+            tempList.addAll(_participantsToJoin.value)
+            tempList.remove(message)
+            _participantsToJoin.value = tempList
         }
     }
 
-    fun accpetParticipantJoinDialog(){
+    fun accpetParticipantJoinDialog(message: AccessResquestMessage){
         viewModelScope.launch {
-            collectionInstance = _connectionService.giveAccess(accessResquestMessage)
-            _showParticipantJoinDialog.value = false
+            collectionInstance = _connectionService.giveAccess(message)
+            val tempList = arrayListOf<AccessResquestMessage>()
+            tempList.addAll(_participantsToJoin.value)
+            tempList.remove(message)
+            _participantsToJoin.value = tempList
+        }
+    }
+
+    fun leaveOrCloseCollection(isAdmin: Boolean){
+        if(isAdmin){
+            viewModelScope.launch {
+                _connectionService.closeCollection(collectionInstance)
+            }
+        }else{
+            viewModelScope.launch {
+                _connectionService.leaveCollection(collectionInstance)
+            }
         }
     }
 }

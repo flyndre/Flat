@@ -6,12 +6,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -52,27 +55,45 @@ fun TrackingScreen(
     modifier: Modifier = Modifier,
     trackingScreenViewModel: TrackingScreenViewModel,
     onNavigateToInitialScreen: () -> Unit,
-    onNavigateToParticipantScreen: ()->Unit,
+    onNavigateToParticipantScreen: () -> Unit,
     userId: UUID,
 ) {
     val trackingEnabled by trackingScreenViewModel.trackingEnabled.collectAsState()
     val localTrackList by trackingScreenViewModel.trackList.collectAsState()
     val remoteTrackList by trackingScreenViewModel.remoteTrackList.collectAsState()
-    val showParticipantJoinDialog by trackingScreenViewModel.showParticipantJoinDialog.collectAsState()
+    val participantsToJoin by trackingScreenViewModel.participantsToJoin.collectAsState()
+    var showLeavingDialog by remember { mutableStateOf(false) }
+    var showClosingDialog by remember { mutableStateOf(false) }
 
-    if(showParticipantJoinDialog){
-        ParticipantJoinDialog(onDecline = { trackingScreenViewModel.declineParticipantJoinDialog() }, onAccept = { trackingScreenViewModel.accpetParticipantJoinDialog() })
+    if (participantsToJoin.isNotEmpty()) {
+        ParticipantJoinDialog(
+            onDecline = { trackingScreenViewModel.declineParticipantJoinDialog(message = participantsToJoin.get(0)) },
+            onAccept = { trackingScreenViewModel.accpetParticipantJoinDialog(message = participantsToJoin.get(0)) })
+    }
+
+    if (showLeavingDialog) {
+        LeavingDialog(
+            onDecline = { showLeavingDialog = false },
+            onAccept = { trackingScreenViewModel.leaveOrCloseCollection(false); onNavigateToInitialScreen() })
+    }
+
+    if (showClosingDialog) {
+        ClosingDialog(
+            onDecline = { showClosingDialog = false },
+            onAccept = { trackingScreenViewModel.leaveOrCloseCollection(true); onNavigateToInitialScreen() })
     }
 
     Scaffold(topBar = {
         TopAppBar(
             title = { Text(text = trackingScreenViewModel.collectionInstance.name) },
             navigationIcon = {
-                IconButton(onClick = { onNavigateToInitialScreen() }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "back to start screen"
-                    )
+                if (!userId.equals(trackingScreenViewModel.collectionInstance.clientId)) {//if this user is no admin
+                    IconButton(onClick = { showLeavingDialog = true }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "back to start screen"
+                        )
+                    }
                 }
             })
     }, bottomBar = {
@@ -96,45 +117,53 @@ fun TrackingScreen(
             }
         }
     }, floatingActionButton = {
-        if(userId.equals(trackingScreenViewModel.collectionInstance.clientId)){
-            AdminMenu(onNavigateToInitialScreen = onNavigateToInitialScreen, onNavigateToParticipantScreen = onNavigateToParticipantScreen, trackingScreenViewModel = trackingScreenViewModel)
+        if (userId.equals(trackingScreenViewModel.collectionInstance.clientId)) {
+            AdminMenu(
+                onClosingCollection = { showClosingDialog = true },
+                onNavigateToParticipantScreen = onNavigateToParticipantScreen,
+                trackingScreenViewModel = trackingScreenViewModel
+            )
         }
     }) { innerPadding ->
-        GoogleMap(modifier = Modifier.padding(innerPadding), properties = MapProperties(isMyLocationEnabled = true), uiSettings = MapUiSettings(zoomControlsEnabled = false)){
+        GoogleMap(
+            modifier = Modifier.padding(innerPadding),
+            properties = MapProperties(isMyLocationEnabled = true),
+            uiSettings = MapUiSettings(zoomControlsEnabled = false)
+        ) {
             //rendering local track
-            if(localTrackList.isNotEmpty()){
-                for(track in localTrackList){
+            if (localTrackList.isNotEmpty()) {
+                for (track in localTrackList) {
                     var list = arrayListOf<LatLng>()
-                    for(position in track){
+                    for (position in track) {
                         list.add(LatLng(position.latitude, position.longitude))
                     }
-                    if(list.isNotEmpty()){
+                    if (list.isNotEmpty()) {
                         Polyline(points = list)
                     }
                 }
             }
             //rendering remote tracks
-            if(remoteTrackList.isNotEmpty()){
-                for(trackCollection in remoteTrackList){
-                    for(track in trackCollection.value){
+            if (remoteTrackList.isNotEmpty()) {
+                for (trackCollection in remoteTrackList) {
+                    for (track in trackCollection.value) {
                         var list = arrayListOf<LatLng>()
-                        for(position in track){
+                        for (position in track) {
                             list.add(LatLng(position.latitude, position.longitude))
                         }
-                        if(list.isNotEmpty()){
+                        if (list.isNotEmpty()) {
                             Polyline(points = list)
                         }
                     }
                 }
             }
             //rendering collection areas
-            if(trackingScreenViewModel.collectionInstance.divisions.isNotEmpty()){
-                for(collectionArea in trackingScreenViewModel.collectionInstance.divisions){
+            if (trackingScreenViewModel.collectionInstance.divisions.isNotEmpty()) {
+                for (collectionArea in trackingScreenViewModel.collectionInstance.divisions) {
                     //get inner list of multipolygon and draw it on map
                     val area = collectionArea.area.coordinates[0]
                     //convert list<position> in list<latlong>
                     val list = arrayListOf<LatLng>()
-                    for(position in area){
+                    for (position in area) {
                         list.add(LatLng(position.latitude, position.longitude))
                     }
 
@@ -146,12 +175,18 @@ fun TrackingScreen(
 }
 
 @Composable
-fun AdminMenu(onNavigateToInitialScreen: () -> Unit, onNavigateToParticipantScreen: () -> Unit, trackingScreenViewModel: TrackingScreenViewModel) {
+fun AdminMenu(
+    onClosingCollection: () -> Unit,
+    onNavigateToParticipantScreen: () -> Unit,
+    trackingScreenViewModel: TrackingScreenViewModel,
+) {
     var expanded by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier) {
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(text = { Text(text = "End Collection") }, onClick = { onNavigateToInitialScreen() })
+            DropdownMenuItem(
+                text = { Text(text = "End Collection") },
+                onClick = { onClosingCollection() })
             HorizontalDivider()
             DropdownMenuItem(text = { Text(text = "Manage Groups") }, onClick = {
                 trackingScreenViewModel.updateParticipantScreenViewModel()
@@ -165,22 +200,97 @@ fun AdminMenu(onNavigateToInitialScreen: () -> Unit, onNavigateToParticipantScre
 }
 
 @Composable
-fun ParticipantJoinDialog(onDecline: ()->Unit, onAccept: ()->Unit){
-    Dialog(onDismissRequest = { onDecline() }) {
-        Card(modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp), shape = RoundedCornerShape(16.dp)) {
-            Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = "A new participant wants to join.")
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-                    TextButton(modifier = Modifier.padding(8.dp), onClick = { onDecline() }) {
-                        Text(text = "Decline")
-                    }
-                    TextButton(modifier = Modifier.padding(8.dp), onClick = { onAccept() }) {
-                        Text(text = "Accept")
-                    }
-                }
+fun ParticipantJoinDialog(onDecline: () -> Unit, onAccept: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = { onDecline() },
+        confirmButton = {
+            TextButton(onClick = { onAccept() }) {
+                Text(
+                    text = "Zustimmen"
+                )
             }
-        }
-    }
+        },
+        dismissButton = {
+            TextButton(onClick = { onDecline() }) {
+                Text(
+                    text = "Ablehnen"
+                )
+            }
+        },
+        icon = {
+            Icon(
+                Icons.Default.Info,
+                contentDescription = "asking whether to leave the collection"
+            )
+        },
+        title = {
+            Text(
+                text = "Information"
+            )
+        },
+        text = { Text(text = "Ein Nutzer möchte deiner Sammlung beitreten.") })
+}
+
+@Composable
+fun LeavingDialog(onDecline: () -> Unit, onAccept: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = { onDecline() },
+        confirmButton = {
+            TextButton(onClick = { onAccept() }) {
+                Text(
+                    text = "Verlassen"
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { onDecline() }) {
+                Text(
+                    text = "Abbrechen"
+                )
+            }
+        },
+        icon = {
+            Icon(
+                Icons.Default.Info,
+                contentDescription = "asking whether to leave the collection"
+            )
+        },
+        title = {
+            Text(
+                text = "Warnung"
+            )
+        },
+        text = { Text(text = "Bist du sicher, dass du die Sammlung verlassen möchtest?") })
+}
+
+@Composable
+fun ClosingDialog(onDecline: () -> Unit, onAccept: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = { onDecline() },
+        confirmButton = {
+            TextButton(onClick = { onAccept() }) {
+                Text(
+                    text = "Schließen"
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { onDecline() }) {
+                Text(
+                    text = "Abbrechen"
+                )
+            }
+        },
+        icon = {
+            Icon(
+                Icons.Default.Info,
+                contentDescription = "asking whether to close the collection"
+            )
+        },
+        title = {
+            Text(
+                text = "Warnung"
+            )
+        },
+        text = { Text(text = "Bist du sicher, dass du die Sammlung schließen möchtest?") })
 }
