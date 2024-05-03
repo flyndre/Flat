@@ -78,22 +78,29 @@ namespace FlatBackend.Controllers
                 accessRequest.collectionId = id;
                 accessRequest.username = value.username;
                 var confirmedUser = await _WebsocketManager.sendAccessRequestToBoss(accessRequest);
-                UserModel? validUser = oldCol.confirmedUsers.Find(x => x.clientId == value.clientId);
-                if (validUser == null)
+                if (confirmedUser != null)
                 {
-                    oldCol.requestedAccess.Remove(value);
-                    oldCol.confirmedUsers.Add(confirmedUser);
+                    UserModel? validUser = oldCol.confirmedUsers.Find(x => x.clientId == value.clientId);
+                    if (validUser == null)
+                    {
+                        oldCol.requestedAccess.Remove(value);
+                        oldCol.confirmedUsers.Add(confirmedUser);
+                    }
+                    else
+                    {
+                        var index = oldCol.confirmedUsers.IndexOf(validUser);
+                        oldCol.confirmedUsers[index] = confirmedUser;
+                    }
+                    _MongoDBService.ChangeCollection(oldCol);
+                    //_WebsocketManager.sendAccessConfirmationToUser(new DTOs.AccessConfirmationDto() { collectionId = id, clientId = value.clientId, accepted = value.accepted });
+                    _WebsocketManager.sendUpdateCollection(id);
+                    Json = JsonConvert.SerializeObject(confirmedUser);
+                    return Json;
                 }
                 else
                 {
-                    var index = oldCol.confirmedUsers.IndexOf(validUser);
-                    oldCol.confirmedUsers[index] = confirmedUser;
+                    return NotFound("Error the Boss didn't answered the request.").ToString();
                 }
-                _MongoDBService.ChangeCollection(oldCol);
-                //_WebsocketManager.sendAccessConfirmationToUser(new DTOs.AccessConfirmationDto() { collectionId = id, clientId = value.clientId, accepted = value.accepted });
-                _WebsocketManager.sendUpdateCollection(id);
-                Json = JsonConvert.SerializeObject(confirmedUser);
-                return Json;
             }
             catch (Exception ex)
             {
