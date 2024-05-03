@@ -69,8 +69,7 @@ class TrackingScreenViewModel(
     }
 
     fun updateParticipantScreenViewModel(){
-        _participantScreenViewModel.setUsers(collectionInstance.confirmedUsers)
-        _participantScreenViewModel.setDivisions(collectionInstance.divisions)
+        _participantScreenViewModel.initialValues(collectionInstance)
     }
 
     fun declineParticipantJoinDialog(){

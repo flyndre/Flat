@@ -74,7 +74,7 @@ class MainActivity : ComponentActivity() {
         trackingService = TrackingService(connectionService, locationService, 10000)
         db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "flat-database")
             .build()
-        val participantScreenViewModel = ParticipantScreenViewModel()
+        val participantScreenViewModel = ParticipantScreenViewModel(connectionService)
         val trackingScreenViewModel =
             TrackingScreenViewModel(db = db, trackingService, connectionService, participantScreenViewModel)
         val collectionAreaScreenViewModel = CollectionAreaScreenViewModel()
