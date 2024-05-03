@@ -61,14 +61,14 @@ fun TrackingScreen(
     val trackingEnabled by trackingScreenViewModel.trackingEnabled.collectAsState()
     val localTrackList by trackingScreenViewModel.trackList.collectAsState()
     val remoteTrackList by trackingScreenViewModel.remoteTrackList.collectAsState()
-    val showParticipantJoinDialog by trackingScreenViewModel.showParticipantJoinDialog.collectAsState()
+    val participantsToJoin by trackingScreenViewModel.participantsToJoin.collectAsState()
     var showLeavingDialog by remember { mutableStateOf(false) }
     var showClosingDialog by remember { mutableStateOf(false) }
 
-    if (showParticipantJoinDialog) {
+    if (participantsToJoin.isNotEmpty()) {
         ParticipantJoinDialog(
-            onDecline = { trackingScreenViewModel.declineParticipantJoinDialog() },
-            onAccept = { trackingScreenViewModel.accpetParticipantJoinDialog() })
+            onDecline = { trackingScreenViewModel.declineParticipantJoinDialog(message = participantsToJoin.get(0)) },
+            onAccept = { trackingScreenViewModel.accpetParticipantJoinDialog(message = participantsToJoin.get(0)) })
     }
 
     if (showLeavingDialog) {
