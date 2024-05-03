@@ -75,14 +75,14 @@ class TrackingScreenViewModel(
 
     fun declineParticipantJoinDialog(){
         viewModelScope.launch {
-            _connectionService.denyAccess(accessResquestMessage)
+            collectionInstance = _connectionService.denyAccess(accessResquestMessage)
             _showParticipantJoinDialog.value = false
         }
     }
 
     fun accpetParticipantJoinDialog(){
         viewModelScope.launch {
-            _connectionService.giveAccess(accessResquestMessage)
+            collectionInstance = _connectionService.giveAccess(accessResquestMessage)
             _showParticipantJoinDialog.value = false
         }
     }
