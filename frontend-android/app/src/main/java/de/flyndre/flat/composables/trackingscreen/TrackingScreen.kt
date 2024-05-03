@@ -59,9 +59,14 @@ fun TrackingScreen(
     val localTrackList by trackingScreenViewModel.trackList.collectAsState()
     val remoteTrackList by trackingScreenViewModel.remoteTrackList.collectAsState()
     val showParticipantJoinDialog by trackingScreenViewModel.showParticipantJoinDialog.collectAsState()
+    var showLeavingDialog by remember { mutableStateOf(false) }
 
     if(showParticipantJoinDialog){
         ParticipantJoinDialog(onDecline = { trackingScreenViewModel.declineParticipantJoinDialog() }, onAccept = { trackingScreenViewModel.accpetParticipantJoinDialog() })
+    }
+
+    if(showLeavingDialog){
+        LeavingDialog(onDecline = { showLeavingDialog = true }, onAccept = {trackingScreenViewModel.leaveOrCloseCollection(false); onNavigateToInitialScreen()})
     }
 
     Scaffold(topBar = {
@@ -69,7 +74,7 @@ fun TrackingScreen(
             title = { Text(text = trackingScreenViewModel.collectionInstance.name) },
             navigationIcon = {
                 if(!userId.equals(trackingScreenViewModel.collectionInstance.clientId)){//if this user is no admin
-                    IconButton(onClick = { trackingScreenViewModel.leaveOrCloseCollection(false); onNavigateToInitialScreen() }) {
+                    IconButton(onClick = { showLeavingDialog = true }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "back to start screen"
@@ -180,6 +185,27 @@ fun ParticipantJoinDialog(onDecline: ()->Unit, onAccept: ()->Unit){
                     }
                     TextButton(modifier = Modifier.padding(8.dp), onClick = { onAccept() }) {
                         Text(text = "Accept")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun LeavingDialog(onDecline: ()->Unit, onAccept: ()->Unit){
+    Dialog(onDismissRequest = { onDecline() }) {
+        Card(modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp), shape = RoundedCornerShape(16.dp)) {
+            Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = "Bist du sicher, dass du die Sammlung verlassen möchtest?")
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
+                    TextButton(modifier = Modifier.padding(8.dp), onClick = { onDecline() }) {
+                        Text(text = "Abbrechen")
+                    }
+                    TextButton(modifier = Modifier.padding(8.dp), onClick = { onAccept() }) {
+                        Text(text = "Verlassen")
                     }
                 }
             }
