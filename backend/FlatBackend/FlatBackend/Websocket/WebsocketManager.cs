@@ -6,9 +6,12 @@ using MongoDB.Driver;
 using System.Collections.Concurrent;
 using System.Net.WebSockets;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 //using System.Text.Json;
 using Newtonsoft.Json;
+using System.Diagnostics.Metrics;
 
 namespace FlatBackend.Websocket
 {
@@ -22,6 +25,7 @@ namespace FlatBackend.Websocket
         public BlockingCollection<CollectionClosedDto> collectionClosedWaiting;
         public BlockingCollection<IncrementalTrackDto> incrementalTrackWaiting;
         public BlockingCollection<CollectionUpdateDto> updateWaiting;
+        private Timer timer;
 
         public WebsocketManager( IMongoDBService mongoDBService )
         {
@@ -33,6 +37,49 @@ namespace FlatBackend.Websocket
             incrementalTrackWaiting = new BlockingCollection<IncrementalTrackDto>();
             updateWaiting = new BlockingCollection<CollectionUpdateDto>();
             trackCollections = new List<TrackCollectionModel>();
+            timer = new Timer(callback: new TimerCallback(x =>
+            {
+                List<WebSocketUserModel> deprecatedUsers = new List<WebSocketUserModel>();
+                var keepAlive = new KeepAliveDto();
+                string Json = JsonConvert.SerializeObject(keepAlive);
+                foreach (var user in users)
+                {
+                    if (user != null && user.webSocket.State == WebSocketState.Open)
+                    {
+                        user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
+                    }
+                    else { deprecatedUsers.Add(user); }
+                }
+                if (deprecatedUsers.Count > 0)
+                {
+                    foreach (var user in deprecatedUsers)
+                    {
+                        users.Remove(user);
+                    }
+                }
+            }), state: null, dueTime: 1000, period: 30000);
+        }
+
+        private void sendKeepaliveMessages()
+        {
+            List<WebSocketUserModel> deprecatedUsers = new List<WebSocketUserModel>();
+            var keepAlive = new KeepAliveDto();
+            string Json = JsonConvert.SerializeObject(keepAlive);
+            foreach (var user in users)
+            {
+                if (user != null && user.webSocket.State == WebSocketState.Open)
+                {
+                    user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
+                }
+                else { deprecatedUsers.Add(user); }
+            }
+            if (deprecatedUsers.Count > 0)
+            {
+                foreach (var user in deprecatedUsers)
+                {
+                    users.Remove(user);
+                }
+            }
         }
 
         public Guid getCollectionId( WebSocket websocket )
@@ -179,7 +226,7 @@ namespace FlatBackend.Websocket
             if (collection != null)
             {
                 var user = users.Find(x => x.collectionId == collection.id && x.clientId == collection.clientId);
-                if (user != null)
+                if (user != null/*&& user.webSocket.State!=WebSocketState.Aborted*/)
                 {
                     var Json = JsonConvert.SerializeObject(request);
                     await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);

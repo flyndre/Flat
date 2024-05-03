@@ -41,7 +41,7 @@ if (app.Environment.IsDevelopment())
 
 var webSocketOptions = new WebSocketOptions
 {
-    KeepAliveInterval = TimeSpan.FromMinutes(2)
+    KeepAliveInterval = TimeSpan.FromMinutes(0.5)
 };
 app.UseWebSockets(webSocketOptions);
 
