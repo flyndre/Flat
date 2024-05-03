@@ -58,6 +58,11 @@ fun TrackingScreen(
     val trackingEnabled by trackingScreenViewModel.trackingEnabled.collectAsState()
     val localTrackList by trackingScreenViewModel.trackList.collectAsState()
     val remoteTrackList by trackingScreenViewModel.remoteTrackList.collectAsState()
+    val showParticipantJoinDialog by trackingScreenViewModel.showParticipantJoinDialog.collectAsState()
+
+    if(showParticipantJoinDialog){
+        ParticipantJoinDialog(onDecline = { trackingScreenViewModel.declineParticipantJoinDialog() }, onAccept = { trackingScreenViewModel.accpetParticipantJoinDialog() })
+    }
 
     Scaffold(topBar = {
         TopAppBar(

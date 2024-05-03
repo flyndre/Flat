@@ -136,7 +136,7 @@ class ConnectionService(
         }
     }
 
-    override suspend fun giveAccess(request: AccessResquestMessage) {
+    override suspend fun giveAccess(request: AccessResquestMessage):CollectionInstance {
 
         val url = "$baseUrl/AccessConfirmation/${request.collectionId}"
         val restRequest = Request.Builder()
@@ -144,24 +144,35 @@ class ConnectionService(
             .post(json.encodeToString(UserModel(request.username,request.userId,true)).toRequestBody())
             .build()
         val response = restClient.newCall(restRequest).await()
-        if(!response.isSuccessful){
+        if(response.isSuccessful&&response.body !=null){
+            val bodyString = response.body!!.string()
+            val collection: CollectionInstance = json.decodeFromString(bodyString)
+            response.close()
+            return collection
+        }else{
             val responseString = response.body?.string()
             response.close()
-            throw RequestFailedException("Could not grant access on collection ${request.collectionId} for user ${request.username} alias ${request.userId}:\n$responseString")
+            throw RequestFailedException("Could not give Access to User ${request.userId} alias ${request.username}:\n $responseString")
+
         }
     }
 
-    override suspend fun denyAccess(request: AccessResquestMessage) {
+    override suspend fun denyAccess(request: AccessResquestMessage):CollectionInstance {
         val url = "$baseUrl/AccessConfirmation/${request.collectionId}"
         val restRequest = Request.Builder()
             .url(url)
             .post(json.encodeToString(UserModel(request.username,request.userId,false)).toRequestBody())
             .build()
         val response = restClient.newCall(restRequest).await()
-        if(!response.isSuccessful){
+        if(response.isSuccessful&&response.body !=null){
+            val bodyString = response.body!!.string()
+            val collection: CollectionInstance = json.decodeFromString(bodyString)
+            response.close()
+            return collection
+        }else{
             val responseString = response.body?.string()
             response.close()
-            throw RequestFailedException("Could not deny access on collection ${request.collectionId} for user ${request.username} alias ${request.userId}:\n$responseString")
+            throw RequestFailedException("Could not deny Access to User ${request.userId} alias ${request.username}:\n $responseString")
         }
     }
 
