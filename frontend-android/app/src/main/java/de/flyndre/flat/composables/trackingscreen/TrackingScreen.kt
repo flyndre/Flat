@@ -69,7 +69,7 @@ fun TrackingScreen(
             title = { Text(text = trackingScreenViewModel.collectionInstance.name) },
             navigationIcon = {
                 if(!userId.equals(trackingScreenViewModel.collectionInstance.clientId)){//if this user is no admin
-                    IconButton(onClick = { onNavigateToInitialScreen() }) {
+                    IconButton(onClick = { trackingScreenViewModel.leaveOrCloseCollection(false); onNavigateToInitialScreen() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "back to start screen"
@@ -153,7 +153,7 @@ fun AdminMenu(onNavigateToInitialScreen: () -> Unit, onNavigateToParticipantScre
 
     Box(modifier = Modifier) {
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(text = { Text(text = "End Collection") }, onClick = { onNavigateToInitialScreen() })
+            DropdownMenuItem(text = { Text(text = "End Collection") }, onClick = { trackingScreenViewModel.leaveOrCloseCollection(true); onNavigateToInitialScreen() })
             HorizontalDivider()
             DropdownMenuItem(text = { Text(text = "Manage Groups") }, onClick = {
                 trackingScreenViewModel.updateParticipantScreenViewModel()

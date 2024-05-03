@@ -85,4 +85,16 @@ class TrackingScreenViewModel(
             _showParticipantJoinDialog.value = false
         }
     }
+
+    fun leaveOrCloseCollection(isAdmin: Boolean){
+        if(isAdmin){
+            viewModelScope.launch {
+                _connectionService.closeCollection(collectionInstance)
+            }
+        }else{
+            viewModelScope.launch {
+                _connectionService.leaveCollection(collectionInstance)
+            }
+        }
+    }
 }
