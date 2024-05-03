@@ -1,6 +1,7 @@
 package de.flyndre.flat.composables.trackingscreen
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import de.flyndre.flat.composables.trackingscreen.participantscreen.ParticipantScreenViewModel
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.interfaces.IConnectionService
@@ -11,6 +12,7 @@ import de.flyndre.flat.models.TrackCollection
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import java.util.UUID
 
 class TrackingScreenViewModel(
@@ -22,7 +24,9 @@ class TrackingScreenViewModel(
     private var _db = db
     private val _participantScreenViewModel: ParticipantScreenViewModel = participantScreenViewModel
     private val _trackingService = trackingService
+    private val _connectionService = connectionService
     lateinit var collectionInstance: CollectionInstance
+    lateinit var accessResquestMessage: AccessResquestMessage
 
     private val _trackingEnabled = MutableStateFlow(false)
     val trackingEnabled = _trackingEnabled.asStateFlow()
@@ -60,6 +64,7 @@ class TrackingScreenViewModel(
     }
 
     private fun onAccessRequestMessage(message: AccessResquestMessage){
+        accessResquestMessage = message
         _showParticipantJoinDialog.value = true
     }
 
@@ -69,10 +74,16 @@ class TrackingScreenViewModel(
     }
 
     fun declineParticipantJoinDialog(){
-        _showParticipantJoinDialog.value = false
+        viewModelScope.launch {
+            _connectionService.denyAccess(accessResquestMessage)
+            _showParticipantJoinDialog.value = false
+        }
     }
 
     fun accpetParticipantJoinDialog(){
-        _showParticipantJoinDialog.value = false
+        viewModelScope.launch {
+            _connectionService.giveAccess(accessResquestMessage)
+            _showParticipantJoinDialog.value = false
+        }
     }
 }
