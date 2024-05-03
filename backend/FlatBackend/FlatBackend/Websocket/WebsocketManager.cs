@@ -147,7 +147,7 @@ namespace FlatBackend.Websocket
             var collection = await _MongoDBService.GetCollection(collectionId);
             foreach (var user in users)
             {
-                if (user.collectionId == collectionId)
+                if (user.collectionId == collectionId && user.webSocket.State == WebSocketState.Open)
                 {
                     var validUser = collection.confirmedUsers.Find(x => x.clientId == user.clientId);
                     if (validUser != null && validUser.accepted)
@@ -165,7 +165,7 @@ namespace FlatBackend.Websocket
             var collection = await _MongoDBService.GetCollection(collectionId);
             foreach (var user in users)
             {
-                if (user.collectionId == collectionId)
+                if (user.collectionId == collectionId && user.webSocket.State == WebSocketState.Open)
                 {
                     CollectionClosedDto collectionClosedDto = new CollectionClosedDto() { collectionId = collectionId };
                     string Json = JsonConvert.SerializeObject(collectionClosedDto);
@@ -203,7 +203,7 @@ namespace FlatBackend.Websocket
         {
             foreach (var user in users)
             {
-                if (user.collectionId == collectionId)
+                if (user.collectionId == collectionId && user.webSocket.State == WebSocketState.Open)
                 {
                     string Json = JsonConvert.SerializeObject(track);
                     await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
