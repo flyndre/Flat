@@ -3,7 +3,9 @@ package de.flyndre.flat.composables.trackingscreen
 import androidx.lifecycle.ViewModel
 import de.flyndre.flat.composables.trackingscreen.participantscreen.ParticipantScreenViewModel
 import de.flyndre.flat.database.AppDatabase
+import de.flyndre.flat.interfaces.IConnectionService
 import de.flyndre.flat.interfaces.ITrackingService
+import de.flyndre.flat.models.AccessResquestMessage
 import de.flyndre.flat.models.CollectionInstance
 import de.flyndre.flat.models.TrackCollection
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,6 +16,7 @@ import java.util.UUID
 class TrackingScreenViewModel(
     db: AppDatabase,
     trackingService: ITrackingService,
+    connectionService: IConnectionService,
     participantScreenViewModel: ParticipantScreenViewModel
 ): ViewModel() {
     private var _db = db
@@ -30,10 +33,13 @@ class TrackingScreenViewModel(
     private val _remoteTrackList: MutableStateFlow<Map<UUID,TrackCollection>> = MutableStateFlow(mapOf())
     val remoteTrackList: StateFlow<Map<UUID,TrackCollection>> = _remoteTrackList.asStateFlow()
 
+    private val _showParticipantJoinDialog = MutableStateFlow(false)
+    val showParticipantJoinDialog = _showParticipantJoinDialog.asStateFlow()
 
     init {
         trackingService.addOnLocalTrackUpdate{ onLocalTrackUpdate() }
         trackingService.addOnRemoteTrackUpdate { onRemoteTrackUpdate() }
+        connectionService.addOnAccessRequest { onAccessRequestMessage(it) }
     }
 
     fun toggleTracking(){
@@ -53,8 +59,20 @@ class TrackingScreenViewModel(
         _remoteTrackList.value = _trackingService.remoteTracks
     }
 
+    private fun onAccessRequestMessage(message: AccessResquestMessage){
+        _showParticipantJoinDialog.value = true
+    }
+
     fun updateParticipantScreenViewModel(){
         _participantScreenViewModel.setUsers(collectionInstance.confirmedUsers)
         _participantScreenViewModel.setDivisions(collectionInstance.divisions)
+    }
+
+    fun declineParticipantJoinDialog(){
+        _showParticipantJoinDialog.value = false
+    }
+
+    fun accpetParticipantJoinDialog(){
+        _showParticipantJoinDialog.value = false
     }
 }

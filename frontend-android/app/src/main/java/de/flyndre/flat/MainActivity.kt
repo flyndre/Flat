@@ -76,7 +76,7 @@ class MainActivity : ComponentActivity() {
             .build()
         val participantScreenViewModel = ParticipantScreenViewModel()
         val trackingScreenViewModel =
-            TrackingScreenViewModel(db = db, trackingService, participantScreenViewModel)
+            TrackingScreenViewModel(db = db, trackingService, connectionService, participantScreenViewModel)
         val collectionAreaScreenViewModel = CollectionAreaScreenViewModel()
         val createGroupScreenViewModel = CreateGroupScreenViewModel(db = db)
         val presetScreenViewModel = PresetScreenViewModel(
