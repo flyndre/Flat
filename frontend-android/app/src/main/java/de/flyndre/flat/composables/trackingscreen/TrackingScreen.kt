@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -60,13 +61,18 @@ fun TrackingScreen(
     val remoteTrackList by trackingScreenViewModel.remoteTrackList.collectAsState()
     val showParticipantJoinDialog by trackingScreenViewModel.showParticipantJoinDialog.collectAsState()
     var showLeavingDialog by remember { mutableStateOf(false) }
+    var showClosingDialog by remember { mutableStateOf(false) }
 
     if(showParticipantJoinDialog){
         ParticipantJoinDialog(onDecline = { trackingScreenViewModel.declineParticipantJoinDialog() }, onAccept = { trackingScreenViewModel.accpetParticipantJoinDialog() })
     }
 
     if(showLeavingDialog){
-        LeavingDialog(onDecline = { showLeavingDialog = true }, onAccept = {trackingScreenViewModel.leaveOrCloseCollection(false); onNavigateToInitialScreen()})
+        LeavingDialog(onDecline = { showLeavingDialog = false }, onAccept = {trackingScreenViewModel.leaveOrCloseCollection(false); onNavigateToInitialScreen()})
+    }
+
+    if(showClosingDialog){
+        ClosingDialog(onDecline = { showClosingDialog = false }, onAccept = {trackingScreenViewModel.leaveOrCloseCollection(true); onNavigateToInitialScreen()})
     }
 
     Scaffold(topBar = {
@@ -104,7 +110,7 @@ fun TrackingScreen(
         }
     }, floatingActionButton = {
         if(userId.equals(trackingScreenViewModel.collectionInstance.clientId)){
-            AdminMenu(onNavigateToInitialScreen = onNavigateToInitialScreen, onNavigateToParticipantScreen = onNavigateToParticipantScreen, trackingScreenViewModel = trackingScreenViewModel)
+            AdminMenu(onClosingCollection = {showClosingDialog = true}, onNavigateToParticipantScreen = onNavigateToParticipantScreen, trackingScreenViewModel = trackingScreenViewModel)
         }
     }) { innerPadding ->
         GoogleMap(modifier = Modifier.padding(innerPadding), properties = MapProperties(isMyLocationEnabled = true), uiSettings = MapUiSettings(zoomControlsEnabled = false)){
@@ -153,12 +159,12 @@ fun TrackingScreen(
 }
 
 @Composable
-fun AdminMenu(onNavigateToInitialScreen: () -> Unit, onNavigateToParticipantScreen: () -> Unit, trackingScreenViewModel: TrackingScreenViewModel) {
+fun AdminMenu(onClosingCollection: () -> Unit, onNavigateToParticipantScreen: () -> Unit, trackingScreenViewModel: TrackingScreenViewModel) {
     var expanded by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier) {
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(text = { Text(text = "End Collection") }, onClick = { trackingScreenViewModel.leaveOrCloseCollection(true); onNavigateToInitialScreen() })
+            DropdownMenuItem(text = { Text(text = "End Collection") }, onClick = { onClosingCollection() })
             HorizontalDivider()
             DropdownMenuItem(text = { Text(text = "Manage Groups") }, onClick = {
                 trackingScreenViewModel.updateParticipantScreenViewModel()
@@ -175,6 +181,7 @@ fun AdminMenu(onNavigateToInitialScreen: () -> Unit, onNavigateToParticipantScre
 fun ParticipantJoinDialog(onDecline: ()->Unit, onAccept: ()->Unit){
     Dialog(onDismissRequest = { onDecline() }) {
         Card(modifier = Modifier
+            .height(200.dp)
             .fillMaxWidth()
             .padding(16.dp), shape = RoundedCornerShape(16.dp)) {
             Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
@@ -196,6 +203,7 @@ fun ParticipantJoinDialog(onDecline: ()->Unit, onAccept: ()->Unit){
 fun LeavingDialog(onDecline: ()->Unit, onAccept: ()->Unit){
     Dialog(onDismissRequest = { onDecline() }) {
         Card(modifier = Modifier
+            .height(200.dp)
             .fillMaxWidth()
             .padding(16.dp), shape = RoundedCornerShape(16.dp)) {
             Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
@@ -206,6 +214,28 @@ fun LeavingDialog(onDecline: ()->Unit, onAccept: ()->Unit){
                     }
                     TextButton(modifier = Modifier.padding(8.dp), onClick = { onAccept() }) {
                         Text(text = "Verlassen")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ClosingDialog(onDecline: ()->Unit, onAccept: ()->Unit){
+    Dialog(onDismissRequest = { onDecline() }) {
+        Card(modifier = Modifier
+            .height(200.dp)
+            .fillMaxWidth()
+            .padding(16.dp), shape = RoundedCornerShape(16.dp)) {
+            Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = "Bist du sicher, dass du die Sammlung schließen möchtest?")
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
+                    TextButton(modifier = Modifier.padding(8.dp), onClick = { onDecline() }) {
+                        Text(text = "Abbrechen")
+                    }
+                    TextButton(modifier = Modifier.padding(8.dp), onClick = { onAccept() }) {
+                        Text(text = "Schließen")
                     }
                 }
             }
