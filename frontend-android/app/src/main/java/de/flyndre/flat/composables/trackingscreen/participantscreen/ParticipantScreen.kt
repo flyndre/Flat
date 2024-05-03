@@ -1,5 +1,8 @@
 package de.flyndre.flat.composables.trackingscreen.participantscreen
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,7 +25,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import de.flyndre.flat.R
 import de.flyndre.flat.models.CollectionArea
 import de.flyndre.flat.models.UserModel
 
@@ -38,7 +44,23 @@ fun ParticipantScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { },
+                title = {
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(onClick = {
+                            participantScreenViewModel.saveAssignments()
+                            onNavigateToTrackingScreen()
+                        }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.save_fill),
+                                contentDescription = "save and return to preset view"
+                            )
+                        }
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = { onNavigateToTrackingScreen() }) {
                         Icon(
@@ -99,8 +121,10 @@ fun DropDownUserSelection(
             colors = ExposedDropdownMenuDefaults.textFieldColors()
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            users.forEach{user ->
-                DropdownMenuItem(text = { Text(text = user.username) }, onClick = { participantScreenViewModel.setUserOfDivision(division, user) })
+            users.forEach { user ->
+                DropdownMenuItem(
+                    text = { Text(text = user.username) },
+                    onClick = { participantScreenViewModel.setUserOfDivision(division, user) })
             }
         }
     }
