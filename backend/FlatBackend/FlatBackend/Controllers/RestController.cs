@@ -114,24 +114,9 @@ namespace FlatBackend.Controllers
         {
             try
             {
-                var oldCol = await _MongoDBService.GetCollection(id);
-                UserModel? user = oldCol.requestedAccess.Find(e => e.clientId == value.clientId);
-                UserModel? validUser = oldCol.confirmedUsers.Find(x => x.clientId == value.clientId);
-                if (validUser == null)
-                {
-                    user.accepted = value.accepted;
-                    oldCol.requestedAccess.Remove(user);
-                    oldCol.confirmedUsers.Add(user);
-                }
-                else
-                {
-                    var index = oldCol.confirmedUsers.IndexOf(validUser);
-                    oldCol.confirmedUsers[index] = value;
-                }
-                _MongoDBService.ChangeCollection(oldCol);
+                _WebsocketManager.setAccessConfirmationWaiting(new AccessConfirmationDto() { clientId = value.clientId, collectionId = id, accepted = value.accepted });
                 var result = await _MongoDBService.GetCollection(id);
-                _WebsocketManager.sendAccessConfirmationToUser(new DTOs.AccessConfirmationDto() { collectionId = id, clientId = value.clientId, accepted = value.accepted });
-                _WebsocketManager.sendUpdateCollection(id);
+
                 string Json = JsonConvert.SerializeObject(result);
                 return Json;
             }
