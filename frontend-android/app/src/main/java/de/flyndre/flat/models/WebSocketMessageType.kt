@@ -5,6 +5,8 @@ enum class WebSocketMessageType {
     IncrementalTrack,
     AccessRequest,
     CollectionClosed,
-    CollectionUpdate
+    CollectionUpdate,
+    Summary,
+    KeepAlive
 
 }
