@@ -1,19 +1,18 @@
 package de.flyndre.flat.composables.trackingscreen
 
+import android.graphics.BitmapFactory
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
@@ -37,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.google.android.gms.maps.model.LatLng
@@ -45,9 +45,8 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Polygon
 import com.google.maps.android.compose.Polyline
-import de.flyndre.flat.models.Track
+import qrcode.render.QRCodeGraphics
 import java.util.UUID
-import kotlin.math.exp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,8 +61,11 @@ fun TrackingScreen(
     val localTrackList by trackingScreenViewModel.trackList.collectAsState()
     val remoteTrackList by trackingScreenViewModel.remoteTrackList.collectAsState()
     val participantsToJoin by trackingScreenViewModel.participantsToJoin.collectAsState()
+    val qrCodeGraphics by trackingScreenViewModel.qrCodeGraphics.collectAsState()
+    val joinLink by trackingScreenViewModel.joinLink.collectAsState()
     var showLeavingDialog by remember { mutableStateOf(false) }
     var showClosingDialog by remember { mutableStateOf(false) }
+    var showAddPaticipantsDialog by remember { mutableStateOf(false) }
 
     if (participantsToJoin.isNotEmpty()) {
         ParticipantJoinDialog(
@@ -81,6 +83,13 @@ fun TrackingScreen(
         ClosingDialog(
             onDecline = { showClosingDialog = false },
             onAccept = { trackingScreenViewModel.leaveOrCloseCollection(true); onNavigateToInitialScreen() })
+    }
+    if (showAddPaticipantsDialog){
+        AddParticipantDialog(
+            onDismissRequest = { showAddPaticipantsDialog = false },
+            onShareButtonClick = {trackingScreenViewModel.shareJoinLink()},
+            qrCodeGraphics = qrCodeGraphics,
+            joinLink = joinLink)
     }
 
     Scaffold(topBar = {
@@ -110,7 +119,7 @@ fun TrackingScreen(
                     }
                 }
                 if (userId.equals(trackingScreenViewModel.collectionInstance.clientId)) {//if this user is admin
-                    Button(onClick = {}) {
+                    Button(onClick = {showAddPaticipantsDialog = true}) {
                         Text(text = "Add Participant")
                     }
                 }
@@ -154,6 +163,7 @@ fun TrackingScreen(
                             Polyline(points = list)
                         }
                     }
+                    
                 }
             }
             //rendering collection areas
@@ -293,4 +303,23 @@ fun ClosingDialog(onDecline: () -> Unit, onAccept: () -> Unit) {
             )
         },
         text = { Text(text = "Bist du sicher, dass du die Sammlung schließen möchtest?") })
+}
+@Composable
+fun AddParticipantDialog(
+    onDismissRequest: () -> Unit,
+    onShareButtonClick: ()->Unit,
+    qrCodeGraphics: QRCodeGraphics,
+    joinLink: String
+){
+    Dialog(onDismissRequest = onDismissRequest) {
+        Card(shape = RoundedCornerShape(16.dp)) {
+            Image(bitmap = BitmapFactory.decodeByteArray(qrCodeGraphics.getBytes(),0,qrCodeGraphics.getBytes().size).asImageBitmap(), contentDescription = "" )
+            SelectionContainer(modifier = Modifier.padding(10.dp)) {
+                Text(text = joinLink)
+            }
+            Button(onClick = onShareButtonClick) {
+                Text(text = "Share")
+            }
+        }
+    }
 }
