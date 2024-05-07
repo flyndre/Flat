@@ -139,7 +139,7 @@ class ConnectionService(
         request.accepted=true
         val message = json.encodeToString(request)
         webSocketClient.sendMessage(message)
-        val url = "$baseUrl/Collection/${request.collectionId}"
+        val url = "$baseUrl/Collection/${request.collectionId}?userId=$clientId"
         val restRequest = Request.Builder()
             .url(url)
             .get()

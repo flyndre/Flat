@@ -1,10 +1,12 @@
 package de.flyndre.flat.models
 
-enum class WebSocketMessageType {
+enum  WebSocketMessageType {
     WebsocketConnection,
     IncrementalTrack,
     AccessRequest,
     CollectionClosed,
-    CollectionUpdate
+    CollectionUpdate,
+    Summary,
+    KeepAlive
 
 }
