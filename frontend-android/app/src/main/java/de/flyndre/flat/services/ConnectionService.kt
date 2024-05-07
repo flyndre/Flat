@@ -136,11 +136,13 @@ class ConnectionService(
     }
 
     override suspend fun giveAccess(request: AccessResquestMessage):CollectionInstance {
-
-        val url = "$baseUrl/AccessConfirmation/${request.collectionId}"
+        request.accepted=true
+        val message = json.encodeToString(request)
+        webSocketClient.sendMessage(message)
+        val url = "$baseUrl/Collection/${request.collectionId}"
         val restRequest = Request.Builder()
             .url(url)
-            .post(json.encodeToString(UserModel(request.username,request.clientId,true)).toRequestBody("application/json".toMediaType()))
+            .get()
             .build()
         val response = restClient.newCall(restRequest).await()
         if(response.isSuccessful&&response.body !=null){
@@ -157,10 +159,13 @@ class ConnectionService(
     }
 
     override suspend fun denyAccess(request: AccessResquestMessage):CollectionInstance {
-        val url = "$baseUrl/AccessConfirmation/${request.collectionId}"
+        request.accepted = false
+        val message = json.encodeToString(request)
+        webSocketClient.sendMessage(message)
+        val url = "$baseUrl/Collection/${request.collectionId}"
         val restRequest = Request.Builder()
             .url(url)
-            .post(json.encodeToString(UserModel(request.username,request.clientId,false)).toRequestBody("application/json".toMediaType()))
+            .get()
             .build()
         val response = restClient.newCall(restRequest).await()
         if(response.isSuccessful&&response.body !=null){

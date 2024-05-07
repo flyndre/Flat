@@ -10,7 +10,8 @@ class AccessResquestMessage(
     var collectionId:UUID,
     @Serializable(with = UUIDSerializer::class)
     var clientId: UUID,
-    var username: String
+    var username: String,
+    var accepted: Boolean? = null
 ) :WebSocketMessage(WebSocketMessageType.AccessRequest){
 
 }
