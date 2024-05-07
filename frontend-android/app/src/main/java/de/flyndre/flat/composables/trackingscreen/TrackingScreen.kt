@@ -55,6 +55,7 @@ fun TrackingScreen(
     trackingScreenViewModel: TrackingScreenViewModel,
     onNavigateToInitialScreen: () -> Unit,
     onNavigateToParticipantScreen: () -> Unit,
+    onShareLink:((String)->Unit),
     userId: UUID,
 ) {
     val trackingEnabled by trackingScreenViewModel.trackingEnabled.collectAsState()
@@ -87,7 +88,7 @@ fun TrackingScreen(
     if (showAddPaticipantsDialog){
         AddParticipantDialog(
             onDismissRequest = { showAddPaticipantsDialog = false },
-            onShareButtonClick = {trackingScreenViewModel.shareJoinLink()},
+            onShareButtonClick = onShareLink,
             qrCodeGraphics = qrCodeGraphics,
             joinLink = joinLink)
     }
@@ -163,7 +164,7 @@ fun TrackingScreen(
                             Polyline(points = list)
                         }
                     }
-                    
+
                 }
             }
             //rendering collection areas
@@ -307,7 +308,7 @@ fun ClosingDialog(onDecline: () -> Unit, onAccept: () -> Unit) {
 @Composable
 fun AddParticipantDialog(
     onDismissRequest: () -> Unit,
-    onShareButtonClick: ()->Unit,
+    onShareButtonClick: (String)->Unit,
     qrCodeGraphics: QRCodeGraphics,
     joinLink: String
 ){
@@ -317,7 +318,7 @@ fun AddParticipantDialog(
             SelectionContainer(modifier = Modifier.padding(10.dp)) {
                 Text(text = joinLink)
             }
-            Button(onClick = onShareButtonClick) {
+            Button(onClick = {onShareButtonClick(joinLink)}) {
                 Text(text = "Share")
             }
         }
