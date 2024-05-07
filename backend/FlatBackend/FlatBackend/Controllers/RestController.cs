@@ -94,8 +94,16 @@ namespace FlatBackend.Controllers
                     _MongoDBService.ChangeCollection(oldCol);
                     //_WebsocketManager.sendAccessConfirmationToUser(new DTOs.AccessConfirmationDto() { collectionId = id, clientId = value.clientId, accepted = value.accepted });
                     _WebsocketManager.sendUpdateCollection(id);
-                    Json = JsonConvert.SerializeObject(confirmedUser);
-                    return Json;
+                    if (confirmedUser.accepted)
+                    {
+                        var resultAccessResult = new ResultAccessRequest() { accepted = true, collection = oldCol };
+                        Json = JsonConvert.SerializeObject(resultAccessResult);
+                        return Json;
+                    }
+                    else
+                    {
+                        Json = JsonConvert.SerializeObject(confirmedUser); return Json;
+                    }
                 }
                 else
                 {
