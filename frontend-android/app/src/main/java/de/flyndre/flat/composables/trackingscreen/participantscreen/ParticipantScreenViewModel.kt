@@ -29,9 +29,9 @@ class ParticipantScreenViewModel(connectionService: IConnectionService): ViewMod
         _initialUsers.addAll(collectionInstance.confirmedUsers)
 
         _divisions.value = arrayListOf()
-        _divisions.value.addAll(collectionInstance.divisions)
+        _divisions.value.addAll(collectionInstance.collectionDivision)
         _initialDivisions.clear()
-        _initialDivisions.addAll(collectionInstance.divisions)
+        _initialDivisions.addAll(collectionInstance.collectionDivision)
 
         this.collectionInstance = collectionInstance
     }

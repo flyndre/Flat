@@ -168,8 +168,8 @@ fun TrackingScreen(
                 }
             }
             //rendering collection areas
-            if (trackingScreenViewModel.collectionInstance.divisions.isNotEmpty()) {
-                for (collectionArea in trackingScreenViewModel.collectionInstance.divisions) {
+            if (trackingScreenViewModel.collectionInstance.collectionDivision.isNotEmpty()) {
+                for (collectionArea in trackingScreenViewModel.collectionInstance.collectionDivision) {
                     //get inner list of multipolygon and draw it on map
                     val area = collectionArea.area.coordinates[0]
                     //convert list<position> in list<latlong>
