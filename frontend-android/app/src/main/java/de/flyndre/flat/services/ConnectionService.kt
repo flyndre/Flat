@@ -53,9 +53,10 @@ class ConnectionService(
 
     override suspend fun openCollection(name: String, area: MultiPolygon
     ): CollectionInstance {
+        val jsonString = json.encodeToString(CollectionInstance(name,clientId,area))
         val request = Request.Builder()
             .url("$baseUrl/collection")
-            .post(Json.encodeToString(CollectionInstance(name,clientId,area)).toRequestBody("application/json".toMediaType()))
+            .post(jsonString.toRequestBody("application/json".toMediaType()))
             .build()
         val response = restClient.newCall(request).await()
         if(response.isSuccessful&&response.body !=null){
@@ -86,7 +87,7 @@ class ConnectionService(
         }
     }
 
-    override suspend fun setAreaDivision(collectionId: UUID, divisions: List<CollectionArea>) {
+    override suspend fun setAreaDivision(collectionId: UUID, divisions: List<CollectionArea>):CollectionInstance {
         val url = "$baseUrl/collection/$collectionId"
         val jsonString = json.encodeToString(divisions)
         val request = Request.Builder()
@@ -94,10 +95,17 @@ class ConnectionService(
             .put(jsonString.toRequestBody("application/json".toMediaType()))
             .build()
         val response = restClient.newCall(request).await()
-        if(!response.isSuccessful){
+        if(response.isSuccessful&&response.body !=null){
+            val bodyString = response.body!!.string()
+            val collection: CollectionInstance = json.decodeFromString(bodyString)
+            response.close()
+            openWebsocket(collection.id!!)
+            return collection
+        }else{
             val responseString = response.body?.string()
             response.close()
-            throw RequestFailedException("Could not set area division on collection $collectionId areas:\n $divisions response body:\n$responseString")
+            throw RequestFailedException("Could set the divisions :\n$responseString")
+
         }
     }
 
