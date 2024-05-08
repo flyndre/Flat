@@ -205,6 +205,7 @@ namespace FlatBackend.Controllers
                 var oldCol = await _MongoDBService.GetCollection(id);
                 foreach (var area in value)
                 {
+                    if (area == null) { continue; }
                     var oldArea = oldCol.collectionDivision.Find(x => x.id == area.id);
 
                     if (oldArea != null)
