@@ -175,6 +175,7 @@ namespace FlatBackend.Controllers
                 {
                     value.collectionDivision = new List<AreaModel>();
                 }
+                if (value.confirmedUsers == null) value.confirmedUsers = new List<UserModel>();
                 if (value.confirmedUsers.Count == 0)
                 {
                     value.confirmedUsers = new List<UserModel>() { new UserModel() { clientId = value.clientId, username = "admin", accepted = true } };
