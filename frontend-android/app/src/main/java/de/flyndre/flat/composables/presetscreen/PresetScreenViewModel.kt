@@ -135,7 +135,11 @@ class PresetScreenViewModel(
                     collectionAreaModelList.add(collectionArea)
                 }
                 //upload collection areas to server
-                _connectionService.setAreaDivision(UUID.randomUUID(), collectionAreaModelList)
+                if(result.id !=null){
+                    _trackingScreenViewModel.collectionInstance = _connectionService.setAreaDivision(result.id!!, collectionAreaModelList)
+                }else{
+                    throw RequestFailedException("result doesn't contain an id:$result")
+                }
 
                 onSuccess()
             } catch (e: RequestFailedException) {
