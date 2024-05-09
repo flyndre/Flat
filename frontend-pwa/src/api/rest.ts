@@ -11,7 +11,10 @@ import api from './api';
  * @returns the created Collection
  */
 export async function openCollection(collection: Collection) {
-    const response = await api.post('api/rest/collection', collection);
+    var collectionDto = collection as any 
+    collectionDto.clientId  = collection.adminClientId
+    delete collectionDto.adminClientId;
+    const response = await api.post('api/rest/collection', collectionDto);
     return response;
 }
 

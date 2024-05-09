@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { openCollection } from '@/api/rest';
 import DivisionsList from '@/components/collections/DivisionsList.vue';
 import MdiInputIcon from '@/components/icons/MdiInputIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
@@ -119,8 +120,13 @@ async function _saveCollection(target: RouteLocationRaw) {
 }
 
 const save = () => _saveCollection({ name: 'presets' });
-function start() {
-    _saveCollection({ name: 'presets' });
+async function start() {
+    //_saveCollection({ name: 'presets' });
+    const response = await openCollection(collection.value); 
+
+    console.log(response); 
+    response.status == 200 ? router.push({name: "track"}) : null;
+    
     // TODO: start collection and redirect to /track
 }
 
