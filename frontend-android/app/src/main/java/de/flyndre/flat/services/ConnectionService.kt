@@ -14,7 +14,6 @@ import de.flyndre.flat.models.Track
 import de.flyndre.flat.models.UserModel
 import de.flyndre.flat.models.WebSocketMessage
 import de.flyndre.flat.models.WebSocketMessageType
-import de.flyndre.flat.models.WebsocketConnectionMessage
 import io.github.dellisd.spatialk.geojson.MultiPolygon
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -42,10 +41,10 @@ class ConnectionService(
         override fun onMessage(message: String) {
             val obj = json.decodeFromString<WebSocketMessage>(message)
             when(obj.type){
-                WebSocketMessageType.IncrementalTrack -> onTrackUpdate.stream().forEach { x->x(obj as IncrementalTrackMessage) }
-                WebSocketMessageType.AccessRequest -> onAccessRequest.stream().forEach { x->x(obj as AccessResquestMessage) }
-                WebSocketMessageType.CollectionClosed -> onCollectionClosed.stream().forEach { x->x(obj as CollectionClosedMessage) }
-                WebSocketMessageType.CollectionUpdate -> onCollectionUpdate.stream().forEach { x->x(obj as CollectionUpdateMessage) }
+                WebSocketMessageType.IncrementalTrack -> onTrackUpdate.stream().forEach { x->x(json.decodeFromString<IncrementalTrackMessage>(message)) }
+                WebSocketMessageType.AccessRequest -> onAccessRequest.stream().forEach { x->x(json.decodeFromString<AccessResquestMessage>(message)) }
+                WebSocketMessageType.CollectionClosed -> onCollectionClosed.stream().forEach { x->x(json.decodeFromString<CollectionClosedMessage>(message)) }
+                WebSocketMessageType.CollectionUpdate -> onCollectionUpdate.stream().forEach { x->x(json.decodeFromString<CollectionUpdateMessage>(message)) }
                 else -> {}
             }
         }
@@ -89,9 +88,10 @@ class ConnectionService(
 
     override suspend fun setAreaDivision(collectionId: UUID, divisions: List<CollectionArea>) {
         val url = "$baseUrl/collection/$collectionId"
+        val jsonString = json.encodeToString(divisions)
         val request = Request.Builder()
             .url(url)
-            .put(json.encodeToString(divisions).toRequestBody())
+            .put(jsonString.toRequestBody("application/json".toMediaType()))
             .build()
         val response = restClient.newCall(request).await()
         if(!response.isSuccessful){
@@ -106,7 +106,7 @@ class ConnectionService(
         area.clientId = clientId
         val request = Request.Builder()
             .url(url)
-            .put(json.encodeToString(listOf(area)).toRequestBody())
+            .put(json.encodeToString(listOf(area)).toRequestBody("application/json".toMediaType()))
             .build()
         val response = restClient.newCall(request).await()
         if(!response.isSuccessful){
@@ -120,7 +120,7 @@ class ConnectionService(
         val url = "$baseUrl/accessrequest/$collectionId"
         val request = Request.Builder()
             .url(url)
-            .post(json.encodeToString(UserModel(username,clientId)).toRequestBody())
+            .post(json.encodeToString(UserModel(username,clientId)).toRequestBody("application/json".toMediaType()))
             .build()
         val response = restClient.newCall(request).await()
         if(response.isSuccessful&&response.body !=null){
@@ -135,32 +135,48 @@ class ConnectionService(
         }
     }
 
-    override suspend fun giveAccess(request: AccessResquestMessage) {
-
-        val url = "$baseUrl/AccessConfirmation/${request.collectionId}"
+    override suspend fun giveAccess(request: AccessResquestMessage):CollectionInstance {
+        request.accepted=true
+        val message = json.encodeToString(request)
+        webSocketClient.sendMessage(message)
+        val url = "$baseUrl/Collection/${request.collectionId}?userId=$clientId"
         val restRequest = Request.Builder()
             .url(url)
-            .post(json.encodeToString(UserModel(request.username,request.userId,true)).toRequestBody())
+            .get()
             .build()
         val response = restClient.newCall(restRequest).await()
-        if(!response.isSuccessful){
+        if(response.isSuccessful&&response.body !=null){
+            val bodyString = response.body!!.string()
+            val collection: CollectionInstance = json.decodeFromString(bodyString)
+            response.close()
+            return collection
+        }else{
             val responseString = response.body?.string()
             response.close()
-            throw RequestFailedException("Could not grant access on collection ${request.collectionId} for user ${request.username} alias ${request.userId}:\n$responseString")
+            throw RequestFailedException("Could not give Access to User ${request.clientId} alias ${request.username}:\n $responseString")
+
         }
     }
 
-    override suspend fun denyAccess(request: AccessResquestMessage) {
-        val url = "$baseUrl/AccessConfirmation/${request.collectionId}"
+    override suspend fun denyAccess(request: AccessResquestMessage):CollectionInstance {
+        request.accepted = false
+        val message = json.encodeToString(request)
+        webSocketClient.sendMessage(message)
+        val url = "$baseUrl/Collection/${request.collectionId}"
         val restRequest = Request.Builder()
             .url(url)
-            .post(json.encodeToString(UserModel(request.username,request.userId,false)).toRequestBody())
+            .get()
             .build()
         val response = restClient.newCall(restRequest).await()
-        if(!response.isSuccessful){
+        if(response.isSuccessful&&response.body !=null){
+            val bodyString = response.body!!.string()
+            val collection: CollectionInstance = json.decodeFromString(bodyString)
+            response.close()
+            return collection
+        }else{
             val responseString = response.body?.string()
             response.close()
-            throw RequestFailedException("Could not deny access on collection ${request.collectionId} for user ${request.username} alias ${request.userId}:\n$responseString")
+            throw RequestFailedException("Could not deny Access to User ${request.clientId} alias ${request.username}:\n $responseString")
         }
     }
 
@@ -187,8 +203,9 @@ class ConnectionService(
         onCollectionUpdate?.let { addOnCollectionUpdate(it) }
         webSocketClient.setSocketUrl(webSocketUrl)
         webSocketClient.setListener(socketListener)
+        webSocketClient.setUserId(clientId)
+        webSocketClient.setCollectionId(collectionId)
         webSocketClient.connect()
-        webSocketClient.sendMessage(Json.encodeToString(WebsocketConnectionMessage(clientId,collectionId)))
     }
 
     override suspend fun closeWebsocket() {

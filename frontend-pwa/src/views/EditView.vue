@@ -56,8 +56,10 @@ const displayedDivisions = computed<Division[]>(() => [
               {
                   id: '0',
                   area: {
-                      type: 'MultiPolygon',
-                      coordinates: [collection.value.area?.coordinates ?? [[]]],
+                      type: 'Polygon',
+                      coordinates: collection.value.area?.coordinates[0] ?? [
+                          [],
+                      ],
                   },
               },
           ]),

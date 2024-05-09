@@ -11,31 +11,40 @@ import de.flyndre.flat.database.entities.Preset
 import de.flyndre.flat.exceptions.RequestFailedException
 import de.flyndre.flat.interfaces.IConnectionService
 import io.github.dellisd.spatialk.geojson.MultiPolygon
+import io.github.dellisd.spatialk.geojson.Polygon
 import io.github.dellisd.spatialk.geojson.Position
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.UUID
 
-class PresetScreenViewModel(db: AppDatabase, collectionAreaScreenViewModel: CollectionAreaScreenViewModel,trackingScreenViewModel: TrackingScreenViewModel, connectionService: IConnectionService) :ViewModel() {
+class PresetScreenViewModel(
+    db: AppDatabase,
+    collectionAreaScreenViewModel: CollectionAreaScreenViewModel,
+    trackingScreenViewModel: TrackingScreenViewModel,
+    connectionService: IConnectionService,
+) : ViewModel() {
     //appdatabase
     private var _db = db
+
     //collectionAreaScreenViewModel
     private var _collectionAreaScreenViewModel = collectionAreaScreenViewModel
     private var _trackingScreenViewModel = trackingScreenViewModel
+
     //preset id
     private var _presetId: Long = 0
 
     private val _connectionService = connectionService
 
-    fun newEmptyPreset(){
+    fun newEmptyPreset() {
         _presetId = 0
         _presetName.value = ""
         _presetDescription.value = ""
         _collectionAreaScreenViewModel.newEmptyCollectionArea()
     }
 
-    fun setPresetId(presetId: Long){
+    fun setPresetId(presetId: Long) {
         _presetId = presetId
         viewModelScope.launch {
             val preset = _db.presetDao().getPresetById(presetId = presetId)
@@ -45,30 +54,38 @@ class PresetScreenViewModel(db: AppDatabase, collectionAreaScreenViewModel: Coll
             _collectionAreaScreenViewModel.setCameraPosition(preset.presetCameraPosition)
         }
     }
-    fun getPresetId(): Long{
+
+    fun getPresetId(): Long {
         return _presetId
     }
+
     //preset name
     private val _presetName = MutableStateFlow("")
     val presetName: StateFlow<String> = _presetName.asStateFlow()
-    fun updatePresetName(presetName: String){
+    fun updatePresetName(presetName: String) {
         _presetName.value = presetName
     }
 
     //preset description
     private val _presetDescription = MutableStateFlow("")
     val presetDescription: StateFlow<String> = _presetDescription.asStateFlow()
-    fun updatePresetDescription(presetDescription: String){
+    fun updatePresetDescription(presetDescription: String) {
         _presetDescription.value = presetDescription
     }
 
     //function for saving preset
-    fun savePresetToDatabase(){
-        val preset = Preset(_presetId, _presetName.value, _presetDescription.value, _collectionAreaScreenViewModel.getListAreas(), _collectionAreaScreenViewModel.getCameraPosition())
+    fun savePresetToDatabase() {
+        val preset = Preset(
+            _presetId,
+            _presetName.value,
+            _presetDescription.value,
+            _collectionAreaScreenViewModel.getListAreas(),
+            _collectionAreaScreenViewModel.getCameraPosition()
+        )
         viewModelScope.launch {
-            if(_presetId == 0.toLong()){
+            if (_presetId == 0.toLong()) {
                 _db.presetDao().insertPreset(preset = preset)
-            }else{
+            } else {
                 _db.presetDao().updatePreset(preset = preset)
             }
         }
@@ -78,26 +95,50 @@ class PresetScreenViewModel(db: AppDatabase, collectionAreaScreenViewModel: Coll
         return _collectionAreaScreenViewModel.getCameraPosition()
     }
 
-    fun getCollectionArea(): ArrayList<CollectionArea>{
+    fun getCollectionArea(): ArrayList<CollectionArea> {
         return _collectionAreaScreenViewModel.getListAreas()
     }
 
     //publish collection to backend
-    fun openCollection(onSuccess:(()->Unit),onFailure:((String)->Unit)?=null){
+    fun openCollection(onSuccess: (() -> Unit), onFailure: ((String) -> Unit)? = null) {
         viewModelScope.launch {
             savePresetToDatabase()
-            try{
+            try {
+                //open the collection
                 val result = _connectionService.openCollection(
                     _presetName.value,
-                    MultiPolygon(arrayListOf(_collectionAreaScreenViewModel.getListAreas().map {
-                      area ->area.listAreaPoints.map{
-                        point -> Position(point.longitude,point.latitude)
-                      }
-                    }))
+                    MultiPolygon(
+                        arrayListOf(
+                            _collectionAreaScreenViewModel.getListAreas().map { area ->
+                                area.listAreaPoints.map { point ->
+                                    Position(point.longitude, point.latitude)
+                                }
+                            })
+                    )
                 )
-                _trackingScreenViewModel.collectionInstance=result
+                _trackingScreenViewModel.collectionInstance = result
+
+                //convert collection areas from collectionAreaViewModel for server
+                val collectionAreaModelList = arrayListOf<de.flyndre.flat.models.CollectionArea>()
+                for (area in _collectionAreaScreenViewModel.getListAreas()) {
+                    val positionList = arrayListOf<Position>()
+                    for (point in area.listAreaPoints) {
+                        positionList.add(Position(point.longitude, point.latitude))
+                    }
+                    val multiPolygon =
+                        Polygon(coordinates = listOf(positionList), null)
+                    val collectionArea = de.flyndre.flat.models.CollectionArea(
+                        multiPolygon,
+                        name = "Area" + _collectionAreaScreenViewModel.getListAreas().indexOf(area),
+                        color = "#" + Integer.toHexString((area.color.red*255).toInt()) + Integer.toHexString((area.color.green*255).toInt()) + Integer.toHexString((area.color.blue*255).toInt())
+                    )
+                    collectionAreaModelList.add(collectionArea)
+                }
+                //upload collection areas to server
+                _connectionService.setAreaDivision(UUID.randomUUID(), collectionAreaModelList)
+
                 onSuccess()
-            }catch (e:RequestFailedException){
+            } catch (e: RequestFailedException) {
                 if (onFailure != null) {
                     e.message?.let { onFailure(it) }
                 }

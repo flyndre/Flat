@@ -13,17 +13,19 @@ import {
 
 export function areaFromShapeList(
     shapeList: IdentifyableTypedOverlay[]
-): GeoJSON.Polygon {
+): GeoJSON.MultiPolygon {
     const areaBounds = getShapeListBounds(shapeList).toJSON();
     return {
-        type: 'Polygon',
+        type: 'MultiPolygon',
         coordinates: [
             [
-                [areaBounds.north, areaBounds.west],
-                [areaBounds.north, areaBounds.east],
-                [areaBounds.south, areaBounds.east],
-                [areaBounds.south, areaBounds.west],
-                [areaBounds.north, areaBounds.west],
+                [
+                    [areaBounds.north, areaBounds.west],
+                    [areaBounds.north, areaBounds.east],
+                    [areaBounds.south, areaBounds.east],
+                    [areaBounds.south, areaBounds.west],
+                    [areaBounds.north, areaBounds.west],
+                ],
             ],
         ],
     };
@@ -35,11 +37,9 @@ export function shapeToDivision(shape: IdentifyableTypedOverlay): Division {
         name: shape.name,
         color: getShapeColor(shape),
         area: {
-            type: 'MultiPolygon',
-            coordinates: [
-                polygonToGeoJSON(<google.maps.Polygon>shape.overlay)
-                    .coordinates,
-            ],
+            type: 'Polygon',
+            coordinates: polygonToGeoJSON(<google.maps.Polygon>shape.overlay)
+                .coordinates,
         },
     };
 }
@@ -55,7 +55,7 @@ export function divisionToShape(
         overlay: geoJSONtoPolygon(
             {
                 type: 'Polygon',
-                coordinates: division.area.coordinates?.[0],
+                coordinates: division.area.coordinates,
             },
             {
                 ...shapeOptions,
@@ -74,6 +74,7 @@ export function shapeListToTrack(
     return {
         id: shapeList?.[0]?.id,
         name: shapeList?.[0]?.name,
+        color: getShapeColor(shapeList?.[0]),
         progress: shapeList.map((s) =>
             polylineToGeoJSON(<google.maps.Polyline>s.overlay)
         ),

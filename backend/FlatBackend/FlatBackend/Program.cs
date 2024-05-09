@@ -11,6 +11,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -27,6 +28,15 @@ else
     mongoConString = builder.Configuration.GetValue<string>("MONGODBCONNECTIONSTRING");
 }
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      policy =>
+                      {
+                          policy.WithOrigins("*");
+                      });
+});
+
 builder.Services.AddSingleton<IMongoDBService>(new MongoDBService(mongoConString));
 builder.Services.AddSingleton<IWebsocketManager>(new WebsocketManager(new MongoDBService(mongoConString)));
 
@@ -41,9 +51,10 @@ if (app.Environment.IsDevelopment())
 
 var webSocketOptions = new WebSocketOptions
 {
-    KeepAliveInterval = TimeSpan.FromMinutes(2)
+    KeepAliveInterval = TimeSpan.FromMinutes(0.5)
 };
 app.UseWebSockets(webSocketOptions);
+app.UseCors(MyAllowSpecificOrigins);
 
 //app.UseHttpsRedirection();
 

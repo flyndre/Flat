@@ -9,15 +9,23 @@ namespace FlatBackend.DTOs
     {
         [EnumMember(Value = nameof(WebsocketConnection))]
         WebsocketConnection,
+
         [EnumMember(Value = nameof(IncrementalTrack))]
         IncrementalTrack,
+
         [EnumMember(Value = nameof(AccessRequest))]
         AccessRequest,
+
         [EnumMember(Value = nameof(CollectionClosed))]
         CollectionClosed,
+
         [EnumMember(Value = nameof(CollectionUpdate))]
         CollectionUpdate,
+
         [EnumMember(Value = nameof(Summary))]
-        Summary
+        Summary,
+
+        [EnumMember(Value = nameof(KeepAlive))]
+        KeepAlive
     }
 }

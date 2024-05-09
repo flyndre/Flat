@@ -52,3 +52,51 @@ I used the GUI MongoCompass to create the Database and the Collection.
 When the Container is up and running you should can create an Collection and use all Endpoints.
 The Single Endpointfunction will be documented when their implemented.
 ### Websocket
+At the moment is the websocket controller under following endpoint accessable:
+ - /api/ws
+Please consider its an WebSocketSecure-Protocol-Endpoint it must be called via the wss prefix.
+As example: wss://localhost:Port/api/ws
+#### How do you use the Websocket?
+First you have to establish an connection on the websocket. When the Connection is established it will not timeout.
+As first message you have to send an WebSocketConnectionMessage that should look like this:
+```WebSocketConnectionMessage
+{
+	"type": 0, //WebsocketConnection
+	"clientId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+	"collectionId": "94042b6e-a317-499a-af3d-1d32e58cbbb2"
+}
+```
+That message is needed by the Backend to link your Connection to the specified Collection to enable UpdateMessages on the Collection and on the Tracks.
+Now you can send following Messages:
+```IncrementalTrackMessage
+{
+	"type": 1,
+	"trackId": "94042b6e-a317-499a-af3d-1d32e58cbbb2",
+	"track": {
+		"type": "LineString",
+		"coordinates": [
+			[
+				0
+			]
+		]
+	}
+}
+```
+To send Tracks to the Backend there they will be collected and send to the other clients of the collection.
+```AccessConfirmationMessage
+{
+	"type": 2,
+	"collectionId": "94042b6e-a317-499a-af3d-1d32e58cbbb2",
+	"clientId": "3fa85f64-5717-4562-b3fc-2c963f66afa7",
+	"username": "string",
+    "accepted": true
+}
+```
+Is only to confirm an user that requested access to the collection.
+```
+{
+    "type":3,
+    "collectionId": "94042b6e-a317-499a-af3d-1d32e58cbbb2"
+}
+```
+Is used to close an collection, will do the same as the RestEndpoint though.

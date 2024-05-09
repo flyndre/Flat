@@ -98,6 +98,8 @@ dependencies {
     implementation (libs.gson)
     //dependencies for location
     implementation (libs.play.services.location)
+    implementation(libs.qrcode.kotlin)
+
 }
 
 secrets {

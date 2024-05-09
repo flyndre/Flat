@@ -37,14 +37,14 @@ Must-have:
 
 -   [x] Map display
 -   [x] Divide map into areas
--   [ ] Track your own location via GPS (can be started and stopped)
+-   [x] Track your own location via GPS (can be started and stopped)
 -   [ ] Share tracking with other team members via backend
 -   [ ] Join the team via link
 -   [ ] User name
 
 Optional:
 
--   [ ] Join via QR code
+-   [x] Join via QR code
 -   [ ] Leaderboard/Statistics
 -   [x] Dark Mode
 -   [x] Define collection templates
@@ -56,3 +56,11 @@ Nice-to-have:
 -   [ ] Profile pictures
 -   [ ] Team leader can send push messages to participants
 -   [ ] Suggestions for optimal route distribution
+
+Unplanned:
+
+-   [x] Import/Export of collection presets
+-   [x] Home screen with current or custom location
+-   [x] Setting for handedness
+-   [ ] I18n
+-   [x] Help for division drawing

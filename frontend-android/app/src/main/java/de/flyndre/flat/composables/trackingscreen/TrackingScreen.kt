@@ -1,17 +1,19 @@
 package de.flyndre.flat.composables.trackingscreen
 
+import android.graphics.BitmapFactory
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -34,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.google.android.gms.maps.model.LatLng
@@ -42,9 +45,8 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Polygon
 import com.google.maps.android.compose.Polyline
-import de.flyndre.flat.models.Track
+import qrcode.render.QRCodeGraphics
 import java.util.UUID
-import kotlin.math.exp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,21 +54,56 @@ fun TrackingScreen(
     modifier: Modifier = Modifier,
     trackingScreenViewModel: TrackingScreenViewModel,
     onNavigateToInitialScreen: () -> Unit,
+    onNavigateToParticipantScreen: () -> Unit,
+    onShareLink:((String)->Unit),
     userId: UUID,
 ) {
     val trackingEnabled by trackingScreenViewModel.trackingEnabled.collectAsState()
     val localTrackList by trackingScreenViewModel.trackList.collectAsState()
     val remoteTrackList by trackingScreenViewModel.remoteTrackList.collectAsState()
+    val participantsToJoin by trackingScreenViewModel.participantsToJoin.collectAsState()
+    val qrCodeGraphics by trackingScreenViewModel.qrCodeGraphics.collectAsState()
+    val joinLink by trackingScreenViewModel.joinLink.collectAsState()
+    var showLeavingDialog by remember { mutableStateOf(false) }
+    var showClosingDialog by remember { mutableStateOf(false) }
+    var showAddPaticipantsDialog by remember { mutableStateOf(false) }
+
+    if (participantsToJoin.isNotEmpty()) {
+        ParticipantJoinDialog(
+            onDecline = { trackingScreenViewModel.declineParticipantJoinDialog(message = participantsToJoin.get(0)) },
+            onAccept = { trackingScreenViewModel.accpetParticipantJoinDialog(message = participantsToJoin.get(0)) })
+    }
+
+    if (showLeavingDialog) {
+        LeavingDialog(
+            onDecline = { showLeavingDialog = false },
+            onAccept = { trackingScreenViewModel.leaveOrCloseCollection(false); onNavigateToInitialScreen() })
+    }
+
+    if (showClosingDialog) {
+        ClosingDialog(
+            onDecline = { showClosingDialog = false },
+            onAccept = { trackingScreenViewModel.leaveOrCloseCollection(true); onNavigateToInitialScreen() })
+    }
+    if (showAddPaticipantsDialog){
+        AddParticipantDialog(
+            onDismissRequest = { showAddPaticipantsDialog = false },
+            onShareButtonClick = onShareLink,
+            qrCodeGraphics = qrCodeGraphics,
+            joinLink = joinLink)
+    }
 
     Scaffold(topBar = {
         TopAppBar(
             title = { Text(text = trackingScreenViewModel.collectionInstance.name) },
             navigationIcon = {
-                IconButton(onClick = { onNavigateToInitialScreen() }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "back to start screen"
-                    )
+                if (!userId.equals(trackingScreenViewModel.collectionInstance.clientId)) {//if this user is no admin
+                    IconButton(onClick = { showLeavingDialog = true }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "back to start screen"
+                        )
+                    }
                 }
             })
     }, bottomBar = {
@@ -83,52 +120,61 @@ fun TrackingScreen(
                     }
                 }
                 if (userId.equals(trackingScreenViewModel.collectionInstance.clientId)) {//if this user is admin
-                    Button(onClick = {}) {
+                    Button(onClick = {showAddPaticipantsDialog = true}) {
                         Text(text = "Add Participant")
                     }
                 }
             }
         }
     }, floatingActionButton = {
-        if(userId.equals(trackingScreenViewModel.collectionInstance.clientId)){
-            AdminMenu()
+        if (userId.equals(trackingScreenViewModel.collectionInstance.clientId)) {
+            AdminMenu(
+                onClosingCollection = { showClosingDialog = true },
+                onNavigateToParticipantScreen = onNavigateToParticipantScreen,
+                trackingScreenViewModel = trackingScreenViewModel
+            )
         }
     }) { innerPadding ->
-        GoogleMap(modifier = Modifier.padding(innerPadding), properties = MapProperties(isMyLocationEnabled = true), uiSettings = MapUiSettings(zoomControlsEnabled = false)){
+        GoogleMap(
+            modifier = Modifier.padding(innerPadding),
+            properties = MapProperties(isMyLocationEnabled = true),
+            uiSettings = MapUiSettings(zoomControlsEnabled = false)
+        ) {
             //rendering local track
-            if(localTrackList.isNotEmpty()){
-                for(track in localTrackList){
+            if (localTrackList.isNotEmpty()) {
+                for (track in localTrackList) {
                     var list = arrayListOf<LatLng>()
-                    for(position in track){
+                    for (position in track) {
                         list.add(LatLng(position.latitude, position.longitude))
                     }
-                    if(list.isNotEmpty()){
+                    if (list.isNotEmpty()) {
                         Polyline(points = list)
                     }
                 }
             }
             //rendering remote tracks
-            if(remoteTrackList.isNotEmpty()){
-                for(trackCollection in remoteTrackList){
-                    for(track in trackCollection.value){
+            if (remoteTrackList.isNotEmpty()) {
+                for (trackCollection in remoteTrackList) {
+                    for (track in trackCollection.value) {
                         var list = arrayListOf<LatLng>()
-                        for(position in track){
+                        for (position in track) {
                             list.add(LatLng(position.latitude, position.longitude))
                         }
-                        if(list.isNotEmpty()){
+                        if (list.isNotEmpty()) {
                             Polyline(points = list)
                         }
                     }
+
                 }
             }
             //rendering collection areas
-            if(trackingScreenViewModel.collectionInstance.divisions.isNotEmpty()){
-                for(collectionArea in trackingScreenViewModel.collectionInstance.divisions){
+            if (trackingScreenViewModel.collectionInstance.divisions.isNotEmpty()) {
+                for (collectionArea in trackingScreenViewModel.collectionInstance.divisions) {
                     //get inner list of multipolygon and draw it on map
-                    val area = collectionArea.area.coordinates[0][0]
+                    val area = collectionArea.area.coordinates[0]
                     //convert list<position> in list<latlong>
                     val list = arrayListOf<LatLng>()
-                    for(position in area){
+                    for (position in area) {
                         list.add(LatLng(position.latitude, position.longitude))
                     }
 
@@ -136,30 +182,27 @@ fun TrackingScreen(
                 }
             }
         }
-        /*Column(modifier.padding(innerPadding)) {
-            Text(text = "Local Tracks:")
-            localTrackList.forEach { track: Track ->
-                Text(text = track.toLineString().toString())
-            }
-            Text(text = "Remote Tracks:")
-            remoteTrackList.forEach { trackCollection ->
-                trackCollection.value.forEach { track ->
-                    Text(text = track.toLineString().toString())
-                }
-            }
-        }*/
     }
 }
 
 @Composable
-fun AdminMenu() {
+fun AdminMenu(
+    onClosingCollection: () -> Unit,
+    onNavigateToParticipantScreen: () -> Unit,
+    trackingScreenViewModel: TrackingScreenViewModel,
+) {
     var expanded by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier) {
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(text = { Text(text = "End Collection") }, onClick = { /*TODO*/ })
+            DropdownMenuItem(
+                text = { Text(text = "End Collection") },
+                onClick = { onClosingCollection() })
             HorizontalDivider()
-            DropdownMenuItem(text = { Text(text = "Manage Groups") }, onClick = { /*TODO*/ })
+            DropdownMenuItem(text = { Text(text = "Manage Groups") }, onClick = {
+                trackingScreenViewModel.updateParticipantScreenViewModel()
+                onNavigateToParticipantScreen()
+            })
         }
         FloatingActionButton(onClick = { expanded = true }) {
             Icon(Icons.Filled.MoreVert, contentDescription = "open collection management")
@@ -168,21 +211,115 @@ fun AdminMenu() {
 }
 
 @Composable
-fun ParticipantJoinDialog(onDecline: ()->Unit, onAccept: ()->Unit){
-    Dialog(onDismissRequest = { onDecline() }) {
-        Card(modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp), shape = RoundedCornerShape(16.dp)) {
-            Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = "A new participant wants to join.")
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-                    TextButton(modifier = Modifier.padding(8.dp), onClick = { onDecline() }) {
-                        Text(text = "Decline")
-                    }
-                    TextButton(modifier = Modifier.padding(8.dp), onClick = { onAccept() }) {
-                        Text(text = "Accept")
-                    }
-                }
+fun ParticipantJoinDialog(onDecline: () -> Unit, onAccept: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = { onDecline() },
+        confirmButton = {
+            TextButton(onClick = { onAccept() }) {
+                Text(
+                    text = "Zustimmen"
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { onDecline() }) {
+                Text(
+                    text = "Ablehnen"
+                )
+            }
+        },
+        icon = {
+            Icon(
+                Icons.Default.Info,
+                contentDescription = "asking whether to leave the collection"
+            )
+        },
+        title = {
+            Text(
+                text = "Information"
+            )
+        },
+        text = { Text(text = "Ein Nutzer möchte deiner Sammlung beitreten.") })
+}
+
+@Composable
+fun LeavingDialog(onDecline: () -> Unit, onAccept: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = { onDecline() },
+        confirmButton = {
+            TextButton(onClick = { onAccept() }) {
+                Text(
+                    text = "Verlassen"
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { onDecline() }) {
+                Text(
+                    text = "Abbrechen"
+                )
+            }
+        },
+        icon = {
+            Icon(
+                Icons.Default.Info,
+                contentDescription = "asking whether to leave the collection"
+            )
+        },
+        title = {
+            Text(
+                text = "Warnung"
+            )
+        },
+        text = { Text(text = "Bist du sicher, dass du die Sammlung verlassen möchtest?") })
+}
+
+@Composable
+fun ClosingDialog(onDecline: () -> Unit, onAccept: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = { onDecline() },
+        confirmButton = {
+            TextButton(onClick = { onAccept() }) {
+                Text(
+                    text = "Schließen"
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { onDecline() }) {
+                Text(
+                    text = "Abbrechen"
+                )
+            }
+        },
+        icon = {
+            Icon(
+                Icons.Default.Info,
+                contentDescription = "asking whether to close the collection"
+            )
+        },
+        title = {
+            Text(
+                text = "Warnung"
+            )
+        },
+        text = { Text(text = "Bist du sicher, dass du die Sammlung schließen möchtest?") })
+}
+@Composable
+fun AddParticipantDialog(
+    onDismissRequest: () -> Unit,
+    onShareButtonClick: (String)->Unit,
+    qrCodeGraphics: QRCodeGraphics,
+    joinLink: String
+){
+    Dialog(onDismissRequest = onDismissRequest) {
+        Card(shape = RoundedCornerShape(16.dp)) {
+            Image(bitmap = BitmapFactory.decodeByteArray(qrCodeGraphics.getBytes(),0,qrCodeGraphics.getBytes().size).asImageBitmap(), contentDescription = "" )
+            SelectionContainer(modifier = Modifier.padding(10.dp)) {
+                Text(text = joinLink)
+            }
+            Button(onClick = {onShareButtonClick(joinLink)}) {
+                Text(text = "Share")
             }
         }
     }

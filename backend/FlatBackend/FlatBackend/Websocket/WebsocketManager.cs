@@ -6,7 +6,12 @@ using MongoDB.Driver;
 using System.Collections.Concurrent;
 using System.Net.WebSockets;
 using System.Text;
-using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+
+//using System.Text.Json;
+using Newtonsoft.Json;
+using System.Diagnostics.Metrics;
 
 namespace FlatBackend.Websocket
 {
@@ -20,6 +25,7 @@ namespace FlatBackend.Websocket
         public BlockingCollection<CollectionClosedDto> collectionClosedWaiting;
         public BlockingCollection<IncrementalTrackDto> incrementalTrackWaiting;
         public BlockingCollection<CollectionUpdateDto> updateWaiting;
+        private Timer timer;
 
         public WebsocketManager( IMongoDBService mongoDBService )
         {
@@ -31,18 +37,70 @@ namespace FlatBackend.Websocket
             incrementalTrackWaiting = new BlockingCollection<IncrementalTrackDto>();
             updateWaiting = new BlockingCollection<CollectionUpdateDto>();
             trackCollections = new List<TrackCollectionModel>();
+            timer = new Timer(callback: new TimerCallback(x =>
+            {
+                List<WebSocketUserModel> deprecatedUsers = new List<WebSocketUserModel>();
+                var keepAlive = new KeepAliveDto();
+                string Json = JsonConvert.SerializeObject(keepAlive);
+                foreach (var user in users)
+                {
+                    if (user != null && user.webSocket.State == WebSocketState.Open)
+                    {
+                        user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
+                    }
+                    else { deprecatedUsers.Add(user); }
+                }
+                if (deprecatedUsers.Count > 0)
+                {
+                    foreach (var user in deprecatedUsers)
+                    {
+                        users.Remove(user);
+                    }
+                }
+            }), state: null, dueTime: 1000, period: 30000);
+        }
+
+        private void sendKeepaliveMessages()
+        {
+            List<WebSocketUserModel> deprecatedUsers = new List<WebSocketUserModel>();
+            var keepAlive = new KeepAliveDto();
+            string Json = JsonConvert.SerializeObject(keepAlive);
+            foreach (var user in users)
+            {
+                if (user != null && user.webSocket.State == WebSocketState.Open)
+                {
+                    user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
+                }
+                else { deprecatedUsers.Add(user); }
+            }
+            if (deprecatedUsers.Count > 0)
+            {
+                foreach (var user in deprecatedUsers)
+                {
+                    users.Remove(user);
+                }
+            }
         }
 
         public Guid getCollectionId( WebSocket websocket )
         {
             var user = users.Where(x => x.webSocket == websocket).First();
-            return user.clientId;
+            return user.collectionId;
         }
 
         public void addTrackToTrackCollection( IncrementalTrackDto track, Guid collectionId )
         {
+            if (trackCollections.Count == 0) { trackCollections = new List<TrackCollectionModel>() { new TrackCollectionModel() { collectionId = collectionId, tracks = new List<IncrementalTrackDto>() { track } } }; }
             var trackCollection = trackCollections.Where(x => x.collectionId == collectionId).First();
-            trackCollection.tracks.Add(track);
+            if (trackCollection != null)
+            {
+                trackCollection.tracks.Add(track);
+            }
+            else
+            {
+                var newtrackCollection = new TrackCollectionModel() { collectionId = collectionId, tracks = new List<IncrementalTrackDto>() { track } };
+                trackCollections.Add(newtrackCollection);
+            }
         }
 
         public void setAccessConfirmationWaiting( AccessConfirmationDto accessConfirmationDto )
@@ -89,13 +147,13 @@ namespace FlatBackend.Websocket
             var collection = await _MongoDBService.GetCollection(collectionId);
             foreach (var user in users)
             {
-                if (user.collectionId == collectionId)
+                if (user.collectionId == collectionId && user.webSocket.State == WebSocketState.Open)
                 {
                     var validUser = collection.confirmedUsers.Find(x => x.clientId == user.clientId);
                     if (validUser != null && validUser.accepted)
                     {
                         CollectionUpdateDto update = new CollectionUpdateDto() { collection = collection };
-                        string Json = JsonSerializer.Serialize(update);
+                        string Json = JsonConvert.SerializeObject(update);
                         await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
                     }
                 }
@@ -107,14 +165,14 @@ namespace FlatBackend.Websocket
             var collection = await _MongoDBService.GetCollection(collectionId);
             foreach (var user in users)
             {
-                if (user.collectionId == collectionId)
+                if (user.collectionId == collectionId && user.webSocket.State == WebSocketState.Open)
                 {
                     CollectionClosedDto collectionClosedDto = new CollectionClosedDto() { collectionId = collectionId };
-                    string Json = JsonSerializer.Serialize(collectionClosedDto);
+                    string Json = JsonConvert.SerializeObject(collectionClosedDto);
                     await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
                     if (user.clientId == collection.clientId)
                     {
-                        sendSummaryToBoss(trackCollections.Where(x => x.collectionId == collectionId).First(), collectionId, user.clientId);
+                        await sendSummaryToBoss(trackCollections.Where(x => x.collectionId == collectionId).First(), collectionId, user.clientId);
                     }
                     await user.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "The Collection was closed so the Connection is closed too.", CancellationToken.None);
 
@@ -127,27 +185,27 @@ namespace FlatBackend.Websocket
         {
             var user = users.Where(x => x.clientId == clientId && x.collectionId == collectionId).First();
             List<IncrementalTrackDto> tracksList = tracks.tracks;
-            string Json = JsonSerializer.Serialize(tracksList);
+            string Json = JsonConvert.SerializeObject(tracksList);
             user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
         }
 
-        public async void sendSummaryToBoss( TrackCollectionModel tracks, Guid collectionId, Guid clientId )
+        public async Task sendSummaryToBoss( TrackCollectionModel tracks, Guid collectionId, Guid clientId )
         {
             var collection = await _MongoDBService.GetCollection(collectionId);
             var user = users.Where(x => x.clientId == clientId && x.collectionId == collectionId).First();
             SummaryModel summary = new SummaryModel() { collection = collection, trackCollection = tracks };
 
-            string Json = JsonSerializer.Serialize(summary);
-            user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
+            string Json = JsonConvert.SerializeObject(summary);
+            await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
         }
 
         public async void sendGPSTrack( IncrementalTrackDto track, Guid collectionId )
         {
             foreach (var user in users)
             {
-                if (user.collectionId == collectionId)
+                if (user.collectionId == collectionId && user.webSocket.State == WebSocketState.Open)
                 {
-                    string Json = JsonSerializer.Serialize(track);
+                    string Json = JsonConvert.SerializeObject(track);
                     await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
                 }
             }
@@ -168,9 +226,9 @@ namespace FlatBackend.Websocket
             if (collection != null)
             {
                 var user = users.Find(x => x.collectionId == collection.id && x.clientId == collection.clientId);
-                if (user != null)
+                if (user != null/*&& user.webSocket.State!=WebSocketState.Aborted*/)
                 {
-                    var Json = JsonSerializer.Serialize(request);
+                    var Json = JsonConvert.SerializeObject(request);
                     await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
                     var buffer = new byte[1024 * 4];
                     var response = accessConfirmationWaiting.Take();
@@ -190,7 +248,7 @@ namespace FlatBackend.Websocket
                 var user = users.Find(x => x.collectionId == request.collectionId && x.clientId == request.clientId);
                 if (user != null)
                 {
-                    var Json = JsonSerializer.Serialize(request);
+                    var Json = JsonConvert.SerializeObject(request);
                     await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
                 }
             }
@@ -217,6 +275,20 @@ namespace FlatBackend.Websocket
                 _MongoDBService.ChangeCollection(collection);
                 var result = await _MongoDBService.GetCollection(collectionId);
                 sendUpdateCollection(collectionId);
+            }
+        }
+
+        public void deleteCollection( Guid collectionId )
+        {
+            _MongoDBService.RemoveCollection(collectionId);
+        }
+
+        public void removeWebsocketUser( WebSocket webSocket )
+        {
+            var user = users.Where(x => x.webSocket == webSocket).First();
+            if (user != null)
+            {
+                users.Remove(user);
             }
         }
     }
