@@ -16,6 +16,7 @@ import de.flyndre.flat.models.AccessResquestMessage
 import de.flyndre.flat.models.CollectionInstance
 import de.flyndre.flat.models.TrackCollection
 import io.github.dellisd.spatialk.geojson.MultiPolygon
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -134,8 +135,14 @@ class TrackingScreenViewModel(
     }
 
     fun centerOnPosition(cameraPositionState: CameraPositionState){
-        viewModelScope.launch {
-            cameraPositionState.animate(CameraUpdateFactory.newLatLng(_trackingService.getCurrentPosition()), 10)
+        var lat :LatLng
+        viewModelScope.launch(Dispatchers.Default){
+            lat = _trackingService.getCurrentPosition()
+            cameraPositionState.animate(CameraUpdateFactory.newLatLng(lat), 10)
         }
+    }
+
+    fun shareJoinLink(){
+
     }
 }
