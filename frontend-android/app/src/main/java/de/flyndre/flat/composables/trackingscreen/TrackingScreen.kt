@@ -189,7 +189,7 @@ fun TrackingScreen(
                     contentDescription = "center on own location"
                 )
             }
-            FloatingActionButton(modifier = Modifier.padding(10.dp), onClick = { /*TODO*/ }) {
+            FloatingActionButton(modifier = Modifier.padding(10.dp), onClick = { trackingScreenViewModel.centerOnOwnArea(cameraPositionState = cameraPositionState, ownId = userId) }) {
                 Icon(
                     painter = painterResource(id = R.drawable.texture_fill),
                     contentDescription = "center on own location"

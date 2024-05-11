@@ -8,12 +8,12 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.CameraPositionState
-import de.flyndre.flat.composables.presetscreen.collectionareascreen.generateBounds
 import de.flyndre.flat.composables.trackingscreen.participantscreen.ParticipantScreenViewModel
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.interfaces.IConnectionService
 import de.flyndre.flat.interfaces.ITrackingService
 import de.flyndre.flat.models.AccessResquestMessage
+import de.flyndre.flat.models.CollectionArea
 import de.flyndre.flat.models.CollectionInstance
 import de.flyndre.flat.models.TrackCollection
 import io.github.dellisd.spatialk.geojson.MultiPolygon
@@ -141,6 +141,31 @@ class TrackingScreenViewModel(
             lat = _trackingService.getCurrentPosition()
             viewModelScope.launch(Dispatchers.Main) {
                 cameraPositionState.animate(CameraUpdateFactory.newLatLng(lat))
+            }
+        }
+    }
+
+    fun centerOnOwnArea(cameraPositionState: CameraPositionState, ownId: UUID){
+        //get area to center
+        var division: CollectionArea? = null
+        for(div in collectionInstance.collectionDivision){
+            if(div.clientId != null){
+                if(div.clientId!!.equals(ownId)){
+                    division = div
+                }
+            }
+        }
+
+        if(division != null){
+            //center on selected area
+            val builder = LatLngBounds.builder()
+
+            for(position in division.area.coordinates[0]){
+                builder.include(LatLng(position.latitude, position.longitude))
+            }
+
+            viewModelScope.launch(Dispatchers.Main) {
+                cameraPositionState.animate(CameraUpdateFactory.newLatLngBounds(builder.build(), 10))
             }
         }
     }
