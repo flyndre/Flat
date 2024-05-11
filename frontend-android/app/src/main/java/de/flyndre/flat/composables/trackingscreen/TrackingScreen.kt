@@ -5,14 +5,17 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
@@ -20,6 +23,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -38,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.google.android.gms.maps.model.LatLng
@@ -46,6 +51,7 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Polygon
 import com.google.maps.android.compose.Polyline
+import de.flyndre.flat.R
 import de.flyndre.flat.models.AccessResquestMessage
 import qrcode.render.QRCodeGraphics
 import java.util.UUID
@@ -110,24 +116,36 @@ fun TrackingScreen(
                 }
             })
     }, bottomBar = {
-        BottomAppBar() {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)
-            ) {
-                Button(onClick = { trackingScreenViewModel.toggleTracking() }) {
-                    if (trackingEnabled) {
-                        Text(text = "Stop Tracking")
-                    } else {
-                        Text(text = "Start Tracking")
-                    }
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
+            ExtendedFloatingActionButton(onClick = { trackingScreenViewModel.toggleTracking() }, icon = {
+                if(trackingEnabled){
+                    Icon(
+                        painter = painterResource(id = R.drawable.stop_circle_fill),
+                        contentDescription = "toggle tracking"
+                    )
+                }else{
+                    Icon(
+                        imageVector = Icons.Filled.PlayArrow,
+                        contentDescription = "toggle tracking"
+                    )
                 }
-                if (userId.equals(trackingScreenViewModel.collectionInstance.clientId)) {//if this user is admin
-                    Button(onClick = {showAddPaticipantsDialog = true}) {
-                        Text(text = "Add Participant")
-                    }
+            }, text = {
+                if (trackingEnabled) {
+                    Text(text = "Stop Tracking")
+                } else {
+                    Text(text = "Start Tracking")
                 }
-            }
+            }, modifier = Modifier.padding(10.dp))
+            ExtendedFloatingActionButton(onClick = { showAddPaticipantsDialog = true }, icon = {
+                Icon(
+                    imageVector = Icons.Filled.AccountCircle,
+                    contentDescription = "show add participant dialog"
+                )
+            }, text = {
+                Text(
+                    text = "Add Participant"
+                )
+            }, modifier = Modifier.padding(10.dp))
         }
     }, floatingActionButton = {
         if (userId.equals(trackingScreenViewModel.collectionInstance.clientId)) {
@@ -138,8 +156,9 @@ fun TrackingScreen(
             )
         }
     }) { innerPadding ->
+        Modifier.padding(innerPadding)
         GoogleMap(
-            modifier = Modifier.padding(innerPadding),
+            modifier = Modifier.fillMaxSize(),
             properties = MapProperties(isMyLocationEnabled = true),
             uiSettings = MapUiSettings(zoomControlsEnabled = false)
         ) {
