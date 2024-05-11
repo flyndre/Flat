@@ -1,5 +1,6 @@
 package de.flyndre.flat.interfaces
 
+import com.google.android.gms.maps.model.LatLng
 import io.github.dellisd.spatialk.geojson.Position
 
 interface ILocationService {
@@ -11,4 +12,5 @@ interface ILocationService {
     fun stopTracking()
 
     fun addOnLocationUpdate(callback:(Position)->Unit)
+    suspend fun getCurrentPosition(): LatLng
 }

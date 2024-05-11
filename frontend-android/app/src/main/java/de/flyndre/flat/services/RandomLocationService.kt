@@ -1,9 +1,11 @@
 package de.flyndre.flat.services
 
 import android.util.Log
+import com.google.android.gms.maps.model.LatLng
 import de.flyndre.flat.interfaces.ILocationService
 import io.github.dellisd.spatialk.geojson.Position
 import java.util.concurrent.ThreadLocalRandom
+import kotlin.random.Random
 
 class RandomLocationService(
     override val updateInterval: Long = 5000,
@@ -55,5 +57,9 @@ class RandomLocationService(
 
     override fun addOnLocationUpdate(callback: (Position) -> Unit) {
         onLocationUpdate.add(callback)
+    }
+
+    override suspend fun getCurrentPosition(): LatLng {
+        return LatLng(Random.nextDouble(),Random.nextDouble())
     }
 }

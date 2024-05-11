@@ -10,6 +10,9 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest.Builder
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.Priority
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.tasks.CancellationTokenSource
+import com.google.android.gms.tasks.Tasks.await
 import de.flyndre.flat.interfaces.ILocationService
 import io.github.dellisd.spatialk.geojson.Position
 
@@ -28,7 +31,9 @@ class LocationService(
         override fun onLocationResult(p0: LocationResult) {
             p0.lastLocation?:return
             onLocationUpdate.forEach { callback->
-                callback(Position(p0.lastLocation!!.longitude, p0.lastLocation!!.latitude))
+                if(isTracking) {
+                    callback(Position(p0.lastLocation!!.longitude, p0.lastLocation!!.latitude))
+                }
             }
         }
     }
@@ -63,5 +68,21 @@ class LocationService(
 
     override fun addOnLocationUpdate(callback: (Position) -> Unit) {
         onLocationUpdate.add(callback)
+    }
+
+    override suspend fun getCurrentPosition(): LatLng {
+        val token = CancellationTokenSource().token
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            throw Exception("No permissions to use location api!")
+        }
+            val location = await(fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY,token))
+            return LatLng(location.latitude,location.longitude)
     }
 }
