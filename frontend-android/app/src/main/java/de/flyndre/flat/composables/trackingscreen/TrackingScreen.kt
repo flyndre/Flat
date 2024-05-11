@@ -19,7 +19,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -36,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -48,7 +48,6 @@ import com.google.maps.android.compose.Polyline
 import qrcode.render.QRCodeGraphics
 import java.util.UUID
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TrackingScreen(
     modifier: Modifier = Modifier,
@@ -178,7 +177,11 @@ fun TrackingScreen(
                         list.add(LatLng(position.latitude, position.longitude))
                     }
 
-                    Polygon(points = list)
+                    //compute colors from hex string
+                    val red: Int = Integer.parseInt(collectionArea.color.substring(1, 3), 16)
+                    val green: Int = Integer.parseInt(collectionArea.color.substring(3, 5),16)
+                    val blue: Int = Integer.parseInt(collectionArea.color.substring(5), 16)
+                    Polygon(points = list, strokeColor = Color(red, green, blue, alpha = 255), fillColor = Color(red, green, blue, alpha = 127))
                 }
             }
         }
