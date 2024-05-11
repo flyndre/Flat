@@ -38,6 +38,7 @@ class TrackingScreenViewModel(
     private val _trackingService = trackingService
     private val _connectionService = connectionService
     private val joinBaseLink = "https://flat.buhss.de/join/"
+    private var lastCenteredOwnDivision: CollectionArea? = null
     var collectionInstance: CollectionInstance = CollectionInstance("", UUID.randomUUID(),
         MultiPolygon()
     )
@@ -152,8 +153,17 @@ class TrackingScreenViewModel(
             if(div.clientId != null){
                 if(div.clientId!!.equals(ownId)){
                     division = div
+                    if(lastCenteredOwnDivision != null){
+                        if(!div.id.equals(lastCenteredOwnDivision!!.id)){
+                            break
+                        }
+                    }
                 }
             }
+        }
+
+        if(division == null && lastCenteredOwnDivision != null){
+            division = lastCenteredOwnDivision
         }
 
         if(division != null){
@@ -167,6 +177,8 @@ class TrackingScreenViewModel(
             viewModelScope.launch(Dispatchers.Main) {
                 cameraPositionState.animate(CameraUpdateFactory.newLatLngBounds(builder.build(), 10))
             }
+
+            lastCenteredOwnDivision = division
         }
     }
 }
