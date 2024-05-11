@@ -3,6 +3,11 @@ package de.flyndre.flat.composables.trackingscreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.CameraPositionState
+import de.flyndre.flat.composables.presetscreen.collectionareascreen.generateBounds
 import de.flyndre.flat.composables.trackingscreen.participantscreen.ParticipantScreenViewModel
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.interfaces.IConnectionService
@@ -11,6 +16,7 @@ import de.flyndre.flat.models.AccessResquestMessage
 import de.flyndre.flat.models.CollectionInstance
 import de.flyndre.flat.models.TrackCollection
 import io.github.dellisd.spatialk.geojson.MultiPolygon
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -58,7 +64,8 @@ class TrackingScreenViewModel(
     private val _joinLink = MutableStateFlow(joinBaseLink+ collectionInstance.id)
     val joinLink : StateFlow<String> = _joinLink.asStateFlow()
 
-
+    private val _cameraPosition = MutableStateFlow(CameraPosition(LatLng(0.0, 0.0), 0F, 0F, 0F))
+    val cameraPosition: StateFlow<CameraPosition> = _cameraPosition.asStateFlow()
 
     init {
         trackingService.addOnLocalTrackUpdate{ onLocalTrackUpdate() }
@@ -124,6 +131,17 @@ class TrackingScreenViewModel(
             viewModelScope.launch {
                 _connectionService.leaveCollection(collectionInstance)
             }
+        }
+    }
+
+    fun centerOnPosition(cameraPositionState: CameraPositionState){
+        var lat :LatLng
+        viewModelScope.launch(Dispatchers.Default){
+            lat = _trackingService.getCurrentPosition()
+            cameraPositionState.animate(CameraUpdateFactory.newLatLng(lat), 10)
+        }
+        viewModelScope.launch(Dispatchers.Default) {
+
         }
     }
 
