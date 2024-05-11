@@ -105,7 +105,7 @@ fun DropDownUserSelection(
             )
         })
     }
-    var userDisplay: String = ""
+    var userDisplay by remember { mutableStateOf("") }
     if (selectedUser != null) {
         userDisplay = selectedUser!!.username
     }
