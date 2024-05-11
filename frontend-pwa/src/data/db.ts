@@ -13,7 +13,7 @@ export class FlatDexie extends Dexie {
         super('FlatDatabase');
         this.version(4).stores({
             collections: '++id, name, adminClientId, area, divisions', // Primary key and indexed props
-            trackingLogs: '++timestamp, position',
+            trackingLogs: '++timestamp, tackingId, position',
         });
     }
 }

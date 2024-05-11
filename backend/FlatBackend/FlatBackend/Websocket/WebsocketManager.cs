@@ -94,7 +94,16 @@ namespace FlatBackend.Websocket
             var trackCollection = trackCollections.Where(x => x.collectionId == collectionId).First();
             if (trackCollection != null)
             {
-                trackCollection.tracks.Add(track);
+                var oldTrack = trackCollection.tracks.Where(x => x.trackId == track.trackId).First();
+                if (oldTrack != null)
+                {
+                    var index = trackCollection.tracks.IndexOf(oldTrack);
+                    trackCollection.tracks[index] = track;
+                }
+                else
+                {
+                    trackCollection.tracks.Add(track);
+                }
             }
             else
             {

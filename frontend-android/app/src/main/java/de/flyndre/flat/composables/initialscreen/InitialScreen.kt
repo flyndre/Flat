@@ -6,8 +6,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,29 +31,41 @@ fun InitialScreen(
     modifier: Modifier = Modifier,
     onNavigateToJoinScreen: () -> Unit,
     onNavigateToCreateGroupScreen: () -> Unit,
-    onLukasBUHtton: () -> Unit
 ) {
     Scaffold(
-        bottomBar = { BottomAppBar {
+        bottomBar = {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)
+                horizontalArrangement = Arrangement.Center
             ) {
-                Button(onClick = { onNavigateToJoinScreen() }) {
-                    Text("Join")
-                }
-                Button(onClick = { onNavigateToCreateGroupScreen() }) {
-                    Text("Create")
-                }
-                Button(onClick = { onLukasBUHtton() }) {
-                    Text("Lukas BUHtton")
-                }
+                ExtendedFloatingActionButton(onClick = { onNavigateToJoinScreen() }, icon = {
+                    Icon(
+                        imageVector = Icons.Filled.AccountCircle,
+                        contentDescription = "join existing collection"
+                    )
+                }, text = {
+                    Text(
+                        text = "Join"
+                    )
+                }, modifier = Modifier.padding(10.dp))
+                ExtendedFloatingActionButton(onClick = { onNavigateToCreateGroupScreen() }, icon = {
+                    Icon(
+                        imageVector = Icons.Filled.Create,
+                        contentDescription = "create new collection"
+                    )
+                }, text = {
+                    Text(
+                        text = "Create"
+                    )
+                }, modifier = Modifier.padding(10.dp))
             }
-        }
         }
     ) { innerPadding ->
         modifier.padding(innerPadding)
-        GoogleMap(modifier = modifier.fillMaxSize(), uiSettings = MapUiSettings(zoomControlsEnabled = false)) {
+        GoogleMap(
+            modifier = modifier.fillMaxSize(),
+            uiSettings = MapUiSettings(zoomControlsEnabled = false)
+        ) {
         }
     }
 }

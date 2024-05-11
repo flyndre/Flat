@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
@@ -43,11 +44,12 @@ fun JoinScreen(modifier: Modifier = Modifier, onNavigateToInitialScreen: () -> U
                 }
             })
         }) { innerPadding ->
-        Column(modifier = modifier.padding(innerPadding)) {
+        Column(modifier = modifier.padding(innerPadding),
+            horizontalAlignment = Alignment.Start) {
             val modifier = Modifier.padding(10.dp)
             TextField(modifier = modifier, value = joinLink, onValueChange = {joinScreenViewModel.updateJoinLink(it)}, label = {Text(text = "Link for joining")})
             TextField(modifier = modifier, value = joinName, onValueChange = {joinScreenViewModel.updateJoinName(it)}, label = {Text(text = "Name for joining")})
-            Button(onClick = { joinScreenViewModel.join { onNavigateToTrackingScreen() } }, enabled = joiningAllowed) {
+            Button(modifier = modifier, onClick = { joinScreenViewModel.join { onNavigateToTrackingScreen() } }, enabled = joiningAllowed) {
                 Text(text = "Join")
             }
         }

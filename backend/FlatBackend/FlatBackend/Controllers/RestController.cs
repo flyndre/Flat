@@ -94,8 +94,16 @@ namespace FlatBackend.Controllers
                     _MongoDBService.ChangeCollection(oldCol);
                     //_WebsocketManager.sendAccessConfirmationToUser(new DTOs.AccessConfirmationDto() { collectionId = id, clientId = value.clientId, accepted = value.accepted });
                     _WebsocketManager.sendUpdateCollection(id);
-                    Json = JsonConvert.SerializeObject(confirmedUser);
-                    return Json;
+                    if (confirmedUser.accepted)
+                    {
+                        var resultAccessResult = new ResultAccessRequest() { accepted = true, collection = oldCol };
+                        Json = JsonConvert.SerializeObject(resultAccessResult);
+                        return Json;
+                    }
+                    else
+                    {
+                        Json = JsonConvert.SerializeObject(confirmedUser); return Json;
+                    }
                 }
                 else
                 {
@@ -167,6 +175,7 @@ namespace FlatBackend.Controllers
                 {
                     value.collectionDivision = new List<AreaModel>();
                 }
+                if (value.confirmedUsers == null) value.confirmedUsers = new List<UserModel>();
                 if (value.confirmedUsers.Count == 0)
                 {
                     value.confirmedUsers = new List<UserModel>() { new UserModel() { clientId = value.clientId, username = "admin", accepted = true } };
@@ -196,6 +205,7 @@ namespace FlatBackend.Controllers
                 var oldCol = await _MongoDBService.GetCollection(id);
                 foreach (var area in value)
                 {
+                    if (area == null) { continue; }
                     var oldArea = oldCol.collectionDivision.Find(x => x.id == area.id);
 
                     if (oldArea != null)

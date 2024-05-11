@@ -112,7 +112,7 @@ class TrackingScreenViewModel(
         }
     }
 
-    fun accpetParticipantJoinDialog(message: AccessResquestMessage){
+    fun acceptParticipantJoinDialog(message: AccessResquestMessage){
         viewModelScope.launch {
             collectionInstance = _connectionService.giveAccess(message)
             val tempList = arrayListOf<AccessResquestMessage>()
@@ -140,13 +140,9 @@ class TrackingScreenViewModel(
             lat = _trackingService.getCurrentPosition()
             cameraPositionState.animate(CameraUpdateFactory.newLatLng(lat), 10)
         }
-        viewModelScope.launch(Dispatchers.Default) {
-
-        }
     }
 
     fun shareJoinLink(){
-
 
     }
 }
