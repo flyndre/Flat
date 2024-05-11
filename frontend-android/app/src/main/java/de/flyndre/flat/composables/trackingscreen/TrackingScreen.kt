@@ -46,6 +46,7 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Polygon
 import com.google.maps.android.compose.Polyline
+import de.flyndre.flat.models.AccessResquestMessage
 import qrcode.render.QRCodeGraphics
 import java.util.UUID
 
@@ -72,7 +73,8 @@ fun TrackingScreen(
     if (participantsToJoin.isNotEmpty()) {
         ParticipantJoinDialog(
             onDecline = { trackingScreenViewModel.declineParticipantJoinDialog(message = participantsToJoin.get(0)) },
-            onAccept = { trackingScreenViewModel.acceptParticipantJoinDialog(message = participantsToJoin.get(0)) })
+            onAccept = { trackingScreenViewModel.acceptParticipantJoinDialog(message = participantsToJoin.get(0)) },
+            accessResquestMessage = participantsToJoin.get(0))
     }
 
     if (showLeavingDialog) {
@@ -216,7 +218,7 @@ fun AdminMenu(
 }
 
 @Composable
-fun ParticipantJoinDialog(onDecline: () -> Unit, onAccept: () -> Unit) {
+fun ParticipantJoinDialog(onDecline: () -> Unit, onAccept: () -> Unit, accessResquestMessage: AccessResquestMessage) {
     AlertDialog(
         onDismissRequest = { onDecline() },
         confirmButton = {
@@ -236,7 +238,7 @@ fun ParticipantJoinDialog(onDecline: () -> Unit, onAccept: () -> Unit) {
         icon = {
             Icon(
                 Icons.Default.Info,
-                contentDescription = "asking whether to leave the collection"
+                contentDescription = "asking whether to accept the join of an user"
             )
         },
         title = {
@@ -244,7 +246,7 @@ fun ParticipantJoinDialog(onDecline: () -> Unit, onAccept: () -> Unit) {
                 text = "Information"
             )
         },
-        text = { Text(text = "Ein Nutzer möchte deiner Sammlung beitreten.") })
+        text = { Text(text = "Der Nutzer " + accessResquestMessage.username + " möchte deiner Sammlung beitreten.") })
 }
 
 @Composable
