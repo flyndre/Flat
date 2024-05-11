@@ -62,7 +62,10 @@ fun ParticipantScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { onNavigateToTrackingScreen() }) {
+                    IconButton(onClick = {
+                        participantScreenViewModel.restoreAssignments()
+                        onNavigateToTrackingScreen()
+                    }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "back to tracking screen"
@@ -112,11 +115,6 @@ fun DropDownUserSelection(
             onValueChange = {},
             modifier = Modifier.menuAnchor(),
             readOnly = true,
-            label = {
-                Text(
-                    text = "Benutzer"
-                )
-            },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             colors = ExposedDropdownMenuDefaults.textFieldColors()
         )
@@ -124,7 +122,7 @@ fun DropDownUserSelection(
             users.forEach { user ->
                 DropdownMenuItem(
                     text = { Text(text = user.username) },
-                    onClick = { participantScreenViewModel.setUserOfDivision(division, user) })
+                    onClick = { participantScreenViewModel.setUserOfDivision(division, user); userDisplay = user.username })
             }
         }
     }
