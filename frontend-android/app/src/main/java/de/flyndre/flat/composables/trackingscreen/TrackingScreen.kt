@@ -246,11 +246,21 @@ fun TrackingScreen(
                     val red: Int = Integer.parseInt(collectionArea.color.substring(1, 3), 16)
                     val green: Int = Integer.parseInt(collectionArea.color.substring(3, 5), 16)
                     val blue: Int = Integer.parseInt(collectionArea.color.substring(5), 16)
-                    Polygon(
-                        points = list,
-                        strokeColor = Color(red, green, blue, alpha = 255),
-                        fillColor = Color(red, green, blue, alpha = 127)
-                    )
+
+                    //paint own collections with higher alpha
+                    if(userId.equals(collectionArea.clientId)){
+                        Polygon(
+                            points = list,
+                            strokeColor = Color(red, green, blue, alpha = 255),
+                            fillColor = Color(red, green, blue, alpha = 127)
+                        )
+                    }else{
+                        Polygon(
+                            points = list,
+                            strokeColor = Color(red, green, blue, alpha = 127),
+                            fillColor = Color(red, green, blue, alpha = 63)
+                        )
+                    }
                 }
             }
         }
