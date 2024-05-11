@@ -42,6 +42,7 @@ import de.flyndre.flat.interfaces.IConnectionService
 import de.flyndre.flat.interfaces.ILocationService
 import de.flyndre.flat.interfaces.ITrackingService
 import de.flyndre.flat.services.LocationService
+import de.flyndre.flat.services.TrackingService
 import de.flyndre.flat.ui.theme.FlatTheme
 import java.util.UUID
 
@@ -67,6 +68,7 @@ class MainActivity : ComponentActivity() {
             1000,
             LocationServices.getFusedLocationProviderClient(this), this
         )
+        trackingService = TrackingService(connectionService, locationService, 10000)
         db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "flat-database")
             .build()
         val participantScreenViewModel = ParticipantScreenViewModel(connectionService)
