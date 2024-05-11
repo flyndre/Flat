@@ -4,7 +4,9 @@ import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
@@ -63,7 +66,7 @@ fun TrackingScreen(
     trackingScreenViewModel: TrackingScreenViewModel,
     onNavigateToInitialScreen: () -> Unit,
     onNavigateToParticipantScreen: () -> Unit,
-    onShareLink:((String)->Unit),
+    onShareLink: ((String) -> Unit),
     userId: UUID,
 ) {
     val trackingEnabled by trackingScreenViewModel.trackingEnabled.collectAsState()
@@ -78,9 +81,22 @@ fun TrackingScreen(
 
     if (participantsToJoin.isNotEmpty()) {
         ParticipantJoinDialog(
-            onDecline = { trackingScreenViewModel.declineParticipantJoinDialog(message = participantsToJoin.get(0)) },
-            onAccept = { trackingScreenViewModel.acceptParticipantJoinDialog(message = participantsToJoin.get(0)) },
-            accessResquestMessage = participantsToJoin.get(0))
+            onDecline = {
+                trackingScreenViewModel.declineParticipantJoinDialog(
+                    message = participantsToJoin.get(
+                        0
+                    )
+                )
+            },
+            onAccept = {
+                trackingScreenViewModel.acceptParticipantJoinDialog(
+                    message = participantsToJoin.get(
+                        0
+                    )
+                )
+            },
+            accessResquestMessage = participantsToJoin.get(0)
+        )
     }
 
     if (showLeavingDialog) {
@@ -94,12 +110,13 @@ fun TrackingScreen(
             onDecline = { showClosingDialog = false },
             onAccept = { trackingScreenViewModel.leaveOrCloseCollection(true); onNavigateToInitialScreen() })
     }
-    if (showAddPaticipantsDialog){
+    if (showAddPaticipantsDialog) {
         AddParticipantDialog(
             onDismissRequest = { showAddPaticipantsDialog = false },
             onShareButtonClick = onShareLink,
             qrCodeGraphics = qrCodeGraphics,
-            joinLink = joinLink)
+            joinLink = joinLink
+        )
     }
 
     Scaffold(topBar = {
@@ -116,26 +133,31 @@ fun TrackingScreen(
                 }
             })
     }, bottomBar = {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-            ExtendedFloatingActionButton(onClick = { trackingScreenViewModel.toggleTracking() }, icon = {
-                if(trackingEnabled){
-                    Icon(
-                        painter = painterResource(id = R.drawable.stop_circle_fill),
-                        contentDescription = "toggle tracking"
-                    )
-                }else{
-                    Icon(
-                        imageVector = Icons.Filled.PlayArrow,
-                        contentDescription = "toggle tracking"
-                    )
-                }
-            }, text = {
-                if (trackingEnabled) {
-                    Text(text = "Stop Tracking")
-                } else {
-                    Text(text = "Start Tracking")
-                }
-            }, modifier = Modifier.padding(10.dp))
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+            ExtendedFloatingActionButton(
+                onClick = { trackingScreenViewModel.toggleTracking() },
+                icon = {
+                    if (trackingEnabled) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.stop_circle_fill),
+                            contentDescription = "toggle tracking"
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Filled.PlayArrow,
+                            contentDescription = "toggle tracking"
+                        )
+                    }
+                },
+                text = {
+                    if (trackingEnabled) {
+                        Text(text = "Stop Tracking")
+                    } else {
+                        Text(text = "Start Tracking")
+                    }
+                },
+                modifier = Modifier.padding(10.dp)
+            )
             ExtendedFloatingActionButton(onClick = { showAddPaticipantsDialog = true }, icon = {
                 Icon(
                     imageVector = Icons.Filled.AccountCircle,
@@ -148,12 +170,26 @@ fun TrackingScreen(
             }, modifier = Modifier.padding(10.dp))
         }
     }, floatingActionButton = {
-        if (userId.equals(trackingScreenViewModel.collectionInstance.clientId)) {
-            AdminMenu(
-                onClosingCollection = { showClosingDialog = true },
-                onNavigateToParticipantScreen = onNavigateToParticipantScreen,
-                trackingScreenViewModel = trackingScreenViewModel
-            )
+        Column {
+            if (userId.equals(trackingScreenViewModel.collectionInstance.clientId)) {
+                AdminMenu(
+                    onClosingCollection = { showClosingDialog = true },
+                    onNavigateToParticipantScreen = onNavigateToParticipantScreen,
+                    trackingScreenViewModel = trackingScreenViewModel
+                )
+            }
+            FloatingActionButton(modifier = Modifier.padding(10.dp), onClick = { /*TODO*/ }) {
+                Icon(
+                    imageVector = Icons.Filled.LocationOn,
+                    contentDescription = "center on own location"
+                )
+            }
+            FloatingActionButton(modifier = Modifier.padding(10.dp), onClick = { /*TODO*/ }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.texture_fill),
+                    contentDescription = "center on own location"
+                )
+            }
         }
     }) { innerPadding ->
         Modifier.padding(innerPadding)
@@ -202,9 +238,13 @@ fun TrackingScreen(
 
                     //compute colors from hex string
                     val red: Int = Integer.parseInt(collectionArea.color.substring(1, 3), 16)
-                    val green: Int = Integer.parseInt(collectionArea.color.substring(3, 5),16)
+                    val green: Int = Integer.parseInt(collectionArea.color.substring(3, 5), 16)
                     val blue: Int = Integer.parseInt(collectionArea.color.substring(5), 16)
-                    Polygon(points = list, strokeColor = Color(red, green, blue, alpha = 255), fillColor = Color(red, green, blue, alpha = 127))
+                    Polygon(
+                        points = list,
+                        strokeColor = Color(red, green, blue, alpha = 255),
+                        fillColor = Color(red, green, blue, alpha = 127)
+                    )
                 }
             }
         }
@@ -219,7 +259,7 @@ fun AdminMenu(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier) {
+    Box {
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(
                 text = { Text(text = "End Collection") },
@@ -230,14 +270,18 @@ fun AdminMenu(
                 onNavigateToParticipantScreen()
             })
         }
-        FloatingActionButton(onClick = { expanded = true }) {
+        FloatingActionButton(modifier = Modifier.padding(10.dp), onClick = { expanded = true }) {
             Icon(Icons.Filled.MoreVert, contentDescription = "open collection management")
         }
     }
 }
 
 @Composable
-fun ParticipantJoinDialog(onDecline: () -> Unit, onAccept: () -> Unit, accessResquestMessage: AccessResquestMessage) {
+fun ParticipantJoinDialog(
+    onDecline: () -> Unit,
+    onAccept: () -> Unit,
+    accessResquestMessage: AccessResquestMessage,
+) {
     AlertDialog(
         onDismissRequest = { onDecline() },
         confirmButton = {
@@ -331,20 +375,27 @@ fun ClosingDialog(onDecline: () -> Unit, onAccept: () -> Unit) {
         },
         text = { Text(text = "Bist du sicher, dass du die Sammlung schließen möchtest?") })
 }
+
 @Composable
 fun AddParticipantDialog(
     onDismissRequest: () -> Unit,
-    onShareButtonClick: (String)->Unit,
+    onShareButtonClick: (String) -> Unit,
     qrCodeGraphics: QRCodeGraphics,
-    joinLink: String
-){
+    joinLink: String,
+) {
     Dialog(onDismissRequest = onDismissRequest) {
         Card(shape = RoundedCornerShape(16.dp)) {
-            Image(bitmap = BitmapFactory.decodeByteArray(qrCodeGraphics.getBytes(),0,qrCodeGraphics.getBytes().size).asImageBitmap(), contentDescription = "" )
+            Image(
+                bitmap = BitmapFactory.decodeByteArray(
+                    qrCodeGraphics.getBytes(),
+                    0,
+                    qrCodeGraphics.getBytes().size
+                ).asImageBitmap(), contentDescription = ""
+            )
             SelectionContainer(modifier = Modifier.padding(10.dp)) {
                 Text(text = joinLink)
             }
-            Button(onClick = {onShareButtonClick(joinLink)}) {
+            Button(onClick = { onShareButtonClick(joinLink) }) {
                 Text(text = "Share")
             }
         }
