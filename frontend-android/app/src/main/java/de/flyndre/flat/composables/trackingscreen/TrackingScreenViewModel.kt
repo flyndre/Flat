@@ -129,9 +129,4 @@ class TrackingScreenViewModel(
             }
         }
     }
-
-    fun shareJoinLink(){
-
-
-    }
 }
