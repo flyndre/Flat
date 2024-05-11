@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.navigation.NavType
 import de.flyndre.flat.services.ConnectionService
+import de.flyndre.flat.services.TrackingService
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -67,6 +68,8 @@ class MainActivity : ComponentActivity() {
             1000,
             LocationServices.getFusedLocationProviderClient(this), this
         )
+
+        trackingService = TrackingService(connectionService, locationService, 10000)
         db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "flat-database")
             .build()
         val participantScreenViewModel = ParticipantScreenViewModel(connectionService)
