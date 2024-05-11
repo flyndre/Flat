@@ -141,8 +141,4 @@ class TrackingScreenViewModel(
             cameraPositionState.animate(CameraUpdateFactory.newLatLng(lat), 10)
         }
     }
-
-    fun shareJoinLink(){
-
-    }
 }
