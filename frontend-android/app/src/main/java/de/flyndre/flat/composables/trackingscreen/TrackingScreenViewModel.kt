@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.CameraPositionState
 import de.flyndre.flat.composables.presetscreen.collectionareascreen.generateBounds
 import de.flyndre.flat.composables.trackingscreen.participantscreen.ParticipantScreenViewModel
@@ -138,7 +139,9 @@ class TrackingScreenViewModel(
         var lat :LatLng
         viewModelScope.launch(Dispatchers.Default){
             lat = _trackingService.getCurrentPosition()
-            cameraPositionState.animate(CameraUpdateFactory.newLatLng(lat), 10)
+            viewModelScope.launch(Dispatchers.Main) {
+                cameraPositionState.animate(CameraUpdateFactory.newLatLng(lat))
+            }
         }
     }
 }
