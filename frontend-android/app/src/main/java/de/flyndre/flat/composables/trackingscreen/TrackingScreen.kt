@@ -72,7 +72,7 @@ fun TrackingScreen(
     if (participantsToJoin.isNotEmpty()) {
         ParticipantJoinDialog(
             onDecline = { trackingScreenViewModel.declineParticipantJoinDialog(message = participantsToJoin.get(0)) },
-            onAccept = { trackingScreenViewModel.accpetParticipantJoinDialog(message = participantsToJoin.get(0)) })
+            onAccept = { trackingScreenViewModel.acceptParticipantJoinDialog(message = participantsToJoin.get(0)) })
     }
 
     if (showLeavingDialog) {

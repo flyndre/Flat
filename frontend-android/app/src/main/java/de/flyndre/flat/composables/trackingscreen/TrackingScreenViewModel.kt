@@ -105,7 +105,7 @@ class TrackingScreenViewModel(
         }
     }
 
-    fun accpetParticipantJoinDialog(message: AccessResquestMessage){
+    fun acceptParticipantJoinDialog(message: AccessResquestMessage){
         viewModelScope.launch {
             collectionInstance = _connectionService.giveAccess(message)
             val tempList = arrayListOf<AccessResquestMessage>()
