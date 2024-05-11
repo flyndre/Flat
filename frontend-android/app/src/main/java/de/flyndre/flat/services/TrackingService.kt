@@ -1,6 +1,7 @@
 package de.flyndre.flat.services
 
 import android.util.Log
+import com.google.android.gms.maps.model.LatLng
 import de.flyndre.flat.interfaces.IConnectionService
 import de.flyndre.flat.interfaces.ILocationService
 import de.flyndre.flat.interfaces.ITrackingService
@@ -10,12 +11,10 @@ import de.flyndre.flat.models.TrackCollection
 import io.github.dellisd.spatialk.geojson.Position
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import java.util.UUID
-import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
 class TrackingService(
@@ -34,7 +33,7 @@ class TrackingService(
         locationService.addOnLocationUpdate {x-> addNewPosition(x) }
     }
     override fun startTracking() {
-        var newTrack = Track()
+        val newTrack = Track()
         localTrack.add(newTrack)
         locationService.startTracking()
         Log.d(this.toString(),"tracking started")
@@ -70,6 +69,10 @@ class TrackingService(
 
     override fun addOnRemoteTrackUpdate(callback: () -> Unit) {
         onRemoteTrackUpdate.add(callback)
+    }
+
+    override suspend fun getCurrentPosition(): LatLng {
+        return locationService.getCurrentPosition()
     }
 
     suspend fun startSendTrackUpdate(track: Track){
