@@ -257,8 +257,8 @@ fun TrackingScreen(
                     }else{
                         Polygon(
                             points = list,
-                            strokeColor = Color(red, green, blue, alpha = 127),
-                            fillColor = Color(red, green, blue, alpha = 63)
+                            strokeColor = Color(red, green, blue, alpha = 63),
+                            fillColor = Color(red, green, blue, alpha = 31)
                         )
                     }
                 }
