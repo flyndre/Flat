@@ -43,7 +43,6 @@ import de.flyndre.flat.interfaces.IConnectionService
 import de.flyndre.flat.interfaces.ILocationService
 import de.flyndre.flat.interfaces.ITrackingService
 import de.flyndre.flat.services.LocationService
-import de.flyndre.flat.services.TrackingService
 import de.flyndre.flat.ui.theme.FlatTheme
 import java.util.UUID
 
