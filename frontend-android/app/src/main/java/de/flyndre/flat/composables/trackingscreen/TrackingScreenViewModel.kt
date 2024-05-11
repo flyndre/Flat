@@ -3,6 +3,8 @@ package de.flyndre.flat.composables.trackingscreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
 import de.flyndre.flat.composables.trackingscreen.participantscreen.ParticipantScreenViewModel
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.interfaces.IConnectionService
@@ -58,7 +60,8 @@ class TrackingScreenViewModel(
     private val _joinLink = MutableStateFlow(joinBaseLink+ collectionInstance.id)
     val joinLink : StateFlow<String> = _joinLink.asStateFlow()
 
-
+    private val _cameraPosition = MutableStateFlow(CameraPosition(LatLng(0.0, 0.0), 0F, 0F, 0F))
+    val cameraPosition: StateFlow<CameraPosition> = _cameraPosition.asStateFlow()
 
     init {
         trackingService.addOnLocalTrackUpdate{ onLocalTrackUpdate() }

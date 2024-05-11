@@ -54,6 +54,7 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Polygon
 import com.google.maps.android.compose.Polyline
+import com.google.maps.android.compose.rememberCameraPositionState
 import de.flyndre.flat.R
 import de.flyndre.flat.models.AccessResquestMessage
 import qrcode.render.QRCodeGraphics
@@ -75,6 +76,10 @@ fun TrackingScreen(
     val participantsToJoin by trackingScreenViewModel.participantsToJoin.collectAsState()
     val qrCodeGraphics by trackingScreenViewModel.qrCodeGraphics.collectAsState()
     val joinLink by trackingScreenViewModel.joinLink.collectAsState()
+    val cameraPosition by trackingScreenViewModel.cameraPosition.collectAsState()
+    val cameraPositionState = rememberCameraPositionState {
+        position = cameraPosition
+    }
     var showLeavingDialog by remember { mutableStateOf(false) }
     var showClosingDialog by remember { mutableStateOf(false) }
     var showAddPaticipantsDialog by remember { mutableStateOf(false) }
@@ -196,7 +201,8 @@ fun TrackingScreen(
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             properties = MapProperties(isMyLocationEnabled = true),
-            uiSettings = MapUiSettings(zoomControlsEnabled = false)
+            uiSettings = MapUiSettings(zoomControlsEnabled = false),
+            cameraPositionState = cameraPositionState
         ) {
             //rendering local track
             if (localTrackList.isNotEmpty()) {
