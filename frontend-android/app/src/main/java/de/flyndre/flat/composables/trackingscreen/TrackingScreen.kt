@@ -183,7 +183,7 @@ fun TrackingScreen(
                     trackingScreenViewModel = trackingScreenViewModel
                 )
             }
-            FloatingActionButton(modifier = Modifier.padding(10.dp), onClick = { /*TODO*/ }) {
+            FloatingActionButton(modifier = Modifier.padding(10.dp), onClick = { trackingScreenViewModel.centerOnPosition(cameraPositionState = cameraPositionState) }) {
                 Icon(
                     imageVector = Icons.Filled.LocationOn,
                     contentDescription = "center on own location"
