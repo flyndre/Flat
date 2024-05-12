@@ -1,7 +1,6 @@
 package de.flyndre.flat.models
 
 import io.github.dellisd.spatialk.geojson.LineString
-import io.github.dellisd.spatialk.geojson.Polygon
 import io.github.dellisd.spatialk.geojson.Position
 import java.util.UUID
 

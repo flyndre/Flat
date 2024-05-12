@@ -6,9 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.CameraPositionState
-import de.flyndre.flat.composables.presetscreen.collectionareascreen.generateBounds
 import de.flyndre.flat.composables.trackingscreen.participantscreen.ParticipantScreenViewModel
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.interfaces.IConnectionService
