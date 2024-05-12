@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,7 +19,6 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
@@ -34,6 +32,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -41,7 +40,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
@@ -205,10 +203,10 @@ fun TrackingScreen(
             cameraPositionState = cameraPositionState
         ) {
             //rendering local track
-            if (localTrackList.isNotEmpty()) {
-                for (track in localTrackList) {
+            if (localTrackList.tracks.isNotEmpty()) {
+                for (track in localTrackList.tracks) {
                     var list = arrayListOf<LatLng>()
-                    for (position in track) {
+                    for (position in track.positions) {
                         list.add(LatLng(position.latitude, position.longitude))
                     }
                     if (list.isNotEmpty()) {
@@ -219,9 +217,9 @@ fun TrackingScreen(
             //rendering remote tracks
             if (remoteTrackList.isNotEmpty()) {
                 for (trackCollection in remoteTrackList) {
-                    for (track in trackCollection.value) {
+                    for (track in trackCollection.value.tracks) {
                         var list = arrayListOf<LatLng>()
-                        for (position in track) {
+                        for (position in track.positions) {
                             list.add(LatLng(position.latitude, position.longitude))
                         }
                         if (list.isNotEmpty()) {
@@ -409,7 +407,7 @@ fun AddParticipantDialog(
                 ).asImageBitmap(), contentDescription = ""
             )
             SelectionContainer(modifier = Modifier.padding(10.dp)) {
-                Text(text = joinLink)
+                TextField(joinLink,{val s = it}, readOnly = true)
             }
             Button(onClick = { onShareButtonClick(joinLink) }) {
                 Text(text = "Share")

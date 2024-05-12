@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.CameraPositionState
 import de.flyndre.flat.composables.trackingscreen.participantscreen.ParticipantScreenViewModel
 import de.flyndre.flat.database.AppDatabase
@@ -87,10 +86,15 @@ class TrackingScreenViewModel(
     }
 
     private fun onLocalTrackUpdate(){
-        _trackList.value = _trackingService.localTrack
+        val s = _trackingService.localTrack.deepCopy()
+        _trackList.value = s
     }
     private fun onRemoteTrackUpdate(){
-        _remoteTrackList.value = _trackingService.remoteTracks
+        val newMap : MutableMap<UUID,TrackCollection> = mutableMapOf()
+        _trackingService.remoteTracks.forEach{
+            newMap[UUID.fromString(it.key.toString())] = it.value.deepCopy()
+        }
+        _remoteTrackList.value = newMap
     }
 
     private fun onAccessRequestMessage(message: AccessResquestMessage){

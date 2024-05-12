@@ -34,7 +34,7 @@ class TrackingService(
     }
     override fun startTracking() {
         val newTrack = Track()
-        localTrack.add(newTrack)
+        localTrack.tracks.add(newTrack)
         locationService.startTracking()
         Log.d(this.toString(),"tracking started")
         isTracking = true
@@ -50,7 +50,7 @@ class TrackingService(
     }
 
     override fun addNewPosition(position: Position) {
-        localTrack.last().add(position)
+        localTrack.tracks.last().positions.add(position)
         onLocalTrackUpdate.forEach { x->x() }
     }
 
@@ -91,12 +91,12 @@ class TrackingService(
         }
         sendUpdateLock.lock()
         try {
-            val newstPointIndex = track.lastIndex
+            val newstPointIndex = track.positions.lastIndex
             if(newstPointIndex<=lastPointIndex){
                 return lastPointIndex
             }
             val incrementalTrack = Track(track.trackId)
-            incrementalTrack.addAll(track.subList(lastPointIndex,newstPointIndex))
+            incrementalTrack.positions.addAll(track.positions.subList(lastPointIndex,newstPointIndex))
             connectionService.sendTrackUpdate(incrementalTrack)
             return newstPointIndex
         }catch (e:Exception){
