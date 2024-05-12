@@ -30,7 +30,8 @@ class TrackingService(
     private val sendUpdateLock = Mutex()
 
     init {
-        locationService.addOnLocationUpdate {x-> addNewPosition(x) }
+        locationService.addOnLocationUpdate {addNewPosition(it) }
+        connectionService.addOnTrackUpdate { addIncrementalTrack(it) }
     }
     override fun startTracking() {
         val newTrack = Track()
