@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
@@ -34,6 +35,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -45,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -198,6 +201,16 @@ fun TrackingScreen(
         }
     }) { innerPadding ->
         Modifier.padding(innerPadding)
+        Column(modifier= Modifier.padding(innerPadding)) {
+            for (track in localTrackList.tracks) {
+                Text(text = "Id: ${track.trackId}")
+                for(pos in track.positions){
+                    Text(text = "${pos.latitude}, ${pos.longitude}")
+                }
+            }
+        }
+
+        /*
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             properties = MapProperties(isMyLocationEnabled = true),
@@ -263,7 +276,7 @@ fun TrackingScreen(
                     }
                 }
             }
-        }
+        }*/
     }
 }
 
@@ -409,7 +422,7 @@ fun AddParticipantDialog(
                 ).asImageBitmap(), contentDescription = ""
             )
             SelectionContainer(modifier = Modifier.padding(10.dp)) {
-                Text(text = joinLink)
+                TextField(joinLink,{val s = it}, readOnly = true)
             }
             Button(onClick = { onShareButtonClick(joinLink) }) {
                 Text(text = "Share")

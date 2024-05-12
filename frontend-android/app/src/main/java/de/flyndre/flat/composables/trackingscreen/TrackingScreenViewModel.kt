@@ -86,7 +86,8 @@ class TrackingScreenViewModel(
     }
 
     private fun onLocalTrackUpdate(){
-        _trackList.value = _trackingService.localTrack
+        val s = _trackingService.localTrack.deepCopy()
+        _trackList.value = s
     }
     private fun onRemoteTrackUpdate(){
         _remoteTrackList.value = _trackingService.remoteTracks
