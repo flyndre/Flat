@@ -201,16 +201,6 @@ fun TrackingScreen(
         }
     }) { innerPadding ->
         Modifier.padding(innerPadding)
-        Column(modifier= Modifier.padding(innerPadding)) {
-            for (track in localTrackList.tracks) {
-                Text(text = "Id: ${track.trackId}")
-                for(pos in track.positions){
-                    Text(text = "${pos.latitude}, ${pos.longitude}")
-                }
-            }
-        }
-
-        /*
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             properties = MapProperties(isMyLocationEnabled = true),
@@ -218,10 +208,10 @@ fun TrackingScreen(
             cameraPositionState = cameraPositionState
         ) {
             //rendering local track
-            if (localTrackList.isNotEmpty()) {
-                for (track in localTrackList) {
+            if (localTrackList.tracks.isNotEmpty()) {
+                for (track in localTrackList.tracks) {
                     var list = arrayListOf<LatLng>()
-                    for (position in track) {
+                    for (position in track.positions) {
                         list.add(LatLng(position.latitude, position.longitude))
                     }
                     if (list.isNotEmpty()) {
@@ -232,9 +222,9 @@ fun TrackingScreen(
             //rendering remote tracks
             if (remoteTrackList.isNotEmpty()) {
                 for (trackCollection in remoteTrackList) {
-                    for (track in trackCollection.value) {
+                    for (track in trackCollection.value.tracks) {
                         var list = arrayListOf<LatLng>()
-                        for (position in track) {
+                        for (position in track.positions) {
                             list.add(LatLng(position.latitude, position.longitude))
                         }
                         if (list.isNotEmpty()) {
@@ -276,7 +266,7 @@ fun TrackingScreen(
                     }
                 }
             }
-        }*/
+        }
     }
 }
 

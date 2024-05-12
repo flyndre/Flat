@@ -90,7 +90,11 @@ class TrackingScreenViewModel(
         _trackList.value = s
     }
     private fun onRemoteTrackUpdate(){
-        _remoteTrackList.value = _trackingService.remoteTracks
+        val newMap : MutableMap<UUID,TrackCollection> = mutableMapOf()
+        _trackingService.remoteTracks.forEach{
+            newMap[UUID.fromString(it.key.toString())] = it.value.deepCopy()
+        }
+        _remoteTrackList.value = newMap
     }
 
     private fun onAccessRequestMessage(message: AccessResquestMessage){
