@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,10 +17,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -46,6 +52,8 @@ import androidx.navigation.NavController
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.Polygon
 import com.google.maps.android.compose.rememberCameraPositionState
 import de.flyndre.flat.composables.customComponents.SegmentedButtonItem
@@ -229,6 +237,10 @@ fun CollectionAreaScreen(
                             Icon(Icons.Filled.Edit, contentDescription = "draw new area")
                         }
                     }
+                    SmallFloatingActionButton(onClick = { collectionAreaScreenViewModel.addPoint(cameraPositionState.position.target)}) {
+                        Icon(Icons.Filled.Add, contentDescription = "add point")
+                    }
+
                 }
             } else {
 
@@ -244,10 +256,10 @@ fun CollectionAreaScreen(
         } else if (selectedNavigationItem == 1) {
             mapSettings = MapUiSettings(
                 zoomControlsEnabled = false,
-                zoomGesturesEnabled = false,
+                zoomGesturesEnabled = true,
                 tiltGesturesEnabled = false,
                 rotationGesturesEnabled = false,
-                scrollGesturesEnabled = false
+                scrollGesturesEnabled = true
             )
             mapProperties = MapProperties(isMyLocationEnabled = false)
         } else {
@@ -260,14 +272,13 @@ fun CollectionAreaScreen(
             //map
             GoogleMap(
                 modifier = mapsModifier,
+
                 uiSettings = mapSettings,
                 properties = mapProperties,
+
                 cameraPositionState = cameraPositionState,
-                onMapClick = {
-                    if (selectedNavigationItem == 1) {
-                        collectionAreaScreenViewModel.addCollectionAreaPoint(it)
-                    }
-                }) {
+                ) {
+                Marker(state = MarkerState(cameraPositionState.position.target))
                 if (collectionAreas.isNotEmpty()) {
                     collectionAreas.forEach { area ->
                         if (area.listAreaPoints.isNotEmpty()) {
@@ -280,6 +291,7 @@ fun CollectionAreaScreen(
                     }
                 }
             }
+
             //list of areas if navigation is set to
             if (selectedNavigationItem == 2) {
                 LazyColumn {

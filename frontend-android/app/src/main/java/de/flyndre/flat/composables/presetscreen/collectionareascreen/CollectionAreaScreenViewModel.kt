@@ -133,4 +133,8 @@ class CollectionAreaScreenViewModel() : ViewModel() {
 
         _listCollectionAreas.value = arrayList
     }
+
+    fun addPoint(point:LatLng){
+        addCollectionAreaPoint(point)
+    }
 }
