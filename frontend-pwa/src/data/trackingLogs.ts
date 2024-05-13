@@ -10,9 +10,9 @@ export const trackingLogs = useObservable<TrackingLog[]>(
 
 export const trackingLogDB = db.trackingLogs;
 
-export function logPosition(position: GeoJSON.Position) {
+export function logPosition(position: GeoJSON.Position, trackId: string) {
     try {
-        db.trackingLogs.add({ timestamp: Date.now(), position });
+        db.trackingLogs.add({ timestamp: Date.now(), trackId, position });
     } catch (error) {
         console.log('Failed to log position:', error);
     }

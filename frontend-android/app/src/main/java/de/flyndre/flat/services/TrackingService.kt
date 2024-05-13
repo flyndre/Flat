@@ -1,6 +1,7 @@
 package de.flyndre.flat.services
 
 import android.util.Log
+import com.google.android.gms.maps.model.LatLng
 import de.flyndre.flat.interfaces.IConnectionService
 import de.flyndre.flat.interfaces.ILocationService
 import de.flyndre.flat.interfaces.ITrackingService
@@ -10,12 +11,10 @@ import de.flyndre.flat.models.TrackCollection
 import io.github.dellisd.spatialk.geojson.Position
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import java.util.UUID
-import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
 class TrackingService(
@@ -31,11 +30,12 @@ class TrackingService(
     private val sendUpdateLock = Mutex()
 
     init {
-        locationService.addOnLocationUpdate {x-> addNewPosition(x) }
+        locationService.addOnLocationUpdate {addNewPosition(it) }
+        connectionService.addOnTrackUpdate { addIncrementalTrack(it) }
     }
     override fun startTracking() {
-        var newTrack = Track()
-        localTrack.add(newTrack)
+        val newTrack = Track()
+        localTrack.tracks.add(newTrack)
         locationService.startTracking()
         Log.d(this.toString(),"tracking started")
         isTracking = true
@@ -51,7 +51,7 @@ class TrackingService(
     }
 
     override fun addNewPosition(position: Position) {
-        localTrack.last().add(position)
+        localTrack.tracks.last().positions.add(position)
         onLocalTrackUpdate.forEach { x->x() }
     }
 
@@ -72,6 +72,10 @@ class TrackingService(
         onRemoteTrackUpdate.add(callback)
     }
 
+    override suspend fun getCurrentPosition(): LatLng {
+        return locationService.getCurrentPosition()
+    }
+
     suspend fun startSendTrackUpdate(track: Track){
         var lastPointIndex = 0
         while (isTracking){
@@ -88,12 +92,12 @@ class TrackingService(
         }
         sendUpdateLock.lock()
         try {
-            val newstPointIndex = track.lastIndex
+            val newstPointIndex = track.positions.lastIndex
             if(newstPointIndex<=lastPointIndex){
                 return lastPointIndex
             }
             val incrementalTrack = Track(track.trackId)
-            incrementalTrack.addAll(track.subList(lastPointIndex,newstPointIndex))
+            incrementalTrack.positions.addAll(track.positions.subList(lastPointIndex,newstPointIndex))
             connectionService.sendTrackUpdate(incrementalTrack)
             return newstPointIndex
         }catch (e:Exception){

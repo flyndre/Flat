@@ -3,14 +3,20 @@ package de.flyndre.flat.composables.trackingscreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.CameraPositionState
 import de.flyndre.flat.composables.trackingscreen.participantscreen.ParticipantScreenViewModel
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.interfaces.IConnectionService
 import de.flyndre.flat.interfaces.ITrackingService
 import de.flyndre.flat.models.AccessResquestMessage
+import de.flyndre.flat.models.CollectionArea
 import de.flyndre.flat.models.CollectionInstance
 import de.flyndre.flat.models.TrackCollection
 import io.github.dellisd.spatialk.geojson.MultiPolygon
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,6 +37,7 @@ class TrackingScreenViewModel(
     private val _trackingService = trackingService
     private val _connectionService = connectionService
     private val joinBaseLink = "https://flat.buhss.de/join/"
+    private var lastCenteredOwnDivision: CollectionArea? = null
     var collectionInstance: CollectionInstance = CollectionInstance("", UUID.randomUUID(),
         MultiPolygon()
     )
@@ -58,7 +65,8 @@ class TrackingScreenViewModel(
     private val _joinLink = MutableStateFlow(joinBaseLink+ collectionInstance.id)
     val joinLink : StateFlow<String> = _joinLink.asStateFlow()
 
-
+    private val _cameraPosition = MutableStateFlow(CameraPosition(LatLng(0.0, 0.0), 0F, 0F, 0F))
+    val cameraPosition: StateFlow<CameraPosition> = _cameraPosition.asStateFlow()
 
     init {
         trackingService.addOnLocalTrackUpdate{ onLocalTrackUpdate() }
@@ -78,10 +86,15 @@ class TrackingScreenViewModel(
     }
 
     private fun onLocalTrackUpdate(){
-        _trackList.value = _trackingService.localTrack
+        val s = _trackingService.localTrack.deepCopy()
+        _trackList.value = s
     }
     private fun onRemoteTrackUpdate(){
-        _remoteTrackList.value = _trackingService.remoteTracks
+        val newMap : MutableMap<UUID,TrackCollection> = mutableMapOf()
+        _trackingService.remoteTracks.forEach{
+            newMap[UUID.fromString(it.key.toString())] = it.value.deepCopy()
+        }
+        _remoteTrackList.value = newMap
     }
 
     private fun onAccessRequestMessage(message: AccessResquestMessage){
@@ -105,7 +118,7 @@ class TrackingScreenViewModel(
         }
     }
 
-    fun accpetParticipantJoinDialog(message: AccessResquestMessage){
+    fun acceptParticipantJoinDialog(message: AccessResquestMessage){
         viewModelScope.launch {
             collectionInstance = _connectionService.giveAccess(message)
             val tempList = arrayListOf<AccessResquestMessage>()
@@ -127,8 +140,49 @@ class TrackingScreenViewModel(
         }
     }
 
-    fun shareJoinLink(){
+    fun centerOnPosition(cameraPositionState: CameraPositionState){
+        var lat :LatLng
+        viewModelScope.launch(Dispatchers.Default){
+            lat = _trackingService.getCurrentPosition()
+            viewModelScope.launch(Dispatchers.Main) {
+                cameraPositionState.animate(CameraUpdateFactory.newLatLng(lat))
+            }
+        }
+    }
 
+    fun centerOnOwnArea(cameraPositionState: CameraPositionState, ownId: UUID){
+        //get area to center
+        var division: CollectionArea? = null
+        for(div in collectionInstance.collectionDivision){
+            if(div.clientId != null){
+                if(div.clientId!!.equals(ownId)){
+                    division = div
+                    if(lastCenteredOwnDivision != null){
+                        if(!div.id.equals(lastCenteredOwnDivision!!.id)){
+                            break
+                        }
+                    }
+                }
+            }
+        }
 
+        if(division == null && lastCenteredOwnDivision != null){
+            division = lastCenteredOwnDivision
+        }
+
+        if(division != null){
+            //center on selected area
+            val builder = LatLngBounds.builder()
+
+            for(position in division.area.coordinates[0]){
+                builder.include(LatLng(position.latitude, position.longitude))
+            }
+
+            viewModelScope.launch(Dispatchers.Main) {
+                cameraPositionState.animate(CameraUpdateFactory.newLatLngBounds(builder.build(), 10))
+            }
+
+            lastCenteredOwnDivision = division
+        }
     }
 }

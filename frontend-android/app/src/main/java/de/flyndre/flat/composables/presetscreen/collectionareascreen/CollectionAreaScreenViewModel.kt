@@ -9,6 +9,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -39,7 +40,7 @@ class CollectionAreaScreenViewModel() : ViewModel() {
     }
 
     fun animateCameraPositionToCollectionArea(collectionArea: CollectionArea, cameraPositionState: CameraPositionState){
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.Main) {
             cameraPositionState.animate(CameraUpdateFactory.newLatLngBounds(generateBounds(collectionArea = collectionArea), 10))
         }
     }

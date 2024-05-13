@@ -14,7 +14,6 @@ class ParticipantScreenViewModel(connectionService: IConnectionService): ViewMod
     private val connectionService = connectionService
     private lateinit var collectionInstance: CollectionInstance
 
-    private var _initialUsers = arrayListOf<UserModel>()
     private val _users = MutableStateFlow(arrayListOf<UserModel>())
     val users = _users.asStateFlow()
 
@@ -25,13 +24,13 @@ class ParticipantScreenViewModel(connectionService: IConnectionService): ViewMod
     fun initialValues(collectionInstance: CollectionInstance){
         _users.value = arrayListOf()
         _users.value.addAll(collectionInstance.confirmedUsers)
-        _initialUsers.clear()
-        _initialUsers.addAll(collectionInstance.confirmedUsers)
 
         _divisions.value = arrayListOf()
-        _divisions.value.addAll(collectionInstance.divisions)
+        collectionInstance.collectionDivision.forEach { div ->
+            _divisions.value.add(div.copy())
+        }
         _initialDivisions.clear()
-        _initialDivisions.addAll(collectionInstance.divisions)
+        _initialDivisions.addAll(collectionInstance.collectionDivision)
 
         this.collectionInstance = collectionInstance
     }
@@ -49,13 +48,16 @@ class ParticipantScreenViewModel(connectionService: IConnectionService): ViewMod
         }
     }
 
+    fun restoreAssignments(){
+        _divisions.value = arrayListOf()
+
+        _initialDivisions.forEach { div ->
+            _divisions.value.add(div.copy())
+        }
+    }
+
     fun setUserOfDivision(division: CollectionArea, user: UserModel){
-        var tempList = arrayListOf<CollectionArea>()
-        tempList.addAll(_divisions.value)
-        val index = tempList.indexOf(division)
-        tempList.remove(division)
-        division.clientId = user.clientId
-        tempList.add(index, division)
-        _divisions.value = tempList
+        _divisions.value.remove(division)
+        _divisions.value.add(division.copy(clientId = user.clientId))
     }
 }

@@ -41,7 +41,7 @@ interface IConnectionService {
      * @param collectionId id of an existing public collection
      * @param divisions list of divisions new ones will be created, existing ones updated, missing ones deleted
      */
-    suspend fun setAreaDivision(collectionId: UUID, divisions: List<CollectionArea>)
+    suspend fun setAreaDivision(collectionId: UUID, divisions: List<CollectionArea>):CollectionInstance
 
     /**
      * assigns a user to a division of a collection area.

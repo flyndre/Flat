@@ -42,6 +42,7 @@ class JoinScreenViewModel(db: AppDatabase,trackingScreenViewModel: TrackingScree
                 val answer = _connectionService.requestAccess(_joinName.value, UUID.fromString(collcetionId))
                 if(answer.accepted){
                     _trackingScreenViewModel.collectionInstance= answer.collection!!
+                    _connectionService.openWebsocket(answer.collection.id!!)
                     navigateToTrackingScreen()
                 }else{
                     //handle deny
