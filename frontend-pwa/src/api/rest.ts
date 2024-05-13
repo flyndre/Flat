@@ -13,6 +13,8 @@ import api from './api';
 export async function openCollection(collection: Collection) {
     var collectionDto = collection as any 
     collectionDto.clientId  = collection.adminClientId
+    collectionDto.collectionDivision = collection.divisions
+    delete collectionDto.divisions;
     delete collectionDto.adminClientId;
     const response = await api.post('api/rest/collection', collectionDto);
     return response;
@@ -24,8 +26,8 @@ export async function openCollection(collection: Collection) {
  * @param collectionId of the collection
  * @returns the requested collection
  */
-export async function getCollection(collectionId: string) {
-    const response = await api.get(`api/rest/collection/${collectionId}`);
+export async function getCollection(collectionId: string, clientId: string ) {
+    const response = await api.get(`api/rest/collection/${collectionId}?userId=${clientId}`);
     return response;
 }
 
@@ -71,7 +73,7 @@ export async function accessRequest(
     clientId: string,
     collectionId: string
 ) {
-    const response = await api.post(`api/rest/collection/${collectionId}`, {
+    const response = await api.post(`api/rest/accessrequest/${collectionId}`, {
         username: username,
         clientId: clientId,
     });

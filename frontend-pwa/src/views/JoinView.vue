@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { accessRequest } from '@/api/rest';
 import CardProgressIndicator from '@/components/card/CardProgressIndicator.vue';
 import MdiInputIcon from '@/components/icons/MdiInputIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
+import { clientId } from '@/data/clientMetadata';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { isOnMobile } from '@/util/mobileDetection';
 import validateJoinName from '@/validation/validateJoinName';
@@ -26,6 +28,7 @@ const props = defineProps<{
 }>();
 
 const router = useRouter();
+
 const joinName = ref('');
 const submittable = computed(() => validateJoinName(joinName.value));
 const dialogVisible = ref(false);
@@ -39,10 +42,12 @@ const { start, stop } = useTimeoutFn(
         immediate: false,
     }
 );
-function join() {
+async function join() {
     dialogVisible.value = true;
     start();
-    // TODO: send join request
+    //TODO: Change ClientId to actual ClientId
+    const response = await accessRequest(joinName.value, clientId.value, props.id)
+    response.status == 200 ? router.push(`/track/${props.id}`) : null;
 }
 function cancel() {
     dialogVisible.value = false;

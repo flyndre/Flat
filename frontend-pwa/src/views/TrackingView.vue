@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { getCollection } from '@/api/rest';
+import { establishWebsocket, isAdmin, newInvite } from '@/api/websockets';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
@@ -39,13 +41,13 @@ import SelectButton from 'primevue/selectbutton';
 import SplitButton from 'primevue/splitbutton';
 import Textarea from 'primevue/textarea';
 import { useToast } from 'primevue/usetoast';
-import { computed, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, onBeforeMount, onMounted, ref } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter();
-const adminView = ref(true);
+const route = useRoute();
+const adminView = ref(isAdmin);
 const { add: pushToast } = useToast();
-
 const {
     coords: trackingPosition,
     isActive: trackingActive,
@@ -112,7 +114,8 @@ const adminActions: MenuItem[] = [
     },
 ];
 
-// TODO: onMounted websocket aufmachen
+
+
 
 function leaveCollection() {
     pushToast({
@@ -148,7 +151,7 @@ const tracks = computed<ParticipantTrack[]>(() => [
     },
 ]);
 
-const divisions: Division[] = [
+let divisions = ref([
     {
         id: 'e8581ff9-b53c-4307-aa5c-2d294b770f29',
         name: 'Dürrenmettstetten',
@@ -190,10 +193,36 @@ const divisions: Division[] = [
             ],
         },
     },
-];
+]);
+
+
+// TODO: onMounted websocket aufmachen
+onBeforeMount(async () => {
+
+    establishWebsocket(clientId.value, route.params.id as string);
+
+
+    //TODO: Errorhandling
+    var response = await getCollection(route.params.id as string, clientId.value);
+    
+    console.log("Collection for Map:")
+    console.log(response.data)
+    divisions.value = response.data.collectionDivision
+    console.log(divisions)
+    
+
+
+    
+
+})
+
+const isNewInvite = ref(newInvite.value)
+
 </script>
 
 <template>
+    
+
     <DefaultLayout>
         <template #action-left>
             <SplitButton
@@ -394,7 +423,7 @@ const divisions: Division[] = [
                     body: { class: 'p-2.5' },
                 }"
             >
-                <template #header>
+                <template #header v-if="!loading">
                     <MapWithControls
                         controls="none"
                         :center="mapCenterSelected"
