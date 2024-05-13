@@ -11,6 +11,9 @@ importers:
       '@googlemaps/js-api-loader':
         specifier: ^1.16.6
         version: 1.16.6
+      '@googlemaps/markerwithlabel':
+        specifier: ^2.0.28
+        version: 2.0.28
       '@mdi/js':
         specifier: ^7.4.47
         version: 7.4.47
@@ -835,6 +838,9 @@ packages:
 
   '@googlemaps/markerclusterer@2.5.3':
     resolution: {integrity: sha512-x7lX0R5yYOoiNectr10wLgCBasNcXFHiADIBdmn7jQllF2B5ENQw5XtZK+hIw4xnV0Df0xhN4LN98XqA5jaiOw==}
+
+  '@googlemaps/markerwithlabel@2.0.28':
+    resolution: {integrity: sha512-4u0UVqeELgHDvR+3ibInIhJHFJYg1jH0R4SXq2TXRu95HHdzQwJoBbC7eo/k+cRGWBwabzHo48sa87g9k8mvMw==}
 
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -3219,6 +3225,8 @@ snapshots:
     dependencies:
       fast-deep-equal: 3.1.3
       supercluster: 8.0.1
+
+  '@googlemaps/markerwithlabel@2.0.28': {}
 
   '@isaacs/cliui@8.0.2':
     dependencies:
