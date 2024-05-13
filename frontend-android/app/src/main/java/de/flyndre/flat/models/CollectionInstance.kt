@@ -14,7 +14,7 @@ data class CollectionInstance(
     var area: MultiPolygon,
     @Serializable(with = UUIDSerializer::class)
     var id: UUID?=null,
-    var divisions: ArrayList<CollectionArea> = arrayListOf(),
+    var collectionDivision: ArrayList<CollectionArea> = arrayListOf(),
     var confirmedUsers: ArrayList<UserModel> = arrayListOf(),
     var requestedAccess: ArrayList<UserModel> = arrayListOf()
 ) {

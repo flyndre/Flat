@@ -1,5 +1,6 @@
 package de.flyndre.flat.interfaces
 
+import com.google.android.gms.maps.model.LatLng
 import de.flyndre.flat.models.IncrementalTrackMessage
 import de.flyndre.flat.models.TrackCollection
 import io.github.dellisd.spatialk.geojson.Position
@@ -20,4 +21,5 @@ interface ITrackingService {
     fun addIncrementalTrack(track: IncrementalTrackMessage)
     fun addOnLocalTrackUpdate(callback:()->Unit)
     fun addOnRemoteTrackUpdate(callback:()->Unit)
+    suspend fun getCurrentPosition():LatLng
 }

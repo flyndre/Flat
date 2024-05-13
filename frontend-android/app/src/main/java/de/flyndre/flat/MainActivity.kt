@@ -68,7 +68,6 @@ class MainActivity : ComponentActivity() {
             1000,
             LocationServices.getFusedLocationProviderClient(this), this
         )
-
         trackingService = TrackingService(connectionService, locationService, 10000)
         db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "flat-database")
             .build()
@@ -174,14 +173,7 @@ fun AppEntryPoint(
             InitialScreen(
                 modifier = modifier,
                 onNavigateToJoinScreen = { navController.navigate("join") },
-                onNavigateToCreateGroupScreen = { navController.navigate("creategroup") },
-                onLukasBUHtton = {
-                    if (trackingService.isTracking) {
-                        trackingService.stopTracking()
-                    } else {
-                        trackingService.startTracking()
-                    };Log.d("Button", "Pressed!")
-                })
+                onNavigateToCreateGroupScreen = { navController.navigate("creategroup") })
         }
         composable("join") {
             JoinScreen(

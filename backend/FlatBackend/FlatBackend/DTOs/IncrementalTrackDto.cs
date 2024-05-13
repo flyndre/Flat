@@ -9,7 +9,8 @@ namespace FlatBackend.DTOs
         [JsonConverter(typeof(StringEnumConverter))]
         public WebSocketMessageType type { get; set; } = WebSocketMessageType.IncrementalTrack;
 
-        public string trackId { get; set; }
+        public Guid trackId { get; set; }
+        public Guid clientId { get; set; }
         public LineString track { get; set; }//LineString
     }
 }
