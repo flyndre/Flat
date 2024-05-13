@@ -190,7 +190,12 @@ class TrackingScreenViewModel(
 class TrackingScreenViewModelFactory(
     val trackingService: ITrackingService,
     val connectionService: IConnectionService,
-    val participantScreenViewModel: ParticipantScreenViewModel,) : ViewModelProvider.Factory{
+    val participantScreenViewModel: ParticipantScreenViewModel,) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return TrackingScreenViewModel(trackingService,connectionService,participantScreenViewModel) as T
+        return TrackingScreenViewModel(
+            trackingService,
+            connectionService,
+            participantScreenViewModel
+        ) as T
     }
+}
