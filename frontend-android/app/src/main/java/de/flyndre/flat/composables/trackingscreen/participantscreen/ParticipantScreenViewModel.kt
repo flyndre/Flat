@@ -1,8 +1,11 @@
 package de.flyndre.flat.composables.trackingscreen.participantscreen
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import de.flyndre.flat.composables.trackingscreen.TrackingScreenViewModel
 import de.flyndre.flat.interfaces.IConnectionService
+import de.flyndre.flat.interfaces.ITrackingService
 import de.flyndre.flat.models.CollectionArea
 import de.flyndre.flat.models.CollectionInstance
 import de.flyndre.flat.models.UserModel
@@ -59,5 +62,11 @@ class ParticipantScreenViewModel(connectionService: IConnectionService): ViewMod
     fun setUserOfDivision(division: CollectionArea, user: UserModel){
         _divisions.value.remove(division)
         _divisions.value.add(division.copy(clientId = user.clientId))
+    }
+}
+class ParticipantScreenViewModelFactory(
+    val connectionService: IConnectionService) : ViewModelProvider.Factory{
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return ParticipantScreenViewModel(connectionService) as T
     }
 }

@@ -2,7 +2,9 @@ package de.flyndre.flat.composables.joinscreen
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import de.flyndre.flat.composables.creategroupscreen.CreateGroupScreenViewModel
 import de.flyndre.flat.composables.trackingscreen.TrackingScreenViewModel
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.interfaces.IConnectionService
@@ -51,5 +53,13 @@ class JoinScreenViewModel(db: AppDatabase,trackingScreenViewModel: TrackingScree
                 e.message?.let { Log.e(this.toString(), it) }
             }
         }
+    }
+}
+class JoinScreenViewModelFactory(
+    val db: AppDatabase,
+    val trackingScreenViewModel: TrackingScreenViewModel,
+    val connectionService: IConnectionService) : ViewModelProvider.Factory{
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return JoinScreenViewModel(db,trackingScreenViewModel,connectionService) as T
     }
 }

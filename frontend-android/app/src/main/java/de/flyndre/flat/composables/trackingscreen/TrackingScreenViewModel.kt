@@ -2,10 +2,12 @@ package de.flyndre.flat.composables.trackingscreen
 
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.CameraPositionState
 import de.flyndre.flat.composables.trackingscreen.participantscreen.ParticipantScreenViewModel
 import de.flyndre.flat.database.AppDatabase
@@ -27,12 +29,10 @@ import java.util.UUID
 
 
 class TrackingScreenViewModel(
-    db: AppDatabase,
     trackingService: ITrackingService,
     connectionService: IConnectionService,
     participantScreenViewModel: ParticipantScreenViewModel,
 ): ViewModel() {
-    private var _db = db
     private val _participantScreenViewModel: ParticipantScreenViewModel = participantScreenViewModel
     private val _trackingService = trackingService
     private val _connectionService = connectionService
@@ -186,3 +186,11 @@ class TrackingScreenViewModel(
         }
     }
 }
+
+class TrackingScreenViewModelFactory(
+    val trackingService: ITrackingService,
+    val connectionService: IConnectionService,
+    val participantScreenViewModel: ParticipantScreenViewModel,) : ViewModelProvider.Factory{
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return TrackingScreenViewModel(trackingService,connectionService,participantScreenViewModel) as T
+    }
