@@ -66,6 +66,14 @@ namespace FlatBackend.Controllers
             try
             {
                 var oldCol = await _MongoDBService.GetCollection(id);
+                var validUser = oldCol.confirmedUsers.Where(x => x.clientId == value.clientId).First();
+                if (validUser.accepted)
+                {
+                    string resultJson;
+                    var resultAccessResult = new ResultAccessRequest() { accepted = true, collection = oldCol };
+                    resultJson = JsonConvert.SerializeObject(resultAccessResult);
+                    return resultJson;
+                }
                 if (oldCol.requestedAccess == null)
                 { oldCol.requestedAccess = new List<UserModel>(); }
 
@@ -78,28 +86,42 @@ namespace FlatBackend.Controllers
                 accessRequest.collectionId = id;
                 accessRequest.username = value.username;
                 var confirmedUser = await _WebsocketManager.sendAccessRequestToBoss(accessRequest);
-                UserModel? validUser = oldCol.confirmedUsers.Find(x => x.clientId == value.clientId);
-                if (validUser == null)
+                if (confirmedUser != null)
                 {
-                    oldCol.requestedAccess.Remove(value);
-                    oldCol.confirmedUsers.Add(confirmedUser);
+                    validUser = oldCol.confirmedUsers.Find(x => x.clientId == value.clientId);
+                    if (validUser == null)
+                    {
+                        oldCol.requestedAccess.Remove(value);
+                        oldCol.confirmedUsers.Add(confirmedUser);
+                    }
+                    else
+                    {
+                        var index = oldCol.confirmedUsers.IndexOf(validUser);
+                        oldCol.confirmedUsers[index] = confirmedUser;
+                    }
+                    _MongoDBService.ChangeCollection(oldCol);
+                    //_WebsocketManager.sendAccessConfirmationToUser(new DTOs.AccessConfirmationDto() { collectionId = id, clientId = value.clientId, accepted = value.accepted });
+                    _WebsocketManager.sendUpdateCollection(id);
+                    if (confirmedUser.accepted)
+                    {
+                        var resultAccessResult = new ResultAccessRequest() { accepted = true, collection = oldCol };
+                        Json = JsonConvert.SerializeObject(resultAccessResult);
+                        return Json;
+                    }
+                    else
+                    {
+                        Json = JsonConvert.SerializeObject(confirmedUser); return Json;
+                    }
                 }
                 else
                 {
-                    var index = oldCol.confirmedUsers.IndexOf(validUser);
-                    oldCol.confirmedUsers[index] = confirmedUser;
+                    return NotFound("Error the Boss didn't answered the request.").ToString();
                 }
-                _MongoDBService.ChangeCollection(oldCol);
-                //_WebsocketManager.sendAccessConfirmationToUser(new DTOs.AccessConfirmationDto() { collectionId = id, clientId = value.clientId, accepted = value.accepted });
-                _WebsocketManager.sendUpdateCollection(id);
-                Json = JsonConvert.SerializeObject(confirmedUser);
-                return Json;
             }
             catch (Exception ex)
             {
                 return NotFound(ex.ToString()).ToJson();
             }
-            //call add User to Accessrequestlist
         }
 
         [HttpPost("AccessConfirmation/{id}")]
@@ -107,24 +129,9 @@ namespace FlatBackend.Controllers
         {
             try
             {
-                var oldCol = await _MongoDBService.GetCollection(id);
-                UserModel? user = oldCol.requestedAccess.Find(e => e.clientId == value.clientId);
-                UserModel? validUser = oldCol.confirmedUsers.Find(x => x.clientId == value.clientId);
-                if (validUser == null)
-                {
-                    user.accepted = value.accepted;
-                    oldCol.requestedAccess.Remove(user);
-                    oldCol.confirmedUsers.Add(user);
-                }
-                else
-                {
-                    var index = oldCol.confirmedUsers.IndexOf(validUser);
-                    oldCol.confirmedUsers[index] = value;
-                }
-                _MongoDBService.ChangeCollection(oldCol);
+                _WebsocketManager.setAccessConfirmationWaiting(new AccessConfirmationDto() { clientId = value.clientId, collectionId = id, accepted = value.accepted });
                 var result = await _MongoDBService.GetCollection(id);
-                _WebsocketManager.sendAccessConfirmationToUser(new DTOs.AccessConfirmationDto() { collectionId = id, clientId = value.clientId, accepted = value.accepted });
-                _WebsocketManager.sendUpdateCollection(id);
+
                 string Json = JsonConvert.SerializeObject(result);
                 return Json;
             }
@@ -175,6 +182,7 @@ namespace FlatBackend.Controllers
                 {
                     value.collectionDivision = new List<AreaModel>();
                 }
+                if (value.confirmedUsers == null) value.confirmedUsers = new List<UserModel>();
                 if (value.confirmedUsers.Count == 0)
                 {
                     value.confirmedUsers = new List<UserModel>() { new UserModel() { clientId = value.clientId, username = "admin", accepted = true } };
@@ -204,6 +212,7 @@ namespace FlatBackend.Controllers
                 var oldCol = await _MongoDBService.GetCollection(id);
                 foreach (var area in value)
                 {
+                    if (area == null) { continue; }
                     var oldArea = oldCol.collectionDivision.Find(x => x.id == area.id);
 
                     if (oldArea != null)

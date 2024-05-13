@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -69,14 +68,12 @@ class MainActivity : ComponentActivity() {
             1000,
             LocationServices.getFusedLocationProviderClient(this), this
         )
-        val appLinkIntent: Intent = intent
-
         trackingService = TrackingService(connectionService, locationService, 10000)
         db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "flat-database")
             .build()
-        val participantScreenViewModel = ParticipantScreenViewModel()
+        val participantScreenViewModel = ParticipantScreenViewModel(connectionService)
         val trackingScreenViewModel =
-            TrackingScreenViewModel(db = db, trackingService, participantScreenViewModel)
+            TrackingScreenViewModel(db = db, trackingService, connectionService, participantScreenViewModel)
         val collectionAreaScreenViewModel = CollectionAreaScreenViewModel()
         val createGroupScreenViewModel = CreateGroupScreenViewModel(db = db)
         val presetScreenViewModel = PresetScreenViewModel(
@@ -109,7 +106,7 @@ class MainActivity : ComponentActivity() {
                         participantScreenViewModel,
                         trackingService,
                         userId
-                    )
+                    ) { x -> shareLink(x) }
                 }
             }
         }
@@ -133,6 +130,18 @@ class MainActivity : ComponentActivity() {
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
+
+    private fun shareLink(link:String){
+        val sendIntent: Intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, link)
+            type = "text/plain"
+        }
+
+        val shareIntent = Intent.createChooser(sendIntent, null)
+        startActivity(shareIntent)
+
+    }
 }
 
 @Composable
@@ -147,6 +156,7 @@ fun AppEntryPoint(
     participantScreenViewModel: ParticipantScreenViewModel,
     trackingService: ITrackingService,
     userId: UUID,
+    onShareLink: ((String)->Unit)
 ) {
     val navController = rememberNavController()
     var _startDestination = "initial"
@@ -163,14 +173,7 @@ fun AppEntryPoint(
             InitialScreen(
                 modifier = modifier,
                 onNavigateToJoinScreen = { navController.navigate("join") },
-                onNavigateToCreateGroupScreen = { navController.navigate("creategroup") },
-                onLukasBUHtton = {
-                    if (trackingService.isTracking) {
-                        trackingService.stopTracking()
-                    } else {
-                        trackingService.startTracking()
-                    };Log.d("Button", "Pressed!")
-                })
+                onNavigateToCreateGroupScreen = { navController.navigate("creategroup") })
         }
         composable("join") {
             JoinScreen(
@@ -228,6 +231,7 @@ fun AppEntryPoint(
                 trackingScreenViewModel = trackingScreenViewModel,
                 onNavigateToInitialScreen = { navController.navigate("initial") },
                 onNavigateToParticipantScreen = { navController.navigate("participant") },
+                onShareLink = onShareLink,
                 userId = userId
             )
         }

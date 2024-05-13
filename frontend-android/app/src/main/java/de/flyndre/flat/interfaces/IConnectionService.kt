@@ -41,7 +41,7 @@ interface IConnectionService {
      * @param collectionId id of an existing public collection
      * @param divisions list of divisions new ones will be created, existing ones updated, missing ones deleted
      */
-    suspend fun setAreaDivision(collectionId: UUID, divisions: List<CollectionArea>)
+    suspend fun setAreaDivision(collectionId: UUID, divisions: List<CollectionArea>):CollectionInstance
 
     /**
      * assigns a user to a division of a collection area.
@@ -62,14 +62,16 @@ interface IConnectionService {
     /**
      * Grants a user access to an owned collection. Results in a positive RequestAccessResult for the requested user.
      * @param request the access request from the user
+     * @return the actual collectionInstance from backend
      */
-    suspend fun giveAccess(request: AccessResquestMessage)
+    suspend fun giveAccess(request: AccessResquestMessage):CollectionInstance
 
     /**
      * Denys a user access to an owned collection. Results in a negative RequestAccessResult for the requested user.
      * @param request the access request from the user
+     * @return the actual collectionInstance from backend
      */
-    suspend fun denyAccess(request: AccessResquestMessage)
+    suspend fun denyAccess(request: AccessResquestMessage):CollectionInstance
 
     /**
      * Notify the backend and other users, that this user is leaving the collection

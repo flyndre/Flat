@@ -1,9 +1,13 @@
 package de.flyndre.flat
 
+import de.flyndre.flat.models.WebsocketConnectionMessage
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocketListener
+import java.util.UUID
 
 class WebSocketClient {
     private lateinit var webSocket: okhttp3.WebSocket
@@ -11,6 +15,8 @@ class WebSocketClient {
     private var socketUrl = ""
     private var shouldReconnect = true
     private var client: OkHttpClient? = null
+    private lateinit var collectionId:UUID
+    private lateinit var userId:UUID
 
     companion object {
         private lateinit var instance: WebSocketClient
@@ -34,6 +40,12 @@ class WebSocketClient {
     fun setSocketUrl(socketUrl: String) {
         this.socketUrl = socketUrl
     }
+    fun setCollectionId(id:UUID){
+        this.collectionId = id
+    }
+    fun setUserId(id:UUID){
+        this.userId = id
+    }
 
     private fun initWebSocket() {
         client = OkHttpClient()
@@ -41,6 +53,7 @@ class WebSocketClient {
         webSocket = client!!.newWebSocket(request, webSocketListener)
         //this must me done else memory leak will be caused
         client!!.dispatcher.executorService.shutdown()
+        sendMessage(Json.encodeToString(WebsocketConnectionMessage(userId,collectionId)))
     }
 
     fun connect() {

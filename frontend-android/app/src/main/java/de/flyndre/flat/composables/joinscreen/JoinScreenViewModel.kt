@@ -1,11 +1,11 @@
 package de.flyndre.flat.composables.joinscreen
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.flyndre.flat.composables.trackingscreen.TrackingScreenViewModel
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.interfaces.IConnectionService
-import de.flyndre.flat.services.ConnectionService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -38,15 +38,17 @@ class JoinScreenViewModel(db: AppDatabase,trackingScreenViewModel: TrackingScree
     fun join(navigateToTrackingScreen: ()->Unit){
         viewModelScope.launch {
             try {
-                val answer = _connectionService.requestAccess(_joinName.value, UUID.fromString(_joinLink.value))
+                val collcetionId = _joinLink.value.split('/').last()
+                val answer = _connectionService.requestAccess(_joinName.value, UUID.fromString(collcetionId))
                 if(answer.accepted){
                     _trackingScreenViewModel.collectionInstance= answer.collection!!
+                    _connectionService.openWebsocket(answer.collection.id!!)
                     navigateToTrackingScreen()
                 }else{
                     //handle deny
                 }
             }catch (e: IllegalArgumentException){
-                //
+                e.message?.let { Log.e(this.toString(), it) }
             }
         }
     }

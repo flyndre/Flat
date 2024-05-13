@@ -1,7 +1,10 @@
 import { TRACKING_INTERVAL } from '@/data/constants';
 import { logPosition, trackingLogDB } from '@/data/trackingLogs';
 import { useGeolocation, useIntervalFn } from '@vueuse/core';
+import { v4 as uuidv4 } from 'uuid';
 import { computed, ref } from 'vue';
+
+let currentTrackId = null;
 
 const {
     coords,
@@ -37,7 +40,7 @@ const {
             stop();
             return;
         }
-        logPosition(position);
+        logPosition(position, currentTrackId);
     },
     TRACKING_INTERVAL,
     {
@@ -51,6 +54,7 @@ function stop() {
 }
 
 function start() {
+    currentTrackId = uuidv4();
     resumeGeolocation();
     resumeInterval();
 }
