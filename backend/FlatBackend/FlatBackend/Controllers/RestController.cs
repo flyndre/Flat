@@ -227,6 +227,20 @@ namespace FlatBackend.Controllers
             }
         }
 
+        // POST api/<ValuesController>/RemoveUser/{id}
+        [HttpPost("RemoveUser/{id}")]
+        public async Task<string> RemoveUser( Guid id, Guid clientId )
+        {
+            try
+            {
+                var oldCol = _MongoDBService.GetCollection(id);
+                if (oldCol != null)
+                {
+                }
+            }
+            catch (Exception ex) { return NotFound(ex.ToString()).ToString(); }
+        }
+
         // DELETE api/<ValuesController>/Collection/5 CloseCollection
         [HttpDelete("Collection/{id}")]
         public async Task<ObjectResult> DeleteCollection( Guid id )
