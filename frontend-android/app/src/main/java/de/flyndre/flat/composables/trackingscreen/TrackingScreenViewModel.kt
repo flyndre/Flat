@@ -2,16 +2,19 @@ package de.flyndre.flat.composables.trackingscreen
 
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.CameraPositionState
 import de.flyndre.flat.composables.trackingscreen.participantscreen.ParticipantScreenViewModel
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.interfaces.IConnectionService
 import de.flyndre.flat.interfaces.ITrackingService
 import de.flyndre.flat.models.AccessResquestMessage
+import de.flyndre.flat.models.CollectionArea
 import de.flyndre.flat.models.CollectionInstance
 import de.flyndre.flat.models.TrackCollection
 import io.github.dellisd.spatialk.geojson.MultiPolygon
@@ -26,16 +29,15 @@ import java.util.UUID
 
 
 class TrackingScreenViewModel(
-    db: AppDatabase,
     trackingService: ITrackingService,
     connectionService: IConnectionService,
     participantScreenViewModel: ParticipantScreenViewModel,
 ): ViewModel() {
-    private var _db = db
     private val _participantScreenViewModel: ParticipantScreenViewModel = participantScreenViewModel
     private val _trackingService = trackingService
     private val _connectionService = connectionService
     private val joinBaseLink = "https://flat.buhss.de/join/"
+    private var lastCenteredOwnDivision: CollectionArea? = null
     var collectionInstance: CollectionInstance = CollectionInstance("", UUID.randomUUID(),
         MultiPolygon()
     )
@@ -146,5 +148,50 @@ class TrackingScreenViewModel(
                 cameraPositionState.animate(CameraUpdateFactory.newLatLng(lat))
             }
         }
+    }
+
+    fun centerOnOwnArea(cameraPositionState: CameraPositionState, ownId: UUID){
+        //get area to center
+        var division: CollectionArea? = null
+        for(div in collectionInstance.collectionDivision){
+            if(div.clientId != null){
+                if(div.clientId!!.equals(ownId)){
+                    division = div
+                    if(lastCenteredOwnDivision != null){
+                        if(!div.id.equals(lastCenteredOwnDivision!!.id)){
+                            break
+                        }
+                    }
+                }
+            }
+        }
+
+        if(division == null && lastCenteredOwnDivision != null){
+            division = lastCenteredOwnDivision
+        }
+
+        if(division != null){
+            //center on selected area
+            val builder = LatLngBounds.builder()
+
+            for(position in division.area.coordinates[0]){
+                builder.include(LatLng(position.latitude, position.longitude))
+            }
+
+            viewModelScope.launch(Dispatchers.Main) {
+                cameraPositionState.animate(CameraUpdateFactory.newLatLngBounds(builder.build(), 10))
+            }
+
+            lastCenteredOwnDivision = division
+        }
+    }
+}
+
+class TrackingScreenViewModelFactory(
+    val trackingService: ITrackingService,
+    val connectionService: IConnectionService,
+    val participantScreenViewModel: ParticipantScreenViewModel,) : ViewModelProvider.Factory{
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return TrackingScreenViewModel(trackingService,connectionService,participantScreenViewModel) as T
     }
 }

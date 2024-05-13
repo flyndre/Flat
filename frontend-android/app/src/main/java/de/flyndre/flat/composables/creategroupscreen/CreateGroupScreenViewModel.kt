@@ -3,8 +3,10 @@ package de.flyndre.flat.composables.creategroupscreen
 import android.util.Log
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.room.Room
+import de.flyndre.flat.composables.trackingscreen.participantscreen.ParticipantScreenViewModel
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.database.entities.Preset
 import de.flyndre.flat.interfaces.IConnectionService
@@ -27,4 +29,10 @@ class CreateGroupScreenViewModel(db: AppDatabase) : ViewModel() {
     //val createGroupState: StateFlow<CreateGroupScreenState> = _createGroupState.asStateFlow()
     private val _presets  = db.presetDao().getAll()
     val presets = _presets.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+}
+class CreateGroupScreenViewModelFactory(
+    val db: AppDatabase) : ViewModelProvider.Factory{
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return CreateGroupScreenViewModel(db) as T
+    }
 }
