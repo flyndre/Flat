@@ -33,5 +33,9 @@ namespace FlatBackend.Interfaces
         public void deleteCollection( Guid collectionId );
 
         public void removeWebsocketUser( WebSocket webSocket );
+
+        public void removeWebsocketUser( Guid clientId );
+
+        public void informBossOverLeavingOfUser( Guid collectionId, Guid clientId );
     }
 }
