@@ -109,21 +109,22 @@ class CollectionAreaScreenViewModel() : ViewModel() {
     }
 
     fun removeLastCollectionAreaPoint() {
-        val arrayList: ArrayList<CollectionArea> = ArrayList(_listCollectionAreas.value)
+        val listOfAreas: ArrayList<CollectionArea> = arrayListOf()
 
-        for (area in arrayList) {
-            if (area.isSelected) {
-                if (area.listAreaPoints.isNotEmpty()) {
-                    val tempArea = area.copy()
-                    tempArea.listAreaPoints.removeLast()
-                    arrayList.remove(area)
-                    arrayList.add(tempArea)
-                }
-                break
+        for(area in _listCollectionAreas.value){
+            val listOfPoints: ArrayList<LatLng> = arrayListOf()
+            for(point in area.listAreaPoints){
+                listOfPoints.add(LatLng(point.latitude, point.longitude))
             }
+            val newArea = CollectionArea(Color(area.color.value), area.isSelected, listOfPoints)
+            if(area.isSelected && area.listAreaPoints.isNotEmpty()){
+                newArea.listAreaPoints.removeLast()
+            }
+
+            listOfAreas.add(newArea)
         }
 
-        _listCollectionAreas.value = arrayList
+        _listCollectionAreas.value = listOfAreas
     }
 
     fun removeCollectionArea(collectionArea: CollectionArea){

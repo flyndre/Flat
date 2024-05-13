@@ -147,79 +147,85 @@ fun CollectionAreaScreen(
                     modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(
                         10.dp,
-                        Alignment.CenterHorizontally
+                        Alignment.End
                     ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    SegmentedButtons(
-                        modifier = Modifier
-                            .width((LocalConfiguration.current.screenWidthDp * 0.7).dp)
-                            .height(40.dp)
-                    ) {
-                        SegmentedButtonItem(
-                            selected = selectedColorItem.equals(AreaBlue),
-                            onClick = { selectedColorItem = AreaBlue },
-                            icon = {
-                                Box(
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .clip(shape = RoundedCornerShape(5.dp))
-                                        .background(color = AreaBlue)
-                                )
-                            })
-                        SegmentedButtonItem(
-                            selected = selectedColorItem.equals(AreaPink),
-                            onClick = { selectedColorItem = AreaPink },
-                            icon = {
-                                Box(
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .clip(shape = RoundedCornerShape(5.dp))
-                                        .background(color = AreaPink)
-                                )
-                            })
-                        SegmentedButtonItem(
-                            selected = selectedColorItem.equals(AreaGreen),
-                            onClick = { selectedColorItem = AreaGreen },
-                            icon = {
-                                Box(
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .clip(shape = RoundedCornerShape(5.dp))
-                                        .background(color = AreaGreen)
-                                )
-                            })
-                        SegmentedButtonItem(
-                            selected = selectedColorItem.equals(AreaOrange),
-                            onClick = { selectedColorItem = AreaOrange },
-                            icon = {
-                                Box(
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .clip(shape = RoundedCornerShape(5.dp))
-                                        .background(color = AreaOrange)
-                                )
-                            })
-                        SegmentedButtonItem(
-                            selected = selectedColorItem.equals(AreaPurple),
-                            onClick = { selectedColorItem = AreaPurple },
-                            icon = {
-                                Box(
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .clip(shape = RoundedCornerShape(5.dp))
-                                        .background(color = AreaPurple)
-                                )
-                            })
-                    }
                     if (drawingEnabled) {
+                        SmallFloatingActionButton(onClick = { collectionAreaScreenViewModel.removeLastCollectionAreaPoint() }) {
+                            Icon(
+                                painter = painterResource(id = de.flyndre.flat.R.drawable.undo_fill),
+                                contentDescription = "delete last point"
+                            )
+                        }
                         SmallFloatingActionButton(onClick = {
-                            drawingEnabled =
-                                false; collectionAreaScreenViewModel.checkNewCollectionIsEmpty()
+                            drawingEnabled = false;
+                            collectionAreaScreenViewModel.checkNewCollectionIsEmpty()
                         }) {
                             Icon(Icons.Filled.Check, contentDescription = "finish drawing of area")
                         }
                     } else {
+                        SegmentedButtons(
+                            modifier = Modifier
+                                .width((LocalConfiguration.current.screenWidthDp * 0.7).dp)
+                                .height(40.dp)
+                        ) {
+                            SegmentedButtonItem(
+                                selected = selectedColorItem.equals(AreaBlue),
+                                onClick = { selectedColorItem = AreaBlue },
+                                icon = {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .clip(shape = RoundedCornerShape(5.dp))
+                                            .background(color = AreaBlue)
+                                    )
+                                })
+                            SegmentedButtonItem(
+                                selected = selectedColorItem.equals(AreaPink),
+                                onClick = { selectedColorItem = AreaPink },
+                                icon = {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .clip(shape = RoundedCornerShape(5.dp))
+                                            .background(color = AreaPink)
+                                    )
+                                })
+                            SegmentedButtonItem(
+                                selected = selectedColorItem.equals(AreaGreen),
+                                onClick = { selectedColorItem = AreaGreen },
+                                icon = {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .clip(shape = RoundedCornerShape(5.dp))
+                                            .background(color = AreaGreen)
+                                    )
+                                })
+                            SegmentedButtonItem(
+                                selected = selectedColorItem.equals(AreaOrange),
+                                onClick = { selectedColorItem = AreaOrange },
+                                icon = {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .clip(shape = RoundedCornerShape(5.dp))
+                                            .background(color = AreaOrange)
+                                    )
+                                })
+                            SegmentedButtonItem(
+                                selected = selectedColorItem.equals(AreaPurple),
+                                onClick = { selectedColorItem = AreaPurple },
+                                icon = {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .clip(shape = RoundedCornerShape(5.dp))
+                                            .background(color = AreaPurple)
+                                    )
+                                })
+                        }
                         SmallFloatingActionButton(onClick = {
                             drawingEnabled =
                                 true; collectionAreaScreenViewModel.addNewCollectionArea(
