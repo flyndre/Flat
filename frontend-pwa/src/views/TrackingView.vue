@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getCollection } from '@/api/rest';
-import { establishWebsocket, isAdmin, newInvite } from '@/api/websockets';
+import { acceptInvite, acceptOrDeclineAccessRequest, establishWebsocket, isAdmin, members, newInvite } from '@/api/websockets';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
@@ -41,7 +41,7 @@ import SelectButton from 'primevue/selectbutton';
 import SplitButton from 'primevue/splitbutton';
 import Textarea from 'primevue/textarea';
 import { useToast } from 'primevue/usetoast';
-import { computed, onBeforeMount, onMounted, ref } from 'vue';
+import { computed, onBeforeMount, onMounted, ref, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter();
@@ -216,13 +216,20 @@ onBeforeMount(async () => {
 
 })
 
-const isNewInvite = ref(newInvite.value)
+const isNewInvite = newInvite
+const visible = computed(() => isNewInvite.value.length != 0 && isAdmin)
 
+watch(members.value, () => console.log("CHANGE IN MEMBER"))
+function accept(){
+    acceptOrDeclineAccessRequest(true, isNewInvite.value[0].username, isNewInvite.value[0].clientId,  isNewInvite.value[0].collectionId)
+    isNewInvite.value.shift()
+}
 </script>
 
 <template>
     
-
+    <Dialog v-model:visible="visible" modal header="Accept" :style="{ width: '25rem' }">{{ isNewInvite[0].username }} wants to join your Collection. Do you want to accept it? {{ members }} <Button label="Akzeptieren"
+                severity="secondary"@click="accept"></Button></Dialog>
     <DefaultLayout>
         <template #action-left>
             <SplitButton

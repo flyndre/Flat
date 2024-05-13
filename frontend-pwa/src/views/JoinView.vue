@@ -33,25 +33,19 @@ const joinName = ref('');
 const submittable = computed(() => validateJoinName(joinName.value));
 const dialogVisible = ref(false);
 // TODO: remove this debug redirect
-const { start, stop } = useTimeoutFn(
-    () => {
-        router.push({ name: 'track' });
-    },
-    3000,
-    {
-        immediate: false,
-    }
-);
+
 async function join() {
     dialogVisible.value = true;
-    start();
+  
     //TODO: Change ClientId to actual ClientId
     const response = await accessRequest(joinName.value, clientId.value, props.id)
+    console.log("ANTWORT ACCESS REQUEST:")
+    console.log(response)
     response.status == 200 ? router.push(`/track/${props.id}`) : null;
 }
 function cancel() {
     dialogVisible.value = false;
-    stop();
+
     // TODO: cancel join request or send cancelation request
 }
 </script>
