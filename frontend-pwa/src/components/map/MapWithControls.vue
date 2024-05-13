@@ -8,6 +8,7 @@ import LocationSearchDialog from '@/components/map/controls/LocationSearchDialog
 import MapTypeSelectButton from '@/components/map/controls/MapTypeSelectButton.vue';
 import ShapeColorSelectButton from '@/components/map/controls/ShapeColorSelectButton.vue';
 import ShapesList from '@/components/map/controls/ShapesList.vue';
+import { MarkerWithLabel } from '@googlemaps/markerwithlabel';
 import {
     GOOGLE_MAPS_API_KEY,
     GOOGLE_MAPS_API_LIBRARIES,
@@ -15,6 +16,7 @@ import {
 import {
     DARK_MAP_STYLES,
     LABELS_OFF_STYLES,
+    markerHtmlFromTrack,
     POSITION_ICON_INNER,
     POSITION_ICON_OUTER,
 } from '@/data/googleMapsPresets';
@@ -43,6 +45,7 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { GoogleMap } from 'vue3-google-map';
 import MdiIcon from '../icons/MdiIcon.vue';
 import { computedWithControl } from '@vueuse/core';
+import { clientId } from '@/data/clientMetadata';
 
 /**
  * The shapes drawn on the map.
@@ -166,9 +169,12 @@ function syncAreas() {
 }
 
 let progressLines: IdentifyableTypedOverlay[] = [];
+let progressLabels: MarkerWithLabel[] = [];
 function drawTracks() {
     progressLines.forEach((l) => l.overlay.setMap(null));
     progressLines.length = 0;
+    progressLabels.forEach((l) => l.setMap(null));
+    progressLabels.length = 0;
     props.tracks?.forEach((t) => {
         const shapes = trackToShapeList(t, {
             strokeColor: t.color,
@@ -178,7 +184,27 @@ function drawTracks() {
         });
         shapes?.forEach((s) => s.overlay?.setMap(map.value));
         progressLines.push(...shapes);
-        // TODO add username label to lines
+        const lastPosition = t.progress?.at(-1)?.coordinates?.at(-1);
+        if (lastPosition != null && t.id !== clientId.value) {
+            const label = new MarkerWithLabel({
+                position: {
+                    lat: lastPosition[0],
+                    lng: lastPosition[1],
+                },
+                labelContent: markerHtmlFromTrack(t),
+                labelAnchor: new google.maps.Point(9, -6),
+                clickable: false,
+                draggable: false,
+                cursor: 'default',
+                icon: {
+                    ...POSITION_ICON_INNER,
+                    fillColor: t.color,
+                    anchor: new google.maps.Point(12, 12),
+                },
+            });
+            progressLabels.push(label);
+            label.setMap(map.value);
+        }
     });
 }
 

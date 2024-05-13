@@ -1,5 +1,5 @@
 @import url('primevue/resources/themes/aura-dark-pink/theme.css');
-@import url('./base.css');
+/* @import url('./base.css'); */
 
 :root {
     background-color: #121212;
