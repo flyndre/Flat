@@ -198,7 +198,7 @@ fun TrackingScreen(
         Modifier.padding(innerPadding)
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
-            properties = MapProperties(isMyLocationEnabled = true),
+            properties = MapProperties(isMyLocationEnabled = false),
             uiSettings = MapUiSettings(zoomControlsEnabled = false),
             cameraPositionState = cameraPositionState
         ) {
