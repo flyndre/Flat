@@ -189,7 +189,20 @@ class ConnectionService(
     }
 
     override suspend fun leaveCollection(collection: CollectionInstance) {
-        TODO("Not yet implemented")
+        webSocketClient.disconnect()
+        if(collection.clientId.equals(clientId)){
+            val url = "$baseUrl/Collection/${collection.id}"
+            val request = Request.Builder()
+                .url(url)
+                .delete()
+                .build()
+            val response = restClient.newCall(request).await()
+            if(!response.isSuccessful){
+                val responseString = response.body?.string()
+                response.close()
+                throw RequestFailedException("Could not close collection ${collection.id} alias ${collection.name}:\n $responseString")
+            }
+        }
     }
 
     override suspend fun sendTrackUpdate(track: Track) {

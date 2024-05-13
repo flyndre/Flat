@@ -115,6 +115,7 @@ class MainActivity : ComponentActivity() {
                         "JoinScreenViewModel",
                         JoinScreenViewModelFactory(
                             db = db,
+                            preference,
                             trackingScreenViewModel,
                             connectionService = connectionService
                         )
