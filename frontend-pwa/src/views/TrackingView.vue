@@ -227,7 +227,7 @@ function accept(){
 </script>
 
 <template>
-    
+    {{ members }}
     <Dialog v-model:visible="visible" modal header="Accept" :style="{ width: '25rem' }">{{ isNewInvite[0].username }} wants to join your Collection. Do you want to accept it? {{ members }} <Button label="Akzeptieren"
                 severity="secondary"@click="accept"></Button></Dialog>
     <DefaultLayout>

@@ -10,10 +10,11 @@ import { useWebSocket } from '@vueuse/core'
 import { Ref, ref, watch } from "vue";
 import { mdiConsoleLine } from "@mdi/js";
 import { clientId } from "@/data/clientMetadata";
+import { ParticipantTrack } from "@/types/ParticipantTrack";
 
 
  
-export let members = ref([] as member[]);
+export let members = ref([] as ParticipantTrack[]);
 export let newInvite = ref([]);
 export let isAdmin = true;
 let latestSendTimestamp = null;
@@ -55,16 +56,16 @@ watch(data, data => {
         console.log(JSON.parse(data).collection.confirmedUsers)
         JSON.parse(data).collection.confirmedUsers.forEach(element => {
             console.log(element); 
-        if((members.value.filter(el => el.uuid === element.clientId)).length === 0){
+        if((members.value.filter(el => el.id === element.clientId)).length === 0){
             console.log("adding to Members:")
-           members.value.push({name: element.username, uuid: element.clientId,  currentPosition: null , positionList: [] })
+           members.value.push({name: element.username, id: element.clientId, color: "#fffff", progress: [] })
         }
         });
         console.log(members)
     }
     if(JSON.parse(data).type === "IncrementalTrack"){
-        //let memberOfTrack = members.filter(el => {el.uuid === JSON.parse(data).clientId})[0]
-        //memberOfTrack.positionList.push.apply(memberOfTrack.positionList, JSON.parse(data).track.coordinates)
+        let memberOfTrack = members.value.filter(el => {el.id === JSON.parse(data).clientId})[0]
+        memberOfTrack.progress.push.apply(memberOfTrack.progress, JSON.parse(data).track)
     }
   
 })
