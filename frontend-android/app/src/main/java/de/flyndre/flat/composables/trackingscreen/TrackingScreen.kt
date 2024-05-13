@@ -123,18 +123,17 @@ fun TrackingScreen(
     }
 
     Scaffold(topBar = {
-        TopAppBar(
-            title = { Text(text = trackingScreenViewModel.collectionInstance.name) },
-            navigationIcon = {
-                if (!userId.equals(trackingScreenViewModel.collectionInstance.clientId)) {//if this user is no admin
-                    IconButton(onClick = { showLeavingDialog = true }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "back to start screen"
-                        )
-                    }
+        Row(){
+            if (!userId.equals(trackingScreenViewModel.collectionInstance.clientId)) {//if this user is no admin
+                FloatingActionButton(modifier = Modifier.padding(10.dp),onClick = { showLeavingDialog = true }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "back to start screen"
+                    )
                 }
-            })
+            }
+
+        }
     }, bottomBar = {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
             ExtendedFloatingActionButton(
