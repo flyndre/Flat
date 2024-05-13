@@ -66,14 +66,19 @@ namespace FlatBackend.Controllers
             try
             {
                 var oldCol = await _MongoDBService.GetCollection(id);
-                var validUser = oldCol.confirmedUsers.Where(x => x.clientId == value.clientId).First();
-                if (validUser.accepted)
+
+                var validUserList = oldCol.confirmedUsers.Where(x => x.clientId == value.clientId).ToList();
+                if (validUserList.Count > 0)
                 {
-                    string resultJson;
-                    var resultAccessResult = new ResultAccessRequest() { accepted = true, collection = oldCol };
-                    resultJson = JsonConvert.SerializeObject(resultAccessResult);
-                    return resultJson;
+                    if (validUserList[0].accepted)
+                    {
+                        string resultJson;
+                        var resultAccessResult = new ResultAccessRequest() { accepted = true, collection = oldCol };
+                        resultJson = JsonConvert.SerializeObject(resultAccessResult);
+                        return resultJson;
+                    }
                 }
+
                 if (oldCol.requestedAccess == null)
                 { oldCol.requestedAccess = new List<UserModel>(); }
 
@@ -88,7 +93,7 @@ namespace FlatBackend.Controllers
                 var confirmedUser = await _WebsocketManager.sendAccessRequestToBoss(accessRequest);
                 if (confirmedUser != null)
                 {
-                    validUser = oldCol.confirmedUsers.Find(x => x.clientId == value.clientId);
+                    var validUser = oldCol.confirmedUsers.Find(x => x.clientId == value.clientId);
                     if (validUser == null)
                     {
                         oldCol.requestedAccess.Remove(value);
@@ -242,10 +247,41 @@ namespace FlatBackend.Controllers
         {
             try
             {
-                var oldCol = _MongoDBService.GetCollection(id);
+                var oldCol = await _MongoDBService.GetCollection(id);
                 if (oldCol != null)
                 {
+                    var usersRequestsList = oldCol.requestedAccess.Where(x => x.clientId == clientId).ToList();
+                    var validUsersList = oldCol.confirmedUsers.Where(x => x.clientId == clientId).ToList();
+                    var usersDivisionsList = oldCol.collectionDivision.Where(x => x.clientId == clientId).ToList();
+                    if (usersRequestsList != null)
+                    {
+                        foreach (var user in usersRequestsList)
+                        {
+                            oldCol.requestedAccess.Remove(user);
+                        }
+                    }
+                    if (validUsersList != null)
+                    {
+                        foreach (var user in validUsersList)
+                        {
+                            oldCol.confirmedUsers.Remove(user);
+                        }
+                    }
+                    if (usersDivisionsList != null)
+                    {
+                        foreach (var division in usersDivisionsList)
+                        {
+                            var index = oldCol.collectionDivision.IndexOf(division);
+                            oldCol.collectionDivision[index].clientId = null;
+                        }
+                    }
+
+                    _WebsocketManager.removeWebsocketUser(clientId);
+                    _WebsocketManager.informBossOverLeavingOfUser(id, clientId);
+                    _MongoDBService.ChangeCollection(oldCol);
+                    _WebsocketManager.sendUpdateCollection(oldCol.id);
                 }
+                return "Success";
             }
             catch (Exception ex) { return NotFound(ex.ToString()).ToString(); }
         }
