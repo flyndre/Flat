@@ -74,6 +74,7 @@ export function shapeListToTrack(
     return {
         id: shapeList?.[0]?.id,
         name: shapeList?.[0]?.name,
+        color: getShapeColor(shapeList?.[0]),
         progress: shapeList.map((s) =>
             polylineToGeoJSON(<google.maps.Polyline>s.overlay)
         ),
