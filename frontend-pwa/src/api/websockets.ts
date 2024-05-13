@@ -69,6 +69,11 @@ watch(data, data => {
   
 })
 
+export function closeCollection(collectionId : string){
+    const answer = {type:  3, collectionId : collectionId}
+    send(JSON.stringify(answer))
+}
+
 export function acceptOrDeclineAccessRequest(choice : boolean, username : string, clientId : string, collectionId : string){
     const answer = {
         type:  "AccessRequest",
