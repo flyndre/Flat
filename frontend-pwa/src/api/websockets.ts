@@ -65,6 +65,15 @@ watch(data, data => {
     }
     if(JSON.parse(data).type === "IncrementalTrack"){
         let memberOfTrack = members.value.filter(el => {el.id === JSON.parse(data).clientId})[0]
+
+        let listOfTracks = memberOfTrack.progress.filter(el => el.id === JSON.parse(data).trackId)
+
+        if(listOfTracks.length == 0){
+            memberOfTrack.progress.push({id: JSON.parse(data).trackId, track: JSON.parse(data).track})
+        }else{
+            listOfTracks[0].track.coordinates.push.apply(listOfTracks[0].track.coordinates, JSON.parse(data).track.coordinates)
+        }
+
         memberOfTrack.progress.push.apply(memberOfTrack.progress, JSON.parse(data).track)
     }
   
@@ -116,7 +125,6 @@ export function resumeSendingToServer(){
 }
 
 export function acceptInvite(uuid: string, username: string){
-    members.push({name: username, uuid: uuid, currentPosition: undefined, positionList: []});
     console.log(members);
 }
 
