@@ -66,6 +66,14 @@ namespace FlatBackend.Controllers
             try
             {
                 var oldCol = await _MongoDBService.GetCollection(id);
+                var validUser = oldCol.confirmedUsers.Where(x => x.clientId == value.clientId).First();
+                if (validUser.accepted)
+                {
+                    string resultJson;
+                    var resultAccessResult = new ResultAccessRequest() { accepted = true, collection = oldCol };
+                    resultJson = JsonConvert.SerializeObject(resultAccessResult);
+                    return resultJson;
+                }
                 if (oldCol.requestedAccess == null)
                 { oldCol.requestedAccess = new List<UserModel>(); }
 
@@ -80,7 +88,7 @@ namespace FlatBackend.Controllers
                 var confirmedUser = await _WebsocketManager.sendAccessRequestToBoss(accessRequest);
                 if (confirmedUser != null)
                 {
-                    UserModel? validUser = oldCol.confirmedUsers.Find(x => x.clientId == value.clientId);
+                    validUser = oldCol.confirmedUsers.Find(x => x.clientId == value.clientId);
                     if (validUser == null)
                     {
                         oldCol.requestedAccess.Remove(value);
@@ -114,7 +122,6 @@ namespace FlatBackend.Controllers
             {
                 return NotFound(ex.ToString()).ToJson();
             }
-            //call add User to Accessrequestlist
         }
 
         [HttpPost("AccessConfirmation/{id}")]
