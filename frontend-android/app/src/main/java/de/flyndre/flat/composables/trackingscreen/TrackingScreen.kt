@@ -47,6 +47,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
@@ -224,6 +225,7 @@ fun TrackingScreen(
                         }
                         if (list.isNotEmpty()) {
                             Polyline(points = list)
+                            Circle(center = list.last(), radius = 5.0)
                         }
                     }
 
