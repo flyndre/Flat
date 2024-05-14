@@ -171,6 +171,13 @@ fun CollectionAreaScreen(
                             )
                         }
                         SmallFloatingActionButton(onClick = {
+                            collectionAreaScreenViewModel.addPoint(
+                                cameraPositionState.position.target
+                            )
+                        }) {
+                            Icon(Icons.Filled.Add, contentDescription = "add point")
+                        }
+                        SmallFloatingActionButton(onClick = {
                             drawingEnabled = false;
                             collectionAreaScreenViewModel.checkNewCollectionIsEmpty()
                         }) {
@@ -239,22 +246,12 @@ fun CollectionAreaScreen(
                                 })
                         }
                         SmallFloatingActionButton(onClick = {
-                            drawingEnabled =
-                                true; collectionAreaScreenViewModel.addNewCollectionArea(
-                            selectedColorItem
-                        )
+                            drawingEnabled = true
+                            collectionAreaScreenViewModel.addNewCollectionArea(selectedColorItem)
                         }) {
                             Icon(Icons.Filled.Edit, contentDescription = "draw new area")
                         }
                     }
-                    SmallFloatingActionButton(onClick = {
-                        collectionAreaScreenViewModel.addPoint(
-                            cameraPositionState.position.target
-                        )
-                    }) {
-                        Icon(Icons.Filled.Add, contentDescription = "add point")
-                    }
-
                 }
             } else {
 
@@ -292,7 +289,10 @@ fun CollectionAreaScreen(
 
                 cameraPositionState = cameraPositionState,
             ) {
-                Marker(state = MarkerState(cameraPositionState.position.target))
+                if(drawingEnabled){
+                    Marker(state = MarkerState(cameraPositionState.position.target))
+                }
+
                 if (collectionAreas.isNotEmpty()) {
                     collectionAreas.forEach { area ->
                         if (area.listAreaPoints.isNotEmpty()) {
