@@ -300,35 +300,10 @@ function accept() {
                 :link="invitationLink"
             />
 
-            <!-- Participant Management Dialog -->
             <ParticipantsDialog
                 v-model:visible="manageGroupsScreenVisible"
                 :participants="[]"
             />
-            <!-- <Dialog
-                :position="isOnMobile ? 'bottom' : 'top'"
-                v-model:visible="manageGroupsScreenVisible"
-                header="Manage Participants"
-                :draggable="false"
-                :closable="false"
-                modal
-            >
-                <template #default> (list of participants) </template>
-                <template #footer>
-                    <div class="w-full flex flex-row justify-center gap-2">
-                        <Button
-                            label="Close"
-                            severity="secondary"
-                            text
-                            @click="manageGroupsScreenVisible = false"
-                        >
-                            <template #icon>
-                                <MdiTextButtonIcon :icon="mdiClose" />
-                            </template>
-                        </Button>
-                    </div>
-                </template>
-            </Dialog> -->
 
             <!-- Stop Collection Confirm Dialog -->
             <Dialog
@@ -372,19 +347,6 @@ function accept() {
                     </div>
                 </template>
             </Dialog>
-
-            <!-- <div
-                class="w-full h-full bg-gray-200 flex flex-col items-center justify-center text-gray-500 rounded-md gap-2"
-                :class="{ 'mb-2': !isOnMobile }"
-            >
-                Map Placeholder
-                <div
-                    class="flex flex-col border border-solid rounded-md py-1 px-2"
-                    :class="{ 'opacity-30': !trackingActive }"
-                >
-                    {{ trackingLogs }}
-                </div>
-            </div> -->
 
             <Card
                 class="h-full grow"
