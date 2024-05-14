@@ -11,6 +11,7 @@ import MdiIcon from '@/components/icons/MdiIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
 import InvitationDialog from '@/components/tracking/InvitationDialog.vue';
+import JoinRequestDialog from '@/components/tracking/JoinRequestDialog.vue';
 import ParticipantsDialog from '@/components/tracking/ParticipantsDialog.vue';
 import { clientId } from '@/data/clientMetadata';
 import { TOAST_LIFE } from '@/data/constants';
@@ -18,6 +19,7 @@ import { trackingLogs } from '@/data/trackingLogs';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { useTrackingService } from '@/service/trackingService';
 import { Division } from '@/types/Division';
+import { JoinRequest } from '@/types/JoinRequest';
 import { ParticipantTrack } from '@/types/ParticipantTrack';
 import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
 import { isOnMobile } from '@/util/mobileDetection';
@@ -45,6 +47,10 @@ import SplitButton from 'primevue/splitbutton';
 import { useToast } from 'primevue/usetoast';
 import { computed, onBeforeMount, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+
+const props = defineProps<{
+    id: string;
+}>();
 
 const router = useRouter();
 const route = useRoute();
@@ -110,9 +116,9 @@ const adminActions: MenuItem[] = [
         command: () => (endCollectionDialogVisible.value = true),
     },
     {
-        label: 'Manage Groups',
+        label: 'Manage Participants',
         icon: mdiAccountMultiple,
-        command: () => (manageGroupsScreenVisible.value = true),
+        command: () => (manageParticipantsDialogVisible.value = true),
     },
 ];
 
@@ -128,15 +134,42 @@ function leaveCollection() {
 
 const endCollectionDialogVisible = ref(false);
 function stopCollection() {
-    // TODO: fetch and display stats
+    // TODO: end collection (and fetch and display stats)
     router.push({ name: 'presets' });
 }
 
 const invitationScreenVisible = ref(false);
-const invitationLink = ref('https://www.flat.com/join/876372894');
-const manageGroupsScreenVisible = ref(false);
+const invitationLink = computed(
+    () => window.location.origin + import.meta.env.BASE_URL + 'join/' + props.id
+);
+
+const manageParticipantsDialogVisible = ref(false);
 const participants = computed<any[]>(() => []);
-const tracks = members;
+
+const joinRequests = computed<JoinRequest[]>(() => {
+    // TODO: get list of join requests from service
+    return [];
+});
+function processJoinRequest(clientId: string, accepted: boolean) {
+    // TODO: send to backend and perhaps show toast
+}
+
+const tracks = computed<ParticipantTrack[]>(() => [
+    {
+        id: clientId.value,
+        name: 'barbapapa',
+        color: '#ff9922',
+        progress: [
+            {
+                id: '',
+                track: {
+                    type: 'LineString',
+                    coordinates: trackingLogs.value?.map((l) => l.position),
+                },
+            },
+        ],
+    },
+]);
 
 let divisions = ref<Division[]>([]);
 
@@ -260,7 +293,7 @@ function accept() {
                 <template #default>
                     To use this app, it is required that you grant the location
                     permission.
-                    {{ locationError }}
+                    {{ trackingError }}
                 </template>
                 <template #footer>
                     <div class="w-full flex flex-row justify-center gap-2">
@@ -286,8 +319,13 @@ function accept() {
             />
 
             <ParticipantsDialog
-                v-model:visible="manageGroupsScreenVisible"
+                v-model:visible="manageParticipantsDialogVisible"
                 :participants
+            />
+
+            <JoinRequestDialog
+                :requests="joinRequests"
+                @request-answered="processJoinRequest"
             />
 
             <!-- Stop Collection Confirm Dialog -->
