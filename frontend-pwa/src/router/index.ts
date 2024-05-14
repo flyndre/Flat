@@ -71,6 +71,7 @@ const router = createRouter({
             path: '/track/:id',
             name: 'track',
             component: TrackingView,
+            props: true,
         },
         {
             path: '/:pathMatch(.*)*',

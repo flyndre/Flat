@@ -48,6 +48,10 @@ import { useToast } from 'primevue/usetoast';
 import { computed, onBeforeMount, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
+const props = defineProps<{
+    id: string;
+}>();
+
 const router = useRouter();
 const route = useRoute();
 const adminView = ref(isAdmin);
@@ -135,7 +139,9 @@ function stopCollection() {
 }
 
 const invitationScreenVisible = ref(false);
-const invitationLink = ref('https://www.flat.com/join/876372894');
+const invitationLink = computed(
+    () => window.location.origin + import.meta.env.BASE_URL + 'join/' + props.id
+);
 const manageGroupsScreenVisible = ref(false);
 
 const joinRequests = computed<JoinRequest[]>(() => {
@@ -286,7 +292,7 @@ function accept() {
                 <template #default>
                     To use this app, it is required that you grant the location
                     permission.
-                    {{ locationError }}
+                    {{ trackingError }}
                 </template>
                 <template #footer>
                     <div class="w-full flex flex-row justify-center gap-2">
