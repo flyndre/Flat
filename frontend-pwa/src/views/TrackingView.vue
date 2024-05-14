@@ -135,7 +135,7 @@ function stopCollection() {
 const invitationScreenVisible = ref(false);
 const invitationLink = ref('https://www.flat.com/join/876372894');
 const manageGroupsScreenVisible = ref(false);
-
+const participants = computed<any[]>(() => []);
 const tracks = computed<ParticipantTrack[]>(() => [
     {
         id: clientId.value,
@@ -302,7 +302,7 @@ function accept() {
 
             <ParticipantsDialog
                 v-model:visible="manageGroupsScreenVisible"
-                :participants="[]"
+                :participants
             />
 
             <!-- Stop Collection Confirm Dialog -->
