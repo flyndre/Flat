@@ -116,7 +116,7 @@ const adminActions: MenuItem[] = [
         command: () => (endCollectionDialogVisible.value = true),
     },
     {
-        label: 'Manage Groups',
+        label: 'Manage Participants',
         icon: mdiAccountMultiple,
         command: () => (manageParticipantsDialogVisible.value = true),
     },
