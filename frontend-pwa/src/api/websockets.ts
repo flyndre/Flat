@@ -34,7 +34,7 @@ const {
     () => {
 
         console.log("Sending Trackingpoints...")
-        var lineStringOfPosition = {type: "LineString", coordinates: [[0,0]]} as LineString
+        var lineStringOfPosition = {type: "LineString", coordinates: [[48.386850,8.580660], [48.387614, 8.581562], [48.387386][8.577933]]} as LineString
         
         var newlatest = null;
         db.trackingLogs.toCollection().each(el => {(el.timestamp > latestSendTimestamp) || latestSendTimestamp == null ? lineStringOfPosition.coordinates.push(el.position) : null; newlatest = el.timestamp})
@@ -95,21 +95,18 @@ export function acceptOrDeclineAccessRequest(choice : boolean, username : string
         accepted: choice
     }
 
-    console.log("ACCEPTORDECLINEMESSAGE:")
-    console.log(answer)
-
     send(JSON.stringify(answer));
-    console.log("Message send.") 
+
 }
 
 export function establishWebsocket(clientId : string, collectionId : string){
-
-
-    send(JSON.stringify({
+    const answer = {
         type: 0, 
         clientId: clientId,
         collectionId: collectionId
-    }))
+    }
+
+    send(JSON.stringify(answer))
 
     console.log("Established Websocket.")
     
