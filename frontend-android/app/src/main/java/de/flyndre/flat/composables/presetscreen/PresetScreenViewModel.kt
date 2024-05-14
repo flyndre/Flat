@@ -14,90 +14,90 @@ import de.flyndre.flat.interfaces.IConnectionService
 import io.github.dellisd.spatialk.geojson.MultiPolygon
 import io.github.dellisd.spatialk.geojson.Polygon
 import io.github.dellisd.spatialk.geojson.Position
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 class PresetScreenViewModel(
-    db: AppDatabase,
+    val db: AppDatabase,
     collectionAreaScreenViewModel: CollectionAreaScreenViewModel,
     trackingScreenViewModel: TrackingScreenViewModel,
     connectionService: IConnectionService,
 ) : ViewModel() {
-    //appdatabase
-    private var _db = db
 
     //collectionAreaScreenViewModel
     private var _collectionAreaScreenViewModel = collectionAreaScreenViewModel
     private var _trackingScreenViewModel = trackingScreenViewModel
+    private var _db = db
 
     //preset id
     private var _presetId: Long = 0
 
-    private val _connectionService = connectionService
-
-    fun newEmptyPreset() {
-        _presetId = 0
-        _presetName.value = ""
-        _presetDescription.value = ""
-        _collectionAreaScreenViewModel.newEmptyCollectionArea()
-    }
-
-    fun setPresetId(presetId: Long) {
-        _presetId = presetId
-        viewModelScope.launch {
-            val preset = _db.presetDao().getPresetById(presetId = presetId)
-            _presetName.value = preset.presetName
-            _presetDescription.value = preset.presetDescription
-            _collectionAreaScreenViewModel.setListAreas(preset.presetCollectionAreas)
-            _collectionAreaScreenViewModel.setCameraPosition(preset.presetCameraPosition)
-        }
-    }
-
-    fun getPresetId(): Long {
-        return _presetId
-    }
-
     //preset name
     private val _presetName = MutableStateFlow("")
     val presetName: StateFlow<String> = _presetName.asStateFlow()
-    fun updatePresetName(presetName: String) {
-        _presetName.value = presetName
-    }
 
     //preset description
     private val _presetDescription = MutableStateFlow("")
     val presetDescription: StateFlow<String> = _presetDescription.asStateFlow()
-    fun updatePresetDescription(presetDescription: String) {
-        _presetDescription.value = presetDescription
+
+    private val _connectionService = connectionService
+
+
+    fun clearPresetValues(){
+        _presetId = 0
+        _presetName.value = ""
+        _presetDescription.value = ""
+        _collectionAreaScreenViewModel.clearCollectionArea()
     }
 
-    //function for saving preset
-    fun savePresetToDatabase() {
-        val preset = Preset(
-            _presetId,
-            _presetName.value,
-            _presetDescription.value,
-            _collectionAreaScreenViewModel.getListAreas(),
-            _collectionAreaScreenViewModel.getCameraPosition()
-        )
-        viewModelScope.launch {
-            if (_presetId == 0.toLong()) {
-                _db.presetDao().insertPreset(preset = preset)
-            } else {
-                _db.presetDao().updatePreset(preset = preset)
-            }
-        }
+    fun setPresetValues(id: Long, name: String, description: String, collectionAreas: ArrayList<CollectionArea>, cameraPosition: CameraPosition){
+        _presetId = id
+        _presetName.value = name
+        _presetDescription.value = description
+        _collectionAreaScreenViewModel.setListAreas(collectionAreas)
+        _collectionAreaScreenViewModel.setCameraPosition(cameraPosition)
     }
 
-    fun getCameraPosition(): CameraPosition {
-        return _collectionAreaScreenViewModel.getCameraPosition()
+    fun getId(): Long{
+        return _presetId
+    }
+
+    fun getName(): String{
+        return _presetName.value
+    }
+
+    fun getDescription(): String{
+        return _presetDescription.value
     }
 
     fun getCollectionArea(): ArrayList<CollectionArea> {
         return _collectionAreaScreenViewModel.getListAreas()
+    }
+
+    fun getCameraPosition(): CameraPosition{
+        return _collectionAreaScreenViewModel.getCameraPosition()
+    }
+
+    fun updatePresetName(presetName: String) {
+        _presetName.value = presetName
+    }
+
+    fun updatePresetDescription(presetDescription: String) {
+        _presetDescription.value = presetDescription
+    }
+
+    fun savePresetToDatabase(){
+        viewModelScope.launch(Dispatchers.IO) {
+            val preset = Preset(_presetId, _presetName.value, _presetDescription.value, _collectionAreaScreenViewModel.getListAreas(), _collectionAreaScreenViewModel.getCameraPosition())
+            if(_presetId == 0.toLong()){
+                _presetId = _db.presetDao().insertPreset(preset)
+            }else{
+                _db.presetDao().updatePreset(preset)
+            }
+        }
     }
 
     //publish collection to backend

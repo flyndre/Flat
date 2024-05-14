@@ -95,11 +95,6 @@ class MainActivity : ComponentActivity() {
                         "TrackingScreenViewModel",
                         TrackingScreenViewModelFactory(trackingService,connectionService,participantScreenViewModel))
                     val collectionAreaScreenViewModel:CollectionAreaScreenViewModel = viewModel()
-                    val createGroupScreenViewModel:CreateGroupScreenViewModel = viewModel(
-                        it,
-                        "CreateGroupScreenViewModel",
-                        CreateGroupScreenViewModelFactory(db)
-                    )
                     val presetScreenViewModel: PresetScreenViewModel = viewModel(
                         it,
                         "PresetScreenViewModel",
@@ -109,6 +104,12 @@ class MainActivity : ComponentActivity() {
                             trackingScreenViewModel,
                             connectionService
                         )
+                    )
+                    val createGroupScreenViewModel:CreateGroupScreenViewModel = viewModel(
+                        it,
+                        "CreateGroupScreenViewModel",
+                        CreateGroupScreenViewModelFactory(db,
+                            presetScreenViewModel)
                     )
                     val joinScreenViewModel:JoinScreenViewModel = viewModel(
                         it,
@@ -218,32 +219,12 @@ fun AppEntryPoint(
             CreateGroupScreen(
                 modifier = modifier,
                 onNavigateToInitialScreen = { navController.navigate("initial") },
-                onNavigateToNewPresetScreen = { navController.navigate("newpreset") },
-                navController = navController,
+                onNavigateToPresetScreen = { navController.navigate("preset") },
                 createGroupScreenViewModel = createGroupScreenViewModel
             )
         }
-        composable("newpreset") {
-            presetScreenViewModel.newEmptyPreset()
+        composable("preset") {
             PresetScreen(
-                presetId = null,
-                navController = navController,
-                topBarText = "New Preset",
-                onNavigateToCreateGroupScreen = { navController.navigate("creategroup") },
-                onNavigateToTrackingScreen = { navController.navigate("tracking") },
-                presetScreenViewModel = presetScreenViewModel
-            )
-        }
-        composable(
-            "editpreset/{presetId}",
-            arguments = listOf(navArgument("presetId") { type = NavType.LongType })
-        ) { backStackEntry ->
-            val presetId = backStackEntry.arguments?.getLong("presetId")
-            if (presetId!! != 0.toLong()) {//0 is the way to signalize to the navController that no new values need to be loaded from database
-                presetScreenViewModel.setPresetId(presetId = presetId)
-            }
-            PresetScreen(
-                presetId = presetId,
                 navController = navController,
                 topBarText = "Edit Preset",
                 onNavigateToCreateGroupScreen = { navController.navigate("creategroup") },

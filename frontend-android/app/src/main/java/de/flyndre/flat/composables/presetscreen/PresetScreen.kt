@@ -35,8 +35,7 @@ import de.flyndre.flat.database.AppDatabase
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PresetScreen(
-    modifier: Modifier = Modifier,
-    presetId: Long?, navController: NavController, topBarText: String, onNavigateToCreateGroupScreen: () -> Unit, onNavigateToTrackingScreen: () -> Unit, presetScreenViewModel: PresetScreenViewModel){
+    modifier: Modifier = Modifier, navController: NavController, topBarText: String, onNavigateToCreateGroupScreen: () -> Unit, onNavigateToTrackingScreen: () -> Unit, presetScreenViewModel: PresetScreenViewModel){
     val presetName by presetScreenViewModel.presetName.collectAsState()
     val presetDescription by presetScreenViewModel.presetDescription.collectAsState()
 

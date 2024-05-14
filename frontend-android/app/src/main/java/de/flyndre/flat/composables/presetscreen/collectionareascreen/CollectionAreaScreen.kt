@@ -87,7 +87,7 @@ fun CollectionAreaScreen(
                     Text(text = "area count: " + collectionAreas.size)
                     IconButton(onClick = {
                         collectionAreaScreenViewModel.setCameraPosition(cameraPositionState.position)
-                        navController.navigate("editpreset/0")
+                        navController.navigate("preset")
                     }) {
                         Icon(
                             painter = painterResource(id = de.flyndre.flat.R.drawable.save_fill),
@@ -98,7 +98,7 @@ fun CollectionAreaScreen(
                 }
 
             }, navigationIcon = {
-                IconButton(onClick = { navController.navigate("editpreset/0") }) {
+                IconButton(onClick = { navController.navigate("preset") }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "back to preset screen"

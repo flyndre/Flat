@@ -23,7 +23,7 @@ class CollectionAreaScreenViewModel() : ViewModel() {
     val cameraPosition: StateFlow<CameraPosition> = _cameraPosition.asStateFlow()
 
     //used to clear viewModel for creation of new empty preset
-    fun newEmptyCollectionArea() {
+    fun clearCollectionArea() {
         _cameraPosition.value = CameraPosition(LatLng(0.0, 0.0), 0F, 0F, 0F)
         _listCollectionAreas.value = listOf()
     }

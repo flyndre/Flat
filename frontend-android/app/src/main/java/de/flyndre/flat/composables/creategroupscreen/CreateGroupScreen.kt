@@ -32,51 +32,80 @@ import de.flyndre.flat.database.entities.Preset
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateGroupScreen(modifier: Modifier = Modifier, onNavigateToInitialScreen: () -> Unit, onNavigateToNewPresetScreen: () -> Unit, navController: NavController, createGroupScreenViewModel: CreateGroupScreenViewModel){
+fun CreateGroupScreen(
+    modifier: Modifier = Modifier,
+    onNavigateToInitialScreen: () -> Unit,
+    onNavigateToPresetScreen: () -> Unit,
+    createGroupScreenViewModel: CreateGroupScreenViewModel,
+) {
     val presets by createGroupScreenViewModel.presets.collectAsState()
     var showDeleteConfirmationDialog by remember { mutableStateOf(false) }
 
-    if(showDeleteConfirmationDialog){
-        deleteConfimationDialog(onConfirmation = { showDeleteConfirmationDialog =false }, onDismiss = {showDeleteConfirmationDialog=false})
+    if (showDeleteConfirmationDialog) {
+        deleteConfimationDialog(onConfirmation = {
+            showDeleteConfirmationDialog = false; createGroupScreenViewModel.deleteSetPreset()
+        }, onDismiss = { showDeleteConfirmationDialog = false })
     }
     Scaffold(topBar = {
-        TopAppBar(title = {Text(text = "Presets")},
+        TopAppBar(title = { Text(text = "Presets") },
             navigationIcon = {
-               IconButton(onClick = { onNavigateToInitialScreen() }) {
-                   Icon(
-                       imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                       contentDescription = "back to start screen"
-                   )
-               }
-        })
+                IconButton(onClick = { onNavigateToInitialScreen() }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "back to start screen"
+                    )
+                }
+            })
     }, floatingActionButton = {
-        ExtendedFloatingActionButton(onClick = { onNavigateToNewPresetScreen() }) {
+        ExtendedFloatingActionButton(onClick = {
+            createGroupScreenViewModel.navigateToPreset(
+                0,
+                onNavigateToPresetScreen
+            )
+        }) {
             Icon(Icons.Filled.Add, contentDescription = "add new preset")
             Text(text = "create preset")
         }
     }
-    ) {
-        innerPadding ->
-        PresetList(Modifier.padding(innerPadding),navController = navController, presets = presets, onDelete = {showDeleteConfirmationDialog=true})
+    ) { innerPadding ->
+        PresetList(
+            Modifier.padding(innerPadding),
+            createGroupScreenViewModel,
+            onNavigateToPresetScreen,
+            presets = presets,
+            onDelete = { showDeleteConfirmationDialog = true })
     }
 }
 
 @Composable
-private fun PresetList(modifier: Modifier, navController: NavController, presets: List<Preset>,onDelete:()->Unit){
+private fun PresetList(
+    modifier: Modifier,
+    createGroupScreenViewModel: CreateGroupScreenViewModel,
+    onNavigateToPresetScreen: () -> Unit,
+    presets: List<Preset>,
+    onDelete: () -> Unit,
+) {
     Column(modifier = modifier) {
-        presets.forEach{
-            preset ->
-            Row(){
+        presets.forEach { preset ->
+            Row() {
 
                 ListItem(
-                    modifier = Modifier.clickable { navController.navigate("editpreset/" + preset.id) },
+                    modifier = Modifier.clickable {
+                        createGroupScreenViewModel.navigateToPreset(
+                            preset.id,
+                            onNavigateToPresetScreen
+                        )
+                    },
                     headlineContent = { Text(text = preset.presetName) },
-                    supportingContent = { Text(text = preset.presetDescription) } ,
+                    supportingContent = { Text(text = preset.presetDescription) },
                     trailingContent = {
                         Icon(
                             Icons.Filled.Delete,
                             contentDescription = "Delete preset",
-                            modifier= Modifier.clickable { onDelete() })
+                            modifier = Modifier.clickable {
+                                createGroupScreenViewModel.setIdToBeDeleted(preset.id)
+                                onDelete()
+                            })
                     }
                 )
 
@@ -84,8 +113,9 @@ private fun PresetList(modifier: Modifier, navController: NavController, presets
         }
     }
 }
+
 @Composable
-fun deleteConfimationDialog(onConfirmation:()->Unit, onDismiss:()->Unit){
+fun deleteConfimationDialog(onConfirmation: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
@@ -99,7 +129,7 @@ fun deleteConfimationDialog(onConfirmation:()->Unit, onDismiss:()->Unit){
                     text = "Ablehnen"
                 )
             }
-        },icon = {
+        }, icon = {
             Icon(
                 Icons.Default.Info,
                 contentDescription = "asking whether to leave the collection"
