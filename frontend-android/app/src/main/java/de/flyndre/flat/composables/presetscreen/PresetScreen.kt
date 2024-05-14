@@ -47,6 +47,7 @@ fun PresetScreen(
 ) {
     val presetName by presetScreenViewModel.presetName.collectAsState()
     val presetDescription by presetScreenViewModel.presetDescription.collectAsState()
+    //error handling
     var isNameEmpty by remember { mutableStateOf(false) }
     var isDescriptionEmpty by remember { mutableStateOf(false) }
 

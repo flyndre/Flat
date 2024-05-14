@@ -29,13 +29,11 @@ import androidx.compose.ui.unit.dp
 fun JoinScreen(modifier: Modifier = Modifier, onNavigateToInitialScreen: () -> Unit, onNavigateToTrackingScreen: () -> Unit, joinScreenViewModel: JoinScreenViewModel) {
     val joinLink by joinScreenViewModel.joinLink.collectAsState()
     val joinName by joinScreenViewModel.joinName.collectAsState()
-    var joiningAllowed by remember { mutableStateOf(false) }
     val lastCollections by joinScreenViewModel.lastCollections.collectAsState()
-    if(!joinLink.equals("") && !joinName.equals("")){
-        joiningAllowed = true
-    }else{
-        joiningAllowed = false
-    }
+    //error handling
+    var isLinkEmpty by remember { mutableStateOf(false) }
+    var isNameEmpty by remember { mutableStateOf(false) }
+    
     Scaffold(
         topBar = {
             TopAppBar(title = { Text(text = "") }, navigationIcon = {
@@ -50,9 +48,20 @@ fun JoinScreen(modifier: Modifier = Modifier, onNavigateToInitialScreen: () -> U
         Column(modifier = modifier.padding(innerPadding),
             horizontalAlignment = Alignment.Start) {
             val modifier = Modifier.padding(10.dp)
-            TextField(modifier = modifier, value = joinLink, onValueChange = {joinScreenViewModel.updateJoinLink(it)}, label = {Text(text = "Link for joining")})
-            TextField(modifier = modifier, value = joinName, onValueChange = {joinScreenViewModel.updateJoinName(it)}, label = {Text(text = "Name for joining")})
-            Button(modifier = modifier, onClick = { joinScreenViewModel.join { onNavigateToTrackingScreen() } }, enabled = joiningAllowed) {
+            TextField(modifier = modifier, value = joinLink, onValueChange = {joinScreenViewModel.updateJoinLink(it)}, label = {Text(text = "Link for joining")}, isError = isLinkEmpty, supportingText = {if(isLinkEmpty){
+                Text(text = "Darf nicht leer sein")} })
+            TextField(modifier = modifier, value = joinName, onValueChange = {joinScreenViewModel.updateJoinName(it)}, label = {Text(text = "Name for joining")}, isError = isNameEmpty, supportingText = {if (isNameEmpty){
+                Text(text = "Darf nicht leer sein")
+            } })
+            Button(modifier = modifier, onClick = {
+                if(joinLink.equals("")){
+                    isLinkEmpty = true
+                }else if(joinName.equals("")){
+                    isNameEmpty = true
+                }else{
+                    joinScreenViewModel.join { onNavigateToTrackingScreen() }
+                }
+            }) {
                 Text(text = "Join")
             }
             Column {
