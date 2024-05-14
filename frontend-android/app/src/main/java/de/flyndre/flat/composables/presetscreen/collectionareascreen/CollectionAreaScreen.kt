@@ -68,7 +68,7 @@ import de.flyndre.flat.ui.theme.AreaPurple
 @Composable
 fun CollectionAreaScreen(
     modifier: Modifier = Modifier,
-    navController: NavController,
+    onNavigateToPresetScreen: () -> Unit,
     collectionAreaScreenViewModel: CollectionAreaScreenViewModel,
 ) {
     //bottom navigation bar
@@ -96,7 +96,7 @@ fun CollectionAreaScreen(
                     IconButton(onClick = {
                         collectionAreaScreenViewModel.saveChanges()
                         collectionAreaScreenViewModel.setCameraPosition(cameraPositionState.position)
-                        navController.navigate("preset")
+                        onNavigateToPresetScreen()
                     }) {
                         Icon(
                             painter = painterResource(id = de.flyndre.flat.R.drawable.save_fill),
@@ -109,7 +109,7 @@ fun CollectionAreaScreen(
             }, navigationIcon = {
                 IconButton(onClick = {
                     collectionAreaScreenViewModel.discardChanges()
-                    navController.navigate("preset")
+                    onNavigateToPresetScreen()
                 }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,

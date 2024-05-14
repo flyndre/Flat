@@ -234,7 +234,7 @@ fun AppEntryPoint(
         }
         composable("collectionarea") {
             CollectionAreaScreen(
-                navController = navController,
+                onNavigateToPresetScreen = {navController.navigate("preset")},
                 collectionAreaScreenViewModel = collectionAreaScreenViewModel
             )
         }
