@@ -14,7 +14,7 @@ import { ParticipantTrack } from "@/types/ParticipantTrack";
 
 
  
-export let members = ref([] as ParticipantTrack[]);
+export let members = ref([{id: clientId.value, name: "admin", color: "#fffff", progress : []}] as ParticipantTrack[]);
 export let newInvite = ref([]);
 export let isAdmin = true;
 let latestSendTimestamp = null;
@@ -34,7 +34,7 @@ const {
     () => {
 
         console.log("Sending Trackingpoints...")
-        var lineStringOfPosition = {type: "LineString", coordinates: []} as LineString
+        var lineStringOfPosition = {type: "LineString", coordinates: [[0,0]]} as LineString
         
         var newlatest = null;
         db.trackingLogs.toCollection().each(el => {(el.timestamp > latestSendTimestamp) || latestSendTimestamp == null ? lineStringOfPosition.coordinates.push(el.position) : null; newlatest = el.timestamp})
@@ -64,7 +64,9 @@ watch(data, data => {
         console.log(members)
     }
     if(JSON.parse(data).type === "IncrementalTrack"){
-        let memberOfTrack = members.value.filter(el => {el.id === JSON.parse(data).clientId})[0]
+        console.log(members.value); 
+        console.log(JSON.parse(data).clientId == members.value[0].id); 
+        let memberOfTrack = (members.value.filter(el => el.id === JSON.parse(data).clientId))[0]
 
         let listOfTracks = memberOfTrack.progress.filter(el => el.id === JSON.parse(data).trackId)
 
