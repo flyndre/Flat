@@ -184,7 +184,7 @@ function drawTracks() {
         });
         shapes?.forEach((s) => s.overlay?.setMap(map.value));
         progressLines.push(...shapes);
-        const lastPosition = t.progress?.at(-1)?.coordinates?.at(-1);
+        const lastPosition = t.progress?.at(-1)?.track?.coordinates?.at(-1);
         if (lastPosition != null && t.id !== clientId.value) {
             const label = new MarkerWithLabel({
                 position: {
