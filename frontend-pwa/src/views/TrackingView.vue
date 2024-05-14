@@ -11,6 +11,7 @@ import MdiIcon from '@/components/icons/MdiIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
 import InvitationDialog from '@/components/tracking/InvitationDialog.vue';
+import JoinRequestDialog from '@/components/tracking/JoinRequestDialog.vue';
 import ParticipantsDialog from '@/components/tracking/ParticipantsDialog.vue';
 import { clientId } from '@/data/clientMetadata';
 import { TOAST_LIFE } from '@/data/constants';
@@ -18,6 +19,7 @@ import { trackingLogs } from '@/data/trackingLogs';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { useTrackingService } from '@/service/trackingService';
 import { Division } from '@/types/Division';
+import { JoinRequest } from '@/types/JoinRequest';
 import { ParticipantTrack } from '@/types/ParticipantTrack';
 import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
 import { isOnMobile } from '@/util/mobileDetection';
@@ -135,6 +137,15 @@ function stopCollection() {
 const invitationScreenVisible = ref(false);
 const invitationLink = ref('https://www.flat.com/join/876372894');
 const manageGroupsScreenVisible = ref(false);
+
+const joinRequests = computed<JoinRequest[]>(() => {
+    // TODO: get list of join requests from service
+    return [];
+});
+function processJoinRequest(clientId: string, accepted: boolean) {
+    // TODO: send to backend and perhaps show toast
+}
+
 const participants = computed<any[]>(() => []);
 const tracks = computed<ParticipantTrack[]>(() => [
     {
@@ -303,6 +314,11 @@ function accept() {
             <ParticipantsDialog
                 v-model:visible="manageGroupsScreenVisible"
                 :participants
+            />
+
+            <JoinRequestDialog
+                :requests="joinRequests"
+                @request-answered="processJoinRequest"
             />
 
             <!-- Stop Collection Confirm Dialog -->
