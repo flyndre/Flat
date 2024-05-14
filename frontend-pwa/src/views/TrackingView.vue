@@ -154,22 +154,7 @@ function processJoinRequest(clientId: string, accepted: boolean) {
     // TODO: send to backend and perhaps show toast
 }
 
-const tracks = computed<ParticipantTrack[]>(() => [
-    {
-        id: clientId.value,
-        name: 'barbapapa',
-        color: '#ff9922',
-        progress: [
-            {
-                id: '',
-                track: {
-                    type: 'LineString',
-                    coordinates: trackingLogs.value?.map((l) => l.position),
-                },
-            },
-        ],
-    },
-]);
+const tracks = computed<ParticipantTrack[]>(() => { return members.value});
 
 let divisions = ref<Division[]>([]);
 
@@ -205,6 +190,7 @@ function accept() {
 </script>
 
 <template>
+    {{ tracks }}
     <Dialog
         v-model:visible="visible"
         modal

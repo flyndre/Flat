@@ -34,7 +34,7 @@ const {
     () => {
 
         console.log("Sending Trackingpoints...")
-        var lineStringOfPosition = {type: "LineString", coordinates: [[48.386850,8.580660], [48.387614, 8.581562], [48.387386][8.577933]]} as LineString
+        var lineStringOfPosition = {type: "LineString", coordinates: [[48.386850,8.580660], [48.387614, 8.581562], [48.387386, 8.577933]]} as LineString
         
         var newlatest = null;
         db.trackingLogs.toCollection().each(el => {(el.timestamp > latestSendTimestamp) || latestSendTimestamp == null ? lineStringOfPosition.coordinates.push(el.position) : null; newlatest = el.timestamp})
