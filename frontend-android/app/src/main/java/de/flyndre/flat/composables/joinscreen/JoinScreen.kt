@@ -45,8 +45,8 @@ fun JoinScreen(
     //connection error handling
     val showConnectionError by joinScreenViewModel.showConnectionError.collectAsState()
 
-    if(showConnectionError){
-        ConnectionErrorDialog(onDecline = {joinScreenViewModel.hideConnectionError()})
+    if (showConnectionError) {
+        ConnectionErrorDialog(onDecline = { joinScreenViewModel.hideConnectionError() })
     }
 
     Scaffold(
@@ -98,7 +98,7 @@ fun JoinScreen(
             }) {
                 Text(text = "Join")
             }
-            Column {
+            Column(Modifier.padding(15.dp)) {
                 Text(text = "Verlauf")
                 lastCollections.reversed().forEach {
                     ListItem(
@@ -112,9 +112,11 @@ fun JoinScreen(
 
 @Composable
 fun ConnectionErrorDialog(onDecline: () -> Unit) {
-    AlertDialog(onDismissRequest = { onDecline() }, confirmButton = { TextButton(onClick = { onDecline() }) {
-        Text(text = "OK")
-    }}, icon = {
+    AlertDialog(onDismissRequest = { onDecline() }, confirmButton = {
+        TextButton(onClick = { onDecline() }) {
+            Text(text = "OK")
+        }
+    }, icon = {
         Icon(
             Icons.Default.Info,
             contentDescription = "error while trying to connect to server"
