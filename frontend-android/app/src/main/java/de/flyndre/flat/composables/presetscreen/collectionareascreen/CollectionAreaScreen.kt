@@ -94,6 +94,7 @@ fun CollectionAreaScreen(
                 ) {
                     Text(text = "area count: " + collectionAreas.size)
                     IconButton(onClick = {
+                        collectionAreaScreenViewModel.saveChanges()
                         collectionAreaScreenViewModel.setCameraPosition(cameraPositionState.position)
                         navController.navigate("preset")
                     }) {
@@ -106,7 +107,10 @@ fun CollectionAreaScreen(
                 }
 
             }, navigationIcon = {
-                IconButton(onClick = { navController.navigate("preset") }) {
+                IconButton(onClick = {
+                    collectionAreaScreenViewModel.discardChanges()
+                    navController.navigate("preset")
+                }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "back to preset screen"
@@ -243,7 +247,11 @@ fun CollectionAreaScreen(
                             Icon(Icons.Filled.Edit, contentDescription = "draw new area")
                         }
                     }
-                    SmallFloatingActionButton(onClick = { collectionAreaScreenViewModel.addPoint(cameraPositionState.position.target)}) {
+                    SmallFloatingActionButton(onClick = {
+                        collectionAreaScreenViewModel.addPoint(
+                            cameraPositionState.position.target
+                        )
+                    }) {
                         Icon(Icons.Filled.Add, contentDescription = "add point")
                     }
 
@@ -283,7 +291,7 @@ fun CollectionAreaScreen(
                 properties = mapProperties,
 
                 cameraPositionState = cameraPositionState,
-                ) {
+            ) {
                 Marker(state = MarkerState(cameraPositionState.position.target))
                 if (collectionAreas.isNotEmpty()) {
                     collectionAreas.forEach { area ->
@@ -303,15 +311,18 @@ fun CollectionAreaScreen(
                 LazyColumn {
                     items(collectionAreas) {
                         ListItem(modifier = Modifier.clickable {
-                            collectionAreaScreenViewModel.animateCameraPositionToCollectionArea(it, cameraPositionState)
-                        },
-                            headlineContent = {
-                            Text(
-                                text = "Area " + (collectionAreas.indexOf(
-                                    it
-                                ) + 1)
+                            collectionAreaScreenViewModel.animateCameraPositionToCollectionArea(
+                                it,
+                                cameraPositionState
                             )
                         },
+                            headlineContent = {
+                                Text(
+                                    text = "Area " + (collectionAreas.indexOf(
+                                        it
+                                    ) + 1)
+                                )
+                            },
                             supportingContent = {
                                 Box(
                                     modifier = Modifier
@@ -321,7 +332,11 @@ fun CollectionAreaScreen(
                                 )
                             },
                             trailingContent = {
-                                IconButton(onClick = { collectionAreaScreenViewModel.removeCollectionArea(it) }) {
+                                IconButton(onClick = {
+                                    collectionAreaScreenViewModel.removeCollectionArea(
+                                        it
+                                    )
+                                }) {
                                     Icon(
                                         Icons.Filled.Delete,
                                         contentDescription = "delete area",

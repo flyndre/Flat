@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 
 class CollectionAreaScreenViewModel() : ViewModel() {
     //list of points for selection area
+    private val _oldListCollectionAreas: ArrayList<CollectionArea> = arrayListOf()
     private val _listCollectionAreas = MutableStateFlow<List<CollectionArea>>(listOf())
     var listCollectionAreas = _listCollectionAreas.asStateFlow()
 
@@ -43,7 +44,36 @@ class CollectionAreaScreenViewModel() : ViewModel() {
     }
 
     fun setListAreas(list: ArrayList<CollectionArea>) {
+        refreshOldValues(list)
         _listCollectionAreas.value = list
+    }
+
+    private fun refreshOldValues(list: ArrayList<CollectionArea>){
+        for(area in list){
+            val listOfPoints: ArrayList<LatLng> = arrayListOf()
+            for(p in area.listAreaPoints){
+                listOfPoints.add(LatLng(p.latitude, p.longitude))
+            }
+            _oldListCollectionAreas.add(CollectionArea(Color(area.color.value), isSelected = false, listOfPoints))
+        }
+    }
+
+    fun saveChanges(){
+        refreshOldValues(ArrayList(_listCollectionAreas.value))
+    }
+
+    fun discardChanges(){
+        val tempList: ArrayList<CollectionArea> = arrayListOf()
+
+        for(area in _oldListCollectionAreas){
+            val listOfPoints: ArrayList<LatLng> = arrayListOf()
+            for(p in area.listAreaPoints){
+                listOfPoints.add(LatLng(p.latitude, p.longitude))
+            }
+            tempList.add(CollectionArea(Color(area.color.value), isSelected = false, listOfPoints))
+        }
+
+        _listCollectionAreas.value = tempList
     }
 
     fun getListAreas(): ArrayList<CollectionArea> {
