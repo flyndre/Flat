@@ -118,7 +118,7 @@ const adminActions: MenuItem[] = [
     {
         label: 'Manage Groups',
         icon: mdiAccountMultiple,
-        command: () => (manageGroupsScreenVisible.value = true),
+        command: () => (manageParticipantsDialogVisible.value = true),
     },
 ];
 
@@ -134,7 +134,7 @@ function leaveCollection() {
 
 const endCollectionDialogVisible = ref(false);
 function stopCollection() {
-    // TODO: fetch and display stats
+    // TODO: end collection (and fetch and display stats)
     router.push({ name: 'presets' });
 }
 
@@ -142,7 +142,9 @@ const invitationScreenVisible = ref(false);
 const invitationLink = computed(
     () => window.location.origin + import.meta.env.BASE_URL + 'join/' + props.id
 );
-const manageGroupsScreenVisible = ref(false);
+
+const manageParticipantsDialogVisible = ref(false);
+const participants = computed<any[]>(() => []);
 
 const joinRequests = computed<JoinRequest[]>(() => {
     // TODO: get list of join requests from service
@@ -152,7 +154,6 @@ function processJoinRequest(clientId: string, accepted: boolean) {
     // TODO: send to backend and perhaps show toast
 }
 
-const participants = computed<any[]>(() => []);
 const tracks = computed<ParticipantTrack[]>(() => [
     {
         id: clientId.value,
@@ -318,7 +319,7 @@ function accept() {
             />
 
             <ParticipantsDialog
-                v-model:visible="manageGroupsScreenVisible"
+                v-model:visible="manageParticipantsDialogVisible"
                 :participants
             />
 
