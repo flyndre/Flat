@@ -300,5 +300,15 @@ namespace FlatBackend.Websocket
                 users.Remove(user);
             }
         }
+
+        void IWebsocketManager.removeWebsocketUser( Guid clientId )
+        {
+            throw new NotImplementedException();
+        }
+
+        void IWebsocketManager.informBossOverLeavingOfUser( Guid collectionId, Guid clientId )
+        {
+            throw new NotImplementedException();
+        }
     }
 }

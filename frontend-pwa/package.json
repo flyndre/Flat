@@ -10,6 +10,7 @@
     },
     "dependencies": {
         "@googlemaps/js-api-loader": "^1.16.6",
+        "@googlemaps/markerwithlabel": "^2.0.28",
         "@mdi/js": "^7.4.47",
         "@types/geojson": "^7946.0.14",
         "@types/naughty-words": "^1.2.3",

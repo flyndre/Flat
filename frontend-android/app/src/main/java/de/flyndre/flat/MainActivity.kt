@@ -16,6 +16,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import de.flyndre.flat.services.ConnectionService
 import de.flyndre.flat.services.TrackingService
@@ -28,16 +30,21 @@ import com.google.android.gms.location.LocationServices
 import de.flyndre.flat.composables.presetscreen.collectionareascreen.CollectionAreaScreen
 import de.flyndre.flat.composables.creategroupscreen.CreateGroupScreen
 import de.flyndre.flat.composables.creategroupscreen.CreateGroupScreenViewModel
+import de.flyndre.flat.composables.creategroupscreen.CreateGroupScreenViewModelFactory
 import de.flyndre.flat.composables.initialscreen.InitialScreen
 import de.flyndre.flat.composables.joinscreen.JoinScreen
 import de.flyndre.flat.composables.joinscreen.JoinScreenViewModel
+import de.flyndre.flat.composables.joinscreen.JoinScreenViewModelFactory
 import de.flyndre.flat.composables.presetscreen.PresetScreen
 import de.flyndre.flat.composables.presetscreen.PresetScreenViewModel
+import de.flyndre.flat.composables.presetscreen.PresetScreenViewModelFactory
 import de.flyndre.flat.composables.presetscreen.collectionareascreen.CollectionAreaScreenViewModel
 import de.flyndre.flat.composables.trackingscreen.TrackingScreen
 import de.flyndre.flat.composables.trackingscreen.TrackingScreenViewModel
+import de.flyndre.flat.composables.trackingscreen.TrackingScreenViewModelFactory
 import de.flyndre.flat.composables.trackingscreen.participantscreen.ParticipantScreen
 import de.flyndre.flat.composables.trackingscreen.participantscreen.ParticipantScreenViewModel
+import de.flyndre.flat.composables.trackingscreen.participantscreen.ParticipantScreenViewModelFactory
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.interfaces.IConnectionService
 import de.flyndre.flat.interfaces.ILocationService
@@ -71,42 +78,66 @@ class MainActivity : ComponentActivity() {
         trackingService = TrackingService(connectionService, locationService, 10000)
         db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "flat-database")
             .build()
-        val participantScreenViewModel = ParticipantScreenViewModel(connectionService)
-        val trackingScreenViewModel =
-            TrackingScreenViewModel(db = db, trackingService, connectionService, participantScreenViewModel)
-        val collectionAreaScreenViewModel = CollectionAreaScreenViewModel()
-        val createGroupScreenViewModel = CreateGroupScreenViewModel(db = db)
-        val presetScreenViewModel = PresetScreenViewModel(
-            db = db,
-            collectionAreaScreenViewModel = collectionAreaScreenViewModel,
-            trackingScreenViewModel,
-            connectionService
-        )
-        val joinScreenViewModel = JoinScreenViewModel(
-            db = db,
-            trackingScreenViewModel,
-            connectionService = connectionService
-        )
+
 
         setContent {
             FlatTheme {
                 // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    AppEntryPoint(
-                        modifier = Modifier,
-                        intent,
-                        createGroupScreenViewModel,
-                        presetScreenViewModel,
-                        collectionAreaScreenViewModel,
-                        joinScreenViewModel,
-                        trackingScreenViewModel,
-                        participantScreenViewModel,
-                        trackingService,
-                        userId
-                    ) { x -> shareLink(x) }
+                val owner = LocalViewModelStoreOwner.current
+                owner?.let {
+                    val participantScreenViewModel: ParticipantScreenViewModel = viewModel(
+                        it,
+                        "ParticipantScreenViewModel",
+                        ParticipantScreenViewModelFactory(connectionService)
+                    )
+                    val trackingScreenViewModel:TrackingScreenViewModel = viewModel(
+                        it,
+                        "TrackingScreenViewModel",
+                        TrackingScreenViewModelFactory(trackingService,connectionService,participantScreenViewModel))
+                    val collectionAreaScreenViewModel:CollectionAreaScreenViewModel = viewModel()
+                    val createGroupScreenViewModel:CreateGroupScreenViewModel = viewModel(
+                        it,
+                        "CreateGroupScreenViewModel",
+                        CreateGroupScreenViewModelFactory(db)
+                    )
+                    val presetScreenViewModel: PresetScreenViewModel = viewModel(
+                        it,
+                        "PresetScreenViewModel",
+                        PresetScreenViewModelFactory(
+                            db,
+                            collectionAreaScreenViewModel,
+                            trackingScreenViewModel,
+                            connectionService
+                        )
+                    )
+                    val joinScreenViewModel:JoinScreenViewModel = viewModel(
+                        it,
+                        "JoinScreenViewModel",
+                        JoinScreenViewModelFactory(
+                            db = db,
+                            preference,
+                            trackingScreenViewModel,
+                            connectionService = connectionService
+                        )
+                    )
+
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        AppEntryPoint(
+                            modifier = Modifier,
+                            intent,
+                            createGroupScreenViewModel,
+                            presetScreenViewModel,
+                            collectionAreaScreenViewModel,
+                            joinScreenViewModel,
+                            trackingScreenViewModel,
+                            participantScreenViewModel,
+                            trackingService,
+                            userId
+                        ) { x -> shareLink(x) }
+                    }
                 }
             }
         }

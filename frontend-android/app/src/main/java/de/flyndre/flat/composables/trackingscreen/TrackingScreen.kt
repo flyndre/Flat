@@ -47,6 +47,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
@@ -123,18 +124,17 @@ fun TrackingScreen(
     }
 
     Scaffold(topBar = {
-        TopAppBar(
-            title = { Text(text = trackingScreenViewModel.collectionInstance.name) },
-            navigationIcon = {
-                if (!userId.equals(trackingScreenViewModel.collectionInstance.clientId)) {//if this user is no admin
-                    IconButton(onClick = { showLeavingDialog = true }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "back to start screen"
-                        )
-                    }
+        Row(){
+            if (!userId.equals(trackingScreenViewModel.collectionInstance.clientId)) {//if this user is no admin
+                FloatingActionButton(modifier = Modifier.padding(10.dp),onClick = { showLeavingDialog = true }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "back to start screen"
+                    )
                 }
-            })
+            }
+
+        }
     }, bottomBar = {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
             ExtendedFloatingActionButton(
@@ -198,7 +198,7 @@ fun TrackingScreen(
         Modifier.padding(innerPadding)
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
-            properties = MapProperties(isMyLocationEnabled = true),
+            properties = MapProperties(isMyLocationEnabled = false),
             uiSettings = MapUiSettings(zoomControlsEnabled = false),
             cameraPositionState = cameraPositionState
         ) {
@@ -224,6 +224,7 @@ fun TrackingScreen(
                         }
                         if (list.isNotEmpty()) {
                             Polyline(points = list)
+                            Circle(center = list.last(), radius = 5.0)
                         }
                     }
 

@@ -1,5 +1,6 @@
 package de.flyndre.flat.composables.joinscreen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -8,6 +9,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -28,6 +30,7 @@ fun JoinScreen(modifier: Modifier = Modifier, onNavigateToInitialScreen: () -> U
     val joinLink by joinScreenViewModel.joinLink.collectAsState()
     val joinName by joinScreenViewModel.joinName.collectAsState()
     var joiningAllowed by remember { mutableStateOf(false) }
+    val lastCollections by joinScreenViewModel.lastCollections.collectAsState()
     if(!joinLink.equals("") && !joinName.equals("")){
         joiningAllowed = true
     }else{
@@ -51,6 +54,14 @@ fun JoinScreen(modifier: Modifier = Modifier, onNavigateToInitialScreen: () -> U
             TextField(modifier = modifier, value = joinName, onValueChange = {joinScreenViewModel.updateJoinName(it)}, label = {Text(text = "Name for joining")})
             Button(modifier = modifier, onClick = { joinScreenViewModel.join { onNavigateToTrackingScreen() } }, enabled = joiningAllowed) {
                 Text(text = "Join")
+            }
+            Column {
+                Text(text = "Verlauf")
+                lastCollections.reversed().forEach{
+                    ListItem(
+                        headlineContent = { Text(text = it)},
+                        modifier=Modifier.clickable { joinScreenViewModel.updateJoinLink(it) })
+                }
             }
         }
     }

@@ -61,7 +61,7 @@ First you have to establish an connection on the websocket. When the Connection 
 As first message you have to send an WebSocketConnectionMessage that should look like this:
 ```WebSocketConnectionMessage
 {
-	"type": 0, //WebsocketConnection
+	"type": "WebsocketConnection", 
 	"clientId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
 	"collectionId": "94042b6e-a317-499a-af3d-1d32e58cbbb2"
 }
@@ -70,8 +70,9 @@ That message is needed by the Backend to link your Connection to the specified C
 Now you can send following Messages:
 ```IncrementalTrackMessage
 {
-	"type": 1,
+	"type": "IncrementalTrack",
 	"trackId": "94042b6e-a317-499a-af3d-1d32e58cbbb2",
+	"clientId": "94042b6e-a317-499a-af3d-1d32e58cbbb3",
 	"track": {
 		"type": "LineString",
 		"coordinates": [
@@ -82,10 +83,10 @@ Now you can send following Messages:
 	}
 }
 ```
-To send Tracks to the Backend there they will be collected and send to the other clients of the collection.
+To send Tracks to the Backend. They will be collected and send to the other clients of the collection.
 ```AccessConfirmationMessage
 {
-	"type": 2,
+	"type": "AccessRequest,
 	"collectionId": "94042b6e-a317-499a-af3d-1d32e58cbbb2",
 	"clientId": "3fa85f64-5717-4562-b3fc-2c963f66afa7",
 	"username": "string",
@@ -95,8 +96,17 @@ To send Tracks to the Backend there they will be collected and send to the other
 Is only to confirm an user that requested access to the collection.
 ```
 {
-    "type":3,
+    "type":"CollectionClosed",
     "collectionId": "94042b6e-a317-499a-af3d-1d32e58cbbb2"
 }
 ```
 Is used to close an collection, will do the same as the RestEndpoint though.
+
+All IncrementalTrackMessages will be send as they are to all confirmed users of the collection.
+If a new WebsocketConnection is established and IncrementalTrackMessages have been send the new connected User receives an List of all previous messages.
+
+## Examples
+In this Section I will describe Examples of how an Communication could look like.
+### WebSocket-Examples
+Here I will display some Examples how an Conversation with the websocket could look like.
+

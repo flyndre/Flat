@@ -1,6 +1,7 @@
 package de.flyndre.flat.composables.presetscreen
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.CameraPosition
 import de.flyndre.flat.composables.presetscreen.collectionareascreen.CollectionArea
@@ -150,3 +151,12 @@ class PresetScreenViewModel(
         }
     }
 }
+class PresetScreenViewModelFactory(val db: AppDatabase,
+                                   val collectionAreaScreenViewModel: CollectionAreaScreenViewModel,
+                                   val trackingScreenViewModel: TrackingScreenViewModel,
+                                   val connectionService: IConnectionService)
+    : ViewModelProvider.Factory{
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return PresetScreenViewModel(db,collectionAreaScreenViewModel,trackingScreenViewModel,connectionService) as T
+    }
+    }
