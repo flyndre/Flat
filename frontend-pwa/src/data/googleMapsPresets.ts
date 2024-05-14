@@ -1,3 +1,4 @@
+import { ParticipantTrack } from '@/types/ParticipantTrack';
 import { mdiCircle } from '@mdi/js';
 
 export const POSITION_ICON_OUTER = {
@@ -16,6 +17,10 @@ export const POSITION_ICON_INNER = {
     strokeWeight: 1.7,
     scale: 0.62,
 };
+
+export function markerHtmlFromTrack(track: ParticipantTrack) {
+    return /*html*/ `<strong style="color: ${track.color}">${track.name}</strong>`;
+}
 
 export const LABELS_OFF_STYLES = [
     {
