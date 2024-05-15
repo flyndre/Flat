@@ -146,12 +146,9 @@ const invitationLink = computed(
 const manageParticipantsDialogVisible = ref(false);
 const participants = computed<any[]>(() => []);
 
-const joinRequests = computed<JoinRequest[]>(() => {
-    // TODO: get list of join requests from service
-    return [];
-});
-function processJoinRequest(clientId: string, accepted: boolean) {
-    // TODO: send to backend and perhaps show toast
+
+function processJoinRequest(joinRequest : JoinRequest) {
+    acceptOrDeclineAccessRequest(joinRequest.accepted, joinRequest.username, joinRequest.clientId, joinRequest.collectionId);
 }
 
 const tracks = computed<ParticipantTrack[]>(() => { return members.value});
@@ -167,11 +164,7 @@ onBeforeMount(async () => {
         route.params.id as string,
         clientId.value
     );
-
-    console.log('Collection for Map:');
-    console.log(response.data);
     divisions.value = response.data.collectionDivision;
-    console.log(divisions);
 });
 
 const isNewInvite = newInvite;
@@ -191,20 +184,7 @@ function accept() {
 
 <template>
     {{ tracks }}
-    <Dialog
-        v-model:visible="visible"
-        modal
-        header="Accept"
-        :style="{ width: '25rem' }"
-    >
-        {{ isNewInvite[0].username }} wants to join your Collection. Do you want
-        to accept it?
-        <Button
-            label="Akzeptieren"
-            severity="secondary"
-            @click="accept"
-        ></Button>
-    </Dialog>
+    <JoinRequestDialog :requests="isNewInvite" @request-answered="processJoinRequest" ></JoinRequestDialog>
     <DefaultLayout>
         <template #action-left>
             <SplitButton

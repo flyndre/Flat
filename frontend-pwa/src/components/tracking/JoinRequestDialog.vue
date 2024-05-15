@@ -13,16 +13,18 @@ const props = defineProps<{
     requests: JoinRequest[];
 }>();
 const emit = defineEmits<{
-    requestAnswered: [clientId: string, accepted: boolean];
+    requestAnswered: [JoinRequest];
 }>();
 const visible = computed(() => props.requests?.length > 0);
 
-function accept(clientId: string) {
-    emit('requestAnswered', clientId, true);
+function accept(request: JoinRequest) {
+    request.accepted = true;
+    emit('requestAnswered', request);
 }
 
-function decline(clientId: string) {
-    emit('requestAnswered', clientId, false);
+function decline(request: JoinRequest) {
+    request.accepted = false;
+    emit('requestAnswered', request);
 }
 </script>
 
@@ -63,7 +65,7 @@ function decline(clientId: string) {
                         </InputGroupAddon>
                         <Button
                             class="shrink-0 w-16"
-                            @click="decline(request.clientId)"
+                            @click="decline(request)"
                             severity="secondary"
                         >
                             <template #icon>
@@ -72,7 +74,7 @@ function decline(clientId: string) {
                         </Button>
                         <Button
                             class="shrink-0 w-16"
-                            @click="accept(request.clientId)"
+                            @click="accept(request)"
                         >
                             <template #icon>
                                 <MdiIcon :icon="mdiCheck" />
