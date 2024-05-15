@@ -141,11 +141,11 @@ class TrackingScreenViewModel(
     }
 
     fun centerOnPosition(cameraPositionState: CameraPositionState){
-        var lat :LatLng
+        var currentPosition :LatLng
         viewModelScope.launch(Dispatchers.Default){
-            lat = _trackingService.getCurrentPosition()
+            currentPosition = _trackingService.getCurrentPosition()
             viewModelScope.launch(Dispatchers.Main) {
-                cameraPositionState.animate(CameraUpdateFactory.newLatLng(lat))
+                cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(currentPosition, 10F))
             }
         }
     }

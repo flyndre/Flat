@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,11 +17,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,15 +44,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.Polygon
 import com.google.maps.android.compose.rememberCameraPositionState
 import de.flyndre.flat.composables.customComponents.SegmentedButtonItem
@@ -63,7 +68,7 @@ import de.flyndre.flat.ui.theme.AreaPurple
 @Composable
 fun CollectionAreaScreen(
     modifier: Modifier = Modifier,
-    navController: NavController,
+    onNavigateToPresetScreen: () -> Unit,
     collectionAreaScreenViewModel: CollectionAreaScreenViewModel,
 ) {
     //bottom navigation bar
@@ -89,8 +94,9 @@ fun CollectionAreaScreen(
                 ) {
                     Text(text = "area count: " + collectionAreas.size)
                     IconButton(onClick = {
+                        collectionAreaScreenViewModel.saveChanges()
                         collectionAreaScreenViewModel.setCameraPosition(cameraPositionState.position)
-                        navController.navigate("editpreset/0")
+                        onNavigateToPresetScreen()
                     }) {
                         Icon(
                             painter = painterResource(id = de.flyndre.flat.R.drawable.save_fill),
@@ -101,7 +107,10 @@ fun CollectionAreaScreen(
                 }
 
             }, navigationIcon = {
-                IconButton(onClick = { navController.navigate("editpreset/0") }) {
+                IconButton(onClick = {
+                    collectionAreaScreenViewModel.discardChanges()
+                    onNavigateToPresetScreen()
+                }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "back to preset screen"
@@ -150,84 +159,95 @@ fun CollectionAreaScreen(
                     modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(
                         10.dp,
-                        Alignment.CenterHorizontally
+                        Alignment.End
                     ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    SegmentedButtons(
-                        modifier = Modifier
-                            .width((LocalConfiguration.current.screenWidthDp * 0.7).dp)
-                            .height(40.dp)
-                    ) {
-                        SegmentedButtonItem(
-                            selected = selectedColorItem.equals(AreaBlue),
-                            onClick = { selectedColorItem = AreaBlue },
-                            icon = {
-                                Box(
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .clip(shape = RoundedCornerShape(5.dp))
-                                        .background(color = AreaBlue)
-                                )
-                            })
-                        SegmentedButtonItem(
-                            selected = selectedColorItem.equals(AreaPink),
-                            onClick = { selectedColorItem = AreaPink },
-                            icon = {
-                                Box(
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .clip(shape = RoundedCornerShape(5.dp))
-                                        .background(color = AreaPink)
-                                )
-                            })
-                        SegmentedButtonItem(
-                            selected = selectedColorItem.equals(AreaGreen),
-                            onClick = { selectedColorItem = AreaGreen },
-                            icon = {
-                                Box(
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .clip(shape = RoundedCornerShape(5.dp))
-                                        .background(color = AreaGreen)
-                                )
-                            })
-                        SegmentedButtonItem(
-                            selected = selectedColorItem.equals(AreaOrange),
-                            onClick = { selectedColorItem = AreaOrange },
-                            icon = {
-                                Box(
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .clip(shape = RoundedCornerShape(5.dp))
-                                        .background(color = AreaOrange)
-                                )
-                            })
-                        SegmentedButtonItem(
-                            selected = selectedColorItem.equals(AreaPurple),
-                            onClick = { selectedColorItem = AreaPurple },
-                            icon = {
-                                Box(
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .clip(shape = RoundedCornerShape(5.dp))
-                                        .background(color = AreaPurple)
-                                )
-                            })
-                    }
                     if (drawingEnabled) {
+                        SmallFloatingActionButton(onClick = { collectionAreaScreenViewModel.removeLastCollectionAreaPoint() }) {
+                            Icon(
+                                painter = painterResource(id = de.flyndre.flat.R.drawable.undo_fill),
+                                contentDescription = "delete last point"
+                            )
+                        }
                         SmallFloatingActionButton(onClick = {
-                            drawingEnabled =
-                                false; collectionAreaScreenViewModel.checkNewCollectionIsEmpty()
+                            collectionAreaScreenViewModel.addPoint(
+                                cameraPositionState.position.target
+                            )
+                        }) {
+                            Icon(Icons.Filled.Add, contentDescription = "add point")
+                        }
+                        SmallFloatingActionButton(onClick = {
+                            drawingEnabled = false;
+                            collectionAreaScreenViewModel.checkNewCollectionIsEmpty()
                         }) {
                             Icon(Icons.Filled.Check, contentDescription = "finish drawing of area")
                         }
                     } else {
+                        SegmentedButtons(
+                            modifier = Modifier
+                                .width((LocalConfiguration.current.screenWidthDp * 0.7).dp)
+                                .height(40.dp)
+                        ) {
+                            SegmentedButtonItem(
+                                selected = selectedColorItem.equals(AreaBlue),
+                                onClick = { selectedColorItem = AreaBlue },
+                                icon = {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .clip(shape = RoundedCornerShape(5.dp))
+                                            .background(color = AreaBlue)
+                                    )
+                                })
+                            SegmentedButtonItem(
+                                selected = selectedColorItem.equals(AreaPink),
+                                onClick = { selectedColorItem = AreaPink },
+                                icon = {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .clip(shape = RoundedCornerShape(5.dp))
+                                            .background(color = AreaPink)
+                                    )
+                                })
+                            SegmentedButtonItem(
+                                selected = selectedColorItem.equals(AreaGreen),
+                                onClick = { selectedColorItem = AreaGreen },
+                                icon = {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .clip(shape = RoundedCornerShape(5.dp))
+                                            .background(color = AreaGreen)
+                                    )
+                                })
+                            SegmentedButtonItem(
+                                selected = selectedColorItem.equals(AreaOrange),
+                                onClick = { selectedColorItem = AreaOrange },
+                                icon = {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .clip(shape = RoundedCornerShape(5.dp))
+                                            .background(color = AreaOrange)
+                                    )
+                                })
+                            SegmentedButtonItem(
+                                selected = selectedColorItem.equals(AreaPurple),
+                                onClick = { selectedColorItem = AreaPurple },
+                                icon = {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .clip(shape = RoundedCornerShape(5.dp))
+                                            .background(color = AreaPurple)
+                                    )
+                                })
+                        }
                         SmallFloatingActionButton(onClick = {
-                            drawingEnabled =
-                                true; collectionAreaScreenViewModel.addNewCollectionArea(
-                            selectedColorItem
-                        )
+                            drawingEnabled = true
+                            collectionAreaScreenViewModel.addNewCollectionArea(selectedColorItem)
                         }) {
                             Icon(Icons.Filled.Edit, contentDescription = "draw new area")
                         }
@@ -247,10 +267,10 @@ fun CollectionAreaScreen(
         } else if (selectedNavigationItem == 1) {
             mapSettings = MapUiSettings(
                 zoomControlsEnabled = false,
-                zoomGesturesEnabled = false,
+                zoomGesturesEnabled = true,
                 tiltGesturesEnabled = false,
                 rotationGesturesEnabled = false,
-                scrollGesturesEnabled = false
+                scrollGesturesEnabled = true
             )
             mapProperties = MapProperties(isMyLocationEnabled = false)
         } else {
@@ -263,14 +283,16 @@ fun CollectionAreaScreen(
             //map
             GoogleMap(
                 modifier = mapsModifier,
+
                 uiSettings = mapSettings,
                 properties = mapProperties,
+
                 cameraPositionState = cameraPositionState,
-                onMapClick = {
-                    if (selectedNavigationItem == 1) {
-                        collectionAreaScreenViewModel.addPCollectionAreaPoint(it)
-                    }
-                }) {
+            ) {
+                if(drawingEnabled){
+                    Marker(state = MarkerState(cameraPositionState.position.target))
+                }
+
                 if (collectionAreas.isNotEmpty()) {
                     collectionAreas.forEach { area ->
                         if (area.listAreaPoints.isNotEmpty()) {
@@ -283,20 +305,24 @@ fun CollectionAreaScreen(
                     }
                 }
             }
+
             //list of areas if navigation is set to
             if (selectedNavigationItem == 2) {
                 LazyColumn {
                     items(collectionAreas) {
                         ListItem(modifier = Modifier.clickable {
-                            collectionAreaScreenViewModel.animateCameraPositionToCollectionArea(it, cameraPositionState)
-                        },
-                            headlineContent = {
-                            Text(
-                                text = "Area " + (collectionAreas.indexOf(
-                                    it
-                                ) + 1)
+                            collectionAreaScreenViewModel.animateCameraPositionToCollectionArea(
+                                it,
+                                cameraPositionState
                             )
                         },
+                            headlineContent = {
+                                Text(
+                                    text = "Area " + (collectionAreas.indexOf(
+                                        it
+                                    ) + 1)
+                                )
+                            },
                             supportingContent = {
                                 Box(
                                     modifier = Modifier
@@ -306,7 +332,11 @@ fun CollectionAreaScreen(
                                 )
                             },
                             trailingContent = {
-                                IconButton(onClick = { collectionAreaScreenViewModel.removeCollectionArea(it) }) {
+                                IconButton(onClick = {
+                                    collectionAreaScreenViewModel.removeCollectionArea(
+                                        it
+                                    )
+                                }) {
                                     Icon(
                                         Icons.Filled.Delete,
                                         contentDescription = "delete area",

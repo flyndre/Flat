@@ -1,7 +1,5 @@
 package de.flyndre.flat.composables.presetscreen.collectionareascreen
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,11 +11,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class CollectionAreaScreenViewModel() : ViewModel() {
     //list of points for selection area
+    private val _oldListCollectionAreas: ArrayList<CollectionArea> = arrayListOf()
     private val _listCollectionAreas = MutableStateFlow<List<CollectionArea>>(listOf())
     var listCollectionAreas = _listCollectionAreas.asStateFlow()
 
@@ -26,7 +24,7 @@ class CollectionAreaScreenViewModel() : ViewModel() {
     val cameraPosition: StateFlow<CameraPosition> = _cameraPosition.asStateFlow()
 
     //used to clear viewModel for creation of new empty preset
-    fun newEmptyCollectionArea() {
+    fun clearCollectionArea() {
         _cameraPosition.value = CameraPosition(LatLng(0.0, 0.0), 0F, 0F, 0F)
         _listCollectionAreas.value = listOf()
     }
@@ -46,7 +44,36 @@ class CollectionAreaScreenViewModel() : ViewModel() {
     }
 
     fun setListAreas(list: ArrayList<CollectionArea>) {
+        refreshOldValues(list)
         _listCollectionAreas.value = list
+    }
+
+    private fun refreshOldValues(list: ArrayList<CollectionArea>){
+        for(area in list){
+            val listOfPoints: ArrayList<LatLng> = arrayListOf()
+            for(p in area.listAreaPoints){
+                listOfPoints.add(LatLng(p.latitude, p.longitude))
+            }
+            _oldListCollectionAreas.add(CollectionArea(Color(area.color.value), isSelected = false, listOfPoints))
+        }
+    }
+
+    fun saveChanges(){
+        refreshOldValues(ArrayList(_listCollectionAreas.value))
+    }
+
+    fun discardChanges(){
+        val tempList: ArrayList<CollectionArea> = arrayListOf()
+
+        for(area in _oldListCollectionAreas){
+            val listOfPoints: ArrayList<LatLng> = arrayListOf()
+            for(p in area.listAreaPoints){
+                listOfPoints.add(LatLng(p.latitude, p.longitude))
+            }
+            tempList.add(CollectionArea(Color(area.color.value), isSelected = false, listOfPoints))
+        }
+
+        _listCollectionAreas.value = tempList
     }
 
     fun getListAreas(): ArrayList<CollectionArea> {
@@ -92,38 +119,42 @@ class CollectionAreaScreenViewModel() : ViewModel() {
         _listCollectionAreas.value = arrayList
     }
 
-    fun addPCollectionAreaPoint(point: LatLng) {
-        val arrayList: ArrayList<CollectionArea> = ArrayList(_listCollectionAreas.value)
+    fun addCollectionAreaPoint(point: LatLng) {
+        val listOfAreas: ArrayList<CollectionArea> = arrayListOf()
 
-        for (area in arrayList) {
-            if (area.isSelected) {
-                val tempArea = area.copy()
-                tempArea.listAreaPoints.add(point)
-                arrayList.remove(area)
-                arrayList.add(tempArea)
-                break
+        for(area in _listCollectionAreas.value){
+            val listOfPoints: ArrayList<LatLng> = arrayListOf()
+            for(p in area.listAreaPoints){
+                listOfPoints.add(LatLng(p.latitude, p.longitude))
             }
+            val newArea = CollectionArea(Color(area.color.value), area.isSelected, listOfPoints)
+            if(area.isSelected){
+                newArea.listAreaPoints.add(point)
+            }
+
+            listOfAreas.add(newArea)
         }
 
-        _listCollectionAreas.value = arrayList
+        _listCollectionAreas.value = listOfAreas
     }
 
     fun removeLastCollectionAreaPoint() {
-        val arrayList: ArrayList<CollectionArea> = ArrayList(_listCollectionAreas.value)
+        val listOfAreas: ArrayList<CollectionArea> = arrayListOf()
 
-        for (area in arrayList) {
-            if (area.isSelected) {
-                if (area.listAreaPoints.isNotEmpty()) {
-                    val tempArea = area.copy()
-                    tempArea.listAreaPoints.removeLast()
-                    arrayList.remove(area)
-                    arrayList.add(tempArea)
-                }
-                break
+        for(area in _listCollectionAreas.value){
+            val listOfPoints: ArrayList<LatLng> = arrayListOf()
+            for(point in area.listAreaPoints){
+                listOfPoints.add(LatLng(point.latitude, point.longitude))
             }
+            val newArea = CollectionArea(Color(area.color.value), area.isSelected, listOfPoints)
+            if(area.isSelected && area.listAreaPoints.isNotEmpty()){
+                newArea.listAreaPoints.removeLast()
+            }
+
+            listOfAreas.add(newArea)
         }
 
-        _listCollectionAreas.value = arrayList
+        _listCollectionAreas.value = listOfAreas
     }
 
     fun removeCollectionArea(collectionArea: CollectionArea){
@@ -132,5 +163,9 @@ class CollectionAreaScreenViewModel() : ViewModel() {
         arrayList.remove(collectionArea)
 
         _listCollectionAreas.value = arrayList
+    }
+
+    fun addPoint(point:LatLng){
+        addCollectionAreaPoint(point)
     }
 }
