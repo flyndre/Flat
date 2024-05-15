@@ -44,11 +44,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
@@ -83,6 +88,8 @@ fun CollectionAreaScreen(
     val cameraPositionState = rememberCameraPositionState {
         position = cameraPosition
     }
+    val selectedPoint by collectionAreaScreenViewModel.selectedPoint.collectAsState()
+    val selectedArea by collectionAreaScreenViewModel.selectedArea.collectAsState()
     //modal bottom sheet for choosing area
     Scaffold(
         topBar = {
@@ -171,14 +178,19 @@ fun CollectionAreaScreen(
                             )
                         }
                         SmallFloatingActionButton(onClick = {
-                            collectionAreaScreenViewModel.addPoint(
-                                cameraPositionState.position.target
-                            )
+                            if(selectedPoint==null){
+                                collectionAreaScreenViewModel.addPoint(
+                                    cameraPositionState.position.target
+                                )
+                            }else{
+                                collectionAreaScreenViewModel.updatePoint(selectedPoint!!, cameraPositionState.position.target)
+                            }
                         }) {
                             Icon(Icons.Filled.Add, contentDescription = "add point")
                         }
                         SmallFloatingActionButton(onClick = {
                             drawingEnabled = false;
+                            collectionAreaScreenViewModel.setSelectedPoint(null,cameraPositionState)
                             collectionAreaScreenViewModel.checkNewCollectionIsEmpty()
                         }) {
                             Icon(Icons.Filled.Check, contentDescription = "finish drawing of area")
@@ -247,7 +259,7 @@ fun CollectionAreaScreen(
                         }
                         SmallFloatingActionButton(onClick = {
                             drawingEnabled = true
-                            collectionAreaScreenViewModel.addNewCollectionArea(selectedColorItem)
+                            if(selectedPoint!=null) collectionAreaScreenViewModel.addNewCollectionArea(selectedColorItem)
                         }) {
                             Icon(Icons.Filled.Edit, contentDescription = "draw new area")
                         }
@@ -286,7 +298,10 @@ fun CollectionAreaScreen(
 
                 uiSettings = mapSettings,
                 properties = mapProperties,
-
+                onMapClick = {
+                    collectionAreaScreenViewModel.setSelectedPoint(null,cameraPositionState)
+                    collectionAreaScreenViewModel.setSelectedArea(null,cameraPositionState)
+                             },
                 cameraPositionState = cameraPositionState,
             ) {
                 if(drawingEnabled){
@@ -299,8 +314,22 @@ fun CollectionAreaScreen(
                             Polygon(
                                 points = area.listAreaPoints,
                                 fillColor = area.color.copy(alpha = 0.5f),
-                                strokeColor = area.color.copy(alpha = 1F)
+                                strokeColor = area.color.copy(alpha = 1F),
+                                clickable = true,
+                                onClick = {collectionAreaScreenViewModel.setSelectedArea(area,cameraPositionState)}
                             )
+                            if(selectedNavigationItem==1&&area==selectedArea){
+                                area.listAreaPoints.forEach{ point ->
+                                    Circle(
+                                        center = point,
+                                        radius = 2.0,
+                                        clickable = true,
+                                        onClick = {collectionAreaScreenViewModel.setSelectedPoint(point,cameraPositionState)},
+                                        fillColor = if(point == selectedPoint) Color.Red else Color.Black,
+                                        strokeColor = if(point == selectedPoint) Color.Red else Color.Black
+                                    )
+                                }
+                            }
                         }
                     }
                 }
