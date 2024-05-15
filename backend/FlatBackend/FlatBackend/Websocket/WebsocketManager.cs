@@ -60,28 +60,6 @@ namespace FlatBackend.Websocket
             }), state: null, dueTime: 1000, period: 30000);
         }
 
-        private void sendKeepaliveMessages()
-        {
-            List<WebSocketUserModel> deprecatedUsers = new List<WebSocketUserModel>();
-            var keepAlive = new KeepAliveDto();
-            string Json = JsonConvert.SerializeObject(keepAlive);
-            foreach (var user in users)
-            {
-                if (user != null && user.webSocket.State == WebSocketState.Open)
-                {
-                    user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
-                }
-                else { deprecatedUsers.Add(user); }
-            }
-            if (deprecatedUsers.Count > 0)
-            {
-                foreach (var user in deprecatedUsers)
-                {
-                    users.Remove(user);
-                }
-            }
-        }
-
         public Guid getCollectionId( WebSocket websocket )
         {
             var user = users.Where(x => x.webSocket == websocket).First();
@@ -156,6 +134,7 @@ namespace FlatBackend.Websocket
             var collection = await _MongoDBService.GetCollection(collectionId);
             foreach (var user in users)
             {
+                if (user == null) continue;
                 if (user.collectionId == collectionId && user.webSocket.State == WebSocketState.Open)
                 {
                     var validUser = collection.confirmedUsers.Find(x => x.clientId == user.clientId);
@@ -174,6 +153,7 @@ namespace FlatBackend.Websocket
             var collection = await _MongoDBService.GetCollection(collectionId);
             foreach (var user in users)
             {
+                if (user == null) continue;
                 if (user.collectionId == collectionId && user.webSocket.State == WebSocketState.Open)
                 {
                     CollectionClosedDto collectionClosedDto = new CollectionClosedDto() { collectionId = collectionId };
@@ -212,6 +192,7 @@ namespace FlatBackend.Websocket
         {
             foreach (var user in users)
             {
+                if (user == null) continue;
                 if (user.collectionId == collectionId && user.webSocket.State == WebSocketState.Open)
                 {
                     string Json = JsonConvert.SerializeObject(track);
@@ -235,7 +216,7 @@ namespace FlatBackend.Websocket
             if (collection != null)
             {
                 var user = users.Find(x => x.collectionId == collection.id && x.clientId == collection.clientId);
-                if (user != null/*&& user.webSocket.State!=WebSocketState.Aborted*/)
+                if (user != null && user.webSocket.State == WebSocketState.Open)
                 {
                     var Json = JsonConvert.SerializeObject(request);
                     await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
@@ -246,7 +227,7 @@ namespace FlatBackend.Websocket
                     return model;
                 }
             }
-            return null;
+            throw new InvalidOperationException("There have been an Problem. It could be that the Admin is not available...");
         }
 
         public async void sendAccessConfirmationToUser( AccessConfirmationDto request )
