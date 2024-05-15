@@ -46,6 +46,8 @@ class JoinScreenViewModel(db: AppDatabase,preferences:SharedPreferences,tracking
             putString(_usernameKey,joinName)
         }
     }
+
+    //last collections
     private val _lastCollections = MutableStateFlow(preferences.getStringSet(_lastCollectionsKey,
         setOf())!!)
     val lastCollections = _lastCollections.asStateFlow()
@@ -61,6 +63,14 @@ class JoinScreenViewModel(db: AppDatabase,preferences:SharedPreferences,tracking
         }
     }
 
+    //connection error handling
+    private val _showConnectionError = MutableStateFlow(false)
+    val showConnectionError = _showConnectionError.asStateFlow()
+
+    fun hideConnectionError(){
+        _showConnectionError.value = false
+    }
+
     fun join(navigateToTrackingScreen: ()->Unit){
         viewModelScope.launch {
             try {
@@ -72,10 +82,11 @@ class JoinScreenViewModel(db: AppDatabase,preferences:SharedPreferences,tracking
                     updateLastCollections(joinLink.value)
                     navigateToTrackingScreen()
                 }else{
-                    //handle deny
+
                 }
             }catch (e: IllegalArgumentException){
                 e.message?.let { Log.e(this.toString(), it) }
+                _showConnectionError.value = true
             }
         }
     }
