@@ -10,22 +10,27 @@ import {
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
+import DivisionsList from '@/components/tracking/DivisionsList.vue';
 import InvitationDialog from '@/components/tracking/InvitationDialog.vue';
 import JoinRequestDialog from '@/components/tracking/JoinRequestDialog.vue';
-import ParticipantsDialog from '@/components/tracking/ParticipantsDialog.vue';
+import ParticipantsList from '@/components/tracking/ParticipantsList.vue';
 import { clientId } from '@/data/clientMetadata';
 import { TOAST_LIFE } from '@/data/constants';
 import { trackingLogs } from '@/data/trackingLogs';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { useTrackingService } from '@/service/trackingService';
+import { Collection } from '@/types/Collection';
 import { Division } from '@/types/Division';
 import { JoinRequest } from '@/types/JoinRequest';
+import { Participant } from '@/types/Participant';
 import { ParticipantTrack } from '@/types/ParticipantTrack';
 import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
 import { isOnMobile } from '@/util/mobileDetection';
 import {
+    mdiAccount,
     mdiAccountMultiple,
     mdiAccountPlus,
+    mdiAccountTie,
     mdiCheck,
     mdiCircle,
     mdiClose,
@@ -33,17 +38,23 @@ import {
     mdiExport,
     mdiFitToScreen,
     mdiHandBackRight,
+    mdiMap,
     mdiPause,
     mdiPauseCircle,
     mdiPlay,
     mdiStop,
+    mdiTextureBox,
 } from '@mdi/js';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import Dialog from 'primevue/dialog';
+import InputGroup from 'primevue/inputgroup';
+import InputGroupAddon from 'primevue/inputgroupaddon';
 import { MenuItem } from 'primevue/menuitem';
 import SelectButton from 'primevue/selectbutton';
 import SplitButton from 'primevue/splitbutton';
+import TabPanel from 'primevue/tabpanel';
+import TabView from 'primevue/tabview';
 import { useToast } from 'primevue/usetoast';
 import { computed, onBeforeMount, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -115,11 +126,6 @@ const adminActions: MenuItem[] = [
         icon: mdiStop,
         command: () => (endCollectionDialogVisible.value = true),
     },
-    {
-        label: 'Manage Participants',
-        icon: mdiAccountMultiple,
-        command: () => (manageParticipantsDialogVisible.value = true),
-    },
 ];
 
 function leaveCollection() {
@@ -143,8 +149,18 @@ const invitationLink = computed(
     () => window.location.origin + import.meta.env.BASE_URL + 'join/' + props.id
 );
 
-const manageParticipantsDialogVisible = ref(false);
-const participants = computed<any[]>(() => []);
+const participants = computed<Participant[]>(() => [
+    {
+        clientId: '1',
+        username: 'Rubi',
+        color: '#64e86f',
+    },
+    {
+        clientId: '2',
+        username: 'Lubuu',
+        color: '#36cfe0',
+    },
+]);
 
 const joinRequests = computed<JoinRequest[]>(() => {
     // TODO: get list of join requests from service
@@ -154,9 +170,28 @@ function processJoinRequest(clientId: string, accepted: boolean) {
     // TODO: send to backend and perhaps show toast
 }
 
-const tracks = computed<ParticipantTrack[]>(() => { return members.value});
+const tracks = computed<ParticipantTrack[]>(() => {
+    return members.value;
+});
 
-let divisions = ref<Division[]>([]);
+const collection = ref<Collection>(undefined);
+const divisions = computed<Division[]>(
+    () =>
+        collection.value?.divisions ?? [
+            {
+                id: '1',
+                name: 'Norddorf',
+                area: undefined,
+                color: '#bfbfbf',
+            },
+            {
+                id: '2',
+                name: 'Süddorf',
+                area: undefined,
+                color: '#bfbfbf',
+            },
+        ]
+);
 
 // TODO: onMounted websocket aufmachen
 onBeforeMount(async () => {
@@ -170,7 +205,7 @@ onBeforeMount(async () => {
 
     console.log('Collection for Map:');
     console.log(response.data);
-    divisions.value = response.data.collectionDivision;
+    collection.value = response.data;
     console.log(divisions);
 });
 
@@ -304,11 +339,6 @@ function accept() {
                 :link="invitationLink"
             />
 
-            <ParticipantsDialog
-                v-model:visible="manageParticipantsDialogVisible"
-                :participants
-            />
-
             <JoinRequestDialog
                 :requests="joinRequests"
                 @request-answered="processJoinRequest"
@@ -357,53 +387,95 @@ function accept() {
                 </template>
             </Dialog>
 
-            <Card
-                class="h-full grow"
-                :pt="{
-                    root: {
-                        class: [
-                            'overflow-hidden flex',
-                            { 'flex flex-col-reverse': !isOnMobile },
-                        ],
-                    },
-                    header: {
-                        class: 'h-full flex flex-col grow',
-                    },
-                    body: { class: 'p-2.5' },
-                }"
-            >
-                <template #header>
-                    <MapWithControls
-                        controls="none"
-                        :center="mapCenterSelected"
-                        :locked="mapCenterSelected != null"
-                        :divisions
-                        :client-pos
-                        :tracks
-                    />
-                </template>
+            <Card class="h-full basis-0 grow">
                 <template #content>
-                    <SelectButton
-                        class="flex w-full flex-row"
-                        v-model="mapCenterSelected"
-                        :options="mapCenterOptions"
-                        :option-value="(o) => o.value"
-                        :allow-empty="false"
-                        :pt="{ button: { class: 'w-full' } }"
+                    <TabView
+                        :pt="{
+                            root: {
+                                class:
+                                    'flex ' +
+                                    (isOnMobile
+                                        ? 'flex-col-reverse'
+                                        : 'flex-col'),
+                            },
+                            nav: {
+                                class: [isOnMobile ? 'mt-2' : 'mb-2'],
+                            },
+                            inkbar: { class: 'rounded-t h-1' },
+                            panelContainer: { class: 'p-0' },
+                        }"
                     >
-                        <template #option="slotProps">
-                            <div
-                                class="flex flex-row justify-center items-center flex-nowrap w-full gap-3 min-h-6"
+                        <TabPanel>
+                            <template #header>
+                                <div class="flex justify-center items-center">
+                                    <MdiTextButtonIcon :icon="mdiMap" />
+                                    Map
+                                </div>
+                            </template>
+                            <SelectButton
+                                class="flex w-full flex-row"
+                                v-model="mapCenterSelected"
+                                :options="mapCenterOptions"
+                                :option-value="(o) => o.value"
+                                :allow-empty="false"
+                                :pt="{ button: { class: 'w-full' } }"
                             >
-                                <MdiIcon :icon="slotProps.option.icon" />
-                                <span
-                                    class="max-[400px]:hidden text-ellipsis overflow-hidden z-10"
-                                >
-                                    {{ slotProps.option.label }}
-                                </span>
-                            </div>
-                        </template>
-                    </SelectButton>
+                                <template #option="slotProps">
+                                    <div
+                                        class="flex flex-row justify-center items-center flex-nowrap w-full gap-3 min-h-6"
+                                    >
+                                        <MdiIcon
+                                            :icon="slotProps.option.icon"
+                                        />
+                                        <span
+                                            class="max-[400px]:hidden text-ellipsis overflow-hidden z-10"
+                                        >
+                                            {{ slotProps.option.label }}
+                                        </span>
+                                    </div>
+                                </template>
+                            </SelectButton>
+                            <MapWithControls
+                                class="min-h-32 h-32"
+                                controls="none"
+                                :center="mapCenterSelected"
+                                :locked="mapCenterSelected != null"
+                                :divisions
+                                :client-pos
+                                :tracks
+                            />
+                        </TabPanel>
+                        <TabPanel>
+                            <template #header>
+                                <div class="flex justify-center items-center">
+                                    <MdiTextButtonIcon
+                                        :icon="mdiAccountMultiple"
+                                    />
+                                    Participants
+                                </div>
+                            </template>
+                            <ParticipantsList
+                                :participants
+                                :divisions
+                                :admin-mode="isAdmin"
+                            />
+                        </TabPanel>
+                        <TabPanel>
+                            <template #header>
+                                <div class="flex justify-center items-center">
+                                    <MdiTextButtonIcon :icon="mdiTextureBox" />
+                                    Divisions
+                                </div>
+                            </template>
+                            <DivisionsList
+                                :participants
+                                :divisions
+                                :admin-mode="isAdmin"
+                                @unassign-division="(d) => console.log(d)"
+                                @assign-division="(d, p) => console.log(d, p)"
+                            />
+                        </TabPanel>
+                    </TabView>
                 </template>
             </Card>
         </template>
