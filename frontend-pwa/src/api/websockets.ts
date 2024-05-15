@@ -10,7 +10,6 @@ import { UpdateCollectionMessage } from "@/types/websocket/UpdateCollectionMessa
 import { IncrementalTrackMessage } from "@/types/websocket/IncrementalTrackMessage";
 
 
-
 export let members = ref([{id: clientId.value, name: "admin", color: "#f8fafc", progress : []}] as ParticipantTrack[]);
 export let newInvite = ref([]);
 export let isAdmin = true;
