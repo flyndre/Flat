@@ -3,4 +3,5 @@ export type Division = {
     name?: string;
     color?: string;
     area: GeoJSON.Polygon;
+    clientId?: string;
 };
