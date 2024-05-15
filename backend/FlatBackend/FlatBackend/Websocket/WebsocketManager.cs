@@ -301,14 +301,27 @@ namespace FlatBackend.Websocket
             }
         }
 
-        void IWebsocketManager.removeWebsocketUser( Guid clientId )
+        public void removeWebsocketUser( Guid clientId )
         {
-            throw new NotImplementedException();
+            var user = users.Where(x => x.clientId == clientId).First();
+            if (user != null)
+            {
+                users.Remove(user);
+            }
         }
 
-        void IWebsocketManager.informBossOverLeavingOfUser( Guid collectionId, Guid clientId )
+        public async void informBossOverLeavingOfUser( Guid collectionId, UserModel leavingUser )
         {
-            throw new NotImplementedException();
+            var collection = await _MongoDBService.GetCollection(collectionId);
+            if (collection != null)
+            {
+                var user = users.Find(x => x.collectionId == collection.id && x.clientId == collection.clientId);
+                if (user != null)
+                {
+                    var Json = JsonConvert.SerializeObject(new LeavingUserDto { user = leavingUser });
+                    await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
+                }
+            }
         }
     }
 }

@@ -252,6 +252,7 @@ namespace FlatBackend.Controllers
                 {
                     var usersRequestsList = oldCol.requestedAccess.Where(x => x.clientId == clientId).ToList();
                     var validUsersList = oldCol.confirmedUsers.Where(x => x.clientId == clientId).ToList();
+                    var leavingUser = validUsersList.First();
                     var usersDivisionsList = oldCol.collectionDivision.Where(x => x.clientId == clientId).ToList();
                     if (usersRequestsList != null)
                     {
@@ -277,7 +278,7 @@ namespace FlatBackend.Controllers
                     }
 
                     _WebsocketManager.removeWebsocketUser(clientId);
-                    _WebsocketManager.informBossOverLeavingOfUser(id, clientId);
+                    _WebsocketManager.informBossOverLeavingOfUser(id, leavingUser);
                     _MongoDBService.ChangeCollection(oldCol);
                     _WebsocketManager.sendUpdateCollection(oldCol.id);
                 }
