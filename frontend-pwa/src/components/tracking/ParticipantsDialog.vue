@@ -1,31 +1,41 @@
 <script setup lang="ts">
-import { mdiArrowLeft } from '@mdi/js';
+import { mdiAccount, mdiArrowLeft, mdiClose } from '@mdi/js';
 import Button from 'primevue/button';
 import Sidebar from 'primevue/sidebar';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
+import { Division } from '@/types/Division';
+import InputGroup from 'primevue/inputgroup';
+import InputGroupAddon from 'primevue/inputgroupaddon';
+import { Participant } from '@/types/Participant';
 
 const visible = defineModel<boolean>('visible', {
     default: false,
 });
+
 const props = defineProps<{
-    participants: any[];
-    assignDivisionHandler?: (participantId: string, divisionId: string) => any;
-    unassignDivisionHandler?: (
-        participantId: string,
-        divisionId: string
-    ) => any;
-    removeParticipantHandler?: (participantId: string) => any;
+    participants: Participant[];
+    divisions: Division[];
 }>();
 
-const participants = [
-    {
-        name: 'hello',
-        id: 'sss',
-        area: 'dsdssd',
-    },
-];
+const emit = defineEmits<{
+    assignDivision: [division: Division, participant: Participant];
+    unassignDivision: [division: Division];
+    kickParticipant: [participant: Participant];
+}>();
+
+function assignDivision(division: Division, participant: Participant) {
+    emit('assignDivision', division, participant);
+}
+
+function unassignDivision(division: Division) {
+    emit('unassignDivision', division);
+}
+
+function kickParticipant(participant: Participant) {
+    emit('kickParticipant', participant);
+}
 </script>
 
 <template>
@@ -59,7 +69,30 @@ const participants = [
                 </Button>
             </template>
             <template #title>Manage Participants</template>
-            <template #default> ... </template>
+            <template #default>
+                <div class="flex flex-col gap-2 items-stretch justify-start">
+                    <InputGroup
+                        v-for="participant of participants"
+                        :key="participant.clientId"
+                    >
+                        <InputGroupAddon
+                            class="grow justify-start items-center overflow-hidden text-ellipsis"
+                        >
+                            <MdiIcon class="ml-2 mr-3" :icon="mdiAccount" />
+                            {{ participant.username }}
+                        </InputGroupAddon>
+                        <Button
+                            class="shrink-0 w-16"
+                            @click="kickParticipant(participant)"
+                            severity="secondary"
+                        >
+                            <template #icon>
+                                <MdiIcon :icon="mdiClose" />
+                            </template>
+                        </Button>
+                    </InputGroup>
+                </div>
+            </template>
         </DefaultLayout>
     </Sidebar>
 </template>
