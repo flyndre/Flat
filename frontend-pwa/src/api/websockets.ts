@@ -10,7 +10,7 @@ import { UpdateCollectionMessage } from "@/types/websocket/UpdateCollectionMessa
 import { IncrementalTrackMessage } from "@/types/websocket/IncrementalTrackMessage";
 
 
- 
+
 export let members = ref([{id: clientId.value, name: "admin", color: "#f8fafc", progress : []}] as ParticipantTrack[]);
 export let newInvite = ref([]);
 export let isAdmin = true;
@@ -95,6 +95,14 @@ export function resumeSendingToServer(){
     resumeInterval();
 }
 
+export function addMemberToCollection(clients : {clientId: string, username: string}[]){
+    clients.forEach(element => {
+        if((members.value.filter(el => el.id === element.clientId)).length === 0){
+           members.value.push({name: element.username, id: element.clientId, color: "#fffff", progress: [] })
+        }
+        });
+}
+
 
 /*
  * Helper Functions 
@@ -114,7 +122,7 @@ function handleCollectionUpdate(message : UpdateCollectionMessage){
 }
 
 function handleIncrementalTracks(message : IncrementalTrackMessage){
-    
+
     let memberOfTrack = (members.value.filter(el => el.id === message.clientId))[0]
 
     let listOfTracks = memberOfTrack.progress.filter(el => el.id === message.trackId)

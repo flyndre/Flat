@@ -2,6 +2,7 @@
 import { getCollection } from '@/api/rest';
 import {
     acceptOrDeclineAccessRequest,
+    addMemberToCollection,
     establishWebsocket,
     isAdmin,
     members,
@@ -51,6 +52,7 @@ import { useRoute, useRouter } from 'vue-router';
 const props = defineProps<{
     id: string;
 }>();
+
 
 const router = useRouter();
 const route = useRoute();
@@ -164,6 +166,8 @@ onBeforeMount(async () => {
         route.params.id as string,
         clientId.value
     );
+
+    addMemberToCollection(response.data.confirmedUsers)
     divisions.value = response.data.collectionDivision;
 });
 
