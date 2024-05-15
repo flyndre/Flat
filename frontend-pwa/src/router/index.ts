@@ -80,3 +80,36 @@ const router = createRouter({
     ],
 });
 export default router;
+
+/**
+ * A cookie check that runs when the application is initially loaded from the server.
+ * It will automatically unregister if cookies are already accepted to prevent checks on every route change.
+ */
+const unregisterCookieCheck = router.beforeEach((_to, _from) => {
+    const COOKIES_ACCEPTED_KEY = 'cookiesAccepted';
+    const cookiesAlreadyAccepted = JSON.parse(
+        localStorage.getItem(COOKIES_ACCEPTED_KEY)
+    );
+    if (cookiesAlreadyAccepted !== true) {
+        const cookiesAccepted = confirm(
+            [
+                'This web app needs to store data in your web browser to function properly. This data includes:',
+                '- A unique client ID that helps the backend discern you from others',
+                '- Your settings',
+                '- Collection configurations you create',
+                'Additionally, the following data is stored and shared with other participants via a backend if you parttake in a collection:',
+                '- The username you chose when joining the collection',
+                '- Your GPS history since you joined',
+                '- The collection configuration (if you start one of your collections)',
+                'Do you accept this? If you do not accept, you will note be able to use this app.',
+            ].join('\n')
+        );
+        if (cookiesAccepted) {
+            localStorage.setItem(COOKIES_ACCEPTED_KEY, JSON.stringify(true));
+        } else {
+            window.location.href = 'about:blank';
+        }
+    } else {
+        unregisterCookieCheck();
+    }
+});
