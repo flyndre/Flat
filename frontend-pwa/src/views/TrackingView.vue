@@ -15,6 +15,7 @@ import InvitationDialog from '@/components/tracking/InvitationDialog.vue';
 import JoinRequestDialog from '@/components/tracking/JoinRequestDialog.vue';
 import ParticipantsList from '@/components/tracking/ParticipantsList.vue';
 import { clientId } from '@/data/clientMetadata';
+import { collectionDB, collections } from '@/data/collections';
 import { TOAST_LIFE } from '@/data/constants';
 import { trackingLogs } from '@/data/trackingLogs';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
@@ -152,7 +153,7 @@ const invitationLink = computed(
 const participants = computed<Participant[]>(() => [
     {
         clientId: '1',
-        username: 'Rubi',
+        username: 'Rubisdfghgfdsafhgdsadthregwrfhbdeflksdbfklsdbfdfbh',
         color: '#64e86f',
     },
     {
@@ -176,21 +177,7 @@ const tracks = computed<ParticipantTrack[]>(() => {
 
 const collection = ref<Collection>(undefined);
 const divisions = computed<Division[]>(
-    () =>
-        collection.value?.divisions ?? [
-            {
-                id: '1',
-                name: 'Norddorf',
-                area: undefined,
-                color: '#bfbfbf',
-            },
-            {
-                id: '2',
-                name: 'Süddorf',
-                area: undefined,
-                color: '#bfbfbf',
-            },
-        ]
+    () => collections.value?.at(0)?.divisions
 );
 
 // TODO: onMounted websocket aufmachen
@@ -496,6 +483,7 @@ function accept() {
                                 :participants
                                 :divisions
                                 :admin-mode="isAdmin"
+                                @kick-participant="(p) => console.log(p)"
                             />
                         </TabPanel>
                         <TabPanel

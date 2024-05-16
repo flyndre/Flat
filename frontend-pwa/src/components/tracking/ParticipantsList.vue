@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { mdiAccount, mdiAccountCircle, mdiClose } from '@mdi/js';
+import { mdiAccountCircle, mdiClose } from '@mdi/js';
 import Button from 'primevue/button';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import { Division } from '@/types/Division';
@@ -18,14 +18,6 @@ const emit = defineEmits<{
     unassignDivision: [division: Division];
     kickParticipant: [participant: Participant];
 }>();
-
-function assignDivision(division: Division, participant: Participant) {
-    emit('assignDivision', division, participant);
-}
-
-function unassignDivision(division: Division) {
-    emit('unassignDivision', division);
-}
 
 function kickParticipant(participant: Participant) {
     emit('kickParticipant', participant);
