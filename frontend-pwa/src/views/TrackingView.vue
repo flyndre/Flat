@@ -225,7 +225,6 @@ function accept() {
 </script>
 
 <template>
-    {{ tracks }}
     <Dialog
         v-model:visible="visible"
         modal
@@ -387,25 +386,53 @@ function accept() {
                 </template>
             </Dialog>
 
-            <Card class="h-full basis-0 grow">
+            <Card
+                class="h-full basis-0 grow"
+                :pt="{
+                    body: {
+                        class: [
+                            'p-2.5 grow',
+                            { 'pb-0': isOnMobile },
+                            { 'pt-0': !isOnMobile },
+                        ],
+                    },
+                    content: {
+                        class: 'grow justify-end',
+                    },
+                }"
+            >
                 <template #content>
                     <TabView
                         :pt="{
                             root: {
-                                class:
-                                    'flex ' +
-                                    (isOnMobile
+                                class: [
+                                    'flex grow h-full',
+                                    isOnMobile
                                         ? 'flex-col-reverse'
-                                        : 'flex-col'),
+                                        : 'flex-col',
+                                ],
                             },
                             nav: {
                                 class: [isOnMobile ? 'mt-2' : 'mb-2'],
                             },
                             inkbar: { class: 'rounded-t h-1' },
-                            panelContainer: { class: 'p-0' },
+                            panelContainer: {
+                                class: 'p-0 grow flex flex-col justify-stretch',
+                            },
                         }"
                     >
-                        <TabPanel>
+                        <TabPanel
+                            :pt="{
+                                content: {
+                                    class: [
+                                        'grow flex justify-start gap-5',
+                                        isOnMobile
+                                            ? 'flex-col-reverse'
+                                            : 'flex-col',
+                                    ],
+                                },
+                            }"
+                        >
                             <template #header>
                                 <div class="flex justify-center items-center">
                                     <MdiTextButtonIcon :icon="mdiMap" />
@@ -436,7 +463,7 @@ function accept() {
                                 </template>
                             </SelectButton>
                             <MapWithControls
-                                class="min-h-32 h-32"
+                                class="!min-h-32 !h-32 -m-2.5"
                                 controls="none"
                                 :center="mapCenterSelected"
                                 :locked="mapCenterSelected != null"
@@ -445,7 +472,18 @@ function accept() {
                                 :tracks
                             />
                         </TabPanel>
-                        <TabPanel>
+                        <TabPanel
+                            :pt="{
+                                content: {
+                                    class: [
+                                        'grow flex justify-start gap-5',
+                                        isOnMobile
+                                            ? 'flex-col-reverse'
+                                            : 'flex-col',
+                                    ],
+                                },
+                            }"
+                        >
                             <template #header>
                                 <div class="flex justify-center items-center">
                                     <MdiTextButtonIcon
@@ -460,7 +498,18 @@ function accept() {
                                 :admin-mode="isAdmin"
                             />
                         </TabPanel>
-                        <TabPanel>
+                        <TabPanel
+                            :pt="{
+                                content: {
+                                    class: [
+                                        'grow flex justify-start gap-5',
+                                        isOnMobile
+                                            ? 'flex-col-reverse'
+                                            : 'flex-col',
+                                    ],
+                                },
+                            }"
+                        >
                             <template #header>
                                 <div class="flex justify-center items-center">
                                     <MdiTextButtonIcon :icon="mdiTextureBox" />
