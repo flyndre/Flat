@@ -20,6 +20,12 @@ const emit = defineEmits<{
 }>();
 
 function kickParticipant(participant: Participant) {
+    if (
+        !confirm(
+            `Are you sure that you want to kick ${participant.username} from this collection?`
+        )
+    )
+        return;
     emit('kickParticipant', participant);
 }
 </script>

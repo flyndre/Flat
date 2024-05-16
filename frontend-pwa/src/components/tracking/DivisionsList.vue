@@ -44,7 +44,7 @@ function getAssignedParticipant(division: Division) {
     <div class="flex flex-col gap-2 items-stretch justify-start">
         <InputGroup v-for="division of divisions" :key="division.id">
             <InputGroupAddon
-                class="grow basis-0 justify-start items-center overflow-hidden text-ellipsis"
+                class="grow basis-2/5 justify-start items-center overflow-hidden text-ellipsis"
             >
                 <MdiIcon
                     class="ml-2 mr-3"
@@ -56,6 +56,7 @@ function getAssignedParticipant(division: Division) {
                 {{ division.name }}
             </InputGroupAddon>
             <Dropdown
+                class="basis-3/5"
                 :model-value="getAssignedParticipant(division)"
                 :options="participants"
                 @update:model-value="(v) => updateAssignment(division, v)"
