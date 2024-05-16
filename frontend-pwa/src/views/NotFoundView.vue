@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
+import DrawingMap from '@/components/map/DrawingMap.vue';
+import TrackingMap from '@/components/map/TrackingMap.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { mdiArrowLeft, mdiHome } from '@mdi/js';
 import Button from 'primevue/button';
@@ -32,6 +34,7 @@ const router = useRouter();
                 <template #title> 404 </template>
                 <template #subtitle>Page not found</template>
             </Card>
+            <DrawingMap />
         </template>
     </DefaultLayout>
 </template>
