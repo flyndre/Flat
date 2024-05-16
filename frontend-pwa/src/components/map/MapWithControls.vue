@@ -146,6 +146,7 @@ function syncAreas() {
     if (recentlyUpdated) return; // Prevents infinite update loop
     deleteAllShapes(false);
     divisions.value.forEach((d) => {
+        if (d.area == null) return;
         const shape = divisionToShape(
             d,
             d.id === '0'
