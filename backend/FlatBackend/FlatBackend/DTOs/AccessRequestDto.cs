@@ -11,6 +11,5 @@ namespace FlatBackend.DTOs
         public Guid collectionId { get; set; }
         public Guid clientId { get; set; }
         public string username { get; set; }
-        //Added cause Boss can have multiple Collections...
     }
 }

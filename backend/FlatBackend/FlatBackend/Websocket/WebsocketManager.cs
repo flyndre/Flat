@@ -95,7 +95,7 @@ namespace FlatBackend.Websocket
             accessConfirmationWaiting.Add(accessConfirmationDto);
         }
 
-        public async void saveWebSocketOfUser( WebSocket webSocket, Guid collectionId, Guid userId )//only if User is allready confirmed else not saved
+        public async void saveWebSocketOfUser( WebSocket webSocket, Guid collectionId, Guid userId )//only if User is allready confirmed else ConnectionClosed
         {
             var collection = await _MongoDBService.GetCollection(collectionId);
             UserModel? validUser = new UserModel();
