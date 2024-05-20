@@ -1,29 +1,16 @@
 <script setup lang="ts">
-import { getCollection } from '@/api/rest';
-import {
-    acceptOrDeclineAccessRequest,
-    addMemberToCollection,
-    establishWebsocket,
-    isAdmin,
-    members,
-    newInvite,
-} from '@/api/websockets';
+import { isAdmin } from '@/api/websockets';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
 import InvitationDialog from '@/components/tracking/InvitationDialog.vue';
 import JoinRequestDialog from '@/components/tracking/JoinRequestDialog.vue';
 import ParticipantsList from '@/components/tracking/ParticipantsList.vue';
-
-import { clientId } from '@/data/clientMetadata';
 import { TOAST_LIFE } from '@/data/constants';
-import { trackingLogs } from '@/data/trackingLogs';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { useCollectionService } from '@/service/collectionService';
 import { useTrackingService } from '@/service/trackingService';
-import { Division } from '@/types/Division';
 import { JoinRequest } from '@/types/JoinRequest';
-import { ParticipantTrack } from '@/types/ParticipantTrack';
 import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
 import { isOnMobile } from '@/util/mobileDetection';
 import {
@@ -36,10 +23,12 @@ import {
     mdiExport,
     mdiFitToScreen,
     mdiHandBackRight,
+    mdiMap,
     mdiPause,
     mdiPauseCircle,
     mdiPlay,
     mdiStop,
+    mdiTextureBox,
 } from '@mdi/js';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
@@ -47,14 +36,14 @@ import Dialog from 'primevue/dialog';
 import { MenuItem } from 'primevue/menuitem';
 import SelectButton from 'primevue/selectbutton';
 import SplitButton from 'primevue/splitbutton';
+import TabView from 'primevue/tabview';
 import { useToast } from 'primevue/usetoast';
-import { computed, onBeforeMount, ref, watch } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 const props = defineProps<{
     id: string;
 }>();
-
 
 const router = useRouter();
 const route = useRoute();
@@ -150,22 +139,33 @@ const invitationLink = computed(
 
 const manageParticipantsDialogVisible = ref(false);
 
-const {activeCollection, assignDivision, requests, member, handleRequest, closeCollection} = useCollectionService(route.params.id as string);
+const {
+    activeCollection,
+    assignDivision,
+    requests,
+    member,
+    handleRequest,
+    closeCollection,
+} = useCollectionService(route.params.id as string);
 
-function processJoinRequest(joinRequest : JoinRequest) {
-    handleRequest(joinRequest.accepted, joinRequest.username, joinRequest.clientId, joinRequest.collectionId);
+function processJoinRequest(joinRequest: JoinRequest) {
+    handleRequest(
+        joinRequest.accepted,
+        joinRequest.username,
+        joinRequest.clientId,
+        joinRequest.collectionId
+    );
 }
 
-onBeforeMount(() => {
-    
-})
-
-
+onBeforeMount(() => {});
 </script>
 
 <template>
     {{ activeCollection }}
-    <JoinRequestDialog :requests="requests" @request-answered="processJoinRequest" ></JoinRequestDialog>
+    <JoinRequestDialog
+        :requests="requests"
+        @request-answered="processJoinRequest"
+    ></JoinRequestDialog>
     <DefaultLayout>
         <template #action-left>
             <SplitButton
@@ -265,11 +265,6 @@ onBeforeMount(() => {
                 :link="invitationLink"
             />
 
-            <ParticipantsList
-                v-model:visible="manageParticipantsDialogVisible"
-                :participants="activeCollection.confirmedUsers"
-            />
-
             <JoinRequestDialog
                 :requests="requests"
                 @request-answered="processJoinRequest"
@@ -319,52 +314,145 @@ onBeforeMount(() => {
             </Dialog>
 
             <Card
-                class="h-full grow"
+                class="h-full basis-0 grow"
                 :pt="{
-                    root: {
+                    body: {
                         class: [
-                            'overflow-hidden flex',
-                            { 'flex flex-col-reverse': !isOnMobile },
+                            'p-2.5 grow',
+                            { 'pb-0': isOnMobile },
+                            { 'pt-0': !isOnMobile },
                         ],
                     },
-                    header: {
-                        class: 'h-full flex flex-col grow',
+                    content: {
+                        class: 'grow justify-end',
                     },
-                    body: { class: 'p-2.5' },
                 }"
             >
-                <template #header>
-                    <MapWithControls
-                        controls="none"
-                        :center="mapCenterSelected"
-                        :locked="mapCenterSelected != null"
-                        :divisions="activeCollection.divisions"
-                        :client-pos
-                        :tracks="activeCollection.confirmedUsers"
-                    />
-                </template>
                 <template #content>
-                    <SelectButton
-                        class="flex w-full flex-row"
-                        v-model="mapCenterSelected"
-                        :options="mapCenterOptions"
-                        :option-value="(o) => o.value"
-                        :allow-empty="false"
-                        :pt="{ button: { class: 'w-full' } }"
+                    <TabView
+                        :pt="{
+                            root: {
+                                class: [
+                                    'flex grow h-full',
+                                    isOnMobile
+                                        ? 'flex-col-reverse'
+                                        : 'flex-col',
+                                ],
+                            },
+                            nav: {
+                                class: [isOnMobile ? 'mt-2' : 'mb-2'],
+                            },
+                            inkbar: { class: 'rounded-t h-1' },
+                            panelContainer: {
+                                class: 'p-0 grow flex flex-col justify-stretch',
+                            },
+                        }"
                     >
-                        <template #option="slotProps">
-                            <div
-                                class="flex flex-row justify-center items-center flex-nowrap w-full gap-3 min-h-6"
+                        <TabPanel
+                            :pt="{
+                                content: {
+                                    class: [
+                                        'grow flex justify-start gap-5',
+                                        isOnMobile
+                                            ? 'flex-col-reverse'
+                                            : 'flex-col',
+                                    ],
+                                },
+                            }"
+                        >
+                            <template #header>
+                                <div class="flex justify-center items-center">
+                                    <MdiTextButtonIcon :icon="mdiMap" />
+                                    Map
+                                </div>
+                            </template>
+                            <SelectButton
+                                class="flex w-full flex-row"
+                                v-model="mapCenterSelected"
+                                :options="mapCenterOptions"
+                                :option-value="(o) => o.value"
+                                :allow-empty="false"
+                                :pt="{ button: { class: 'w-full' } }"
                             >
-                                <MdiIcon :icon="slotProps.option.icon" />
-                                <span
-                                    class="max-[400px]:hidden text-ellipsis overflow-hidden z-10"
-                                >
-                                    {{ slotProps.option.label }}
-                                </span>
-                            </div>
-                        </template>
-                    </SelectButton>
+                                <template #option="slotProps">
+                                    <div
+                                        class="flex flex-row justify-center items-center flex-nowrap w-full gap-3 min-h-6"
+                                    >
+                                        <MdiIcon
+                                            :icon="slotProps.option.icon"
+                                        />
+                                        <span
+                                            class="max-[400px]:hidden text-ellipsis overflow-hidden z-10"
+                                        >
+                                            {{ slotProps.option.label }}
+                                        </span>
+                                    </div>
+                                </template>
+                            </SelectButton>
+                            <MapWithControls
+                                class="!min-h-32 !h-32 -m-2.5"
+                                controls="none"
+                                :center="mapCenterSelected"
+                                :locked="mapCenterSelected != null"
+                                :divisions="activeCollection.divisions"
+                                :client-pos
+                                :tracks="member"
+                            />
+                        </TabPanel>
+                        <TabPanel
+                            :pt="{
+                                content: {
+                                    class: [
+                                        'grow flex justify-start gap-5',
+                                        isOnMobile
+                                            ? 'flex-col-reverse'
+                                            : 'flex-col',
+                                    ],
+                                },
+                            }"
+                        >
+                            <template #header>
+                                <div class="flex justify-center items-center">
+                                    <MdiTextButtonIcon
+                                        :icon="mdiAccountMultiple"
+                                    />
+                                    Participants
+                                </div>
+                            </template>
+                            <ParticipantsList
+                                :participants="member"
+                                :divisions="activeCollection.divisions"
+                                :admin-mode="isAdmin"
+                                @kick-participant="(p) => console.log(p)"
+                            />
+                        </TabPanel>
+                        <TabPanel
+                            :pt="{
+                                content: {
+                                    class: [
+                                        'grow flex justify-start gap-5',
+                                        isOnMobile
+                                            ? 'flex-col-reverse'
+                                            : 'flex-col',
+                                    ],
+                                },
+                            }"
+                        >
+                            <template #header>
+                                <div class="flex justify-center items-center">
+                                    <MdiTextButtonIcon :icon="mdiTextureBox" />
+                                    Divisions
+                                </div>
+                            </template>
+                            <DivisionsList
+                                :participants="member"
+                                :divisions="activeCollection.divisions"
+                                :admin-mode="isAdmin"
+                                @unassign-division="(d) => console.log(d)"
+                                @assign-division="(d, p) => console.log(d, p)"
+                            />
+                        </TabPanel>
+                    </TabView>
                 </template>
             </Card>
         </template>
