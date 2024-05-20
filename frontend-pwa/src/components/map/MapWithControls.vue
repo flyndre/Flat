@@ -183,6 +183,7 @@ function drawTracks() {
             editable: false,
             draggable: false,
         });
+        console.log(t); 
         shapes?.forEach((s) => s.overlay?.setMap(map.value));
         progressLines.push(...shapes);
         const lastPosition = t.progress?.at(-1)?.track?.coordinates?.at(-1);

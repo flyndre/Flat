@@ -6,9 +6,10 @@ import { Division } from '@/types/Division';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
 import { Participant } from '@/types/Participant';
+import { ParticipantTrack } from '@/types/ParticipantTrack';
 
 const props = defineProps<{
-    participants: Participant[];
+    participants: ParticipantTrack[];
     divisions: Division[];
     adminMode: boolean;
 }>();
@@ -16,13 +17,13 @@ const props = defineProps<{
 const emit = defineEmits<{
     assignDivision: [division: Division, participant: Participant];
     unassignDivision: [division: Division];
-    kickParticipant: [participant: Participant];
+    kickParticipant: [participant: ParticipantTrack];
 }>();
 
-function kickParticipant(participant: Participant) {
+function kickParticipant(participant: ParticipantTrack) {
     if (
         !confirm(
-            `Are you sure that you want to kick ${participant.username} from this collection?`
+            `Are you sure that you want to kick ${participant.name} from this collection?`
         )
     )
         return;
@@ -34,7 +35,7 @@ function kickParticipant(participant: Participant) {
     <div class="flex flex-col gap-2 items-stretch justify-start">
         <InputGroup
             v-for="participant of participants"
-            :key="participant.clientId"
+            :key="participant.id"
         >
             <InputGroupAddon
                 class="grow justify-start items-center overflow-hidden text-ellipsis"
@@ -44,7 +45,7 @@ function kickParticipant(participant: Participant) {
                     :icon="mdiAccountCircle"
                     :style="{ color: participant.color }"
                 />
-                {{ participant.username }}
+                {{ participant.name }}
             </InputGroupAddon>
             <Button
                 v-if="adminMode"

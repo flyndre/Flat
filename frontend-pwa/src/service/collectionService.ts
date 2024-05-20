@@ -142,7 +142,7 @@ export const useCollectionService = (id: string) => {
                 return {
                     name: el.username,
                     id: el.clientId,
-                    color: '#fffff',
+                    color: '#eff542',
                     progress: [],
                 };
             }
@@ -150,7 +150,7 @@ export const useCollectionService = (id: string) => {
         _activeCollection.value.confirmedUsers.push({
             name: 'manamana',
             id: '39c2beaf-bb10-4aad-99da-f3288aaaaaae',
-            color: '#fffff',
+            color: '#eff542',
             progress: [
                 {
                     id: '39c2beaf-bb10-aaad-99da-f3288aaaaaae',
@@ -222,7 +222,7 @@ function handleCollectionUpdate(message: UpdateCollectionMessage) {
             _activeCollection.value.confirmedUsers.push({
                 name: element.username,
                 id: element.clientId,
-                color: '#fffff',
+                color: '#eff542',
                 progress: [],
             });
         }
