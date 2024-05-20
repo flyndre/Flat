@@ -110,13 +110,16 @@ export function establishWebsocket(clientId: string, collectionId: string) {
     resumeInterval();
 }
 
-export const useTrackingService = async (id: string) => {
-    var response = await getCollection(
+
+export const useCollectionService = async (id: string) => {
+    let response = await getCollection(
         id,
         clientId.value
     );
     _activeCollection.value = response.data;
     
+    establishWebsocket(clientId.value, id);
+
     return {
         activeCollection: computed(() => _activeCollection.value),
         assignDivision: (d: Division, p: ParticipantTrack | null) =>
@@ -147,7 +150,7 @@ export const useTrackingService = async (id: string) => {
  */
 
 function handleAccessRequest(message: InviteMessage) {
-    _activeCollection.value.requestedUsers.push({name: message.username, id: message.clientId, progress: [], color: null});
+    _activeCollection.value.requestedUsers.push({username: message.username, clientId: message.clientId, accepted: null, collectionId: _activeCollection.value.id});
 }
 
 function handleCollectionUpdate(message: UpdateCollectionMessage) {

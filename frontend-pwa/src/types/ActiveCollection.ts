@@ -1,4 +1,5 @@
 import { Division } from './Division';
+import { JoinRequest } from './JoinRequest';
 import { ParticipantTrack } from './ParticipantTrack';
 
 export type ActiveCollection = {
@@ -8,6 +9,6 @@ export type ActiveCollection = {
     area?: GeoJSON.MultiPolygon;
     divisions?: Division[];
     confirmedUsers: ParticipantTrack[];
-    requestedUsers: ParticipantTrack[];
+    requestedUsers: JoinRequest[];
 
 };
