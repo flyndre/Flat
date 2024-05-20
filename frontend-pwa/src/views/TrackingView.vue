@@ -18,6 +18,7 @@ import { clientId } from '@/data/clientMetadata';
 import { TOAST_LIFE } from '@/data/constants';
 import { trackingLogs } from '@/data/trackingLogs';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
+import { useCollectionService } from '@/service/collectionService';
 import { useTrackingService } from '@/service/trackingService';
 import { Division } from '@/types/Division';
 import { JoinRequest } from '@/types/JoinRequest';
@@ -136,6 +137,7 @@ function leaveCollection() {
 
 const endCollectionDialogVisible = ref(false);
 function stopCollection() {
+    closeCollection(route.params.id as string);
     // TODO: end collection (and fetch and display stats)
     router.push({ name: 'presets' });
 }
@@ -146,49 +148,23 @@ const invitationLink = computed(
 );
 
 const manageParticipantsDialogVisible = ref(false);
-const participants = computed<any[]>(() => []);
 
+const {activeCollection, assignDivision, requests, member, handleRequest, closeCollection} = useCollectionService(route.params.id as string);
 
 function processJoinRequest(joinRequest : JoinRequest) {
-    acceptOrDeclineAccessRequest(joinRequest.accepted, joinRequest.username, joinRequest.clientId, joinRequest.collectionId);
+    handleRequest(joinRequest.accepted, joinRequest.username, joinRequest.clientId, joinRequest.collectionId);
 }
 
-const tracks = computed<ParticipantTrack[]>(() => { return members.value});
+onBeforeMount(() => {
+    
+})
 
-let divisions = ref<Division[]>([]);
 
-// TODO: onMounted websocket aufmachen
-onBeforeMount(async () => {
-    establishWebsocket(clientId.value, route.params.id as string);
-
-    //TODO: Errorhandling
-    var response = await getCollection(
-        route.params.id as string,
-        clientId.value
-    );
-
-    addMemberToCollection(response.data.confirmedUsers)
-    divisions.value = response.data.collectionDivision;
-});
-
-const isNewInvite = newInvite;
-const visible = computed(() => isNewInvite.value.length != 0 && isAdmin);
-
-watch(members.value, () => console.log('CHANGE IN MEMBER'));
-function accept() {
-    acceptOrDeclineAccessRequest(
-        true,
-        isNewInvite.value[0].username,
-        isNewInvite.value[0].clientId,
-        isNewInvite.value[0].collectionId
-    );
-    isNewInvite.value.shift();
-}
 </script>
 
 <template>
-    {{ tracks }}
-    <JoinRequestDialog :requests="isNewInvite" @request-answered="processJoinRequest" ></JoinRequestDialog>
+    {{ activeCollection }}
+    <JoinRequestDialog :requests="requests" @request-answered="processJoinRequest" ></JoinRequestDialog>
     <DefaultLayout>
         <template #action-left>
             <SplitButton
@@ -361,9 +337,9 @@ function accept() {
                         controls="none"
                         :center="mapCenterSelected"
                         :locked="mapCenterSelected != null"
-                        :divisions
+                        :divisions="activeCollection.divisions"
                         :client-pos
-                        :tracks
+                        :tracks="activeCollection.confirmedUsers"
                     />
                 </template>
                 <template #content>

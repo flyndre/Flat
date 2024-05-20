@@ -1,5 +1,5 @@
 import { getCollection } from '@/api/rest';
-import { members, newInvite } from '@/api/websockets';
+import { newInvite } from '@/api/websockets';
 import { clientId } from '@/data/clientMetadata';
 import db from '@/data/db';
 import { Division } from '@/types/Division';
@@ -22,7 +22,6 @@ const { status, data, send, open, close } = useWebSocket(
 const _activeCollection = ref({} as ActiveCollection);
 let isAdmin = true;
 let latestSendTimestamp = null;
-
 
 const {
     isActive,
@@ -53,7 +52,7 @@ const {
             clientId: clientId.value,
         })
     );
-    }, 7000);
+}, 7000);
 
 watch(data, (data) => {
     let websocketMsg = JSON.parse(data);
@@ -110,14 +109,27 @@ export function establishWebsocket(clientId: string, collectionId: string) {
     resumeInterval();
 }
 
+export const useCollectionService = (id: string) => {
+    let response = getCollection(id, clientId.value);
+    response.then((el) => {
+        _activeCollection.value.id = el.data.id;
+        _activeCollection.value.adminClientId = el.data.clientId;
+        _activeCollection.value.name = el.data.name;
+        _activeCollection.value.area = el.data.area;
+        _activeCollection.value.divisions = el.data.collectionDivision;
+        _activeCollection.value.confirmedUsers = el.data.confirmedUsers.map(
+            (el) => {
+                return {
+                    name: el.username,
+                    id: el.clientId,
+                    color: '#fffff',
+                    progress: [],
+                };
+            }
+        );
+        _activeCollection.value.requestedUsers = el.data.requestedUsers;
+    });
 
-export const useCollectionService = async (id: string) => {
-    let response = await getCollection(
-        id,
-        clientId.value
-    );
-    _activeCollection.value = response.data;
-    
     establishWebsocket(clientId.value, id);
 
     return {
@@ -150,14 +162,20 @@ export const useCollectionService = async (id: string) => {
  */
 
 function handleAccessRequest(message: InviteMessage) {
-    _activeCollection.value.requestedUsers.push({username: message.username, clientId: message.clientId, accepted: null, collectionId: _activeCollection.value.id});
+    _activeCollection.value.requestedUsers.push({
+        username: message.username,
+        clientId: message.clientId,
+        accepted: null,
+        collectionId: _activeCollection.value.id,
+    });
 }
 
 function handleCollectionUpdate(message: UpdateCollectionMessage) {
     message.collection.confirmedUsers.forEach((element) => {
         if (
-            _activeCollection.value.confirmedUsers.filter((el) => el.id === element.clientId).length ===
-            0
+            _activeCollection.value.confirmedUsers.filter(
+                (el) => el.id === element.clientId
+            ).length === 0
         ) {
             _activeCollection.value.confirmedUsers.push({
                 name: element.username,
@@ -170,6 +188,7 @@ function handleCollectionUpdate(message: UpdateCollectionMessage) {
 }
 
 function handleIncrementalTracks(message: IncrementalTrackMessage) {
+    
     let memberOfTrack = _activeCollection.value.confirmedUsers.filter(
         (el) => el.id === message.clientId
     )[0];
