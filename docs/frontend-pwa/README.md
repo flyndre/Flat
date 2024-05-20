@@ -33,11 +33,11 @@ For maximum clarity, the following bullet list assigns each folder inside the pr
         For custom Vue Plugins.
     -   `router/`
         For the Vue Router configuration.
-    -   `service`
+    -   `service/`
         For async services such as position logging.
     -   `types/`
         For TypeScript type declarations.
-    -   `util`
+    -   `util/`
         For supporting functionality such as conversion functions and alike.
     -   `validation/`
         For validation functions.
