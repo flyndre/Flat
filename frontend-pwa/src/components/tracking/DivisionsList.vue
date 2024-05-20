@@ -43,7 +43,7 @@ function updateAssignment(division: Division, participant: Participant | null) {
 }
 
 function getAssignedParticipant(division: Division) {
-    return props.participants.find((p) => p.clientId === division.clientId);
+    return props.participants.find((p) => p.id === division.clientId);
 }
 </script>
 
@@ -79,14 +79,14 @@ function getAssignedParticipant(division: Division) {
                         "
                         :style="{ color: slotProps.value?.color }"
                     />
-                    {{ slotProps.value?.username ?? 'Unassigned' }}
+                    {{ slotProps.value?.name ?? 'Unassigned' }}
                 </template>
                 <template #option="slotProps">
                     <MdiTextButtonIcon
                         :icon="mdiAccountCircle"
                         :style="{ color: slotProps.option.color }"
                     />
-                    {{ slotProps.option.username }}
+                    {{ slotProps.option.name }}
                 </template>
             </Dropdown>
         </InputGroup>
