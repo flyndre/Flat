@@ -14,12 +14,18 @@ importers:
       '@googlemaps/markerwithlabel':
         specifier: ^2.0.28
         version: 2.0.28
+      '@mapbox/geojson-area':
+        specifier: ^0.2.2
+        version: 0.2.2
       '@mdi/js':
         specifier: ^7.4.47
         version: 7.4.47
       '@types/geojson':
         specifier: ^7946.0.14
         version: 7946.0.14
+      '@types/mapbox__geojson-area':
+        specifier: ^0.2.6
+        version: 0.2.6
       '@types/naughty-words':
         specifier: ^1.2.3
         version: 1.2.3
@@ -41,6 +47,9 @@ importers:
       geojson:
         specifier: ^0.5.0
         version: 0.5.0
+      geojson-length:
+        specifier: ^0.1.1
+        version: 0.1.1
       naughty-words:
         specifier: ^1.2.0
         version: 1.2.0
@@ -864,6 +873,9 @@ packages:
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
 
+  '@mapbox/geojson-area@0.2.2':
+    resolution: {integrity: sha512-bBqqFn1kIbLBfn7Yq1PzzwVkPYQr9lVUeT8Dhd0NL5n76PBuXzOcuLV7GOSbEB1ia8qWxH4COCvFpziEu/yReA==}
+
   '@mdi/js@7.4.47':
     resolution: {integrity: sha512-KPnNOtm5i2pMabqZxpUz7iQf+mfrYZyKCZ8QNz85czgEt7cuHcGorWfdzUMWYA0SD+a6Hn4FmJ+YhzzzjkTZrQ==}
 
@@ -1011,6 +1023,9 @@ packages:
 
   '@types/google.maps@3.55.8':
     resolution: {integrity: sha512-aSyvlCRXzF9Jtjqq4zmA24sczKZ0QWJnn4zRrkufCoohHulS6LCf4KsF22eAlnHBuVYwEhQoMXIufUS7kXF5uA==}
+
+  '@types/mapbox__geojson-area@0.2.6':
+    resolution: {integrity: sha512-Fs4BRS9zalj1lE+gm5d1Fu0kS+C7HWkH3zC5Iuq8QFBjxo9aAIm0dCHGy7Xtt/xI/jlEEf6SWU0LXkGMQZhIqA==}
 
   '@types/naughty-words@1.2.3':
     resolution: {integrity: sha512-Cf70ztEQzMJrAGtkCWeG65puU4dyL9sskYytOXMRXUNsAHxb5d2eetKUy9gBdg3nVDHNe4sbWfNCDwHJ/TeCEg==}
@@ -1458,6 +1473,9 @@ packages:
   gensync@1.0.0-beta.2:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
     engines: {node: '>=6.9.0'}
+
+  geojson-length@0.1.1:
+    resolution: {integrity: sha512-GMeWjaZ9YJbGth0MIVDgd287qp8BmyuKc9kOCoIo5uCkX6wzP+7UKKkWgYDe81BCH1wZPG5S1Vrgspl7nXimvA==}
 
   geojson@0.5.0:
     resolution: {integrity: sha512-/Bx5lEn+qRF4TfQ5aLu6NH+UKtvIv7Lhc487y/c8BdludrCTpiWf9wyI0RTyqg49MFefIAvFDuEi5Dfd/zgNxQ==}
@@ -2324,6 +2342,9 @@ packages:
   webrtc-adapter@8.2.3:
     resolution: {integrity: sha512-gnmRz++suzmvxtp3ehQts6s2JtAGPuDPjA1F3a9ckNpG1kYdYuHWYpazoAnL9FS5/B21tKlhkorbdCXat0+4xQ==}
     engines: {node: '>=6.0.0', npm: '>=3.10.0'}
+
+  wgs84@0.0.0:
+    resolution: {integrity: sha512-ANHlY4Rb5kHw40D0NJ6moaVfOCMrp9Gpd1R/AIQYg2ko4/jzcJ+TVXYYF6kXJqQwITvEZP4yEthjM7U6rYlljQ==}
 
   whatwg-url@7.1.0:
     resolution: {integrity: sha512-WUu7Rg1DroM7oQvGWfOiAK21n74Gg+T4elXEQYkOhtyLeWiJFoOGLXPKI/9gzIie9CtwVLm8wtw6YJdKyxSjeg==}
@@ -3248,6 +3269,10 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.4.15
 
+  '@mapbox/geojson-area@0.2.2':
+    dependencies:
+      wgs84: 0.0.0
+
   '@mdi/js@7.4.47': {}
 
   '@nodelib/fs.scandir@2.1.5':
@@ -3361,6 +3386,10 @@ snapshots:
   '@types/geojson@7946.0.14': {}
 
   '@types/google.maps@3.55.8': {}
+
+  '@types/mapbox__geojson-area@0.2.6':
+    dependencies:
+      '@types/geojson': 7946.0.14
 
   '@types/naughty-words@1.2.3': {}
 
@@ -3908,6 +3937,8 @@ snapshots:
   functions-have-names@1.2.3: {}
 
   gensync@1.0.0-beta.2: {}
+
+  geojson-length@0.1.1: {}
 
   geojson@0.5.0: {}
 
@@ -4760,6 +4791,8 @@ snapshots:
   webrtc-adapter@8.2.3:
     dependencies:
       sdp: 3.2.0
+
+  wgs84@0.0.0: {}
 
   whatwg-url@7.1.0:
     dependencies:
