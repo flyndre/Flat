@@ -1,11 +1,10 @@
 import { getCollection } from '@/api/rest';
-import { newInvite } from '@/api/websockets';
 import { clientId } from '@/data/clientMetadata';
 import db from '@/data/db';
+import { ActiveCollection } from '@/types/ActiveCollection';
 import { Division } from '@/types/Division';
 import { JoinRequest } from '@/types/JoinRequest';
 import { ParticipantTrack } from '@/types/ParticipantTrack';
-import { ActiveCollection } from '@/types/activeCollection';
 import { IncrementalTrackMessage } from '@/types/websocket/IncrementalTrackMessage';
 import { InviteMessage } from '@/types/websocket/InviteMessage';
 import { UpdateCollectionMessage } from '@/types/websocket/UpdateCollectionMessage';
@@ -23,11 +22,14 @@ const { status, data, send, open, close } = useWebSocket(
 const _activeCollection = ref({} as ActiveCollection);
 let isAdmin = true;
 let latestSendTimestamp = null;
-const dmettstett_DEBUG = [48.386848, 8.580660]
+const dmettstett_DEBUG = [48.386848, 8.58066];
 
-function randomDEBUG(){
-    return [dmettstett_DEBUG[0]+(Math.random() / 100), dmettstett_DEBUG[1]+(Math.random() / 100)]
-} 
+function randomDEBUG() {
+    return [
+        dmettstett_DEBUG[0] + Math.random() / 100,
+        dmettstett_DEBUG[1] + Math.random() / 100,
+    ];
+}
 
 const {
     isActive,
@@ -76,10 +78,14 @@ watch(data, (data) => {
 });
 
 function _assignDivision(d: Division, p: ParticipantTrack | null) {
-    let div = _activeCollection.value.divisions.filter(el => d.id === el.id)[0]
+    let div = _activeCollection.value.divisions.filter(
+        (el) => d.id === el.id
+    )[0];
     div.clientId = p.id;
 
-    let user = _activeCollection.value.confirmedUsers.filter(el => el.id === p.id)[0]
+    let user = _activeCollection.value.confirmedUsers.filter(
+        (el) => el.id === p.id
+    )[0];
     user.color = div.color;
 }
 
@@ -130,7 +136,7 @@ export const useCollectionService = (id: string) => {
         _activeCollection.value.name = el.data.name;
         _activeCollection.value.area = el.data.area;
         _activeCollection.value.divisions = el.data.collectionDivision;
-        _activeCollection.value.requestedUsers = [] as JoinRequest[]; 
+        _activeCollection.value.requestedUsers = [] as JoinRequest[];
         _activeCollection.value.confirmedUsers = el.data.confirmedUsers.map(
             (el) => {
                 return {
@@ -142,33 +148,29 @@ export const useCollectionService = (id: string) => {
             }
         );
         _activeCollection.value.confirmedUsers.push({
-            name: "manamana",
-            id: "39c2beaf-bb10-4aad-99da-f3288aaaaaae",
+            name: 'manamana',
+            id: '39c2beaf-bb10-4aad-99da-f3288aaaaaae',
             color: '#fffff',
-            progress: [{id: "39c2beaf-bb10-aaad-99da-f3288aaaaaae", track: {
-                "type": "LineString",
-                "coordinates": [
-                  [
-                    48.386850,
-                    8.580660
-                  ],
-                  [
-                    48.386916,
-                    8.577717
-                  ],
-                  [
-                    48.388811,
-                    8.583342
-                  ]
-                ]
-              }}],
+            progress: [
+                {
+                    id: '39c2beaf-bb10-aaad-99da-f3288aaaaaae',
+                    track: {
+                        type: 'LineString',
+                        coordinates: [
+                            [48.38685, 8.58066],
+                            [48.386916, 8.577717],
+                            [48.388811, 8.583342],
+                        ],
+                    },
+                },
+            ],
         });
         _activeCollection.value.requestedUsers = el.data.requestedUsers;
     });
 
     establishWebsocket(clientId.value, id);
 
-    console.log("READY")
+    console.log('READY');
     return {
         activeCollection: computed(() => _activeCollection.value),
         assignDivision: (d: Division, p: ParticipantTrack | null) =>
@@ -199,10 +201,9 @@ export const useCollectionService = (id: string) => {
  */
 
 function handleAccessRequest(message: InviteMessage) {
-
-    console.log("TEST:")
-    console.log(_activeCollection.value.requestedUsers); 
-    _activeCollection.value.requestedUsers = []; 
+    console.log('TEST:');
+    console.log(_activeCollection.value.requestedUsers);
+    _activeCollection.value.requestedUsers = [];
     _activeCollection.value.requestedUsers.push({
         username: message.username,
         clientId: message.clientId,
@@ -229,7 +230,6 @@ function handleCollectionUpdate(message: UpdateCollectionMessage) {
 }
 
 function handleIncrementalTracks(message: IncrementalTrackMessage) {
-    
     let memberOfTrack = _activeCollection.value.confirmedUsers.filter(
         (el) => el.id === message.clientId
     )[0];
