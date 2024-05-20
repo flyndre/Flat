@@ -1,6 +1,9 @@
-import { getCollection } from '@/api/rest';
+import { divideCollectionArea, getCollection } from '@/api/rest';
+import { isAdmin } from '@/api/websockets';
 import { clientId } from '@/data/clientMetadata';
+import { collections } from '@/data/collections';
 import db from '@/data/db';
+import { trackingLogDB, trackingLogs } from '@/data/trackingLogs';
 import { ActiveCollection } from '@/types/ActiveCollection';
 import { Division } from '@/types/Division';
 import { JoinRequest } from '@/types/JoinRequest';
@@ -8,6 +11,7 @@ import { ParticipantTrack } from '@/types/ParticipantTrack';
 import { IncrementalTrackMessage } from '@/types/websocket/IncrementalTrackMessage';
 import { InviteMessage } from '@/types/websocket/InviteMessage';
 import { UpdateCollectionMessage } from '@/types/websocket/UpdateCollectionMessage';
+import { RefSymbol } from '@vue/reactivity';
 import { useIntervalFn, useWebSocket } from '@vueuse/core';
 import { LineString } from 'geojson';
 import { computed, ref, watch } from 'vue';
@@ -18,9 +22,10 @@ const { status, data, send, open, close } = useWebSocket(
         autoReconnect: true,
     }
 );
-
+const _isAdmin = ref(false); 
 const _activeCollection = ref({} as ActiveCollection);
-let isAdmin = true;
+const _isLoading = ref(true)
+
 let latestSendTimestamp = null;
 const dmettstett_DEBUG = [48.386848, 8.58066];
 
@@ -43,7 +48,7 @@ const {
     } as LineString;
 
     var newlatest = null;
-    db.trackingLogs.toCollection().each((el) => {
+   trackingLogDB.each((el) => {
         el.timestamp > latestSendTimestamp || latestSendTimestamp == null
             ? lineStringOfPosition.coordinates.push(el.position)
             : null;
@@ -78,15 +83,19 @@ watch(data, (data) => {
 });
 
 function _assignDivision(d: Division, p: ParticipantTrack | null) {
-    let div = _activeCollection.value.divisions.filter(
+    let div = _activeCollection.value.divisions.find(
         (el) => d.id === el.id
-    )[0];
-    div.clientId = p.id;
+    );
 
-    let user = _activeCollection.value.confirmedUsers.filter(
-        (el) => el.id === p.id
-    )[0];
-    user.color = div.color;
+    div.clientId = p === null ? null : p.id;
+    divideCollectionArea(_activeCollection.value.id, [div]); 
+
+    if(p !== null){
+        let user = _activeCollection.value.confirmedUsers.filter(
+            (el) => el.id === p.id
+        )[0];
+        user.color = div.color;
+    }
 }
 
 function _startTracking() {
@@ -169,13 +178,14 @@ export const useCollectionService = (id: string) => {
             ],
         });
         _activeCollection.value.requestedUsers = el.data.requestedUsers;
+        _isAdmin.value = el.data.clientId === clientId;
+        _isLoading.value = false; 
     });
 
     establishWebsocket(clientId.value, id);
 
     console.log('READY');
     return {
-        
         activeCollection: computed(() => _activeCollection.value),
         assignDivision: (d: Division, p: ParticipantTrack | null) =>
             _assignDivision(d, p),
@@ -197,6 +207,8 @@ export const useCollectionService = (id: string) => {
             _closeCollection(collectionId),
         startTracking: _startTracking,
         stopTracking: _stopTracking,
+        isLoading: computed(() => _isLoading.value),
+        isAdmin: computed(() => _isAdmin.value)
     };
 };
 

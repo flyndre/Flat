@@ -42,6 +42,7 @@ import TabView from 'primevue/tabview';
 import { useToast } from 'primevue/usetoast';
 import { computed, onBeforeMount, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import DivisionsList from '@/components/tracking/DivisionsList.vue';
 
 const props = defineProps<{
     id: string;
@@ -454,8 +455,8 @@ onBeforeMount(() => {});
                                 :participants="member"
                                 :divisions="activeCollection.divisions"
                                 :admin-mode="isAdmin"
-                                @unassign-division="(d) => console.log(d)"
-                                @assign-division="(d, p) => console.log(d, p)"
+                                @unassign-division="(d) => assignDivision(d, null)"
+                                @assign-division="(d, p) => assignDivision(d,p)"
                             />
                         </TabPanel>
                     </TabView>
