@@ -11,23 +11,29 @@ import {
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
+import DivisionsList from '@/components/tracking/DivisionsList.vue';
 import InvitationDialog from '@/components/tracking/InvitationDialog.vue';
 import JoinRequestDialog from '@/components/tracking/JoinRequestDialog.vue';
-import ParticipantsDialog from '@/components/tracking/ParticipantsDialog.vue';
+import ParticipantsList from '@/components/tracking/ParticipantsList.vue';
 import { clientId } from '@/data/clientMetadata';
+import { collectionDB, collections } from '@/data/collections';
 import { TOAST_LIFE } from '@/data/constants';
 import { trackingLogs } from '@/data/trackingLogs';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { useCollectionService } from '@/service/collectionService';
 import { useTrackingService } from '@/service/trackingService';
+import { Collection } from '@/types/Collection';
 import { Division } from '@/types/Division';
 import { JoinRequest } from '@/types/JoinRequest';
+import { Participant } from '@/types/Participant';
 import { ParticipantTrack } from '@/types/ParticipantTrack';
 import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
 import { isOnMobile } from '@/util/mobileDetection';
 import {
+    mdiAccount,
     mdiAccountMultiple,
     mdiAccountPlus,
+    mdiAccountTie,
     mdiCheck,
     mdiCircle,
     mdiClose,
@@ -35,17 +41,23 @@ import {
     mdiExport,
     mdiFitToScreen,
     mdiHandBackRight,
+    mdiMap,
     mdiPause,
     mdiPauseCircle,
     mdiPlay,
     mdiStop,
+    mdiTextureBox,
 } from '@mdi/js';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import Dialog from 'primevue/dialog';
+import InputGroup from 'primevue/inputgroup';
+import InputGroupAddon from 'primevue/inputgroupaddon';
 import { MenuItem } from 'primevue/menuitem';
 import SelectButton from 'primevue/selectbutton';
 import SplitButton from 'primevue/splitbutton';
+import TabPanel from 'primevue/tabpanel';
+import TabView from 'primevue/tabview';
 import { useToast } from 'primevue/usetoast';
 import { computed, onBeforeMount, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -118,11 +130,6 @@ const adminActions: MenuItem[] = [
         icon: mdiStop,
         command: () => (endCollectionDialogVisible.value = true),
     },
-    {
-        label: 'Manage Participants',
-        icon: mdiAccountMultiple,
-        command: () => (manageParticipantsDialogVisible.value = true),
-    },
 ];
 
 function leaveCollection() {
@@ -147,24 +154,82 @@ const invitationLink = computed(
     () => window.location.origin + import.meta.env.BASE_URL + 'join/' + props.id
 );
 
-const manageParticipantsDialogVisible = ref(false);
+const participants = computed<Participant[]>(() => [
+    {
+        clientId: '1',
+        username: 'Rubisdfghgfdsafhgdsadthregwrfhbdeflksdbfklsdbfdfbh',
+        color: '#64e86f',
+    },
+    {
+        clientId: '2',
+        username: 'Lubuu',
+        color: '#36cfe0',
+    },
+]);
 
-const {activeCollection, assignDivision, requests, member, handleRequest, closeCollection} = useCollectionService(route.params.id as string);
-
-function processJoinRequest(joinRequest : JoinRequest) {
-    handleRequest(joinRequest.accepted, joinRequest.username, joinRequest.clientId, joinRequest.collectionId);
+const joinRequests = computed<JoinRequest[]>(() => {
+    // TODO: get list of join requests from service
+    return [];
+});
+function processJoinRequest(clientId: string, accepted: boolean) {
+    // TODO: send to backend and perhaps show toast
 }
 
-onBeforeMount(() => {
-    
-})
+const tracks = computed<ParticipantTrack[]>(() => {
+    return members.value;
+});
 
+const collection = ref<Collection>(undefined);
+const divisions = computed<Division[]>(
+    () => collections.value?.at(0)?.divisions
+);
 
+// TODO: onMounted websocket aufmachen
+onBeforeMount(async () => {
+    establishWebsocket(clientId.value, route.params.id as string);
+
+    //TODO: Errorhandling
+    var response = await getCollection(
+        route.params.id as string,
+        clientId.value
+    );
+
+    console.log('Collection for Map:');
+    console.log(response.data);
+    collection.value = response.data;
+    console.log(divisions);
+});
+
+const isNewInvite = newInvite;
+const visible = computed(() => isNewInvite.value.length != 0 && isAdmin);
+
+watch(members.value, () => console.log('CHANGE IN MEMBER'));
+function accept() {
+    acceptOrDeclineAccessRequest(
+        true,
+        isNewInvite.value[0].username,
+        isNewInvite.value[0].clientId,
+        isNewInvite.value[0].collectionId
+    );
+    isNewInvite.value.shift();
+}
 </script>
 
 <template>
-    {{ activeCollection }}
-    <JoinRequestDialog :requests="requests" @request-answered="processJoinRequest" ></JoinRequestDialog>
+    <Dialog
+        v-model:visible="visible"
+        modal
+        header="Accept"
+        :style="{ width: '25rem' }"
+    >
+        {{ isNewInvite[0].username }} wants to join your Collection. Do you want
+        to accept it?
+        <Button
+            label="Akzeptieren"
+            severity="secondary"
+            @click="accept"
+        ></Button>
+    </Dialog>
     <DefaultLayout>
         <template #action-left>
             <SplitButton
@@ -264,11 +329,6 @@ onBeforeMount(() => {
                 :link="invitationLink"
             />
 
-            <ParticipantsDialog
-                v-model:visible="manageParticipantsDialogVisible"
-                :participants="activeCollection.confirmedUsers"
-            />
-
             <JoinRequestDialog
                 :requests="requests"
                 @request-answered="processJoinRequest"
@@ -318,52 +378,145 @@ onBeforeMount(() => {
             </Dialog>
 
             <Card
-                class="h-full grow"
+                class="h-full basis-0 grow"
                 :pt="{
-                    root: {
+                    body: {
                         class: [
-                            'overflow-hidden flex',
-                            { 'flex flex-col-reverse': !isOnMobile },
+                            'p-2.5 grow',
+                            { 'pb-0': isOnMobile },
+                            { 'pt-0': !isOnMobile },
                         ],
                     },
-                    header: {
-                        class: 'h-full flex flex-col grow',
+                    content: {
+                        class: 'grow justify-end',
                     },
-                    body: { class: 'p-2.5' },
                 }"
             >
-                <template #header>
-                    <MapWithControls
-                        controls="none"
-                        :center="mapCenterSelected"
-                        :locked="mapCenterSelected != null"
-                        :divisions="activeCollection.divisions"
-                        :client-pos
-                        :tracks="activeCollection.confirmedUsers"
-                    />
-                </template>
                 <template #content>
-                    <SelectButton
-                        class="flex w-full flex-row"
-                        v-model="mapCenterSelected"
-                        :options="mapCenterOptions"
-                        :option-value="(o) => o.value"
-                        :allow-empty="false"
-                        :pt="{ button: { class: 'w-full' } }"
+                    <TabView
+                        :pt="{
+                            root: {
+                                class: [
+                                    'flex grow h-full',
+                                    isOnMobile
+                                        ? 'flex-col-reverse'
+                                        : 'flex-col',
+                                ],
+                            },
+                            nav: {
+                                class: [isOnMobile ? 'mt-2' : 'mb-2'],
+                            },
+                            inkbar: { class: 'rounded-t h-1' },
+                            panelContainer: {
+                                class: 'p-0 grow flex flex-col justify-stretch',
+                            },
+                        }"
                     >
-                        <template #option="slotProps">
-                            <div
-                                class="flex flex-row justify-center items-center flex-nowrap w-full gap-3 min-h-6"
+                        <TabPanel
+                            :pt="{
+                                content: {
+                                    class: [
+                                        'grow flex justify-start gap-5',
+                                        isOnMobile
+                                            ? 'flex-col-reverse'
+                                            : 'flex-col',
+                                    ],
+                                },
+                            }"
+                        >
+                            <template #header>
+                                <div class="flex justify-center items-center">
+                                    <MdiTextButtonIcon :icon="mdiMap" />
+                                    Map
+                                </div>
+                            </template>
+                            <SelectButton
+                                class="flex w-full flex-row"
+                                v-model="mapCenterSelected"
+                                :options="mapCenterOptions"
+                                :option-value="(o) => o.value"
+                                :allow-empty="false"
+                                :pt="{ button: { class: 'w-full' } }"
                             >
-                                <MdiIcon :icon="slotProps.option.icon" />
-                                <span
-                                    class="max-[400px]:hidden text-ellipsis overflow-hidden z-10"
-                                >
-                                    {{ slotProps.option.label }}
-                                </span>
-                            </div>
-                        </template>
-                    </SelectButton>
+                                <template #option="slotProps">
+                                    <div
+                                        class="flex flex-row justify-center items-center flex-nowrap w-full gap-3 min-h-6"
+                                    >
+                                        <MdiIcon
+                                            :icon="slotProps.option.icon"
+                                        />
+                                        <span
+                                            class="max-[400px]:hidden text-ellipsis overflow-hidden z-10"
+                                        >
+                                            {{ slotProps.option.label }}
+                                        </span>
+                                    </div>
+                                </template>
+                            </SelectButton>
+                            <MapWithControls
+                                class="!min-h-32 !h-32 -m-2.5"
+                                controls="none"
+                                :center="mapCenterSelected"
+                                :locked="mapCenterSelected != null"
+                                :divisions
+                                :client-pos
+                                :tracks
+                            />
+                        </TabPanel>
+                        <TabPanel
+                            :pt="{
+                                content: {
+                                    class: [
+                                        'grow flex justify-start gap-5',
+                                        isOnMobile
+                                            ? 'flex-col-reverse'
+                                            : 'flex-col',
+                                    ],
+                                },
+                            }"
+                        >
+                            <template #header>
+                                <div class="flex justify-center items-center">
+                                    <MdiTextButtonIcon
+                                        :icon="mdiAccountMultiple"
+                                    />
+                                    Participants
+                                </div>
+                            </template>
+                            <ParticipantsList
+                                :participants
+                                :divisions
+                                :admin-mode="isAdmin"
+                                @kick-participant="(p) => console.log(p)"
+                            />
+                        </TabPanel>
+                        <TabPanel
+                            :pt="{
+                                content: {
+                                    class: [
+                                        'grow flex justify-start gap-5',
+                                        isOnMobile
+                                            ? 'flex-col-reverse'
+                                            : 'flex-col',
+                                    ],
+                                },
+                            }"
+                        >
+                            <template #header>
+                                <div class="flex justify-center items-center">
+                                    <MdiTextButtonIcon :icon="mdiTextureBox" />
+                                    Divisions
+                                </div>
+                            </template>
+                            <DivisionsList
+                                :participants
+                                :divisions
+                                :admin-mode="isAdmin"
+                                @unassign-division="(d) => console.log(d)"
+                                @assign-division="(d, p) => console.log(d, p)"
+                            />
+                        </TabPanel>
+                    </TabView>
                 </template>
             </Card>
         </template>
