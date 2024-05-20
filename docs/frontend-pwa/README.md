@@ -38,9 +38,15 @@ Must-have:
 -   [x] Map display
 -   [x] Divide map into areas
 -   [x] Track your own location via GPS (can be started and stopped)
--   [ ] Share tracking with other team members via backend
--   [ ] Join the team via link
--   [ ] User name
+-   [x] Share tracking with other team members via backend
+    - [x] Start collection (⚠ has backend error)
+    - [x] Send/receive tracking logs
+    - [x] Assign divisions
+    - [x] End collection
+-   [x] Join the team via link
+    -   [x] Join collection (⚠ has backend error)
+    -   [ ] Leave collection
+-   [x] User name
 
 Optional:
 
