@@ -266,11 +266,11 @@ onBeforeMount(() => {
 
             <ParticipantsDialog
                 v-model:visible="manageParticipantsDialogVisible"
-                :participants
+                :participants="activeCollection.confirmedUsers"
             />
 
             <JoinRequestDialog
-                :requests="joinRequests"
+                :requests="requests"
                 @request-answered="processJoinRequest"
             />
 

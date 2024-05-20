@@ -3,6 +3,7 @@ import { newInvite } from '@/api/websockets';
 import { clientId } from '@/data/clientMetadata';
 import db from '@/data/db';
 import { Division } from '@/types/Division';
+import { JoinRequest } from '@/types/JoinRequest';
 import { ParticipantTrack } from '@/types/ParticipantTrack';
 import { ActiveCollection } from '@/types/activeCollection';
 import { IncrementalTrackMessage } from '@/types/websocket/IncrementalTrackMessage';
@@ -22,6 +23,11 @@ const { status, data, send, open, close } = useWebSocket(
 const _activeCollection = ref({} as ActiveCollection);
 let isAdmin = true;
 let latestSendTimestamp = null;
+const dmettstett_DEBUG = [48.386848, 8.580660]
+
+function randomDEBUG(){
+    return [dmettstett_DEBUG[0]+Math.floor(Math.random() / 100), dmettstett_DEBUG[0]+Math.floor(Math.random() / 100)]
+} 
 
 const {
     isActive,
@@ -31,7 +37,7 @@ const {
     console.log('Sending Trackingpoints...');
     var lineStringOfPosition = {
         type: 'LineString',
-        coordinates: [[0, 0]],
+        coordinates: [randomDEBUG(), randomDEBUG(), randomDEBUG()],
     } as LineString;
 
     var newlatest = null;
@@ -102,7 +108,7 @@ export function _acceptOrDeclineAccessRequest(
     console.log(answer);
 
     send(JSON.stringify(answer));
-    newInvite.value.shift();
+    _activeCollection.value.requestedUsers.shift();
 }
 
 export function establishWebsocket(clientId: string, collectionId: string) {
@@ -124,6 +130,7 @@ export const useCollectionService = (id: string) => {
         _activeCollection.value.name = el.data.name;
         _activeCollection.value.area = el.data.area;
         _activeCollection.value.divisions = el.data.collectionDivision;
+        _activeCollection.value.requestedUsers = [] as JoinRequest[]; 
         _activeCollection.value.confirmedUsers = el.data.confirmedUsers.map(
             (el) => {
                 return {
@@ -134,11 +141,34 @@ export const useCollectionService = (id: string) => {
                 };
             }
         );
+        _activeCollection.value.confirmedUsers.push({
+            name: "manamana",
+            id: "39c2beaf-bb10-4aad-99da-f3288aaaaaae",
+            color: '#fffff',
+            progress: [{id: "39c2beaf-bb10-aaad-99da-f3288aaaaaae", track: {
+                "type": "LineString",
+                "coordinates": [
+                  [
+                    48.386848,
+                    48.386848
+                  ],
+                  [
+                    48.386848,
+                    48.386848
+                  ],
+                  [
+                    48.386848,
+                    48.386848
+                  ]
+                ]
+              }}],
+        });
         _activeCollection.value.requestedUsers = el.data.requestedUsers;
     });
 
     establishWebsocket(clientId.value, id);
 
+    console.log("READY")
     return {
         activeCollection: computed(() => _activeCollection.value),
         assignDivision: (d: Division, p: ParticipantTrack | null) =>
@@ -169,6 +199,10 @@ export const useCollectionService = (id: string) => {
  */
 
 function handleAccessRequest(message: InviteMessage) {
+
+    console.log("TEST:")
+    console.log(_activeCollection.value.requestedUsers); 
+    _activeCollection.value.requestedUsers = []; 
     _activeCollection.value.requestedUsers.push({
         username: message.username,
         clientId: message.clientId,
