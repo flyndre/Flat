@@ -26,7 +26,7 @@ let latestSendTimestamp = null;
 const dmettstett_DEBUG = [48.386848, 8.580660]
 
 function randomDEBUG(){
-    return [dmettstett_DEBUG[0]+Math.floor(Math.random() / 100), dmettstett_DEBUG[0]+Math.floor(Math.random() / 100)]
+    return [dmettstett_DEBUG[0]+(Math.random() / 100), dmettstett_DEBUG[1]+(Math.random() / 100)]
 } 
 
 const {
@@ -149,16 +149,16 @@ export const useCollectionService = (id: string) => {
                 "type": "LineString",
                 "coordinates": [
                   [
-                    48.386848,
-                    48.386848
+                    48.386850,
+                    8.580660
                   ],
                   [
-                    48.386848,
-                    48.386848
+                    48.386916,
+                    8.577717
                   ],
                   [
-                    48.386848,
-                    48.386848
+                    48.388811,
+                    8.583342
                   ]
                 ]
               }}],
