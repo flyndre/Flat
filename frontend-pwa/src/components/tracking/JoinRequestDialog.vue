@@ -9,9 +9,14 @@ import InputGroupAddon from 'primevue/inputgroupaddon';
 import Sidebar from 'primevue/sidebar';
 import { computed } from 'vue';
 
-const props = defineProps<{
-    requests: JoinRequest[];
-}>();
+const props = withDefaults(
+    defineProps<{
+        requests?: JoinRequest[];
+    }>(),
+    {
+        requests: () => [],
+    }
+);
 const emit = defineEmits<{
     requestAnswered: [JoinRequest];
 }>();
@@ -72,10 +77,7 @@ function decline(request: JoinRequest) {
                                 <MdiIcon :icon="mdiClose" />
                             </template>
                         </Button>
-                        <Button
-                            class="shrink-0 w-16"
-                            @click="accept(request)"
-                        >
+                        <Button class="shrink-0 w-16" @click="accept(request)">
                             <template #icon>
                                 <MdiIcon :icon="mdiCheck" />
                             </template>

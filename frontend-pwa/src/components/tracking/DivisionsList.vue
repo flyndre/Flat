@@ -8,11 +8,18 @@ import Dropdown from 'primevue/dropdown';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
 
-const props = defineProps<{
-    participants: Participant[];
-    divisions: Division[];
-    adminMode: boolean;
-}>();
+const props = withDefaults(
+    defineProps<{
+        participants?: Participant[];
+        divisions?: Division[];
+        adminMode?: boolean;
+    }>(),
+    {
+        participants: () => [],
+        divisions: () => [],
+        adminMode: false,
+    }
+);
 
 const emit = defineEmits<{
     assignDivision: [division: Division, participant: Participant];

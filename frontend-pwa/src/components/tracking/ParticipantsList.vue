@@ -8,11 +8,18 @@ import InputGroupAddon from 'primevue/inputgroupaddon';
 import { Participant } from '@/types/Participant';
 import { ParticipantTrack } from '@/types/ParticipantTrack';
 
-const props = defineProps<{
-    participants: ParticipantTrack[];
-    divisions: Division[];
-    adminMode: boolean;
-}>();
+const props = withDefaults(
+    defineProps<{
+        participants?: ParticipantTrack[];
+        divisions?: Division[];
+        adminMode?: boolean;
+    }>(),
+    {
+        participants: () => [],
+        divisions: () => [],
+        adminMode: false,
+    }
+);
 
 const emit = defineEmits<{
     assignDivision: [division: Division, participant: Participant];
@@ -33,10 +40,7 @@ function kickParticipant(participant: ParticipantTrack) {
 
 <template>
     <div class="flex flex-col gap-2 items-stretch justify-start">
-        <InputGroup
-            v-for="participant of participants"
-            :key="participant.id"
-        >
+        <InputGroup v-for="participant of participants" :key="participant.id">
             <InputGroupAddon
                 class="grow justify-start items-center overflow-hidden text-ellipsis"
             >
