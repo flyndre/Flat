@@ -6,11 +6,10 @@ import { Division } from '@/types/Division';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
 import { Participant } from '@/types/Participant';
-import { ParticipantTrack } from '@/types/ParticipantTrack';
 
 const props = withDefaults(
     defineProps<{
-        participants?: ParticipantTrack[];
+        participants?: Participant[];
         divisions?: Division[];
         adminMode?: boolean;
     }>(),
@@ -24,10 +23,10 @@ const props = withDefaults(
 const emit = defineEmits<{
     assignDivision: [division: Division, participant: Participant];
     unassignDivision: [division: Division];
-    kickParticipant: [participant: ParticipantTrack];
+    kickParticipant: [participant: Participant];
 }>();
 
-function kickParticipant(participant: ParticipantTrack) {
+function kickParticipant(participant: Participant) {
     if (
         !confirm(
             `Are you sure that you want to kick ${participant.name} from this collection?`

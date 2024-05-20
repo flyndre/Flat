@@ -1,5 +1,5 @@
 export type Participant = {
-    clientId: string;
-    username: string;
+    id: string;
+    name: string;
     color?: string;
 };

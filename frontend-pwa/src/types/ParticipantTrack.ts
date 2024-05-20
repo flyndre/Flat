@@ -1,8 +1,6 @@
+import { Participant } from './Participant';
 import { TrackInstance } from './TrackInstance';
 
-export type ParticipantTrack = {
-    id: string;
-    name: string;
-    color: string;
+export type ParticipantTrack = Participant & {
     progress: TrackInstance[];
 };
