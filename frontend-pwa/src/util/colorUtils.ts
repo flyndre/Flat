@@ -19,10 +19,10 @@ export function standardizeCSStoHex(cssColor: string) {
  * @see https://stackoverflow.com/a/56348573/11793652
  */
 export function blendColors(colorA: string, colorB: string, blendAmount = 0.5) {
-    colorA = standardizeCSStoHex(colorA);
-    colorB = standardizeCSStoHex(colorB);
-    const [rA, gA, bA] = colorA.match(/\w\w/g).map((c) => parseInt(c, 16));
-    const [rB, gB, bB] = colorB.match(/\w\w/g).map((c) => parseInt(c, 16));
+    const colorAStd = standardizeCSStoHex(colorA);
+    const colorBStd = standardizeCSStoHex(colorB);
+    const [rA, gA, bA] = colorAStd.match(/\w\w/g).map((c) => parseInt(c, 16));
+    const [rB, gB, bB] = colorBStd.match(/\w\w/g).map((c) => parseInt(c, 16));
     const r = Math.round(rA + (rB - rA) * blendAmount)
         .toString(16)
         .padStart(2, '0');
