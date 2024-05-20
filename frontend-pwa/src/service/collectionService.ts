@@ -69,7 +69,14 @@ watch(data, (data) => {
     }
 });
 
-function _assignDivision(d: Division, p: ParticipantTrack | null) {}
+function _assignDivision(d: Division, p: ParticipantTrack | null) {
+    let div = _activeCollection.value.divisions.filter(el => d.id === el.id)[0]
+    div.clientId = p.id;
+
+    let user = _activeCollection.value.confirmedUsers.filter(el => el.id === p.id)[0]
+    user.color = div.color;
+}
+
 function _startTracking() {}
 function _stopTracking() {}
 
