@@ -89,11 +89,15 @@ function _assignDivision(d: Division, p: ParticipantTrack | null) {
     user.color = div.color;
 }
 
-function _startTracking() {}
-function _stopTracking() {}
+function _startTracking() {
+    resumeInterval();
+}
+function _stopTracking() {
+    pauseInterval(); 
+}
 
 export function _closeCollection(collectionId: string) {
-    const answer = { type: 3, collectionId: collectionId };
+    const answer = { type: "CollectionClosed", collectionId: collectionId };
     send(JSON.stringify(answer));
 }
 
@@ -125,7 +129,6 @@ export function establishWebsocket(clientId: string, collectionId: string) {
             collectionId: collectionId,
         })
     );
-    resumeInterval();
 }
 
 export const useCollectionService = (id: string) => {
@@ -172,6 +175,7 @@ export const useCollectionService = (id: string) => {
 
     console.log('READY');
     return {
+        
         activeCollection: computed(() => _activeCollection.value),
         assignDivision: (d: Division, p: ParticipantTrack | null) =>
             _assignDivision(d, p),

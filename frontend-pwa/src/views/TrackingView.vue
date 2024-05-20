@@ -30,6 +30,8 @@ import {
     mdiStop,
     mdiTextureBox,
 } from '@mdi/js';
+
+import TabPanel from 'primevue/tabpanel';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import Dialog from 'primevue/dialog';
@@ -52,17 +54,19 @@ const { add: pushToast } = useToast();
 const {
     coords: trackingPosition,
     isActive: trackingActive,
-    start: startTracking,
-    stop: stopTracking,
+    start: startTrackingLogs,
+    stop: stopTrackingLogs,
     error: trackingError,
 } = useTrackingService();
 
 function toggleTracking() {
     trackingLoading.value = true;
     if (trackingActive.value) {
-        stopTracking();
+        stopTrackingLogs();
+        stopTrackingCollection();
     } else {
-        startTracking();
+        startTrackingLogs();
+        startTrackingCollection();
     }
     setTimeout(() => {
         trackingLoading.value = false;
@@ -146,6 +150,8 @@ const {
     member,
     handleRequest,
     closeCollection,
+    startTracking: startTrackingCollection,
+    stopTracking: stopTrackingCollection
 } = useCollectionService(route.params.id as string);
 
 function processJoinRequest(joinRequest: JoinRequest) {
