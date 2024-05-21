@@ -1,4 +1,4 @@
-import { divideCollectionArea, getCollection } from '@/api/rest';
+import { confirmRequest, divideCollectionArea, getCollection } from '@/api/rest';
 import { isAdmin } from '@/api/websockets';
 import { clientId } from '@/data/clientMetadata';
 import { collections } from '@/data/collections';
@@ -116,17 +116,8 @@ export function _acceptOrDeclineAccessRequest(
     clientId: string,
     collectionId: string
 ) {
-    const answer = {
-        type: 'AccessRequest',
-        collectionId: collectionId,
-        clientId: clientId,
-        username: username,
-        accepted: choice,
-    };
-    console.log('Sending AcceptOrDeclineRequest:');
-    console.log(answer);
 
-    send(JSON.stringify(answer));
+    confirmRequest(username, clientId, choice, collectionId)
     _activeCollection.value.requestedUsers.shift();
 }
 

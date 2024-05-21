@@ -91,10 +91,10 @@ export async function accessRequest(
 export async function confirmRequest(
     username: string,
     clientId: string,
-    accepted: string,
+    accepted: boolean,
     collectionId: string
 ) {
-    const response = await api.post(`api/rest/collection/${collectionId}`, {
+    const response = await api.post(`api/rest/AccessConfirmation/${collectionId}`, {
         username: username,
         clientId: clientId,
         accepted: accepted,
