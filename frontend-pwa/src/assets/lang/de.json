@@ -1,21 +1,94 @@
 {
-    "prompts": {
+    "locales": {
+        "en": "Englisch",
+        "de": "Deutsch"
+    },
+    "universal": {
         "back": "Zurück",
         "cancel": "Abbrechen",
         "close": "Schließen",
         "confirm": "Ja",
         "deny": "Nein",
+        "save": "Speichern",
+        "start": "Starten",
+        "join": "Beitreten",
+        "next": "Weiter",
+        "help": "Hilfe",
+        "delete": "Löschen",
         "settings": "Einstellungen",
         "dark_theme": "Dunkel",
         "light_theme": "Hell",
-        "device_theme": "Gerät",
-        "persistence_enabled": "Einstellungen speichern",
-        "persistence_disabled": "Einstellungen nicht speichern",
-        "copy_url_success": "URL kopiert!",
-        "copy_text_success": "Text kopiert!"
+        "device_theme": "Gerät"
     },
-    "locales": {
-        "en": "Englisch",
-        "de": "Deutsch"
+    "home": {
+        "join": "Sammlung beitreten",
+        "presets": "Meine Sammlungen"
+    },
+    "edit": {
+        "title_edit": "Bearbeiten",
+        "title_create": "Erstellen",
+        "area_name": "Bereichsname",
+        "collection_name": "Name der Sammlung",
+        "divisions_header": "Bereichsaufteilung",
+        "edit_divisions": "Aufteilung bearbeiten",
+        "error_collection_not_found": "Die angefragte Sammlungs-ID existiert nicht.",
+        "error_collection_retrieval": "Abrufen der Sammlung fehlgeschlagen.",
+        "error_collection_incomplete": "Es wurden nicht alle erforderlichen Angaben gemacht.",
+        "error_failed_to_save": "Speichern der Sammlung fehlgeschlagen.",
+        "error_failed_to_start": "Starten der Sammlung fehlgeschlagen."
+    },
+    "join": {
+        "title": "Beitreten",
+        "waiting_title": "Warte auf Beitritt...",
+        "waiting_text": "Es dauert einen Moment, bis die Beitrittsanfrage überprüft wurde.",
+        "cancel_waiting": "Beitritt abbrechen",
+        "enter_link": "Oder Link hier einfügen",
+        "nickname": "Nutzername",
+        "error_failed_to_join": "Beitreten der Sammlung fehlgeschlagen."
+    },
+    "map": {
+        "title": "Aufteilung bearbeiten",
+        "error_collection_not_found": "Die angefragte Sammlungs-ID existiert nicht.",
+        "error_collection_retrieval": "Abrufen der Sammlung fehlgeschlagen.",
+        "error_failed_to_save": "Speichern der Bereichsaufteilung fehlgeschlagen."
+    },
+    "not_found": {
+        "title": "Error",
+        "go_home": "Zum Startbildschirm",
+        "error_text": "Seite nicht gefunden"
+    },
+    "presets": {
+        "title": "Meine Sammlungen",
+        "copy_suffix": "(Kopie)",
+        "action_duplicate": "Duplizieren",
+        "action_export": "Exportieren",
+        "action_import": "Importieren",
+        "action_create": "Erstellen",
+        "action_delete": "Löschen",
+        "selected": "ausgewählt"
+    },
+    "scan": {
+        "title": "Beitreten",
+        "enter_link": "Oder Link hier einfügen"
+    },
+    "settings": {
+        "title": "Einstellungen",
+        "theme": "Design",
+        "handedness": "Händigkeit",
+        "home_location": "Standort im Startbildschirm",
+        "about": "Über"
+    },
+    "tracking": {
+        "title_active": "Tracke",
+        "title_paused": "Pausiert",
+        "unlock_focus": "Frei",
+        "location_focus": "Position",
+        "area_focus": "Sammlung",
+        "action_end": "Sammlung beenden",
+        "action_manage": "Teilnehmer verwalten",
+        "action_invite": "Teilnehmer einladen",
+        "action_leave": "Sammlung verlassen",
+        "action_start_tracking": "Tracking starten",
+        "action_pause_tracking": "Tracking pausieren"
     }
 }
