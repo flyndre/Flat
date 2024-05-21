@@ -43,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -210,7 +211,7 @@ fun TrackingScreen(
                         list.add(LatLng(position.latitude, position.longitude))
                     }
                     if (list.isNotEmpty()) {
-                        Polyline(points = list)
+                        Polyline(points = list, color = Color(66,90,245))
                     }
                 }
             }
@@ -223,8 +224,8 @@ fun TrackingScreen(
                             list.add(LatLng(position.latitude, position.longitude))
                         }
                         if (list.isNotEmpty()) {
-                            Polyline(points = list)
-                            Circle(center = list.last(), radius = 5.0)
+                            Polyline(points = list, color = Color(66,90,245))
+                            Circle(center = list.last(), radius = LocalConfiguration.current.screenWidthDp.toDouble()/20, strokeColor = Color(66,90,245), fillColor = Color(66,90,245))
                         }
                     }
 

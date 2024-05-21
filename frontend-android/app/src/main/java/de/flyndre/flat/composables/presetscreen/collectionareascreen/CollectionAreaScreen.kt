@@ -89,10 +89,9 @@ fun CollectionAreaScreen(
             TopAppBar(title = {
                 Row(
                     Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "area count: " + collectionAreas.size)
                     IconButton(onClick = {
                         collectionAreaScreenViewModel.saveChanges()
                         collectionAreaScreenViewModel.setCameraPosition(cameraPositionState.position)

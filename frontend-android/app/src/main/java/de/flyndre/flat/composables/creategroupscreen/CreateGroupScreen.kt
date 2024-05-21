@@ -4,6 +4,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -85,32 +87,28 @@ private fun PresetList(
     presets: List<Preset>,
     onDelete: () -> Unit,
 ) {
-    Column(modifier = modifier) {
-        presets.forEach { preset ->
-            Row() {
-
-                ListItem(
-                    modifier = Modifier.clickable {
-                        createGroupScreenViewModel.navigateToPreset(
-                            preset.id,
-                            onNavigateToPresetScreen
-                        )
-                    },
-                    headlineContent = { Text(text = preset.presetName) },
-                    supportingContent = { Text(text = preset.presetDescription) },
-                    trailingContent = {
-                        Icon(
-                            Icons.Filled.Delete,
-                            contentDescription = "Delete preset",
-                            modifier = Modifier.clickable {
-                                createGroupScreenViewModel.setIdToBeDeleted(preset.id)
-                                onDelete()
-                            })
-                    }
-                )
-
-            }
-        }
+    LazyColumn(modifier = modifier) {
+       items(presets){
+           ListItem(
+               modifier = Modifier.clickable {
+                   createGroupScreenViewModel.navigateToPreset(
+                       it.id,
+                       onNavigateToPresetScreen
+                   )
+               },
+               headlineContent = { Text(text = it.presetName) },
+               supportingContent = { Text(text = it.presetDescription) },
+               trailingContent = {
+                   Icon(
+                       Icons.Filled.Delete,
+                       contentDescription = "Delete preset",
+                       modifier = Modifier.clickable {
+                           createGroupScreenViewModel.setIdToBeDeleted(it.id)
+                           onDelete()
+                       })
+               }
+           )
+       }
     }
 }
 
