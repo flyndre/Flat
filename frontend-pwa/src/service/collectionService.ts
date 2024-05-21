@@ -1,6 +1,7 @@
 import { confirmRequest, divideCollectionArea, getCollection } from '@/api/rest';
 import { isAdmin } from '@/api/websockets';
 import { clientId } from '@/data/clientMetadata';
+import { SERVER_UPDATE_INTERVAL } from '@/data/constants';
 import { trackingLogDB } from '@/data/trackingLogs';
 import { ActiveCollection } from '@/types/ActiveCollection';
 import { Division } from '@/types/Division';
@@ -20,50 +21,44 @@ const { status, data, send, open, close } = useWebSocket(
         autoReconnect: true,
     }
 );
+
+
 const _isAdmin = ref(false);
-const _activeCollection = ref({} as ActiveCollection);
+const _activeCollection = ref<ActiveCollection>(undefined);
 const _isLoading = ref(true);
 
-let latestSendTimestamp = null;
-const dmettstett_DEBUG = [48.386848, 8.58066];
-
-function randomDEBUG() {
-    return [
-        dmettstett_DEBUG[0] + Math.random() / 100,
-        dmettstett_DEBUG[1] + Math.random() / 100,
-    ];
-}
+let latestSendTimestamp = Date.now();
 
 const {
     isActive,
     pause: pauseInterval,
     resume: resumeInterval,
-} = useIntervalFn(() => {
+} = useIntervalFn(async () => {
     console.log('Sending Trackingpoints...');
-    var lineStringOfPosition = {
-        type: 'LineString',
-        coordinates: [randomDEBUG(), randomDEBUG(), randomDEBUG()],
-    } as LineString;
+    
+    let tracks = await trackingLogDB.where("timestamp").above(latestSendTimestamp).toArray();
+    let result = Object.groupBy(tracks, ({ trackId }) => trackId);
 
-    var newlatest = null;
-    trackingLogDB.each((el) => {
-        el.timestamp > latestSendTimestamp || latestSendTimestamp == null
-            ? lineStringOfPosition.coordinates.push(el.position)
-            : null;
-        newlatest = el.timestamp;
-    });
 
-    latestSendTimestamp = newlatest;
+    Object.entries(result).forEach(([key, logs]) => {
+        var lineStringOfPosition = {
+            type: 'LineString',
+            coordinates: logs.map(el => el.position),
+        }
 
-    send(
-        JSON.stringify({
-            type: 1,
-            trackId: '94042b6e-a317-499a-af3d-1d32e58cbbb2',
+        const msg = {
+            type: "IncrementalTrack",
+            trackId: key,
             track: lineStringOfPosition,
-            clientId: clientId.value,
-        })
-    );
-}, 7000);
+            clientId: clientId.value
+        }
+
+        send(JSON.stringify(msg))
+    })
+
+    latestSendTimestamp = tracks.at(-1).timestamp;
+}, SERVER_UPDATE_INTERVAL);
+
 
 watch(data, (data) => {
     let websocketMsg = JSON.parse(data);
@@ -77,6 +72,8 @@ watch(data, (data) => {
         case 'IncrementalTrack':
             handleIncrementalTracks(websocketMsg as IncrementalTrackMessage);
             break;
+        //LeaveMessage
+        //DeleteMessage
     }
 });
 
