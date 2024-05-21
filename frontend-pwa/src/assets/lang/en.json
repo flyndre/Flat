@@ -1,0 +1,21 @@
+{
+    "prompts": {
+        "back": "Back",
+        "cancel": "Cancel",
+        "close": "Close",
+        "confirm": "Yes",
+        "deny": "No",
+        "settings": "Settings",
+        "dark_theme": "Dark",
+        "light_theme": "Light",
+        "device_theme": "Device",
+        "persistence_enabled": "Save settings",
+        "persistence_disabled": "Don't save settings",
+        "copy_url_success": "URL copied!",
+        "copy_text_success": "Text copied!"
+    },
+    "locales": {
+        "en": "English",
+        "de": "German"
+    }
+}

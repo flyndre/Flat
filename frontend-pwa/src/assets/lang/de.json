@@ -1,0 +1,21 @@
+{
+    "prompts": {
+        "back": "Zurück",
+        "cancel": "Abbrechen",
+        "close": "Schließen",
+        "confirm": "Ja",
+        "deny": "Nein",
+        "settings": "Einstellungen",
+        "dark_theme": "Dunkel",
+        "light_theme": "Hell",
+        "device_theme": "Gerät",
+        "persistence_enabled": "Einstellungen speichern",
+        "persistence_disabled": "Einstellungen nicht speichern",
+        "copy_url_success": "URL kopiert!",
+        "copy_text_success": "Text kopiert!"
+    },
+    "locales": {
+        "en": "Englisch",
+        "de": "Deutsch"
+    }
+}
