@@ -8,7 +8,6 @@ import { SERVER_UPDATE_INTERVAL } from '@/data/constants';
 import { trackingLogDB } from '@/data/trackingLogs';
 import { ActiveCollection } from '@/types/ActiveCollection';
 import { Division } from '@/types/Division';
-import { JoinRequest } from '@/types/JoinRequest';
 import { ParticipantTrack } from '@/types/ParticipantTrack';
 import { IncrementalTrackMessage } from '@/types/websocket/IncrementalTrackMessage';
 import { InviteMessage } from '@/types/websocket/InviteMessage';
@@ -66,13 +65,13 @@ watch(data, (data) => {
     let websocketMsg = JSON.parse(data);
     switch (websocketMsg.type) {
         case 'AccessRequest':
-            handleAccessRequest(websocketMsg as InviteMessage);
+            handleAccessRequest(<InviteMessage>websocketMsg);
             break;
         case 'CollectionUpdate':
-            handleCollectionUpdate(websocketMsg as UpdateCollectionMessage);
+            handleCollectionUpdate(<UpdateCollectionMessage>websocketMsg);
             break;
         case 'IncrementalTrack':
-            handleIncrementalTracks(websocketMsg as IncrementalTrackMessage);
+            handleIncrementalTracks(<IncrementalTrackMessage>websocketMsg);
             break;
         //LeaveMessage
         //DeleteMessage
@@ -133,7 +132,7 @@ export const useCollectionService = (id: string) => {
         _activeCollection.value.name = data.name;
         _activeCollection.value.area = data.area;
         _activeCollection.value.divisions = data.collectionDivision;
-        _activeCollection.value.requestedUsers = [] as JoinRequest[];
+        _activeCollection.value.requestedUsers = [];
         _activeCollection.value.confirmedUsers = data.confirmedUsers.map(
             (user) => {
                 return {
@@ -206,6 +205,7 @@ export const useCollectionService = (id: string) => {
         stopTracking: _stopTracking,
         isLoading: computed(() => _isLoading.value),
         isAdmin: computed(() => _isAdmin.value),
+        connectionStatus: status,
     };
 };
 
