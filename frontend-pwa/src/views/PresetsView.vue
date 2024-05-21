@@ -49,7 +49,7 @@ function duplicateSelected() {
     collectionDB.bulkAdd([
         ...selectedCollections.value.map((c) => ({
             ...dbSafe(c),
-            name: `${c.name} ${t('prests.copy_suffix')}`,
+            name: `${c.name} ${t('presets.copy_suffix')}`,
             id: uuidv4(),
         })),
     ]);
