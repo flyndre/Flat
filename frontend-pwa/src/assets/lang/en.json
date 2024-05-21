@@ -15,14 +15,8 @@
         "next": "Next",
         "help": "Help",
         "delete": "Delete",
-        "settings": "Settings",
-        "dark_theme": "Dark",
-        "light_theme": "Light",
-        "device_theme": "Device",
-        "persistence_enabled": "Save settings",
-        "persistence_disabled": "Don't save settings",
-        "copy_url_success": "URL copied!",
-        "copy_text_success": "Text copied!"
+        "share": "Share",
+        "copy": "Copy"
     },
     "home": {
         "join": "Join a Collection",
@@ -31,10 +25,7 @@
     "edit": {
         "title_edit": "Edit",
         "title_create": "Create",
-        "area_name": "Area Name",
         "collection_name": "Collection Name",
-        "divisions_header": "Divisions",
-        "edit_divisions": "Edit Divisions",
         "error_collection_not_found": "The requested collection id does not exist.",
         "error_collection_retrieval": "Failed to get the requested collection.",
         "error_collection_incomplete": "The collection is missing required information.",
@@ -95,5 +86,122 @@
         "action_leave": "Leave Collection",
         "action_start_tracking": "Start Tracking",
         "action_pause_tracking": "Pause Tracking"
+    },
+    "components": {
+        "code_reader": {
+            "scan_code": "Scan QR Code",
+            "error_not_allowed": "To scan a QR code, allow this app to use your camera and reload.",
+            "error_not_found": "No camera on this device",
+            "error_not_supported": "Secure context required (HTTPS, localhost)",
+            "error_not_readable": "Is the camera already in use?",
+            "error_overconstrained": "Installed cameras are not suitable",
+            "error_steam_api_not_supported": "Stream API is not supported in this browser",
+            "error_insecure_context": "Camera access is only permitted in secure context. Use HTTPS or localhost rather than HTTP."
+        },
+        "divisions_preview": {
+            "header": "Divisions",
+            "division_name": "Division Name",
+            "add_divisions": "Add Divisions",
+            "edit_divisions": "Edit Divisions"
+        },
+        "import_dialog": {
+            "title": "Import",
+            "paste_data_here": "Paste data here...",
+            "overwrite_existing": "Overwrite Existing",
+            "keep_duplicates": "Keep Duplicates",
+            "upload_backup": "Upload Backup",
+            "import_success": "Successfully importted data!",
+            "import_failed": "Data import failed.",
+            "action_import": "Import"
+        },
+        "export_dialog": {
+            "title": "Export",
+            "copy_success": "Successfully copied data to clipboard!",
+            "copy_failed": "Failed to copy data to clipboard.",
+            "action_download": "Download",
+            "action_copy": "Copy"
+        },
+        "about_setting": {
+            "slogan": "The modern cross-platform route tracking app to orchestrate volunteer collection campaigns in your neighborhood.",
+            "repository": "Repository",
+            "website": "Team Website"
+        },
+        "handedness_setting": {
+            "right": "Right",
+            "left": "Left"
+        },
+        "home_location_setting": {
+            "live": "Live",
+            "custom": "Custom"
+        },
+        "theme_setting": {
+            "light": "Light",
+            "dark": "Dark",
+            "device": "Device"
+        },
+        "division_assignment": {
+            "unassigned": "Unassigned"
+        },
+        "invitation_dialog": {
+            "title": "Add Participants",
+            "copy_success": "Successfully copied invitation link to clipboard!",
+            "copy_failed": "Failed to copy invitation link to clipboard.",
+            "share_title": "Join {collectionName}"
+        },
+        "join_request_dialog": {
+            "title": "Join Requests"
+        },
+        "participants_list": {
+            "confirmation_message": "Are you certain that you want to kick {participantName} from the ongoing collection?"
+        },
+        "map_with_controls": {
+            "map": "Map",
+            "tools": "Tools",
+            "divisions": "Divisions"
+        },
+        "draw_shape_button": {
+            "draw_division": "Draw Division",
+            "stop_drawing": "Cancel Drawing"
+        },
+        "location_search_dialog": {
+            "action_search": "Search",
+            "find_place": "Look for a place",
+            "search_failed": "Search failed",
+            "search_failed_text": "The API responded with status code {code}."
+        },
+        "divisions_list": {
+            "division_name": "Division Name",
+            "delete_all": "Delete All"
+        },
+        "map_help": {
+            "title": "Help",
+            "introduction": [
+                "This is the map edit screen. Here, you draw shapes on the map, representing different divisions of the area in which you are organizing your collection.",
+                "Later, when your collection is in progress, each participant using Flat is assigned one or more of those divisions.",
+                "The following will describe how to use the different tab menus and buttons:"
+            ],
+            "explanation_save": "The \"Save\" button will save all drawn divisions to your collection.",
+            "explanation_map": {
+                "introduction": "The \"Map\" tab provides you with everything you need to navigate the map:",
+                "locate_me": "\"Locate Me\" button to pan to your current location",
+                "locate_shapes": "\"Locate Shapes\" button to pan the map so that all drawn areas are visible",
+                "search": "A search to find a specific location",
+                "map_type": "A select button to set the map type (roadmap, terrain, satellite and satellite with labels)"
+            },
+            "explanation_tools": {
+                "introduction": "The \"Tools\" tab contains anything you need to draw on the map, such as:",
+                "draw_division": "\"Draw Division\" button to draw a new area onto the map and (while drawing) to stop drawing",
+                "delete_selected": "A button to delete the currently selected area",
+                "select_color": "Several colors to choose from for the areas"
+            },
+            "explanation_divisions": {
+                "introduction": "In the \"Divisions\" tab, you'll find an overview of all maps that have been drawn onto the map. For each shape, you can:",
+                "focus_division": "Focus the area on the map",
+                "division_name": "Give the area a name",
+                "delete_division": "Delete the area",
+                "delete_introduction": "At the bottom of the list you'll find a button to delete all areas:",
+                "delete_all": "Delete All"
+            }
+        }
     }
 }

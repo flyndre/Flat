@@ -6,6 +6,7 @@ import { Division } from '@/types/Division';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
 import { Participant } from '@/types/Participant';
+import { useI18n } from 'vue-i18n';
 
 const props = withDefaults(
     defineProps<{
@@ -26,10 +27,14 @@ const emit = defineEmits<{
     kickParticipant: [participant: Participant];
 }>();
 
+const { t } = useI18n();
+
 function kickParticipant(participant: Participant) {
     if (
         !confirm(
-            `Are you sure that you want to kick ${participant.name} from this collection?`
+            t('components.participants_list.confirmation_message', {
+                participantName: participant.name,
+            })
         )
     )
         return;
