@@ -138,14 +138,15 @@ const manageParticipantsDialogVisible = ref(false);
 const {
     activeCollection,
     assignDivision,
-    requests,
-    member,
-    handleRequest,
     closeCollection,
-    startTracking: startTrackingCollection,
-    stopTracking: stopTrackingCollection,
+    connectionStatus,
+    handleRequest,
     isAdmin,
     isLoading,
+    member,
+    requests,
+    startTracking: startTrackingCollection,
+    stopTracking: stopTrackingCollection,
 } = useCollectionService(route.params.id as string);
 
 function processJoinRequest(joinRequest: JoinRequest) {
