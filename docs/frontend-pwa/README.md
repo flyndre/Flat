@@ -72,6 +72,7 @@ Optional:
 Nice-to-have:
 
 -   [ ] Start/stop tracking via notification
+    -    Not implementable for PWA since background workers have no access to geolocation.
 -   [ ] Profile pictures
 -   [ ] Team leader can send push messages to participants
 -   [ ] Suggestions for optimal route distribution
