@@ -1,5 +1,8 @@
-import { confirmRequest, divideCollectionArea, getCollection } from '@/api/rest';
-import { isAdmin } from '@/api/websockets';
+import {
+    confirmRequest,
+    divideCollectionArea,
+    getCollection,
+} from '@/api/rest';
 import { clientId } from '@/data/clientMetadata';
 import { SERVER_UPDATE_INTERVAL } from '@/data/constants';
 import { trackingLogDB } from '@/data/trackingLogs';
@@ -12,7 +15,6 @@ import { InviteMessage } from '@/types/websocket/InviteMessage';
 import { UpdateCollectionMessage } from '@/types/websocket/UpdateCollectionMessage';
 import { getParticipantColor } from '@/util/trackingUtils';
 import { useIntervalFn, useWebSocket } from '@vueuse/core';
-import { LineString } from 'geojson';
 import { computed, ref, watch } from 'vue';
 
 const { status, data, send, open, close } = useWebSocket(
@@ -21,7 +23,6 @@ const { status, data, send, open, close } = useWebSocket(
         autoReconnect: true,
     }
 );
-
 
 const _isAdmin = ref(false);
 const _activeCollection = ref<ActiveCollection>(undefined);
@@ -35,30 +36,31 @@ const {
     resume: resumeInterval,
 } = useIntervalFn(async () => {
     console.log('Sending Trackingpoints...');
-    
-    let tracks = await trackingLogDB.where("timestamp").above(latestSendTimestamp).toArray();
-    let result = Object.groupBy(tracks, ({ trackId }) => trackId);
 
+    let tracks = await trackingLogDB
+        .where('timestamp')
+        .above(latestSendTimestamp)
+        .toArray();
+    let result = Object.groupBy(tracks, ({ trackId }) => trackId);
 
     Object.entries(result).forEach(([key, logs]) => {
         var lineStringOfPosition = {
             type: 'LineString',
-            coordinates: logs.map(el => el.position),
-        }
+            coordinates: logs.map((el) => el.position),
+        };
 
         const msg = {
-            type: "IncrementalTrack",
+            type: 'IncrementalTrack',
             trackId: key,
             track: lineStringOfPosition,
-            clientId: clientId.value
-        }
+            clientId: clientId.value,
+        };
 
-        send(JSON.stringify(msg))
-    })
+        send(JSON.stringify(msg));
+    });
 
     latestSendTimestamp = tracks.at(-1).timestamp;
 }, SERVER_UPDATE_INTERVAL);
-
 
 watch(data, (data) => {
     let websocketMsg = JSON.parse(data);
@@ -109,8 +111,7 @@ export function _acceptOrDeclineAccessRequest(
     clientId: string,
     collectionId: string
 ) {
-
-    confirmRequest(username, clientId, choice, collectionId)
+    confirmRequest(username, clientId, choice, collectionId);
     _activeCollection.value.requestedUsers.shift();
 }
 
@@ -173,7 +174,16 @@ export const useCollectionService = (id: string) => {
 
     console.log('READY');
     return {
-        activeCollection: computed(() => _activeCollection.value),
+        activeCollection: computed(() => ({
+            ..._activeCollection.value,
+            confirmedUsers: _activeCollection.value.confirmedUsers.map((u) => ({
+                ...u,
+                color: getParticipantColor(
+                    u.id,
+                    _activeCollection.value.divisions
+                ),
+            })),
+        })),
         assignDivision: (d: Division, p: ParticipantTrack | null) =>
             _assignDivision(d, p),
         requests: computed(() => _activeCollection.value.requestedUsers),
