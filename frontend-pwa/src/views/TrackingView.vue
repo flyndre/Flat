@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { isAdmin } from '@/api/websockets';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
@@ -50,7 +49,6 @@ const props = defineProps<{
 
 const router = useRouter();
 const route = useRoute();
-const adminView = ref(isAdmin);
 const { add: pushToast } = useToast();
 const {
     coords: trackingPosition,
@@ -99,13 +97,6 @@ const mapCenterOptions: {
         icon: mdiFitToScreen,
     },
 ];
-const mapCenterSelected = ref<undefined | 'area' | 'position'>(
-    mapCenterOptions[adminView.value ? 2 : 1].value
-);
-const clientPos = mapCenterWithDefaults(trackingPosition, {
-    lat: null,
-    lng: null,
-});
 
 const adminActions: MenuItem[] = [
     {
@@ -152,7 +143,9 @@ const {
     handleRequest,
     closeCollection,
     startTracking: startTrackingCollection,
-    stopTracking: stopTrackingCollection
+    stopTracking: stopTrackingCollection,
+    isAdmin,
+    isLoading,
 } = useCollectionService(route.params.id as string);
 
 function processJoinRequest(joinRequest: JoinRequest) {
@@ -164,7 +157,13 @@ function processJoinRequest(joinRequest: JoinRequest) {
     );
 }
 
-onBeforeMount(() => {});
+const mapCenterSelected = ref<undefined | 'area' | 'position'>(
+    mapCenterOptions[isAdmin.value ? 2 : 1].value
+);
+const clientPos = mapCenterWithDefaults(trackingPosition, {
+    lat: null,
+    lng: null,
+});
 </script>
 
 <template>
@@ -176,7 +175,7 @@ onBeforeMount(() => {});
     <DefaultLayout>
         <template #action-left>
             <SplitButton
-                v-if="adminView"
+                v-if="isAdmin"
                 :model="adminActions"
                 :label="isOnMobile ? '' : 'Add Participants'"
                 severity="secondary"
@@ -455,8 +454,12 @@ onBeforeMount(() => {});
                                 :participants="member"
                                 :divisions="activeCollection.divisions"
                                 :admin-mode="isAdmin"
-                                @unassign-division="(d) => assignDivision(d, null)"
-                                @assign-division="(d, p) => assignDivision(d,p)"
+                                @unassign-division="
+                                    (d) => assignDivision(d, null)
+                                "
+                                @assign-division="
+                                    (d, p) => assignDivision(d, p)
+                                "
                             />
                         </TabPanel>
                     </TabView>
