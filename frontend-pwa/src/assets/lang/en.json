@@ -184,22 +184,22 @@
             "explanation_map": {
                 "introduction": "The \"Map\" tab provides you with everything you need to navigate the map:",
                 "locate_me": "\"Locate Me\" button to pan to your current location",
-                "locate_shapes": "\"Locate Shapes\" button to pan the map so that all drawn areas are visible",
+                "locate_shapes": "\"Locate Shapes\" button to pan the map so that all drawn divisions are visible",
                 "search": "A search to find a specific location",
                 "map_type": "A select button to set the map type (roadmap, terrain, satellite and satellite with labels)"
             },
             "explanation_tools": {
                 "introduction": "The \"Tools\" tab contains anything you need to draw on the map, such as:",
-                "draw_division": "\"Draw Division\" button to draw a new area onto the map and (while drawing) to stop drawing",
-                "delete_selected": "A button to delete the currently selected area",
-                "select_color": "Several colors to choose from for the areas"
+                "draw_division": "\"Draw Division\" button to draw a new division onto the map and (while drawing) to stop drawing",
+                "delete_selected": "A button to delete the currently selected division",
+                "select_color": "Several colors to choose from for the divisions"
             },
             "explanation_divisions": {
                 "introduction": "In the \"Divisions\" tab, you'll find an overview of all maps that have been drawn onto the map. For each shape, you can:",
-                "focus_division": "Focus the area on the map",
-                "division_name": "Give the area a name",
-                "delete_division": "Delete the area",
-                "delete_introduction": "At the bottom of the list you'll find a button to delete all areas:",
+                "focus_division": "Focus the division on the map",
+                "division_name": "Give the division a name",
+                "delete_division": "Delete the division",
+                "delete_introduction": "At the bottom of the list you'll find a button to delete all divisions:",
                 "delete_all": "Delete All"
             }
         }
