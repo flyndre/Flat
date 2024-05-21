@@ -63,7 +63,14 @@ namespace FlatBackend.Websocket
         public Guid getCollectionId( WebSocket websocket )
         {
             var user = users.Where(x => x.webSocket == websocket).First();
-            return user.collectionId;
+            if (user != null)
+            {
+                return user.collectionId;
+            }
+            else
+            {
+                return Guid.Empty;
+            }
         }
 
         public void addTrackToTrackCollection( IncrementalTrackDto track, Guid collectionId )
