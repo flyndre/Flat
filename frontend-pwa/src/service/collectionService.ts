@@ -24,7 +24,7 @@ const { status, data, send, open, close } = useWebSocket(
 
 
 const _isAdmin = ref(false);
-const _activeCollection = ref<ActiveCollection>(undefined);
+const _activeCollection = ref<ActiveCollection>({} as ActiveCollection);
 const _isLoading = ref(true);
 
 let latestSendTimestamp = Date.now();
@@ -126,7 +126,9 @@ export function establishWebsocket(clientId: string, collectionId: string) {
 
 export const useCollectionService = (id: string) => {
     let response = getCollection(id, clientId.value);
+    
     response.then(({ data }) => {
+        console.log(data)
         _activeCollection.value.id = data.id;
         _activeCollection.value.adminClientId = data.clientId;
         _activeCollection.value.name = data.name;
@@ -196,6 +198,7 @@ export const useCollectionService = (id: string) => {
         stopTracking: _stopTracking,
         isLoading: computed(() => _isLoading.value),
         isAdmin: computed(() => _isAdmin.value),
+        statusOfWebsocket: computed(() => status.value)
     };
 };
 
@@ -216,6 +219,11 @@ function handleAccessRequest(message: InviteMessage) {
 }
 
 function handleCollectionUpdate(message: UpdateCollectionMessage) {
+    
+    _activeCollection.value.divisions = message.collection.collectionDivision; 
+    _activeCollection.value.area = message.collection.area;
+    _activeCollection.value.name = message.collection.name;
+
     message.collection.confirmedUsers.forEach((element) => {
         if (
             _activeCollection.value.confirmedUsers.filter(
@@ -225,7 +233,10 @@ function handleCollectionUpdate(message: UpdateCollectionMessage) {
             _activeCollection.value.confirmedUsers.push({
                 name: element.username,
                 id: element.clientId,
-                color: '#eff542',
+                color: getParticipantColor(
+                    element.clientId,
+                    message.collection.collectionDivision
+                ),
                 progress: [],
             });
         }
