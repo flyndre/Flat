@@ -57,7 +57,7 @@ Must-have:
     - [x] Assign divisions
     - [x] End collection
 -   [x] Join the team via link
-    -   [x] Join collection (⚠ has backend error)
+    -   [x] Join collection
     -   [ ] Leave collection
 -   [x] User name
 
