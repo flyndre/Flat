@@ -78,6 +78,7 @@
     "settings": {
         "title": "Settings",
         "theme": "Theme",
+        "locale": "Locale",
         "handedness": "Handedness",
         "home_location": "Home Screen Location",
         "about": "About"

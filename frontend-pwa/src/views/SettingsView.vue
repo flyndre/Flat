@@ -4,6 +4,7 @@ import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import AboutSetting from '@/components/settings/AboutSetting.vue';
 import HandednessSetting from '@/components/settings/HandednessSetting.vue';
 import HomeLocationSetting from '@/components/settings/HomeLocationSetting.vue';
+import LocaleSetting from '@/components/settings/LocaleSetting.vue';
 import ThemeSetting from '@/components/settings/ThemeSetting.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import {
@@ -12,6 +13,7 @@ import {
     mdiHomeMapMarker,
     mdiInformation,
     mdiPalette,
+    mdiTranslate,
 } from '@mdi/js';
 import Accordion from 'primevue/accordion';
 import AccordionTab from 'primevue/accordiontab';
@@ -28,6 +30,11 @@ const settings = [
         messageCode: 'settings.handedness',
         icon: mdiHandClap,
         component: HandednessSetting,
+    },
+    {
+        messageCode: 'settings.locale',
+        icon: mdiTranslate,
+        component: LocaleSetting,
     },
     {
         messageCode: 'settings.home_location',
