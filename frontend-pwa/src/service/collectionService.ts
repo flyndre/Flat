@@ -20,6 +20,7 @@ const { status, data, send, open, close } = useWebSocket(
     'wss://flat.buhss.de/api/ws',
     {
         autoReconnect: true,
+        immediate: false,
     }
 );
 
@@ -33,33 +34,39 @@ const {
     isActive,
     pause: pauseInterval,
     resume: resumeInterval,
-} = useIntervalFn(async () => {
-    console.log('Sending Trackingpoints...');
+} = useIntervalFn(
+    async () => {
+        console.log('Sending Trackingpoints...');
 
-    let tracks = await trackingLogDB
-        .where('timestamp')
-        .above(latestSendTimestamp)
-        .toArray();
-    let result = Object.groupBy(tracks, ({ trackId }) => trackId);
+        let tracks = await trackingLogDB
+            .where('timestamp')
+            .above(latestSendTimestamp)
+            .toArray();
+        let result = Object.groupBy(tracks, ({ trackId }) => trackId);
 
-    Object.entries(result).forEach(([key, logs]) => {
-        var lineStringOfPosition = {
-            type: 'LineString',
-            coordinates: logs.map((el) => el.position),
-        };
+        Object.entries(result).forEach(([key, logs]) => {
+            var lineStringOfPosition = {
+                type: 'LineString',
+                coordinates: logs.map((el) => el.position),
+            };
 
-        const msg = {
-            type: 'IncrementalTrack',
-            trackId: key,
-            track: lineStringOfPosition,
-            clientId: clientId.value,
-        };
+            const msg = {
+                type: 'IncrementalTrack',
+                trackId: key,
+                track: lineStringOfPosition,
+                clientId: clientId.value,
+            };
 
-        send(JSON.stringify(msg));
-    });
+            send(JSON.stringify(msg));
+        });
 
-    latestSendTimestamp = tracks.at(-1).timestamp;
-}, SERVER_UPDATE_INTERVAL);
+        latestSendTimestamp = tracks.at(-1).timestamp;
+    },
+    SERVER_UPDATE_INTERVAL,
+    {
+        immediate: false,
+    }
+);
 
 watch(data, (data) => {
     let websocketMsg = JSON.parse(data);
@@ -125,10 +132,11 @@ export function establishWebsocket(clientId: string, collectionId: string) {
 }
 
 export const useCollectionService = (id: string) => {
+    open();
     let response = getCollection(id, clientId.value);
-    
+
     response.then(({ data }) => {
-        console.log(data)
+        console.log(data);
         _activeCollection.value.id = data.id;
         _activeCollection.value.adminClientId = data.clientId;
         _activeCollection.value.name = data.name;
@@ -228,8 +236,7 @@ function handleAccessRequest(message: InviteMessage) {
 }
 
 function handleCollectionUpdate(message: UpdateCollectionMessage) {
-    
-    _activeCollection.value.divisions = message.collection.collectionDivision; 
+    _activeCollection.value.divisions = message.collection.collectionDivision;
     _activeCollection.value.area = message.collection.area;
     _activeCollection.value.name = message.collection.name;
 
