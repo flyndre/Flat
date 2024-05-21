@@ -35,17 +35,17 @@ function next() {
     <DefaultLayout>
         <template #action-left>
             <router-link :to="{ name: 'home' }">
-                <Button label="Back" severity="secondary" text>
+                <Button :label="$t('universal.back')" severity="secondary" text>
                     <template #icon>
                         <MdiTextButtonIcon :icon="mdiArrowLeft" />
                     </template>
                 </Button>
             </router-link>
         </template>
-        <template #title> Join a Collection </template>
+        <template #title> {{ $t('scan.title') }} </template>
         <template #action-right>
             <Button
-                label="Next"
+                :label="$t('universal.next')"
                 severity="primary"
                 :disabled="!submittable"
                 @click="next"
@@ -70,7 +70,7 @@ function next() {
                             <MdiInputIcon :icon="mdiLink" />
                             <InputText
                                 class="w-full"
-                                placeholder="Or enter a link manually"
+                                :placeholder="$t('scan.enter_link')"
                                 v-model="joinLink"
                             />
                         </IconField>

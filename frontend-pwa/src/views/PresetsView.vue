@@ -29,6 +29,9 @@ import { MenuItem } from 'primevue/menuitem';
 import SplitButton from 'primevue/splitbutton';
 import { v4 as uuidv4 } from 'uuid';
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const displayedCollections = computedAsync(() =>
     collections.value.sort((a, b) => a.name.localeCompare(b.name))
@@ -46,7 +49,7 @@ function duplicateSelected() {
     collectionDB.bulkAdd([
         ...selectedCollections.value.map((c) => ({
             ...dbSafe(c),
-            name: `${c.name} (copy)`,
+            name: `${c.name} ${t('prests.copy_suffix')}`,
             id: uuidv4(),
         })),
     ]);
@@ -55,13 +58,13 @@ function duplicateSelected() {
 
 const selectedActions: MenuItem[] = [
     {
-        label: 'Duplicate',
+        label: t('presets.action_duplicate'),
         command: duplicateSelected,
         disabled: () => selectionEmpty.value,
         icon: mdiCheckboxMultipleBlank,
     },
     {
-        label: 'Export',
+        label: t('presets.action_export'),
         command: () => (exportDialogVisible.value = true),
         disabled: () => selectionEmpty.value,
         icon: mdiTrayArrowUp,
@@ -82,24 +85,24 @@ const deleteDialogVisible = ref(false);
     <DefaultLayout>
         <template #action-left>
             <router-link :to="{ name: 'home' }">
-                <Button label="Back" severity="secondary" text>
+                <Button :label="$t('universal.back')" severity="secondary" text>
                     <template #icon>
                         <MdiTextButtonIcon :icon="mdiArrowLeft" />
                     </template>
                 </Button>
             </router-link>
         </template>
-        <template #title> My Collections </template>
+        <template #title> {{ $t('presets.title') }} </template>
         <template #action-right>
             <router-link :to="{ name: 'create' }">
-                <Button label="Create new" severity="primary">
+                <Button :label="$t('presets.action_create')" severity="primary">
                     <template #icon>
                         <MdiTextButtonIcon :icon="mdiPlus" />
                     </template>
                 </Button>
             </router-link>
             <Button
-                label="Import"
+                :label="$t('presets.action_import')"
                 severity="secondary"
                 text
                 @click="importDialogVisible = true"
@@ -136,7 +139,7 @@ const deleteDialogVisible = ref(false);
                         class="w-full flex flex-row justify-stretch gap-2 [&>*]:grow"
                     >
                         <Button
-                            label="Cancel"
+                            :label="$t('universal.cancel')"
                             severity="secondary"
                             @click="deleteDialogVisible = false"
                         >
@@ -145,7 +148,7 @@ const deleteDialogVisible = ref(false);
                             </template>
                         </Button>
                         <Button
-                            label="Delete"
+                            :label="$t('universal.delete')"
                             severity="danger"
                             @click="deleteDialogConfirm"
                         >
@@ -186,11 +189,11 @@ const deleteDialogVisible = ref(false);
                                         {{
                                             selectionEmpty
                                                 ? ''
-                                                : `${selectedCollections.length} Selected`
+                                                : `${selectedCollections.length} ${$t('presets.selected')}`
                                         }}
                                     </div>
                                     <SplitButton
-                                        label="Delete"
+                                        :label="$t('presets.action_delete')"
                                         severity="secondary"
                                         :model="selectedActions"
                                         :disabled="selectionEmpty"

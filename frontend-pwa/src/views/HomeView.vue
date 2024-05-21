@@ -39,14 +39,14 @@ const mapZoomReal = useThrottle(mapZoomSlider, 25);
         </template>
         <template #action-right>
             <router-link :to="{ name: 'scan' }">
-                <Button label="Join a Collection">
+                <Button :label="$t('home.join')">
                     <template #icon>
                         <MdiTextButtonIcon :icon="mdiImport" />
                     </template>
                 </Button>
             </router-link>
             <router-link :to="{ name: 'presets' }">
-                <Button label="My Collections" severity="secondary">
+                <Button :label="$t('home.presets')" severity="secondary">
                     <template #icon>
                         <MdiTextButtonIcon :icon="mdiMapMarkerPath" />
                     </template>

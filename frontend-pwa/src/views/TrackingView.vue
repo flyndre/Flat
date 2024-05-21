@@ -42,11 +42,13 @@ import { useToast } from 'primevue/usetoast';
 import { computed, onBeforeMount, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import DivisionsList from '@/components/tracking/DivisionsList.vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
     id: string;
 }>();
 
+const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const { add: pushToast } = useToast();
@@ -79,33 +81,33 @@ const locationError = computed(
 const mapCenterOptions: {
     value?: 'area' | 'position';
     icon: string;
-    label: string;
+    messageCode: string;
 }[] = [
     {
         value: undefined,
-        label: 'Unlock',
+        messageCode: 'tracking.unlock_focus',
         icon: mdiHandBackRight,
     },
     {
         value: 'position',
-        label: 'Location',
+        messageCode: 'tracking.location_focus',
         icon: mdiCrosshairsGps,
     },
     {
         value: 'area',
-        label: 'Area',
+        messageCode: 'tracking.area_focus',
         icon: mdiFitToScreen,
     },
 ];
 
 const adminActions: MenuItem[] = [
     {
-        label: 'End Collection',
+        label: t('tracking.action_end'),
         icon: mdiStop,
         command: () => (endCollectionDialogVisible.value = true),
     },
     {
-        label: 'Manage Participants',
+        label: t('tracking.action_manage'),
         icon: mdiAccountMultiple,
         command: () => (manageParticipantsDialogVisible.value = true),
     },
@@ -178,7 +180,7 @@ const clientPos = mapCenterWithDefaults(trackingPosition, {
             <SplitButton
                 v-if="isAdmin"
                 :model="adminActions"
-                :label="isOnMobile ? '' : 'Add Participants'"
+                :label="isOnMobile ? '' : $t('tracking.action_invite')"
                 severity="secondary"
                 @click="invitationScreenVisible = true"
             >
@@ -195,7 +197,7 @@ const clientPos = mapCenterWithDefaults(trackingPosition, {
 
             <Button
                 v-else
-                label="Leave Collection"
+                :label="$t('tracking.action_leave')"
                 severity="secondary"
                 @click="leaveCollection"
             >
@@ -213,16 +215,20 @@ const clientPos = mapCenterWithDefaults(trackingPosition, {
                     class="text-red-500 animate-ping"
                     :icon="mdiCircle"
                 />
-                Tracking
+                {{ $t('tracking.title_active') }}
             </template>
             <template v-else>
                 <MdiTextButtonIcon class="opacity-75" :icon="mdiPauseCircle" />
-                Paused
+                {{ $t('tracking.title_paused') }}
             </template>
         </template>
         <template #action-right>
             <Button
-                :label="trackingActive ? 'Pause Tracking' : 'Start Tracking'"
+                :label="
+                    trackingActive
+                        ? $t('tracking.action_pause_tracking')
+                        : $t('tracking.action_start_tracking')
+                "
                 :loading="trackingLoading"
                 :disabled="locationError"
                 @click="toggleTracking"
@@ -236,7 +242,7 @@ const clientPos = mapCenterWithDefaults(trackingPosition, {
         </template>
         <template #default>
             <!-- Geolocation Permission Dialog -->
-            <Dialog
+            <!-- <Dialog
                 :position="isOnMobile ? 'bottom' : 'top'"
                 :visible="locationError"
                 header="Location Permission Required"
@@ -265,7 +271,7 @@ const clientPos = mapCenterWithDefaults(trackingPosition, {
                         </Button>
                     </div>
                 </template>
-            </Dialog>
+            </Dialog> -->
 
             <InvitationDialog
                 v-model:visible="invitationScreenVisible"
@@ -299,7 +305,7 @@ const clientPos = mapCenterWithDefaults(trackingPosition, {
                 <template #footer>
                     <div class="w-full flex flex-row justify-center gap-2">
                         <Button
-                            label="No"
+                            :label="$t('universal.deny')"
                             severity="secondary"
                             @click="endCollectionDialogVisible = false"
                         >
@@ -308,7 +314,7 @@ const clientPos = mapCenterWithDefaults(trackingPosition, {
                             </template>
                         </Button>
                         <Button
-                            label="Yes"
+                            :label="$t('universal.confirm')"
                             severity="danger"
                             @click="stopCollection"
                         >
@@ -391,7 +397,9 @@ const clientPos = mapCenterWithDefaults(trackingPosition, {
                                         <span
                                             class="max-[400px]:hidden text-ellipsis overflow-hidden z-10"
                                         >
-                                            {{ slotProps.option.label }}
+                                            {{
+                                                $t(slotProps.option.messageCode)
+                                            }}
                                         </span>
                                     </div>
                                 </template>

@@ -20,22 +20,22 @@ import Card from 'primevue/card';
 
 const settings = [
     {
-        label: 'Theme',
+        messageCode: 'settings.theme',
         icon: mdiPalette,
         component: ThemeSetting,
     },
     {
-        label: 'Handedness',
+        messageCode: 'settings.handedness',
         icon: mdiHandClap,
         component: HandednessSetting,
     },
     {
-        label: 'Home Screen Location',
+        messageCode: 'settings.home_location',
         icon: mdiHomeMapMarker,
         component: HomeLocationSetting,
     },
     {
-        label: 'About',
+        messageCode: 'settings.about',
         icon: mdiInformation,
         component: AboutSetting,
     },
@@ -46,14 +46,14 @@ const settings = [
     <DefaultLayout>
         <template #action-left>
             <router-link :to="{ name: 'home' }">
-                <Button label="Back" severity="secondary" text>
+                <Button :label="$t('universal.back')" severity="secondary" text>
                     <template #icon>
                         <MdiTextButtonIcon :icon="mdiArrowLeft" />
                     </template>
                 </Button>
             </router-link>
         </template>
-        <template #title> Settings </template>
+        <template #title> {{ $t('settings.title') }} </template>
         <template #default>
             <Card
                 class="mb-2.5 overflow-hidden"
@@ -63,11 +63,13 @@ const settings = [
                     <Accordion :multiple="true" :active-index="[0, 1]">
                         <AccordionTab
                             v-for="setting of settings"
-                            :key="setting.label"
+                            :key="setting.messageCode"
                             :pt="{ headerAction: { class: 'bg-transparent' } }"
                         >
                             <template #header>
-                                <span class="mr-auto">{{ setting.label }}</span>
+                                <span class="mr-auto">
+                                    {{ $t(setting.messageCode) }}
+                                </span>
                                 <MdiIcon class="mr-3" :icon="setting.icon" />
                             </template>
                             <component :is="setting.component" />

@@ -1,10 +1,20 @@
 {
-    "prompts": {
+    "locales": {
+        "en": "English",
+        "de": "German"
+    },
+    "universal": {
         "back": "Back",
         "cancel": "Cancel",
         "close": "Close",
         "confirm": "Yes",
         "deny": "No",
+        "save": "Save",
+        "start": "Start",
+        "join": "Join",
+        "next": "Next",
+        "help": "Help",
+        "delete": "Delete",
         "settings": "Settings",
         "dark_theme": "Dark",
         "light_theme": "Light",
@@ -14,8 +24,75 @@
         "copy_url_success": "URL copied!",
         "copy_text_success": "Text copied!"
     },
-    "locales": {
-        "en": "English",
-        "de": "German"
+    "home": {
+        "join": "Join a Collection",
+        "presets": "My Collections"
+    },
+    "edit": {
+        "title_edit": "Edit",
+        "title_create": "Create",
+        "area_name": "Area Name",
+        "collection_name": "Collection Name",
+        "divisions_header": "Divisions",
+        "edit_divisions": "Edit Divisions",
+        "error_collection_not_found": "The requested collection id does not exist.",
+        "error_collection_retrieval": "Failed to get the requested collection.",
+        "error_collection_incomplete": "The collection is missing required information.",
+        "error_failed_to_save": "Failed to save the collection.",
+        "error_failed_to_start": "Failed to start collection. Try again."
+    },
+    "join": {
+        "title": "Join",
+        "waiting_title": "Waiting to join...",
+        "waiting_text": "Please stand by as the collection's admin reviews your join request.",
+        "cancel_waiting": "Cancel joining",
+        "enter_link": "Or enter a link manually",
+        "nickname": "Your Name",
+        "error_failed_to_join": "Failed to join the Collection."
+    },
+    "map": {
+        "title": "Edit Divisions",
+        "error_collection_not_found": "The requested collection does not exits.",
+        "error_collection_retrieval": "Failed to get the requested collection.",
+        "error_failed_to_save": "Failed to save divisions."
+    },
+    "not_found": {
+        "title": "Error",
+        "go_home": "Go Home",
+        "error_text": "Page not found"
+    },
+    "presets": {
+        "title": "My Collections",
+        "copy_suffix": "(copy)",
+        "action_duplicate": "Duplicate",
+        "action_export": "Export",
+        "action_import": "Import",
+        "action_create": "Create new",
+        "action_delete": "Delete",
+        "selected": "Selected"
+    },
+    "scan": {
+        "title": "Join",
+        "enter_link": "Or enter a link manually"
+    },
+    "settings": {
+        "title": "Settings",
+        "theme": "Theme",
+        "handedness": "Handedness",
+        "home_location": "Home Screen Location",
+        "about": "About"
+    },
+    "tracking": {
+        "title_active": "Tracking",
+        "title_paused": "Paused",
+        "unlock_focus": "Unlocked",
+        "location_focus": "Location",
+        "area_focus": "Area",
+        "action_end": "End Collection",
+        "action_manage": "Manage Participants",
+        "action_invite": "Add Participants",
+        "action_leave": "Leave Collection",
+        "action_start_tracking": "Start Tracking",
+        "action_pause_tracking": "Pause Tracking"
     }
 }
