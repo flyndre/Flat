@@ -29,6 +29,9 @@ namespace FlatBackend.DTOs
         KeepAlive,
 
         [EnumMember(Value = nameof(LeavingUser))]
-        LeavingUser
+        LeavingUser,
+
+        [EnumMember(Value = nameof(KickedUser))]
+        KickedUser
     }
 }

@@ -7,7 +7,7 @@ namespace FlatBackend.DTOs
     public class LeavingUserDto
     {
         [JsonConverter(typeof(StringEnumConverter))]
-        private WebSocketMessageType type { get; set; } = WebSocketMessageType.LeavingUser;
+        public WebSocketMessageType type { get; set; } = WebSocketMessageType.LeavingUser;
 
         public UserModel user { get; set; }
     }

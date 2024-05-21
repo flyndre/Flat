@@ -282,12 +282,25 @@ namespace FlatBackend.Websocket
             }
         }
 
-        public void removeWebsocketUser( Guid clientId )
+        public void removeWebsocketUser( Guid clientId, Guid collectionId )
         {
-            var user = users.Where(x => x.clientId == clientId).First();
+            var user = users.Where(x => x.clientId == clientId && x.collectionId == collectionId).First();
             if (user != null)
             {
                 users.Remove(user);
+            }
+        }
+
+        public async void informKickedUser( Guid clientId, Guid collectionId )
+        {
+            var kickedUser = users.Find(x => x.clientId == clientId && x.collectionId == collectionId);
+            if (kickedUser != null)
+            {
+                if (kickedUser.webSocket.State == WebSocketState.Open)
+                {
+                    var Json = JsonConvert.SerializeObject(new KickedUserDto { message = "You have been kicked from boss Connection aborted.", type = DTOs.WebSocketMessageType.KickedUser });
+                    await kickedUser.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
+                }
             }
         }
 
@@ -297,9 +310,9 @@ namespace FlatBackend.Websocket
             if (collection != null)
             {
                 var user = users.Find(x => x.collectionId == collection.id && x.clientId == collection.clientId);
-                if (user != null)
+                if (user != null && user.webSocket.State == WebSocketState.Open)
                 {
-                    var Json = JsonConvert.SerializeObject(new LeavingUserDto { user = leavingUser });
+                    var Json = JsonConvert.SerializeObject(new LeavingUserDto { user = leavingUser, type = DTOs.WebSocketMessageType.LeavingUser });
                     await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
                 }
             }
