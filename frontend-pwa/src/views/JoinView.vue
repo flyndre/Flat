@@ -4,6 +4,7 @@ import CardProgressIndicator from '@/components/card/CardProgressIndicator.vue';
 import MdiInputIcon from '@/components/icons/MdiInputIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import { clientId } from '@/data/clientMetadata';
+import { TOAST_LIFE } from '@/data/constants';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { isOnMobile } from '@/util/mobileDetection';
 import validateJoinName from '@/validation/validateJoinName';
@@ -20,13 +21,14 @@ import Card from 'primevue/card';
 import Dialog from 'primevue/dialog';
 import IconField from 'primevue/iconfield';
 import InputText from 'primevue/inputtext';
+import { useToast } from 'primevue/usetoast';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const props = defineProps<{
     id: string;
 }>();
-
+const { add } = useToast();
 const router = useRouter();
 
 const joinName = ref('');
@@ -36,12 +38,22 @@ const dialogVisible = ref(false);
 
 async function join() {
     dialogVisible.value = true;
-  
-    //TODO: Change ClientId to actual ClientId
-    const response = await accessRequest(joinName.value, clientId.value, props.id)
-    console.log("ANTWORT ACCESS REQUEST:")
-    console.log(response)
-    response.status == 200 ? router.push(`/track/${props.id}`) : null;
+    const response = await accessRequest(
+        joinName.value,
+        clientId.value,
+        props.id
+    );
+
+    if (response.status == 200) {
+        router.push(`/track/${props.id}`);
+    } else {
+        add({
+            life: TOAST_LIFE,
+            severity: 'error',
+            summary: 'Failed to join the Collection.',
+        });
+        dialogVisible.value = false;
+    }
 }
 function cancel() {
     dialogVisible.value = false;

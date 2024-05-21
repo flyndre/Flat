@@ -124,17 +124,15 @@ async function _saveCollection(target: RouteLocationRaw) {
 
 const save = () => _saveCollection({ name: 'presets' });
 async function start() {
-    //_saveCollection({ name: 'presets' });
-    
-    console.log("------------------------")
-    console.log(collection.value)
-    console.log("------------------------")
-    const response = await openCollection(collection.value); 
-    setAdmin(true)
-    // TODO: Open Error Dialog when status != 200
-    console.log(response); 
-    response.status == 200 ? router.push(`/track/${collection.value.id}`) : null;
-    
+    const response = await openCollection(collection.value);
+
+    response.status == 200
+        ? router.push(`/track/${collection.value.id}`)
+        : add({
+              life: TOAST_LIFE,
+              severity: 'error',
+              summary: 'Failed to start collection. Try again.',
+          });
 }
 
 function editDivisions() {
