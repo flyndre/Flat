@@ -1,6 +1,7 @@
 package de.flyndre.flat.composables.trackingscreen
 
 import android.graphics.BitmapFactory
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -83,6 +84,14 @@ fun TrackingScreen(
     var showLeavingDialog by remember { mutableStateOf(false) }
     var showClosingDialog by remember { mutableStateOf(false) }
     var showAddPaticipantsDialog by remember { mutableStateOf(false) }
+
+    BackHandler(enabled = true) {
+        if(userId.equals(trackingScreenViewModel.collectionInstance.clientId)){//if this user is admin
+            showClosingDialog = true
+        }else{
+            showLeavingDialog = true
+        }
+    }
 
     if (participantsToJoin.isNotEmpty()) {
         ParticipantJoinDialog(
