@@ -1,9 +1,7 @@
 import { confirmRequest, divideCollectionArea, getCollection } from '@/api/rest';
 import { isAdmin } from '@/api/websockets';
 import { clientId } from '@/data/clientMetadata';
-import { collections } from '@/data/collections';
-import db from '@/data/db';
-import { trackingLogDB, trackingLogs } from '@/data/trackingLogs';
+import { trackingLogDB } from '@/data/trackingLogs';
 import { ActiveCollection } from '@/types/ActiveCollection';
 import { Division } from '@/types/Division';
 import { JoinRequest } from '@/types/JoinRequest';
@@ -11,7 +9,7 @@ import { ParticipantTrack } from '@/types/ParticipantTrack';
 import { IncrementalTrackMessage } from '@/types/websocket/IncrementalTrackMessage';
 import { InviteMessage } from '@/types/websocket/InviteMessage';
 import { UpdateCollectionMessage } from '@/types/websocket/UpdateCollectionMessage';
-import { RefSymbol } from '@vue/reactivity';
+import { getParticipantColor } from '@/util/trackingUtils';
 import { useIntervalFn, useWebSocket } from '@vueuse/core';
 import { LineString } from 'geojson';
 import { computed, ref, watch } from 'vue';
@@ -22,9 +20,9 @@ const { status, data, send, open, close } = useWebSocket(
         autoReconnect: true,
     }
 );
-const _isAdmin = ref(false); 
+const _isAdmin = ref(false);
 const _activeCollection = ref({} as ActiveCollection);
-const _isLoading = ref(true)
+const _isLoading = ref(true);
 
 let latestSendTimestamp = null;
 const dmettstett_DEBUG = [48.386848, 8.58066];
@@ -48,7 +46,7 @@ const {
     } as LineString;
 
     var newlatest = null;
-   trackingLogDB.each((el) => {
+    trackingLogDB.each((el) => {
         el.timestamp > latestSendTimestamp || latestSendTimestamp == null
             ? lineStringOfPosition.coordinates.push(el.position)
             : null;
@@ -83,14 +81,12 @@ watch(data, (data) => {
 });
 
 function _assignDivision(d: Division, p: ParticipantTrack | null) {
-    let div = _activeCollection.value.divisions.find(
-        (el) => d.id === el.id
-    );
+    let div = _activeCollection.value.divisions.find((el) => d.id === el.id);
 
     div.clientId = p === null ? null : p.id;
-    divideCollectionArea(_activeCollection.value.id, [div]); 
+    divideCollectionArea(_activeCollection.value.id, [div]);
 
-    if(p !== null){
+    if (p !== null) {
         let user = _activeCollection.value.confirmedUsers.filter(
             (el) => el.id === p.id
         )[0];
@@ -102,11 +98,11 @@ function _startTracking() {
     resumeInterval();
 }
 function _stopTracking() {
-    pauseInterval(); 
+    pauseInterval();
 }
 
 export function _closeCollection(collectionId: string) {
-    const answer = { type: "CollectionClosed", collectionId: collectionId };
+    const answer = { type: 'CollectionClosed', collectionId: collectionId };
     send(JSON.stringify(answer));
 }
 
@@ -133,19 +129,22 @@ export function establishWebsocket(clientId: string, collectionId: string) {
 
 export const useCollectionService = (id: string) => {
     let response = getCollection(id, clientId.value);
-    response.then((el) => {
-        _activeCollection.value.id = el.data.id;
-        _activeCollection.value.adminClientId = el.data.clientId;
-        _activeCollection.value.name = el.data.name;
-        _activeCollection.value.area = el.data.area;
-        _activeCollection.value.divisions = el.data.collectionDivision;
+    response.then(({ data }) => {
+        _activeCollection.value.id = data.id;
+        _activeCollection.value.adminClientId = data.clientId;
+        _activeCollection.value.name = data.name;
+        _activeCollection.value.area = data.area;
+        _activeCollection.value.divisions = data.collectionDivision;
         _activeCollection.value.requestedUsers = [] as JoinRequest[];
-        _activeCollection.value.confirmedUsers = el.data.confirmedUsers.map(
-            (el) => {
+        _activeCollection.value.confirmedUsers = data.confirmedUsers.map(
+            (user) => {
                 return {
-                    name: el.username,
-                    id: el.clientId,
-                    color: '#eff542',
+                    name: user.username,
+                    id: user.clientId,
+                    color: getParticipantColor(
+                        user.clientId,
+                        data.collectionDivision
+                    ),
                     progress: [],
                 };
             }
@@ -168,9 +167,9 @@ export const useCollectionService = (id: string) => {
                 },
             ],
         });
-        _activeCollection.value.requestedUsers = el.data.requestedUsers;
-        _isAdmin.value = el.data.clientId === clientId;
-        _isLoading.value = false; 
+        _activeCollection.value.requestedUsers = data.requestedUsers;
+        _isAdmin.value = data.clientId === clientId;
+        _isLoading.value = false;
     });
 
     establishWebsocket(clientId.value, id);
@@ -199,7 +198,7 @@ export const useCollectionService = (id: string) => {
         startTracking: _startTracking,
         stopTracking: _stopTracking,
         isLoading: computed(() => _isLoading.value),
-        isAdmin: computed(() => _isAdmin.value)
+        isAdmin: computed(() => _isAdmin.value),
     };
 };
 
