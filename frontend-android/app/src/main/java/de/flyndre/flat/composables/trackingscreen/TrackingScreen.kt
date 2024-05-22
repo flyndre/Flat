@@ -221,7 +221,9 @@ fun TrackingScreen(
                     }
                     if (list.isNotEmpty()) {
                         Polyline(points = list, color = Color(66,90,245))
-                        Circle(center = list.last(), radius = LocalConfiguration.current.screenWidthDp.toDouble()/15, strokeColor = Color(66,90,245), fillColor = Color(66,90,245))
+                        if(track.equals(localTrackList.tracks.last())){
+                            Circle(center = list.last(), radius = LocalConfiguration.current.screenWidthDp.toDouble()/15, strokeColor = Color(66,90,245), fillColor = Color(66,90,245))
+                        }
                     }
                 }
             }
@@ -235,7 +237,9 @@ fun TrackingScreen(
                         }
                         if (list.isNotEmpty()) {
                             Polyline(points = list, color = Color(66,90,245))
-                            Circle(center = list.last(), radius = LocalConfiguration.current.screenWidthDp.toDouble()/20, strokeColor = Color(66,90,245), fillColor = Color(66,90,245))
+                            if(track.equals(trackCollection.value.tracks.last())){
+                                Circle(center = list.last(), radius = LocalConfiguration.current.screenWidthDp.toDouble()/20, strokeColor = Color(66,90,245), fillColor = Color(66,90,245))
+                            }
                         }
                     }
 
