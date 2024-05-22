@@ -12,12 +12,14 @@ import com.google.maps.android.compose.CameraPositionState
 import de.flyndre.flat.composables.trackingscreen.participantscreen.ParticipantScreenViewModel
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.interfaces.IConnectionService
+import de.flyndre.flat.interfaces.ISettingService
 import de.flyndre.flat.interfaces.ITrackingService
 import de.flyndre.flat.models.AccessResquestMessage
 import de.flyndre.flat.models.CollectionArea
 import de.flyndre.flat.models.CollectionInstance
 import de.flyndre.flat.models.Track
 import de.flyndre.flat.models.TrackCollection
+import de.flyndre.flat.services.SettingService
 import io.github.dellisd.spatialk.geojson.MultiPolygon
 import io.github.dellisd.spatialk.geojson.Position
 import kotlinx.coroutines.Dispatchers
@@ -34,10 +36,12 @@ class TrackingScreenViewModel(
     trackingService: ITrackingService,
     connectionService: IConnectionService,
     participantScreenViewModel: ParticipantScreenViewModel,
+    settingService: ISettingService
 ): ViewModel() {
     private val _participantScreenViewModel: ParticipantScreenViewModel = participantScreenViewModel
     private val _trackingService = trackingService
     private val _connectionService = connectionService
+    private val _settingService = settingService
     private val joinBaseLink = "https://flat.buhss.de/join/"
     private var lastCenteredOwnDivision: CollectionArea? = null
     var collectionInstance: CollectionInstance = CollectionInstance("", UUID.randomUUID(),
@@ -69,6 +73,9 @@ class TrackingScreenViewModel(
 
     private val _cameraPosition = MutableStateFlow(CameraPosition(LatLng(0.0, 0.0), 0F, 0F, 0F))
     val cameraPosition: StateFlow<CameraPosition> = _cameraPosition.asStateFlow()
+
+    private val _clientId = MutableStateFlow(_settingService.getClientId().toString())
+    val clientId : StateFlow<String> = _clientId.asStateFlow()
 
     init {
         trackingService.addOnLocalTrackUpdate{ onLocalTrackUpdate() }
@@ -158,12 +165,12 @@ class TrackingScreenViewModel(
         }
     }
 
-    fun centerOnOwnArea(cameraPositionState: CameraPositionState, ownId: UUID){
+    fun centerOnOwnArea(cameraPositionState: CameraPositionState){
         //get area to center
         var division: CollectionArea? = null
         for(div in collectionInstance.collectionDivision){
             if(div.clientId != null){
-                if(div.clientId!!.equals(ownId)){
+                if(div.clientId!!.equals(_settingService.getClientId())){
                     division = div
                     if(lastCenteredOwnDivision != null){
                         if(!div.id.equals(lastCenteredOwnDivision!!.id)){
@@ -198,12 +205,14 @@ class TrackingScreenViewModel(
 class TrackingScreenViewModelFactory(
     val trackingService: ITrackingService,
     val connectionService: IConnectionService,
-    val participantScreenViewModel: ParticipantScreenViewModel,) : ViewModelProvider.Factory {
+    val participantScreenViewModel: ParticipantScreenViewModel,
+    val settingService: ISettingService) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return TrackingScreenViewModel(
             trackingService,
             connectionService,
-            participantScreenViewModel
+            participantScreenViewModel,
+            settingService
         ) as T
     }
 }

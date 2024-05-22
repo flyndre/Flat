@@ -68,8 +68,7 @@ fun TrackingScreen(
     trackingScreenViewModel: TrackingScreenViewModel,
     onNavigateToInitialScreen: () -> Unit,
     onNavigateToParticipantScreen: () -> Unit,
-    onShareLink: ((String) -> Unit),
-    userId: UUID,
+    onShareLink: ((String) -> Unit)
 ) {
     val trackingEnabled by trackingScreenViewModel.trackingEnabled.collectAsState()
     val localTrackList by trackingScreenViewModel.trackList.collectAsState()
@@ -81,12 +80,13 @@ fun TrackingScreen(
     val cameraPositionState = rememberCameraPositionState {
         position = cameraPosition
     }
+    val userId by trackingScreenViewModel.clientId.collectAsState()
     var showLeavingDialog by remember { mutableStateOf(false) }
     var showClosingDialog by remember { mutableStateOf(false) }
     var showAddPaticipantsDialog by remember { mutableStateOf(false) }
 
     BackHandler(enabled = true) {
-        if(userId.equals(trackingScreenViewModel.collectionInstance.clientId)){//if this user is admin
+        if(userId.equals(trackingScreenViewModel.collectionInstance.clientId.toString())){//if this user is admin
             showClosingDialog = true
         }else{
             showLeavingDialog = true
@@ -135,7 +135,7 @@ fun TrackingScreen(
 
     Scaffold(topBar = {
         Row(){
-            if (!userId.equals(trackingScreenViewModel.collectionInstance.clientId)) {//if this user is no admin
+            if (!userId.equals(trackingScreenViewModel.collectionInstance.clientId.toString())) {//if this user is no admin
                 FloatingActionButton(modifier = Modifier.padding(10.dp),onClick = { showLeavingDialog = true }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -184,7 +184,7 @@ fun TrackingScreen(
         }
     }, floatingActionButton = {
         Column {
-            if (userId.equals(trackingScreenViewModel.collectionInstance.clientId)) {
+            if (userId.equals(trackingScreenViewModel.collectionInstance.clientId.toString())) {
                 AdminMenu(
                     onClosingCollection = { showClosingDialog = true },
                     onNavigateToParticipantScreen = onNavigateToParticipantScreen,
@@ -197,7 +197,7 @@ fun TrackingScreen(
                     contentDescription = "center on own location"
                 )
             }
-            FloatingActionButton(modifier = Modifier.padding(10.dp), onClick = { trackingScreenViewModel.centerOnOwnArea(cameraPositionState = cameraPositionState, ownId = userId) }) {
+            FloatingActionButton(modifier = Modifier.padding(10.dp), onClick = { trackingScreenViewModel.centerOnOwnArea(cameraPositionState = cameraPositionState) }) {
                 Icon(
                     painter = painterResource(id = R.drawable.texture_fill),
                     contentDescription = "center on own location"
@@ -262,7 +262,7 @@ fun TrackingScreen(
                     val blue: Int = Integer.parseInt(collectionArea.color.substring(5), 16)
 
                     //paint own collections with higher alpha
-                    if(userId.equals(collectionArea.clientId)){
+                    if(userId.equals(collectionArea.clientId.toString())){
                         Polygon(
                             points = list,
                             strokeColor = Color(red, green, blue, alpha = 255),

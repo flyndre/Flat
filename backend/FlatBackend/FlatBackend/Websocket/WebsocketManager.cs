@@ -292,11 +292,12 @@ namespace FlatBackend.Websocket
             }
         }
 
-        public void removeWebsocketUser( Guid clientId, Guid collectionId )
+        public async void removeWebsocketUser( Guid clientId, Guid collectionId )
         {
             var user = users.Where(x => x.clientId == clientId && x.collectionId == collectionId).First();
             if (user != null)
             {
+                await user.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "The Collection was closed so the Connection is closed too.", CancellationToken.None);
                 users.Remove(user);
             }
         }
@@ -310,6 +311,7 @@ namespace FlatBackend.Websocket
                 {
                     var Json = JsonConvert.SerializeObject(new KickedUserDto { message = "You have been kicked from boss Connection aborted.", type = DTOs.WebSocketMessageType.KickedUser });
                     await kickedUser.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
+                    await kickedUser.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "The Collection was closed so the Connection is closed too.", CancellationToken.None);
                 }
             }
         }
