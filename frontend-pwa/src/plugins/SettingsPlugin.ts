@@ -56,6 +56,12 @@ function remove(key: string) {
     localStorage.removeItem(key);
 }
 
+function reset() {
+    Object.entries(defaultSettings).forEach(
+        ([key, value]) => (settings.value[key] = value)
+    );
+}
+
 const SettingsPlugin: Plugin = {
     install(_app, ..._options) {
         settings.value = read(SETTINGS_KEY) ?? defaultSettings;
@@ -74,5 +80,5 @@ export default SettingsPlugin;
 
 export const useSettings = () => ({
     settings,
-    reset: () => remove(SETTINGS_KEY),
+    reset,
 });

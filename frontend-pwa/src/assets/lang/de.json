@@ -73,6 +73,7 @@
         "locale": "Sprache",
         "handedness": "Händigkeit",
         "home_location": "Standort im Startbildschirm",
+        "advanced": "Erweitert",
         "about": "Über"
     },
     "tracking": {
@@ -121,6 +122,9 @@
             "copy_failed": "Kopieren der Daten fehlgeschlagen",
             "action_download": "Herunterladen",
             "action_copy": "Kopieren"
+        },
+        "advanced_setting": {
+            "reset_settings": "Einstellungen zurücksetzen"
         },
         "about_setting": {
             "slogan": "Die moderne, plattformübergreifende Tracking-App zur Koordination ehrenamtlicher Sammelaktionen in deiner Nachbarschaft.",

@@ -2,6 +2,7 @@
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import AboutSetting from '@/components/settings/AboutSetting.vue';
+import AdvancedSetting from '@/components/settings/AdvancedSetting.vue';
 import HandednessSetting from '@/components/settings/HandednessSetting.vue';
 import HomeLocationSetting from '@/components/settings/HomeLocationSetting.vue';
 import LocaleSetting from '@/components/settings/LocaleSetting.vue';
@@ -9,6 +10,7 @@ import ThemeSetting from '@/components/settings/ThemeSetting.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import {
     mdiArrowLeft,
+    mdiCogs,
     mdiHandClap,
     mdiHomeMapMarker,
     mdiInformation,
@@ -40,6 +42,11 @@ const settings = [
         messageCode: 'settings.home_location',
         icon: mdiHomeMapMarker,
         component: HomeLocationSetting,
+    },
+    {
+        messageCode: 'settings.advanced',
+        icon: mdiCogs,
+        component: AdvancedSetting,
     },
     {
         messageCode: 'settings.about',

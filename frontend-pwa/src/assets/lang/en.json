@@ -73,6 +73,7 @@
         "locale": "Locale",
         "handedness": "Handedness",
         "home_location": "Home Screen Location",
+        "advanced": "Advanced",
         "about": "About"
     },
     "tracking": {
@@ -121,6 +122,9 @@
             "copy_failed": "Failed to copy data to clipboard.",
             "action_download": "Download",
             "action_copy": "Copy"
+        },
+        "advanced_setting": {
+            "reset_settings": "Reset Settings"
         },
         "about_setting": {
             "slogan": "The modern cross-platform route tracking app to orchestrate volunteer collection campaigns in your neighborhood.",

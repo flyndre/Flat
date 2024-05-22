@@ -68,11 +68,12 @@
         "enter_link": "O insertar enlace aquí"
     },
     "settings": {
-        "title": "Configuración",
+        "title": "Ajustes",
         "theme": "Apariencia",
         "locale": "Idioma",
         "handedness": "Manos",
         "home_location": "Posición de la pantalla de inicio",
+        "advanced": "Avanzado",
         "about": "Información"
     },
     "tracking": {
@@ -121,6 +122,9 @@
             "copy_failed": "Error al copiar datos",
             "action_download": "Descargar",
             "action_copy": "Copiar"
+        },
+        "advanced_setting": {
+            "reset_settings": "Restablecer ajustes"
         },
         "about_setting": {
             "slogan": "La moderna aplicación de seguimiento multiplataforma para coordinar campañas de recogida voluntaria en tu barrio.",
