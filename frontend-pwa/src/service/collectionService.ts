@@ -19,6 +19,9 @@ import { computed, ref, watch } from 'vue';
 const { status, data, send, open, close } = useWebSocket(
     'wss://flat.buhss.de/api/ws',
     {
+        onConnected(){
+            establishWebsocket(clientId.value, _activeCollection.value.id); 
+        },
         autoReconnect: true,
     }
 );
@@ -49,7 +52,7 @@ const {
         };
 
         const msg = {
-            type: 'IncrementalTrack',
+            type: 1,
             trackId: key,
             track: lineStringOfPosition,
             clientId: clientId.value,
@@ -58,25 +61,32 @@ const {
         send(JSON.stringify(msg));
     });
 
-    latestSendTimestamp = tracks.at(-1).timestamp;
+    console.log(tracks);
+    latestSendTimestamp = tracks.at(-1)?.timestamp ?? Date.now();
 }, SERVER_UPDATE_INTERVAL);
 
 watch(data, (data) => {
     let websocketMsg = JSON.parse(data);
-    switch (websocketMsg.type) {
+    Array.isArray(websocketMsg)
+        ? websocketMsg.forEach((el) => handleWebsocketMessage(el))
+        : handleWebsocketMessage(websocketMsg);
+});
+
+function handleWebsocketMessage(message: any) {
+    switch (message.type) {
         case 'AccessRequest':
-            handleAccessRequest(<InviteMessage>websocketMsg);
+            handleAccessRequest(<InviteMessage>message);
             break;
         case 'CollectionUpdate':
-            handleCollectionUpdate(<UpdateCollectionMessage>websocketMsg);
+            handleCollectionUpdate(<UpdateCollectionMessage>message);
             break;
         case 'IncrementalTrack':
-            handleIncrementalTracks(<IncrementalTrackMessage>websocketMsg);
+            handleIncrementalTracks(<IncrementalTrackMessage>message);
             break;
         //LeaveMessage
         //DeleteMessage
     }
-});
+}
 
 function _assignDivision(d: Division, p: ParticipantTrack | null) {
     let div = _activeCollection.value.divisions.find((el) => d.id === el.id);
@@ -126,9 +136,9 @@ export function establishWebsocket(clientId: string, collectionId: string) {
 
 export const useCollectionService = (id: string) => {
     let response = getCollection(id, clientId.value);
-    
+
     response.then(({ data }) => {
-        console.log(data)
+        console.log(data);
         _activeCollection.value.id = data.id;
         _activeCollection.value.adminClientId = data.clientId;
         _activeCollection.value.name = data.name;
@@ -148,26 +158,9 @@ export const useCollectionService = (id: string) => {
                 };
             }
         );
-        _activeCollection.value.confirmedUsers.push({
-            name: 'manamana',
-            id: '39c2beaf-bb10-4aad-99da-f3288aaaaaae',
-            color: '#eff542',
-            progress: [
-                {
-                    id: '39c2beaf-bb10-aaad-99da-f3288aaaaaae',
-                    track: {
-                        type: 'LineString',
-                        coordinates: [
-                            [48.38685, 8.58066],
-                            [48.386916, 8.577717],
-                            [48.388811, 8.583342],
-                        ],
-                    },
-                },
-            ],
-        });
+
         _activeCollection.value.requestedUsers = data.requestedUsers;
-        _isAdmin.value = data.clientId === clientId;
+        _isAdmin.value = data.clientId === clientId.value;
         _isLoading.value = false;
     });
 
@@ -177,13 +170,15 @@ export const useCollectionService = (id: string) => {
     return {
         activeCollection: computed(() => ({
             ..._activeCollection.value,
-            confirmedUsers: _activeCollection.value.confirmedUsers.map((u) => ({
-                ...u,
-                color: getParticipantColor(
-                    u.id,
-                    _activeCollection.value.divisions
-                ),
-            })),
+            confirmedUsers: _activeCollection.value.confirmedUsers?.map(
+                (u) => ({
+                    ...u,
+                    color: getParticipantColor(
+                        u.id,
+                        _activeCollection.value.divisions
+                    ),
+                })
+            ),
         })),
         assignDivision: (d: Division, p: ParticipantTrack | null) =>
             _assignDivision(d, p),
@@ -228,8 +223,7 @@ function handleAccessRequest(message: InviteMessage) {
 }
 
 function handleCollectionUpdate(message: UpdateCollectionMessage) {
-    
-    _activeCollection.value.divisions = message.collection.collectionDivision; 
+    _activeCollection.value.divisions = message.collection.collectionDivision;
     _activeCollection.value.area = message.collection.area;
     _activeCollection.value.name = message.collection.name;
 
@@ -253,6 +247,7 @@ function handleCollectionUpdate(message: UpdateCollectionMessage) {
 }
 
 function handleIncrementalTracks(message: IncrementalTrackMessage) {
+    console.log(message);
     let memberOfTrack = _activeCollection.value.confirmedUsers.filter(
         (el) => el.id === message.clientId
     )[0];
