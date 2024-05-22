@@ -29,6 +29,26 @@ export function getDateTime(date: string, locale: string = 'en') {
     });
 }
 
+export function getDuration(from: string | Date, to: string | Date) {
+    const date1 = new Date(from);
+    const date2 = new Date(to);
+    const diffTime = Math.abs(date2.getTime() - date1.getTime());
+    return msToTime(diffTime);
+}
+
+export function msToTime(duration: number) {
+    const milliseconds = Math.floor((duration % 1000) / 100);
+    const seconds = Math.floor((duration / 1000) % 60);
+    const minutes = Math.floor((duration / (1000 * 60)) % 60);
+    const hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
+
+    const hoursStr = hours < 10 ? '0' + hours : hours;
+    const minutesStr = minutes < 10 ? '0' + minutes : minutes;
+    const secondsStr = seconds < 10 ? '0' + seconds : seconds;
+
+    return hoursStr + ':' + minutesStr + ':' + secondsStr + '.' + milliseconds;
+}
+
 /**
  * Formats a date string using two dates.
  * If both are on the same day, the second date's dd.MM.YYYY is omitted.
@@ -36,13 +56,13 @@ export function getDateTime(date: string, locale: string = 'en') {
  * @param to the ending date string
  */
 export function formatDateRange(from: any, to: any, locale: string = 'en') {
-    let short = {
+    let short: Intl.DateTimeFormatOptions = {
         timeStyle: 'short',
-    } as Intl.DateTimeFormatOptions;
-    let long = {
-        dateStyle: 'short',
+    };
+    let long: Intl.DateTimeFormatOptions = {
+        dateStyle: 'long',
         timeStyle: 'short',
-    } as Intl.DateTimeFormatOptions;
+    };
     let start = new Date(from);
     let end = new Date(to);
     if (isSameDay(start, end)) {
