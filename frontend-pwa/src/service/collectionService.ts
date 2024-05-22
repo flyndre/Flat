@@ -19,11 +19,9 @@ import { computed, ref, watch } from 'vue';
 const { status, data, send, open, close } = useWebSocket(
     'wss://flat.buhss.de/api/ws',
     {
-        onConnected(){
-            establishWebsocket(clientId.value, _activeCollection.value.id); 
-        },
-        autoReconnect: true,
-        immediate: false,
+        onConnected: () => establishWebsocket(clientId.value, _activeCollection.value.id),
+        autoClose: false,
+        autoReconnect: true
     }
 );
 
@@ -54,13 +52,13 @@ const {
             };
 
             const msg = {
-                type: 'IncrementalTrack',
+                type: 1,
                 trackId: key,
                 track: lineStringOfPosition,
                 clientId: clientId.value,
             };
-
-
+            console.log("Sending this Message:");
+            console.log(msg);
             send(JSON.stringify(msg));
         });
 
@@ -71,6 +69,7 @@ const {
 
 
 watch(data, (data) => {
+    console.log("RECEIVED MESSAGE")
     let websocketMsg = JSON.parse(data);
     Array.isArray(websocketMsg)
         ? websocketMsg.forEach((el) => handleWebsocketMessage(el))
@@ -88,6 +87,9 @@ function handleWebsocketMessage(message: any) {
         case 'IncrementalTrack':
             handleIncrementalTracks(<IncrementalTrackMessage>message);
             break;
+        //case 'KeepAlive':
+            //send(JSON.stringify({type: 'KeepAlive'}))
+            //break;
         //LeaveMessage
         //DeleteMessage
     }
@@ -130,6 +132,7 @@ export function _acceptOrDeclineAccessRequest(
 }
 
 export function establishWebsocket(clientId: string, collectionId: string) {
+    
     send(
         JSON.stringify({
             type: 'WebsocketConnection',
@@ -140,7 +143,8 @@ export function establishWebsocket(clientId: string, collectionId: string) {
 }
 
 export const useCollectionService = (id: string) => {
-    open();
+    
+    _activeCollection.value.id = id; 
     let response = getCollection(id, clientId.value);
 
     response.then(({ data }) => {
@@ -167,11 +171,12 @@ export const useCollectionService = (id: string) => {
 
         _activeCollection.value.requestedUsers = data.requestedUsers;
         _isAdmin.value = data.clientId === clientId.value;
+        
         _isLoading.value = false;
     });
 
-    establishWebsocket(clientId.value, id);
-
+    
+    
     console.log('READY');
     return {
         activeCollection: computed(() => ({
@@ -253,10 +258,14 @@ function handleCollectionUpdate(message: UpdateCollectionMessage) {
 }
 
 function handleIncrementalTracks(message: IncrementalTrackMessage) {
-    console.log(message);
-    let memberOfTrack = _activeCollection.value.confirmedUsers.filter(
+    
+    console.log(message)
+    let memberOfTrack = _activeCollection.value.confirmedUsers.find(
         (el) => el.id === message.clientId
-    )[0];
+    );
+
+    console.log("Owner of Track:")
+    console.log(memberOfTrack); 
 
     let listOfTracks = memberOfTrack.progress.filter(
         (el) => el.id === message.trackId
