@@ -1,11 +1,9 @@
 package de.flyndre.flat
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -15,16 +13,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
-import androidx.core.content.edit
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavType
 import de.flyndre.flat.services.ConnectionService
 import de.flyndre.flat.services.TrackingService
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import androidx.room.Room
 import com.google.android.gms.location.LocationServices
 import de.flyndre.flat.composables.presetscreen.collectionareascreen.CollectionAreaScreen
@@ -39,6 +34,9 @@ import de.flyndre.flat.composables.presetscreen.PresetScreen
 import de.flyndre.flat.composables.presetscreen.PresetScreenViewModel
 import de.flyndre.flat.composables.presetscreen.PresetScreenViewModelFactory
 import de.flyndre.flat.composables.presetscreen.collectionareascreen.CollectionAreaScreenViewModel
+import de.flyndre.flat.composables.settingScreen.CreateSettingScreenViewModelFactory
+import de.flyndre.flat.composables.settingScreen.SettingScreen
+import de.flyndre.flat.composables.settingScreen.SettingScreenViewModel
 import de.flyndre.flat.composables.trackingscreen.TrackingScreen
 import de.flyndre.flat.composables.trackingscreen.TrackingScreenViewModel
 import de.flyndre.flat.composables.trackingscreen.TrackingScreenViewModelFactory
@@ -48,29 +46,27 @@ import de.flyndre.flat.composables.trackingscreen.participantscreen.ParticipantS
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.interfaces.IConnectionService
 import de.flyndre.flat.interfaces.ILocationService
+import de.flyndre.flat.interfaces.ISettingService
 import de.flyndre.flat.interfaces.ITrackingService
 import de.flyndre.flat.services.LocationService
+import de.flyndre.flat.services.SettingService
 import de.flyndre.flat.ui.theme.FlatTheme
 import java.util.UUID
 
 class MainActivity : ComponentActivity() {
+    private lateinit var settingService: ISettingService
     private lateinit var connectionService: IConnectionService
     private lateinit var locationService: ILocationService
     private lateinit var trackingService: ITrackingService
     private lateinit var db: AppDatabase
-    private val userIdKey = "USERID"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //request permissions
         requestLocationPermission()
-        val preference = getPreferences(Context.MODE_PRIVATE)
-        if (!preference.contains(userIdKey)) {
-            preference.edit { putString(userIdKey, UUID.randomUUID().toString()) }
-        }
-        val userId = UUID.fromString(preference.getString(userIdKey, ""))
+        settingService = SettingService(getPreferences(MODE_PRIVATE))
         connectionService =
-            ConnectionService("https:flat.buhss.de/api/rest", "wss:flat.buhss.de/api/ws", userId)
+            ConnectionService(settingService)
         locationService = LocationService(
             1000,
             LocationServices.getFusedLocationProviderClient(this), this
@@ -78,7 +74,6 @@ class MainActivity : ComponentActivity() {
         trackingService = TrackingService(connectionService, locationService, 10000)
         db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "flat-database")
             .build()
-
 
         setContent {
             FlatTheme {
@@ -93,7 +88,11 @@ class MainActivity : ComponentActivity() {
                     val trackingScreenViewModel:TrackingScreenViewModel = viewModel(
                         it,
                         "TrackingScreenViewModel",
-                        TrackingScreenViewModelFactory(trackingService,connectionService,participantScreenViewModel))
+                        TrackingScreenViewModelFactory(
+                            trackingService,
+                            connectionService,
+                            participantScreenViewModel,
+                            settingService))
                     val collectionAreaScreenViewModel:CollectionAreaScreenViewModel = viewModel()
                     val presetScreenViewModel: PresetScreenViewModel = viewModel(
                         it,
@@ -116,11 +115,19 @@ class MainActivity : ComponentActivity() {
                         "JoinScreenViewModel",
                         JoinScreenViewModelFactory(
                             db = db,
-                            preference,
+                            settingService,
                             trackingScreenViewModel,
                             connectionService = connectionService
                         )
                     )
+                    val settingScreenViewModel: SettingScreenViewModel = viewModel(
+                        it,
+                        "SettingScreenViewModel",
+                        CreateSettingScreenViewModelFactory(
+                            settingService
+                        )
+                    )
+
 
                     Surface(
                         modifier = Modifier.fillMaxSize(),
@@ -135,8 +142,8 @@ class MainActivity : ComponentActivity() {
                             joinScreenViewModel,
                             trackingScreenViewModel,
                             participantScreenViewModel,
-                            trackingService,
-                            userId
+                            settingScreenViewModel,
+                            settingService.getClientId()
                         ) { x -> shareLink(x) }
                     }
                 }
@@ -186,7 +193,7 @@ fun AppEntryPoint(
     joinScreenViewModel: JoinScreenViewModel,
     trackingScreenViewModel: TrackingScreenViewModel,
     participantScreenViewModel: ParticipantScreenViewModel,
-    trackingService: ITrackingService,
+    settingScreenViewModel: SettingScreenViewModel,
     userId: UUID,
     onShareLink: ((String)->Unit)
 ) {
@@ -205,7 +212,9 @@ fun AppEntryPoint(
             InitialScreen(
                 modifier = modifier,
                 onNavigateToJoinScreen = { navController.navigate("join") },
-                onNavigateToCreateGroupScreen = { navController.navigate("creategroup") })
+                onNavigateToCreateGroupScreen = { navController.navigate("creategroup") },
+                onNavigateToSettingScreen = {navController.navigate("settings")}
+            )
         }
         composable("join") {
             JoinScreen(
@@ -229,6 +238,7 @@ fun AppEntryPoint(
                 topBarText = "Edit Preset",
                 onNavigateToCreateGroupScreen = { navController.navigate("creategroup") },
                 onNavigateToTrackingScreen = { navController.navigate("tracking") },
+                onNavigateToCollectionAreaScreen = { navController.navigate("collectionarea") },
                 presetScreenViewModel = presetScreenViewModel
             )
         }
@@ -243,14 +253,18 @@ fun AppEntryPoint(
                 trackingScreenViewModel = trackingScreenViewModel,
                 onNavigateToInitialScreen = { navController.navigate("initial") },
                 onNavigateToParticipantScreen = { navController.navigate("participant") },
-                onShareLink = onShareLink,
-                userId = userId
+                onShareLink = onShareLink
             )
         }
         composable("participant") {
             ParticipantScreen(
                 participantScreenViewModel = participantScreenViewModel,
                 onNavigateToTrackingScreen = { navController.navigate("tracking") })
+        }
+        composable("settings"){
+            SettingScreen(onNavigateToInitialScreen = { navController.navigate("initial") },
+                settingScreenViewModel = settingScreenViewModel
+            )
         }
     }
 }
