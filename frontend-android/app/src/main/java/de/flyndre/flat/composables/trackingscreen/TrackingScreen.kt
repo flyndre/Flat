@@ -86,7 +86,7 @@ fun TrackingScreen(
     var showAddPaticipantsDialog by remember { mutableStateOf(false) }
 
     BackHandler(enabled = true) {
-        if(userId.equals(trackingScreenViewModel.collectionInstance.clientId)){//if this user is admin
+        if(userId.equals(trackingScreenViewModel.collectionInstance.clientId.toString())){//if this user is admin
             showClosingDialog = true
         }else{
             showLeavingDialog = true
@@ -135,7 +135,7 @@ fun TrackingScreen(
 
     Scaffold(topBar = {
         Row(){
-            if (!userId.equals(trackingScreenViewModel.collectionInstance.clientId)) {//if this user is no admin
+            if (!userId.equals(trackingScreenViewModel.collectionInstance.clientId.toString())) {//if this user is no admin
                 FloatingActionButton(modifier = Modifier.padding(10.dp),onClick = { showLeavingDialog = true }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -184,7 +184,7 @@ fun TrackingScreen(
         }
     }, floatingActionButton = {
         Column {
-            if (userId.equals(trackingScreenViewModel.collectionInstance.clientId)) {
+            if (userId.equals(trackingScreenViewModel.collectionInstance.clientId.toString())) {
                 AdminMenu(
                     onClosingCollection = { showClosingDialog = true },
                     onNavigateToParticipantScreen = onNavigateToParticipantScreen,
@@ -262,7 +262,7 @@ fun TrackingScreen(
                     val blue: Int = Integer.parseInt(collectionArea.color.substring(5), 16)
 
                     //paint own collections with higher alpha
-                    if(userId.equals(collectionArea.clientId)){
+                    if(userId.equals(collectionArea.clientId.toString())){
                         Polygon(
                             points = list,
                             strokeColor = Color(red, green, blue, alpha = 255),
