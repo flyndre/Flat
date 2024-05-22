@@ -63,13 +63,17 @@ const properties = computed<
                 locked
             />
             <Panel :header="$t('components.stats_display.title_general')">
-                <div class="grid grid-cols-[max-content_1fr] gap-3">
+                <div
+                    class="grid grid-cols-[minmax(20%,_max-content)_minmax(50%,_1fr)] gap-3"
+                >
                     <div
                         v-for="stat of properties"
                         :key="stat.messageCode"
                         class="grid grid-cols-subgrid col-span-2"
                     >
-                        <span>
+                        <span
+                            class="text-ellipsis overflow-hidden whitespace-nowrap"
+                        >
                             <MdiTextButtonIcon :icon="stat.icon" />
                             {{ $t(stat.messageCode) }}
                         </span>
