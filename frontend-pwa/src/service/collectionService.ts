@@ -185,13 +185,15 @@ export const useCollectionService = (id: string) => {
     return {
         activeCollection: computed(() => ({
             ..._activeCollection.value,
-            confirmedUsers: _activeCollection.value.confirmedUsers.map((u) => ({
-                ...u,
-                color: getParticipantColor(
-                    u.id,
-                    _activeCollection.value.divisions
-                ),
-            })),
+            confirmedUsers: _activeCollection.value.confirmedUsers?.map(
+                (u) => ({
+                    ...u,
+                    color: getParticipantColor(
+                        u.id,
+                        _activeCollection.value.divisions
+                    ),
+                })
+            ),
         })),
         assignDivision: (d: Division, p: ParticipantTrack | null) =>
             _assignDivision(d, p),
