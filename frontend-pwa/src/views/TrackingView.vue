@@ -172,7 +172,7 @@ const clientPos = mapCenterWithDefaults(trackingPosition, {
     <JoinRequestDialog
         :requests="requests"
         @request-answered="processJoinRequest"
-    ></JoinRequestDialog>
+    />
     <DefaultLayout>
         <template #action-left>
             <SplitButton
