@@ -42,6 +42,7 @@ import { useToast } from 'primevue/usetoast';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
+import { watchOnce } from '@vueuse/core';
 
 const props = defineProps<{
     id: string;
@@ -52,25 +53,11 @@ const router = useRouter();
 const { add: pushToast } = useToast();
 const {
     coords: trackingPosition,
-    isActive: trackingActive,
+    isActive: trackingLogsActive,
     start: startTrackingLogs,
     stop: stopTrackingLogs,
     error: trackingError,
 } = useTrackingService();
-
-function toggleTracking() {
-    trackingLoading.value = true;
-    if (trackingActive.value) {
-        stopTrackingLogs();
-        stopTrackingCollection();
-    } else {
-        startTrackingLogs();
-        startTrackingCollection();
-    }
-    setTimeout(() => {
-        trackingLoading.value = false;
-    }, 1000);
-}
 
 const trackingLoading = ref(false);
 const locationError = computed(
@@ -143,6 +130,7 @@ const {
     handleRequest,
     isAdmin,
     isLoading,
+    isTracking: collectionTrackingActive,
     member,
     requests,
     startTracking: startTrackingCollection,
@@ -165,6 +153,24 @@ const clientPos = mapCenterWithDefaults(trackingPosition, {
     lat: null,
     lng: null,
 });
+
+const isTracking = computed(
+    () => trackingLogsActive.value || collectionTrackingActive.value
+);
+
+function toggleTracking() {
+    trackingLoading.value = true;
+    watchOnce(isTracking, () => {
+        setTimeout(() => (trackingLoading.value = false), 1000);
+    });
+    if (isTracking.value) {
+        stopTrackingLogs();
+        stopTrackingCollection();
+    } else {
+        startTrackingLogs();
+        startTrackingCollection();
+    }
+}
 </script>
 
 <template>
@@ -208,7 +214,7 @@ const clientPos = mapCenterWithDefaults(trackingPosition, {
             </Button>
         </template>
         <template #title>
-            <template v-if="trackingActive">
+            <template v-if="isTracking">
                 <MdiTextButtonIcon
                     class="text-red-500 animate-ping"
                     :icon="mdiCircle"
@@ -223,7 +229,7 @@ const clientPos = mapCenterWithDefaults(trackingPosition, {
         <template #action-right>
             <Button
                 :label="
-                    trackingActive
+                    isTracking
                         ? $t('tracking.action_pause_tracking')
                         : $t('tracking.action_start_tracking')
                 "
@@ -233,7 +239,7 @@ const clientPos = mapCenterWithDefaults(trackingPosition, {
             >
                 <template #icon>
                     <MdiTextButtonIcon
-                        :icon="trackingActive ? mdiPause : mdiPlay"
+                        :icon="isTracking ? mdiPause : mdiPlay"
                     />
                 </template>
             </Button>
