@@ -149,7 +149,7 @@ const {
     requests,
     startTracking: startTrackingCollection,
     stopTracking: stopTrackingCollection,
-} = useCollectionService(route.params.id as string);
+} = useCollectionService(props.id);
 
 function processJoinRequest(joinRequest: JoinRequest) {
     handleRequest(
