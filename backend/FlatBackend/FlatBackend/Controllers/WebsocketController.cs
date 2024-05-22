@@ -87,6 +87,7 @@ namespace FlatBackend.Controllers
                             break;
                     };
                 }
+                buffer = new byte[1024 * 4];
 
                 //await webSocket.SendAsync(
                 //    new ArraySegment<byte>(buffer, 0, receiveResult.Count),
