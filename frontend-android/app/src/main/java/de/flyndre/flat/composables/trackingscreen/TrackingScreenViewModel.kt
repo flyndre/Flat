@@ -153,7 +153,7 @@ class TrackingScreenViewModel(
         viewModelScope.launch(Dispatchers.Default){
             currentPosition = _trackingService.getCurrentPosition()
             viewModelScope.launch(Dispatchers.Main) {
-                cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(currentPosition, 15F))
+                cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(currentPosition, 18F))
             }
         }
     }
