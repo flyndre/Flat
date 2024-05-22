@@ -16,8 +16,10 @@ import de.flyndre.flat.interfaces.ITrackingService
 import de.flyndre.flat.models.AccessResquestMessage
 import de.flyndre.flat.models.CollectionArea
 import de.flyndre.flat.models.CollectionInstance
+import de.flyndre.flat.models.Track
 import de.flyndre.flat.models.TrackCollection
 import io.github.dellisd.spatialk.geojson.MultiPolygon
+import io.github.dellisd.spatialk.geojson.Position
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -73,6 +75,12 @@ class TrackingScreenViewModel(
         trackingService.addOnRemoteTrackUpdate { onRemoteTrackUpdate() }
         connectionService.addOnAccessRequest { onAccessRequestMessage(it) }
 
+        //add initial point for own location
+        viewModelScope.launch(Dispatchers.Default) {
+            val pos = _trackingService.getCurrentPosition()
+            val track = Track(positions = arrayListOf(Position(pos.longitude, pos.latitude)))
+            _trackList.value = TrackCollection(clientId = _trackList.value.clientId, arrayListOf(track))
+        }
     }
 
     fun toggleTracking(){
@@ -145,7 +153,7 @@ class TrackingScreenViewModel(
         viewModelScope.launch(Dispatchers.Default){
             currentPosition = _trackingService.getCurrentPosition()
             viewModelScope.launch(Dispatchers.Main) {
-                cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(currentPosition, 10F))
+                cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(currentPosition, 15F))
             }
         }
     }
