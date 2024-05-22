@@ -174,7 +174,7 @@ fun CollectionAreaScreen(
                             )
                         }
                         SmallFloatingActionButton(onClick = {
-                            collectionAreaScreenViewModel.addPoint(
+                            collectionAreaScreenViewModel.addCollectionAreaPoint(
                                 cameraPositionState.position.target
                             )
                         }) {
