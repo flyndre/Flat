@@ -13,25 +13,60 @@ import { IncrementalTrackMessage } from '@/types/websocket/IncrementalTrackMessa
 import { InviteMessage } from '@/types/websocket/InviteMessage';
 import { UpdateCollectionMessage } from '@/types/websocket/UpdateCollectionMessage';
 import { getParticipantColor } from '@/util/trackingUtils';
-import { useIntervalFn, useWebSocket } from '@vueuse/core';
-import { computed, ref, watch } from 'vue';
+import { useIntervalFn } from '@vueuse/core';
+import { computed, ref } from 'vue';
 
-const { status, data, send, open, close } = useWebSocket(
-    'wss://flat.buhss.de/api/ws',
-    {
-        autoReconnect: true,
-        immediate: false,
-    }
-);
+let ws: WebSocket = null;
+const _websocketStatus = ref<number>(null);
+
+function initialiseWebsocket() {
+    ws = new WebSocket('wss://flat.buhss.de/api/ws');
+
+    ws.onmessage = function (event) {
+        _websocketStatus.value = ws.readyState;
+        console.log('ON MESSAGE EVENT:');
+        console.log(event);
+        let websocketMsg = JSON.parse(event.data);
+        Array.isArray(websocketMsg)
+            ? websocketMsg.forEach((el) => handleWebsocketMessage(el))
+            : handleWebsocketMessage(websocketMsg);
+    };
+
+    ws.onopen = function (event) {
+        _websocketStatus.value = ws.readyState;
+        console.log('ON OPEN EVENT:');
+        console.log(event);
+        establishWebsocket(clientId.value, _activeCollection.value.id);
+    };
+
+    ws.onclose = function (event) {
+        _websocketStatus.value = ws.readyState;
+        console.log('ON CLOSE EVENT:');
+        console.log(event);
+        ws = null;
+        initialiseWebsocket();
+    };
+
+    ws.onerror = function (event) {
+        _websocketStatus.value = ws.readyState;
+        console.log(
+            'HANDELSGUT WICHTIG !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+        );
+        console.log('ON ERROR EVENT:');
+        console.log(event);
+        console.log(
+            'HANDELSGUT WICHTIG !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+        );
+    };
+}
 
 const _isAdmin = ref(false);
 const _activeCollection = ref<ActiveCollection>({} as ActiveCollection);
 const _isLoading = ref(true);
-
 let latestSendTimestamp = Date.now();
 
 const {
-    isActive,
+    isActive: _isTracking,
     pause: pauseInterval,
     resume: resumeInterval,
 } = useIntervalFn(
@@ -56,11 +91,13 @@ const {
                 track: lineStringOfPosition,
                 clientId: clientId.value,
             };
-
-            send(JSON.stringify(msg));
+            console.log('Sending this Message:');
+            console.log(msg);
+            ws.send(JSON.stringify(msg));
         });
 
-        latestSendTimestamp = tracks.at(-1).timestamp;
+        console.log(tracks);
+        latestSendTimestamp = tracks.at(-1)?.timestamp ?? Date.now();
     },
     SERVER_UPDATE_INTERVAL,
     {
@@ -68,22 +105,22 @@ const {
     }
 );
 
-watch(data, (data) => {
-    let websocketMsg = JSON.parse(data);
-    switch (websocketMsg.type) {
+function handleWebsocketMessage(message: any) {
+    switch (message.type) {
         case 'AccessRequest':
-            handleAccessRequest(<InviteMessage>websocketMsg);
+            handleAccessRequest(<InviteMessage>message);
             break;
         case 'CollectionUpdate':
-            handleCollectionUpdate(<UpdateCollectionMessage>websocketMsg);
+            handleCollectionUpdate(<UpdateCollectionMessage>message);
             break;
         case 'IncrementalTrack':
-            handleIncrementalTracks(<IncrementalTrackMessage>websocketMsg);
+            handleIncrementalTracks(<IncrementalTrackMessage>message);
             break;
+
         //LeaveMessage
         //DeleteMessage
     }
-});
+}
 
 function _assignDivision(d: Division, p: ParticipantTrack | null) {
     let div = _activeCollection.value.divisions.find((el) => d.id === el.id);
@@ -107,8 +144,10 @@ function _stopTracking() {
 }
 
 export function _closeCollection(collectionId: string) {
+    _stopTracking();
     const answer = { type: 'CollectionClosed', collectionId: collectionId };
-    send(JSON.stringify(answer));
+    ws.send(JSON.stringify(answer));
+    ws.close();
 }
 
 export function _acceptOrDeclineAccessRequest(
@@ -122,7 +161,7 @@ export function _acceptOrDeclineAccessRequest(
 }
 
 export function establishWebsocket(clientId: string, collectionId: string) {
-    send(
+    ws.send(
         JSON.stringify({
             type: 'WebsocketConnection',
             clientId: clientId,
@@ -132,7 +171,7 @@ export function establishWebsocket(clientId: string, collectionId: string) {
 }
 
 export const useCollectionService = (id: string) => {
-    open();
+    _activeCollection.value.id = id;
     let response = getCollection(id, clientId.value);
 
     response.then(({ data }) => {
@@ -156,30 +195,14 @@ export const useCollectionService = (id: string) => {
                 };
             }
         );
-        _activeCollection.value.confirmedUsers.push({
-            name: 'manamana',
-            id: '39c2beaf-bb10-4aad-99da-f3288aaaaaae',
-            color: '#eff542',
-            progress: [
-                {
-                    id: '39c2beaf-bb10-aaad-99da-f3288aaaaaae',
-                    track: {
-                        type: 'LineString',
-                        coordinates: [
-                            [48.38685, 8.58066],
-                            [48.386916, 8.577717],
-                            [48.388811, 8.583342],
-                        ],
-                    },
-                },
-            ],
-        });
+
         _activeCollection.value.requestedUsers = data.requestedUsers;
-        _isAdmin.value = data.clientId === clientId;
+        _isAdmin.value = data.clientId === clientId.value;
+
         _isLoading.value = false;
     });
 
-    establishWebsocket(clientId.value, id);
+    initialiseWebsocket();
 
     console.log('READY');
     return {
@@ -215,9 +238,10 @@ export const useCollectionService = (id: string) => {
             _closeCollection(collectionId),
         startTracking: _startTracking,
         stopTracking: _stopTracking,
+        isTracking: _isTracking,
         isLoading: computed(() => _isLoading.value),
         isAdmin: computed(() => _isAdmin.value),
-        connectionStatus: status,
+        connectionStatus: computed(() => _websocketStatus.value),
     };
 };
 
@@ -262,9 +286,13 @@ function handleCollectionUpdate(message: UpdateCollectionMessage) {
 }
 
 function handleIncrementalTracks(message: IncrementalTrackMessage) {
-    let memberOfTrack = _activeCollection.value.confirmedUsers.filter(
+    console.log(message);
+    let memberOfTrack = _activeCollection.value.confirmedUsers.find(
         (el) => el.id === message.clientId
-    )[0];
+    );
+
+    console.log('Owner of Track:');
+    console.log(memberOfTrack);
 
     let listOfTracks = memberOfTrack.progress.filter(
         (el) => el.id === message.trackId

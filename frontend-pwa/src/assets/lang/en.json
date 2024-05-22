@@ -40,7 +40,8 @@
         "cancel_waiting": "Cancel joining",
         "enter_link": "Or enter a link manually",
         "nickname": "Your Name",
-        "error_failed_to_join": "Failed to join the Collection."
+        "error_rejected": "Join request was rejected.",
+        "error_failed": "Failed to join the Collection."
     },
     "map": {
         "title": "Edit Divisions",
@@ -87,7 +88,9 @@
         "action_invite": "Add Participants",
         "action_leave": "Leave Collection",
         "action_start_tracking": "Start Tracking",
-        "action_pause_tracking": "Pause Tracking"
+        "action_pause_tracking": "Pause Tracking",
+        "leave_success": "The collection {collectionName} has been left.",
+        "leave_failed": "Failed to leave collection."
     },
     "components": {
         "code_reader": {

@@ -29,20 +29,22 @@ import {
     mdiStop,
     mdiTextureBox,
 } from '@mdi/js';
-
-import TabPanel from 'primevue/tabpanel';
+import DivisionsList from '@/components/tracking/DivisionsList.vue';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import Dialog from 'primevue/dialog';
 import { MenuItem } from 'primevue/menuitem';
 import SelectButton from 'primevue/selectbutton';
 import SplitButton from 'primevue/splitbutton';
+import TabPanel from 'primevue/tabpanel';
 import TabView from 'primevue/tabview';
 import { useToast } from 'primevue/usetoast';
-import { computed, onBeforeMount, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import DivisionsList from '@/components/tracking/DivisionsList.vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
+import { watchOnce } from '@vueuse/core';
+import { leaveCollection } from '@/api/rest';
+import { clientId } from '@/data/clientMetadata';
 
 const props = defineProps<{
     id: string;
@@ -50,29 +52,14 @@ const props = defineProps<{
 
 const { t } = useI18n();
 const router = useRouter();
-const route = useRoute();
 const { add: pushToast } = useToast();
 const {
     coords: trackingPosition,
-    isActive: trackingActive,
+    isActive: trackingLogsActive,
     start: startTrackingLogs,
     stop: stopTrackingLogs,
     error: trackingError,
 } = useTrackingService();
-
-function toggleTracking() {
-    trackingLoading.value = true;
-    if (trackingActive.value) {
-        stopTrackingLogs();
-        stopTrackingCollection();
-    } else {
-        startTrackingLogs();
-        startTrackingCollection();
-    }
-    setTimeout(() => {
-        trackingLoading.value = false;
-    }, 1000);
-}
 
 const trackingLoading = ref(false);
 const locationError = computed(
@@ -113,20 +100,36 @@ const adminActions: MenuItem[] = [
     },
 ];
 
-function leaveCollection() {
-    pushToast({
-        summary: `You left ${'<Collection Name>'}`,
-        severity: 'warn',
-        closable: true,
-        life: TOAST_LIFE,
-    });
-    router.push({ name: 'home' });
+async function leaveCollectionHandler() {
+    try {
+        const response = await leaveCollection(clientId.value, props.id);
+        if (response.status == 200) {
+            pushToast({
+                summary: t('tracking.leave_success', {
+                    collectionName: activeCollection.value?.name,
+                }),
+                severity: 'info',
+                closable: true,
+                life: TOAST_LIFE,
+            });
+            router.push({ name: 'home' });
+        } else {
+            throw response.statusText;
+        }
+    } catch (error) {
+        pushToast({
+            summary: t('tracking.leave_failed'),
+            severity: 'error',
+            closable: true,
+            life: TOAST_LIFE,
+        });
+    }
 }
 
 const endCollectionDialogVisible = ref(false);
 function stopCollection() {
-    closeCollection(route.params.id as string);
-    // TODO: end collection (and fetch and display stats)
+    closeCollection(props.id);
+    // TODO: fetch and display stats
     router.push({ name: 'presets' });
 }
 
@@ -145,11 +148,12 @@ const {
     handleRequest,
     isAdmin,
     isLoading,
+    isTracking: collectionTrackingActive,
     member,
     requests,
     startTracking: startTrackingCollection,
     stopTracking: stopTrackingCollection,
-} = useCollectionService(route.params.id as string);
+} = useCollectionService(props.id);
 
 function processJoinRequest(joinRequest: JoinRequest) {
     handleRequest(
@@ -167,6 +171,24 @@ const clientPos = mapCenterWithDefaults(trackingPosition, {
     lat: null,
     lng: null,
 });
+
+const isTracking = computed(
+    () => trackingLogsActive.value || collectionTrackingActive.value
+);
+
+function toggleTracking() {
+    trackingLoading.value = true;
+    watchOnce(isTracking, () => {
+        setTimeout(() => (trackingLoading.value = false), 1000);
+    });
+    if (isTracking.value) {
+        stopTrackingLogs();
+        stopTrackingCollection();
+    } else {
+        startTrackingLogs();
+        startTrackingCollection();
+    }
+}
 </script>
 
 <template>
@@ -199,7 +221,7 @@ const clientPos = mapCenterWithDefaults(trackingPosition, {
                 v-else
                 :label="$t('tracking.action_leave')"
                 severity="secondary"
-                @click="leaveCollection"
+                @click="leaveCollectionHandler"
             >
                 <template #icon>
                     <MdiTextButtonIcon
@@ -210,7 +232,7 @@ const clientPos = mapCenterWithDefaults(trackingPosition, {
             </Button>
         </template>
         <template #title>
-            <template v-if="trackingActive">
+            <template v-if="isTracking">
                 <MdiTextButtonIcon
                     class="text-red-500 animate-ping"
                     :icon="mdiCircle"
@@ -225,7 +247,7 @@ const clientPos = mapCenterWithDefaults(trackingPosition, {
         <template #action-right>
             <Button
                 :label="
-                    trackingActive
+                    isTracking
                         ? $t('tracking.action_pause_tracking')
                         : $t('tracking.action_start_tracking')
                 "
@@ -235,7 +257,7 @@ const clientPos = mapCenterWithDefaults(trackingPosition, {
             >
                 <template #icon>
                     <MdiTextButtonIcon
-                        :icon="trackingActive ? mdiPause : mdiPlay"
+                        :icon="isTracking ? mdiPause : mdiPlay"
                     />
                 </template>
             </Button>

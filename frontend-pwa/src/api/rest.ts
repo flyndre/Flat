@@ -11,9 +11,9 @@ import api from './api';
  * @returns the created Collection
  */
 export async function openCollection(collection: Collection) {
-    var collectionDto = collection as any 
-    collectionDto.clientId  = collection.adminClientId
-    collectionDto.collectionDivision = collection.divisions
+    var collectionDto = collection as any;
+    collectionDto.clientId = collection.adminClientId;
+    collectionDto.collectionDivision = collection.divisions;
     delete collectionDto.divisions;
     delete collectionDto.adminClientId;
     const response = await api.post('api/rest/collection', collectionDto);
@@ -26,8 +26,10 @@ export async function openCollection(collection: Collection) {
  * @param collectionId of the collection
  * @returns the requested collection
  */
-export async function getCollection(collectionId: string, clientId: string ) {
-    const response = await api.get(`api/rest/collection/${collectionId}?userId=${clientId}`);
+export async function getCollection(collectionId: string, clientId: string) {
+    const response = await api.get(
+        `api/rest/collection/${collectionId}?userId=${clientId}`
+    );
     return response;
 }
 
@@ -94,10 +96,30 @@ export async function confirmRequest(
     accepted: boolean,
     collectionId: string
 ) {
-    const response = await api.post(`api/rest/AccessConfirmation/${collectionId}`, {
-        username: username,
-        clientId: clientId,
-        accepted: accepted,
-    });
+    const response = await api.post(
+        `api/rest/AccessConfirmation/${collectionId}`,
+        {
+            username: username,
+            clientId: clientId,
+            accepted: accepted,
+        }
+    );
+    return response;
+}
+
+/**
+ * Leave a collection as a participant. Admins should end the collection rather than leaving it.
+ *
+ * @param clientId of the User
+ * @param collectionId of the Collection
+ * @returns idk
+ */
+export async function leaveCollection(clientId: string, collectionId: string) {
+    const response = await api.post(
+        `api/rest/LeaveCollection/${collectionId}`,
+        {
+            clientId: clientId,
+        }
+    );
     return response;
 }
