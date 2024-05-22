@@ -1,16 +1,20 @@
 package de.flyndre.flat.composables.presetscreen
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Create
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -43,6 +47,7 @@ fun PresetScreen(
     topBarText: String,
     onNavigateToCreateGroupScreen: () -> Unit,
     onNavigateToTrackingScreen: () -> Unit,
+    onNavigateToCollectionAreaScreen: () -> Unit,
     presetScreenViewModel: PresetScreenViewModel,
 ) {
     val presetName by presetScreenViewModel.presetName.collectAsState()
@@ -117,25 +122,29 @@ fun PresetScreen(
                     }
                 })
             Card(modifier = modifier) {
-                GoogleMap(
-                    onMapClick = { navController.navigate("collectionarea") },
-                    cameraPositionState = CameraPositionState(position = presetScreenViewModel.getCameraPosition()),
-                    uiSettings = MapUiSettings(
-                        zoomControlsEnabled = false,
-                        zoomGesturesEnabled = false,
-                        scrollGesturesEnabled = false,
-                        rotationGesturesEnabled = false,
-                        tiltGesturesEnabled = false
-                    )
-                ) {
-                    if (presetScreenViewModel.getCollectionArea().isNotEmpty()) {
-                        presetScreenViewModel.getCollectionArea().forEach { area ->
-                            Polygon(
-                                points = area.listAreaPoints,
-                                fillColor = area.color.copy(alpha = 0.5f),
-                                strokeColor = area.color.copy(alpha = 1F)
-                            )
+                Box(modifier = Modifier.fillMaxSize()) {
+                    GoogleMap(
+                        cameraPositionState = CameraPositionState(position = presetScreenViewModel.getCameraPosition()),
+                        uiSettings = MapUiSettings(
+                            zoomControlsEnabled = false,
+                            zoomGesturesEnabled = false,
+                            scrollGesturesEnabled = false,
+                            rotationGesturesEnabled = false,
+                            tiltGesturesEnabled = false
+                        )
+                    ) {
+                        if (presetScreenViewModel.getCollectionArea().isNotEmpty()) {
+                            presetScreenViewModel.getCollectionArea().forEach { area ->
+                                Polygon(
+                                    points = area.listAreaPoints,
+                                    fillColor = area.color.copy(alpha = 0.5f),
+                                    strokeColor = area.color.copy(alpha = 1F)
+                                )
+                            }
                         }
+                    }
+                    FloatingActionButton(modifier = Modifier.padding(10.dp).align(Alignment.BottomEnd), onClick = { onNavigateToCollectionAreaScreen() }) {
+                        Icon(imageVector = Icons.Filled.Create, contentDescription = "edit collection area")
                     }
                 }
             }

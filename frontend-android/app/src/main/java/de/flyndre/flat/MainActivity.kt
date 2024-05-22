@@ -229,6 +229,7 @@ fun AppEntryPoint(
                 topBarText = "Edit Preset",
                 onNavigateToCreateGroupScreen = { navController.navigate("creategroup") },
                 onNavigateToTrackingScreen = { navController.navigate("tracking") },
+                onNavigateToCollectionAreaScreen = { navController.navigate("collectionarea") },
                 presetScreenViewModel = presetScreenViewModel
             )
         }
