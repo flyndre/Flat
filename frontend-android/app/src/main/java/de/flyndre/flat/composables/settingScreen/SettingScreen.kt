@@ -32,7 +32,7 @@ fun SettingScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(title = { Text(text = "Presets") },
+            CenterAlignedTopAppBar(title = { Text(text = "Einstellungen") },
                 navigationIcon = {
                     IconButton(onClick = { onNavigateToInitialScreen() }) {
                         Icon(
