@@ -1,7 +1,8 @@
 {
     "locales": {
         "en": "Englisch",
-        "de": "Deutsch"
+        "de": "Deutsch",
+        "es": "Spanisch"
     },
     "universal": {
         "back": "Zurück",
