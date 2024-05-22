@@ -387,25 +387,24 @@ fun CollectionAreaScreen(
                                     )
                                 }
                             )
-                            if (area == selectedArea) {
-                                area.listAreaPoints.forEach { point ->
-                                    Circle(
-                                        center = point,
-                                        radius = 2.0,
-                                        clickable = true,
-                                        onClick = {
-                                            collectionAreaScreenViewModel.setSelectedPoint(
-                                                point,
-                                                cameraPositionState
-                                            )
-                                        },
-                                        fillColor = if (point == selectedPoint) Color.Red else Color.Black,
-                                        strokeColor = if (point == selectedPoint) Color.Red else Color.Black
-                                    )
-                                }
-                            }
+
                         }
                     }
+                }
+                selectedArea?.listAreaPoints?.forEach { point ->
+                    Circle(
+                        center = point,
+                        radius = 2.0,
+                        clickable = true,
+                        onClick = {
+                            collectionAreaScreenViewModel.setSelectedPoint(
+                                point,
+                                cameraPositionState
+                            )
+                        },
+                        fillColor = if (point == selectedPoint) Color.Red else Color.Black,
+                        strokeColor = if (point == selectedPoint) Color.Red else Color.Black
+                    )
                 }
             }
             Icon(Icons.Outlined.Add,"Cursor",modifier = Modifier

@@ -84,7 +84,17 @@ class CollectionAreaScreenViewModel() : ViewModel() {
 
     fun addCollectionAreaPoint(point: LatLng,toUpdate:LatLng?=null) {
         _selectedPoint.value = point
-        _listCollectionAreas.value.forEach { area ->
+        val area = _selectedArea.value
+        if (area != null) {
+            area.listAreaPoints.add(point)
+            val new = CollectionArea(area.color, arrayListOf())
+            area.listAreaPoints.forEach { new.listAreaPoints.add(LatLng(it.latitude,it.longitude)) }
+            _selectedArea.value = null
+            _selectedArea.value = new
+        }
+
+        val list = _listCollectionAreas.value
+        list.forEach { area ->
             if(area== _selectedArea.value){
                 if(toUpdate!=null){
                     val index = area.listAreaPoints.indexOf(point)
@@ -93,11 +103,11 @@ class CollectionAreaScreenViewModel() : ViewModel() {
                         area.listAreaPoints.add(index,point)
                     }
                 }else{
-                    area.listAreaPoints.add(point)
+                    area.listAreaPoints.add(LatLng(point.latitude,point.longitude))
                 }
             }
         }
-        setAreaList(_listCollectionAreas.value)
+        setAreaList(list)
     }
 
     fun removeLastCollectionAreaPoint() {
@@ -153,20 +163,21 @@ class CollectionAreaScreenViewModel() : ViewModel() {
     }
 
     private fun setAreaList(areas: List<CollectionArea>){
-        var newAreaList = arrayListOf<CollectionArea>()
+        val newAreaList = arrayListOf<CollectionArea>()
         areas.forEach { area ->
             val newPointList = arrayListOf<LatLng>()
-                area.listAreaPoints.forEach {
-                newPointList.add(LatLng(it.latitude,it.longitude))
-                    if(it==_selectedPoint.value){
-                        _selectedPoint.value = newPointList.last()
-                    }
+            area.listAreaPoints.forEach {
+            newPointList.add(LatLng(it.latitude,it.longitude))
+                if(it==_selectedPoint.value){
+                    _selectedPoint.value = newPointList.last()
+                }
             }
             newAreaList.add(CollectionArea(Color(area.color.value),newPointList))
             if(area==_selectedArea.value){
                 _selectedArea.value=newAreaList.last()
             }
         }
+        _listCollectionAreas.value = newAreaList + CollectionArea(Color.White, arrayListOf())
         _listCollectionAreas.value = newAreaList
     }
 }
