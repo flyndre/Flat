@@ -1,15 +1,11 @@
 <script setup lang="ts">
+import { CollectionStats } from '@/types/stats/CollectionStats';
 import { computed } from 'vue';
-import { calculateCollectionStats } from '@/util/statsUtils';
-import { ActiveCollection } from '@/types/ActiveCollection';
 
 const props = defineProps<{
-    collection?: ActiveCollection;
+    stats?: CollectionStats;
 }>();
-const statsPresent = computed(() => props.collection != null);
-const stats = computed(() =>
-    statsPresent.value ? null : calculateCollectionStats(props.collection)
-);
+const statsPresent = computed(() => props.stats != null);
 </script>
 
 <template>
