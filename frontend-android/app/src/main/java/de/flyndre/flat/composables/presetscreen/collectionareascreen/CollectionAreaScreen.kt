@@ -34,6 +34,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -83,7 +84,10 @@ fun CollectionAreaScreen(
     val cameraPositionState = rememberCameraPositionState {
         position = cameraPosition
     }
-    //modal bottom sheet for choosing area
+    //editing area names
+    var areaName by remember { mutableStateOf("") }
+    var areaIndex: Long? by remember { mutableStateOf(null) }
+
     Scaffold(
         topBar = {
             TopAppBar(title = {
@@ -170,7 +174,7 @@ fun CollectionAreaScreen(
                             )
                         }
                         SmallFloatingActionButton(onClick = {
-                            collectionAreaScreenViewModel.addPoint(
+                            collectionAreaScreenViewModel.addCollectionAreaPoint(
                                 cameraPositionState.position.target
                             )
                         }) {
@@ -316,13 +320,47 @@ fun CollectionAreaScreen(
                             )
                         },
                             headlineContent = {
-                                Text(
-                                    text = "Area " + (collectionAreas.indexOf(
-                                        it
-                                    ) + 1)
-                                )
+                                if(areaIndex == null){
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = it.name
+                                        )
+                                        IconButton(onClick = {
+                                            areaName = it.name
+                                            areaIndex = collectionAreas.indexOf(it).toLong()
+                                        }) {
+                                            Icon(imageVector = Icons.Filled.Edit, contentDescription = "edit area name")
+                                        }
+                                    }
+                                }else{
+                                    if(areaIndex!!.toInt() == collectionAreas.indexOf(it)){
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            TextField(value = areaName, onValueChange = {areaName = it}, trailingIcon = {
+                                                IconButton(onClick = {
+                                                    collectionAreaScreenViewModel.setCollectionAreaName(it, areaName)
+                                                    areaName = ""
+                                                    areaIndex = null
+                                                }) {
+                                                    Icon(painterResource(id = de.flyndre.flat.R.drawable.save_fill), contentDescription = "save area name")
+                                                }
+                                            })
+                                        }
+                                    }else{
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Text(
+                                                text = it.name
+                                            )
+                                            IconButton(onClick = {
+                                                areaName = it.name
+                                                areaIndex = collectionAreas.indexOf(it).toLong()
+                                            }) {
+                                                Icon(imageVector = Icons.Filled.Edit, contentDescription = "edit area name")
+                                            }
+                                        }
+                                    }
+                                }
                             },
-                            supportingContent = {
+                            leadingContent = {
                                 Box(
                                     modifier = Modifier
                                         .size(12.dp)

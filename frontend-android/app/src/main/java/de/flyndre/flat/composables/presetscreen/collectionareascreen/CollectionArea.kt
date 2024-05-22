@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.Color
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 
-data class CollectionArea(val color: Color, val isSelected: Boolean, val listAreaPoints: ArrayList<LatLng>)
+data class CollectionArea(val color: Color, val name: String, val isSelected: Boolean, val listAreaPoints: ArrayList<LatLng>)
 
 fun generateBounds(collectionArea: CollectionArea): LatLngBounds {
     val builder = LatLngBounds.builder()
