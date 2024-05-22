@@ -62,5 +62,6 @@ Unplanned:
 -   [x] Import/Export of collection presets
 -   [x] Home screen with current or custom location
 -   [x] Setting for handedness
--   [ ] I18n
+-   [x] I18n
+    -   English, German, Spanish
 -   [x] Help for division drawing

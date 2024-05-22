@@ -11,6 +11,7 @@ import Button from 'primevue/button';
 import Sidebar from 'primevue/sidebar';
 import { useToast } from 'primevue/usetoast';
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const visible = defineModel<boolean>('visible', {
     default: false,
@@ -21,18 +22,19 @@ const props = defineProps<{
 }>();
 
 const { add } = useToast();
+const { t } = useI18n();
 
 const exportData = computed(() => collectionListToBackup(props.collections));
 const { copy, copied, isSupported } = useClipboard({ source: exportData });
 
 function copyData() {
     copy();
-    watchOnce(copied, (v) =>
+    watchOnce(copied, (success) =>
         add({
-            summary: v
-                ? 'Copied data to clipboard!'
-                : 'Failed to copy data to clipboard.',
-            severity: v ? 'success' : 'error',
+            summary: success
+                ? t('components.export_dialog.copy_success')
+                : t('components.export_dialog.copy_failed'),
+            severity: success ? 'success' : 'error',
         })
     );
 }
@@ -65,7 +67,7 @@ function downloadData() {
         <DefaultLayout height="60vh">
             <template #action-left>
                 <Button
-                    label="Back"
+                    :label="$t('universal.back')"
                     severity="secondary"
                     @click="visible = false"
                     text
@@ -75,10 +77,12 @@ function downloadData() {
                     </template>
                 </Button>
             </template>
-            <template #title>Export</template>
+            <template #title>
+                {{ $t('components.export_dialog.title') }}
+            </template>
             <template #action-right>
                 <Button
-                    label="Download"
+                    :label="$t('components.export_dialog.action_download')"
                     severity="primary"
                     @click="downloadData"
                 >
@@ -88,7 +92,7 @@ function downloadData() {
                 </Button>
                 <Button
                     v-if="isSupported"
-                    :label="isOnMobile ? '' : 'Copy'"
+                    :label="isOnMobile ? '' : $t('universal.copy')"
                     severity="primary"
                     text
                     @click="copyData"

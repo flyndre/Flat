@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { isAdmin } from '@/api/websockets';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
@@ -30,48 +29,37 @@ import {
     mdiStop,
     mdiTextureBox,
 } from '@mdi/js';
-
-import TabPanel from 'primevue/tabpanel';
+import DivisionsList from '@/components/tracking/DivisionsList.vue';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import Dialog from 'primevue/dialog';
 import { MenuItem } from 'primevue/menuitem';
 import SelectButton from 'primevue/selectbutton';
 import SplitButton from 'primevue/splitbutton';
+import TabPanel from 'primevue/tabpanel';
 import TabView from 'primevue/tabview';
 import { useToast } from 'primevue/usetoast';
-import { computed, onBeforeMount, ref } from 'vue';
+import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
+import { watchOnce } from '@vueuse/core';
+import { leaveCollection } from '@/api/rest';
+import { clientId } from '@/data/clientMetadata';
 
 const props = defineProps<{
     id: string;
 }>();
 
+const { t } = useI18n();
 const router = useRouter();
-const route = useRoute();
-const adminView = ref(isAdmin);
 const { add: pushToast } = useToast();
 const {
     coords: trackingPosition,
-    isActive: trackingActive,
+    isActive: trackingLogsActive,
     start: startTrackingLogs,
     stop: stopTrackingLogs,
     error: trackingError,
 } = useTrackingService();
-
-function toggleTracking() {
-    trackingLoading.value = true;
-    if (trackingActive.value) {
-        stopTrackingLogs();
-        stopTrackingCollection();
-    } else {
-        startTrackingLogs();
-        startTrackingCollection();
-    }
-    setTimeout(() => {
-        trackingLoading.value = false;
-    }, 1000);
-}
 
 const trackingLoading = ref(false);
 const locationError = computed(
@@ -80,59 +68,68 @@ const locationError = computed(
 const mapCenterOptions: {
     value?: 'area' | 'position';
     icon: string;
-    label: string;
+    messageCode: string;
 }[] = [
     {
         value: undefined,
-        label: 'Unlock',
+        messageCode: 'tracking.unlock_focus',
         icon: mdiHandBackRight,
     },
     {
         value: 'position',
-        label: 'Location',
+        messageCode: 'tracking.location_focus',
         icon: mdiCrosshairsGps,
     },
     {
         value: 'area',
-        label: 'Area',
+        messageCode: 'tracking.area_focus',
         icon: mdiFitToScreen,
     },
 ];
-const mapCenterSelected = ref<undefined | 'area' | 'position'>(
-    mapCenterOptions[adminView.value ? 2 : 1].value
-);
-const clientPos = mapCenterWithDefaults(trackingPosition, {
-    lat: null,
-    lng: null,
-});
 
 const adminActions: MenuItem[] = [
     {
-        label: 'End Collection',
+        label: t('tracking.action_end'),
         icon: mdiStop,
         command: () => (endCollectionDialogVisible.value = true),
     },
     {
-        label: 'Manage Participants',
+        label: t('tracking.action_manage'),
         icon: mdiAccountMultiple,
         command: () => (manageParticipantsDialogVisible.value = true),
     },
 ];
 
-function leaveCollection() {
-    pushToast({
-        summary: `You left ${'<Collection Name>'}`,
-        severity: 'warn',
-        closable: true,
-        life: TOAST_LIFE,
-    });
-    router.push({ name: 'home' });
+async function leaveCollectionHandler() {
+    try {
+        const response = await leaveCollection(clientId.value, props.id);
+        if (response.status == 200) {
+            pushToast({
+                summary: t('tracking.leave_success', {
+                    collectionName: activeCollection.value?.name,
+                }),
+                severity: 'info',
+                closable: true,
+                life: TOAST_LIFE,
+            });
+            router.push({ name: 'home' });
+        } else {
+            throw response.statusText;
+        }
+    } catch (error) {
+        pushToast({
+            summary: t('tracking.leave_failed'),
+            severity: 'error',
+            closable: true,
+            life: TOAST_LIFE,
+        });
+    }
 }
 
 const endCollectionDialogVisible = ref(false);
 function stopCollection() {
-    closeCollection(route.params.id as string);
-    // TODO: end collection (and fetch and display stats)
+    closeCollection(props.id);
+    // TODO: fetch and display stats
     router.push({ name: 'presets' });
 }
 
@@ -146,13 +143,17 @@ const manageParticipantsDialogVisible = ref(false);
 const {
     activeCollection,
     assignDivision,
-    requests,
-    member,
-    handleRequest,
     closeCollection,
+    connectionStatus,
+    handleRequest,
+    isAdmin,
+    isLoading,
+    isTracking: collectionTrackingActive,
+    member,
+    requests,
     startTracking: startTrackingCollection,
-    stopTracking: stopTrackingCollection
-} = useCollectionService(route.params.id as string);
+    stopTracking: stopTrackingCollection,
+} = useCollectionService(props.id);
 
 function processJoinRequest(joinRequest: JoinRequest) {
     handleRequest(
@@ -163,7 +164,31 @@ function processJoinRequest(joinRequest: JoinRequest) {
     );
 }
 
-onBeforeMount(() => {});
+const mapCenterSelected = ref<undefined | 'area' | 'position'>(
+    mapCenterOptions[isAdmin.value ? 2 : 1].value
+);
+const clientPos = mapCenterWithDefaults(trackingPosition, {
+    lat: null,
+    lng: null,
+});
+
+const isTracking = computed(
+    () => trackingLogsActive.value || collectionTrackingActive.value
+);
+
+function toggleTracking() {
+    trackingLoading.value = true;
+    watchOnce(isTracking, () => {
+        setTimeout(() => (trackingLoading.value = false), 1000);
+    });
+    if (isTracking.value) {
+        stopTrackingLogs();
+        stopTrackingCollection();
+    } else {
+        startTrackingLogs();
+        startTrackingCollection();
+    }
+}
 </script>
 
 <template>
@@ -171,13 +196,13 @@ onBeforeMount(() => {});
     <JoinRequestDialog
         :requests="requests"
         @request-answered="processJoinRequest"
-    ></JoinRequestDialog>
+    />
     <DefaultLayout>
         <template #action-left>
             <SplitButton
-                v-if="adminView"
+                v-if="isAdmin"
                 :model="adminActions"
-                :label="isOnMobile ? '' : 'Add Participants'"
+                :label="isOnMobile ? '' : $t('tracking.action_invite')"
                 severity="secondary"
                 @click="invitationScreenVisible = true"
             >
@@ -194,9 +219,9 @@ onBeforeMount(() => {});
 
             <Button
                 v-else
-                label="Leave Collection"
+                :label="$t('tracking.action_leave')"
                 severity="secondary"
-                @click="leaveCollection"
+                @click="leaveCollectionHandler"
             >
                 <template #icon>
                     <MdiTextButtonIcon
@@ -207,35 +232,39 @@ onBeforeMount(() => {});
             </Button>
         </template>
         <template #title>
-            <template v-if="trackingActive">
+            <template v-if="isTracking">
                 <MdiTextButtonIcon
                     class="text-red-500 animate-ping"
                     :icon="mdiCircle"
                 />
-                Tracking
+                {{ $t('tracking.title_active') }}
             </template>
             <template v-else>
                 <MdiTextButtonIcon class="opacity-75" :icon="mdiPauseCircle" />
-                Paused
+                {{ $t('tracking.title_paused') }}
             </template>
         </template>
         <template #action-right>
             <Button
-                :label="trackingActive ? 'Pause Tracking' : 'Start Tracking'"
+                :label="
+                    isTracking
+                        ? $t('tracking.action_pause_tracking')
+                        : $t('tracking.action_start_tracking')
+                "
                 :loading="trackingLoading"
                 :disabled="locationError"
                 @click="toggleTracking"
             >
                 <template #icon>
                     <MdiTextButtonIcon
-                        :icon="trackingActive ? mdiPause : mdiPlay"
+                        :icon="isTracking ? mdiPause : mdiPlay"
                     />
                 </template>
             </Button>
         </template>
         <template #default>
             <!-- Geolocation Permission Dialog -->
-            <Dialog
+            <!-- <Dialog
                 :position="isOnMobile ? 'bottom' : 'top'"
                 :visible="locationError"
                 header="Location Permission Required"
@@ -264,7 +293,7 @@ onBeforeMount(() => {});
                         </Button>
                     </div>
                 </template>
-            </Dialog>
+            </Dialog> -->
 
             <InvitationDialog
                 v-model:visible="invitationScreenVisible"
@@ -298,7 +327,7 @@ onBeforeMount(() => {});
                 <template #footer>
                     <div class="w-full flex flex-row justify-center gap-2">
                         <Button
-                            label="No"
+                            :label="$t('universal.deny')"
                             severity="secondary"
                             @click="endCollectionDialogVisible = false"
                         >
@@ -307,7 +336,7 @@ onBeforeMount(() => {});
                             </template>
                         </Button>
                         <Button
-                            label="Yes"
+                            :label="$t('universal.confirm')"
                             severity="danger"
                             @click="stopCollection"
                         >
@@ -390,7 +419,9 @@ onBeforeMount(() => {});
                                         <span
                                             class="max-[400px]:hidden text-ellipsis overflow-hidden z-10"
                                         >
-                                            {{ slotProps.option.label }}
+                                            {{
+                                                $t(slotProps.option.messageCode)
+                                            }}
                                         </span>
                                     </div>
                                 </template>
@@ -454,8 +485,12 @@ onBeforeMount(() => {});
                                 :participants="member"
                                 :divisions="activeCollection.divisions"
                                 :admin-mode="isAdmin"
-                                @unassign-division="(d) => console.log(d)"
-                                @assign-division="(d, p) => console.log(d, p)"
+                                @unassign-division="
+                                    (d) => assignDivision(d, null)
+                                "
+                                @assign-division="
+                                    (d, p) => assignDivision(d, p)
+                                "
                             />
                         </TabPanel>
                     </TabView>

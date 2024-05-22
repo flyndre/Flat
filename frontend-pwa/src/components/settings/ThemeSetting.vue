@@ -13,22 +13,22 @@ import SelectButton from 'primevue/selectbutton';
 
 const { settings } = useSettings();
 const options: {
-    label: string;
+    messageCode: string;
     value: ColorSchemeType;
     icon: string;
 }[] = [
     {
-        label: 'Light',
+        messageCode: 'components.theme_setting.light',
         value: 'light',
         icon: mdiWhiteBalanceSunny,
     },
     {
-        label: 'Device',
+        messageCode: 'components.theme_setting.device',
         value: 'no-preference',
         icon: isOnMobile.value ? mdiCellphone : mdiLaptop,
     },
     {
-        label: 'Dark',
+        messageCode: 'components.theme_setting.dark',
         value: 'dark',
         icon: mdiBrightness2,
     },
@@ -52,7 +52,7 @@ const options: {
                 <span
                     class="max-[400px]:hidden text-ellipsis overflow-hidden z-10"
                 >
-                    {{ slotProps.option.label }}
+                    {{ $t(slotProps.option.messageCode) }}
                 </span>
             </div>
         </template>

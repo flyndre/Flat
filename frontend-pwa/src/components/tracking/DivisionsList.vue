@@ -2,7 +2,7 @@
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import { Division } from '@/types/Division';
-import { Participant } from '@/types/Participant';
+import { ParticipantTrack } from '@/types/ParticipantTrack';
 import { mdiAccountCircle, mdiAccountOff, mdiTextureBox } from '@mdi/js';
 import Dropdown from 'primevue/dropdown';
 import InputGroup from 'primevue/inputgroup';
@@ -10,7 +10,7 @@ import InputGroupAddon from 'primevue/inputgroupaddon';
 
 const props = withDefaults(
     defineProps<{
-        participants?: Participant[];
+        participants?: ParticipantTrack[];
         divisions?: Division[];
         adminMode?: boolean;
     }>(),
@@ -22,11 +22,11 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-    assignDivision: [division: Division, participant: Participant];
+    assignDivision: [division: Division, participant: ParticipantTrack];
     unassignDivision: [division: Division];
 }>();
 
-function assignDivision(division: Division, participant: Participant) {
+function assignDivision(division: Division, participant: ParticipantTrack) {
     emit('assignDivision', division, participant);
 }
 
@@ -34,7 +34,10 @@ function unassignDivision(division: Division) {
     emit('unassignDivision', division);
 }
 
-function updateAssignment(division: Division, participant: Participant | null) {
+function updateAssignment(
+    division: Division,
+    participant: ParticipantTrack | null
+) {
     if (participant == null) {
         unassignDivision(division);
     } else {
@@ -79,7 +82,10 @@ function getAssignedParticipant(division: Division) {
                         "
                         :style="{ color: slotProps.value?.color }"
                     />
-                    {{ slotProps.value?.name ?? 'Unassigned' }}
+                    {{
+                        slotProps.value?.name ??
+                        $t('components.division_assignment.unassigned')
+                    }}
                 </template>
                 <template #option="slotProps">
                     <MdiTextButtonIcon

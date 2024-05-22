@@ -1,12 +1,9 @@
 <script setup lang="ts">
-import Button from 'primevue/button';
-import IconField from 'primevue/iconfield';
-import ScrollPanel from 'primevue/scrollpanel';
-import MdiInputIcon from '@/components/icons/MdiInputIcon.vue';
-import InputText from 'primevue/inputtext';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
+import MdiInputIcon from '@/components/icons/MdiInputIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import { IdentifyableTypedOverlay } from '@/types/map/IdentifyableTypedOverlay';
+import { getShapeColor } from '@/util/googleMapsUtils';
 import {
     mdiChartLineVariant,
     mdiCircle,
@@ -17,7 +14,10 @@ import {
     mdiRectangle,
     mdiTextureBox,
 } from '@mdi/js';
-import { getShapeColor } from '@/util/googleMapsUtils';
+import Button from 'primevue/button';
+import IconField from 'primevue/iconfield';
+import InputText from 'primevue/inputtext';
+import ScrollPanel from 'primevue/scrollpanel';
 
 type _Shape = IdentifyableTypedOverlay;
 
@@ -77,7 +77,7 @@ function getShapeIcon(shape: IdentifyableTypedOverlay) {
                 <InputText
                     class="w-full"
                     :model-value="shape.name"
-                    placeholder="Area Name"
+                    :placeholder="$t('components.divisions_list.division_name')"
                     @update:model-value="
                         (v: string) => setShapeNameHook(shape, v)
                     "
@@ -103,7 +103,7 @@ function getShapeIcon(shape: IdentifyableTypedOverlay) {
         >
             <template #default>
                 <MdiTextButtonIcon :icon="mdiCloseBox" />
-                Delete All
+                {{ $t('components.divisions_list.delete_all') }}
             </template>
         </Button>
     </ScrollPanel>
