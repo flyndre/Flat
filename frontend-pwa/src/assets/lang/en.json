@@ -88,7 +88,9 @@
         "action_invite": "Add Participants",
         "action_leave": "Leave Collection",
         "action_start_tracking": "Start Tracking",
-        "action_pause_tracking": "Pause Tracking"
+        "action_pause_tracking": "Pause Tracking",
+        "leave_success": "The collection {collectionName} has been left.",
+        "leave_failed": "Failed to leave collection."
     },
     "components": {
         "code_reader": {

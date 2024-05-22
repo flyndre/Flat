@@ -88,7 +88,9 @@
         "action_invite": "Invitar participantes",
         "action_leave": "Dejar colección",
         "action_start_tracking": "Iniciar seguimiento",
-        "action_pause_tracking": "Pausar seguimiento"
+        "action_pause_tracking": "Pausar seguimiento",
+        "leave_success": "El colección {collectionName} fue abandonada.",
+        "leave_failed": "No se pudo salir de la colección."
     },
     "components": {
         "code_reader": {

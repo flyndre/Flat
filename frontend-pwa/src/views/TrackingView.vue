@@ -43,6 +43,8 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { watchOnce } from '@vueuse/core';
+import { leaveCollection } from '@/api/rest';
+import { clientId } from '@/data/clientMetadata';
 
 const props = defineProps<{
     id: string;
@@ -98,20 +100,36 @@ const adminActions: MenuItem[] = [
     },
 ];
 
-function leaveCollection() {
-    pushToast({
-        summary: `You left ${'<Collection Name>'}`,
-        severity: 'warn',
-        closable: true,
-        life: TOAST_LIFE,
-    });
-    router.push({ name: 'home' });
+async function leaveCollectionHandler() {
+    try {
+        const response = await leaveCollection(clientId.value, props.id);
+        if (response.status == 200) {
+            pushToast({
+                summary: t('tracking.leave_success', {
+                    collectionName: activeCollection.value?.name,
+                }),
+                severity: 'info',
+                closable: true,
+                life: TOAST_LIFE,
+            });
+            router.push({ name: 'home' });
+        } else {
+            throw response.statusText;
+        }
+    } catch (error) {
+        pushToast({
+            summary: t('tracking.leave_failed'),
+            severity: 'error',
+            closable: true,
+            life: TOAST_LIFE,
+        });
+    }
 }
 
 const endCollectionDialogVisible = ref(false);
 function stopCollection() {
     closeCollection(props.id);
-    // TODO: end collection (and fetch and display stats)
+    // TODO: fetch and display stats
     router.push({ name: 'presets' });
 }
 
@@ -203,7 +221,7 @@ function toggleTracking() {
                 v-else
                 :label="$t('tracking.action_leave')"
                 severity="secondary"
-                @click="leaveCollection"
+                @click="leaveCollectionHandler"
             >
                 <template #icon>
                     <MdiTextButtonIcon
