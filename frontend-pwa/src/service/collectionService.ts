@@ -16,19 +16,49 @@ import { getParticipantColor } from '@/util/trackingUtils';
 import { useIntervalFn, useWebSocket } from '@vueuse/core';
 import { computed, ref, watch } from 'vue';
 
-const { status, data, send, open, close } = useWebSocket(
-    'wss://flat.buhss.de/api/ws',
-    {
-        onConnected: () => establishWebsocket(clientId.value, _activeCollection.value.id),
-        autoClose: false,
-        autoReconnect: true
+let ws = null;
+
+
+function initialiseWebsocket(){
+    ws = new WebSocket('wss://flat.buhss.de/api/ws')
+    ws.onmessage = function(event) {
+    
+        console.log("ON MESSAGE EVENT:")
+        console.log(event)
+        let websocketMsg = JSON.parse(event.data);
+        Array.isArray(websocketMsg)
+            ? websocketMsg.forEach((el) => handleWebsocketMessage(el))
+            : handleWebsocketMessage(websocketMsg);
     }
-);
+    
+    ws.onopen = function(event){
+        console.log("ON OPEN EVENT:")
+        console.log(event)
+        establishWebsocket(clientId.value, _activeCollection.value.id)
+    }
+    
+    ws.onclose = function(event){
+        console.log("ON CLOSE EVENT:")
+        console.log(event)
+        ws = null
+        setTimeout(() => ws = new WebSocket('wss://flat.buhss.de/api/ws'), 5000)
+        //ws = new WebSocket('wss://flat.buhss.de/api/ws')
+    }
+
+    ws.onerror = function(event){
+        console.log("HANDELSGUT WICHTIG !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        console.log("ON ERROR EVENT:")
+        console.log(event)
+        console.log("HANDELSGUT WICHTIG !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    }
+}
+
+
+
 
 const _isAdmin = ref(false);
 const _activeCollection = ref<ActiveCollection>({} as ActiveCollection);
 const _isLoading = ref(true);
-
 let latestSendTimestamp = Date.now();
 
 const {
@@ -52,14 +82,14 @@ const {
             };
 
             const msg = {
-                type: 1,
+                type: "IncrementalTrack",
                 trackId: key,
                 track: lineStringOfPosition,
                 clientId: clientId.value,
             };
             console.log("Sending this Message:");
             console.log(msg);
-            send(JSON.stringify(msg));
+            ws.send(JSON.stringify(msg));
         });
 
 
@@ -67,14 +97,6 @@ const {
     latestSendTimestamp = tracks.at(-1)?.timestamp ?? Date.now();
 }, SERVER_UPDATE_INTERVAL);
 
-
-watch(data, (data) => {
-    console.log("RECEIVED MESSAGE")
-    let websocketMsg = JSON.parse(data);
-    Array.isArray(websocketMsg)
-        ? websocketMsg.forEach((el) => handleWebsocketMessage(el))
-        : handleWebsocketMessage(websocketMsg);
-});
 
 function handleWebsocketMessage(message: any) {
     switch (message.type) {
@@ -88,7 +110,7 @@ function handleWebsocketMessage(message: any) {
             handleIncrementalTracks(<IncrementalTrackMessage>message);
             break;
         //case 'KeepAlive':
-            //send(JSON.stringify({type: 'KeepAlive'}))
+            //ws.send(JSON.stringify({type: 'KeepAlive'}))
             //break;
         //LeaveMessage
         //DeleteMessage
@@ -118,7 +140,7 @@ function _stopTracking() {
 
 export function _closeCollection(collectionId: string) {
     const answer = { type: 'CollectionClosed', collectionId: collectionId };
-    send(JSON.stringify(answer));
+    ws.send(JSON.stringify(answer));
 }
 
 export function _acceptOrDeclineAccessRequest(
@@ -133,7 +155,7 @@ export function _acceptOrDeclineAccessRequest(
 
 export function establishWebsocket(clientId: string, collectionId: string) {
     
-    send(
+    ws.send(
         JSON.stringify({
             type: 'WebsocketConnection',
             clientId: clientId,
@@ -175,7 +197,7 @@ export const useCollectionService = (id: string) => {
         _isLoading.value = false;
     });
 
-    
+    initialiseWebsocket();
     
     console.log('READY');
     return {
