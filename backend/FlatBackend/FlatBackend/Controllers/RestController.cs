@@ -243,15 +243,65 @@ namespace FlatBackend.Controllers
 
         // POST api/<ValuesController>/RemoveUser/{id}
         [HttpPost("RemoveUser/{id}")]
-        public async Task<string> RemoveUser( Guid id, Guid clientId )
+        public async Task<string> RemoveUser( Guid id, Guid clientId, Guid bossId )
         {
             try
             {
                 var oldCol = await _MongoDBService.GetCollection(id);
+
+                if (oldCol != null && bossId != null)
+                {
+                    if (oldCol.clientId != bossId) return "An Error accured. The collection wasn't found or your not allowed to do this";
+                    var usersRequestsList = oldCol.requestedAccess.Where(x => x.clientId == clientId).ToList();
+                    var validUsersList = oldCol.confirmedUsers.Where(x => x.clientId == clientId).ToList();
+                    var leavingUser = validUsersList.First();
+                    var usersDivisionsList = oldCol.collectionDivision.Where(x => x.clientId == clientId).ToList();
+                    if (usersRequestsList != null)
+                    {
+                        foreach (var user in usersRequestsList)
+                        {
+                            oldCol.requestedAccess.Remove(user);
+                        }
+                    }
+                    if (validUsersList != null)
+                    {
+                        foreach (var user in validUsersList)
+                        {
+                            oldCol.confirmedUsers.Remove(user);
+                        }
+                    }
+                    if (usersDivisionsList != null)
+                    {
+                        foreach (var division in usersDivisionsList)
+                        {
+                            var index = oldCol.collectionDivision.IndexOf(division);
+                            oldCol.collectionDivision[index].clientId = null;
+                        }
+                    }
+                    _WebsocketManager.informKickedUser(clientId, id);
+                    _WebsocketManager.removeWebsocketUser(clientId, id);
+                    _WebsocketManager.informBossOverLeavingOfUser(id, leavingUser);
+                    _MongoDBService.ChangeCollection(oldCol);
+                    _WebsocketManager.sendUpdateCollection(oldCol.id);
+                }
+                return "Success";
+            }
+            catch (Exception ex) { return NotFound(ex.ToString()).ToString(); }
+        }
+
+        // POST api/<ValuesController>/LeaveCollection/{id}
+        [HttpPost("LeaveCollection/{id}")]
+        public async Task<string> LeaveCollection( Guid id, Guid clientId )
+        {
+            try
+            {
+                var oldCol = await _MongoDBService.GetCollection(id);
+
                 if (oldCol != null)
                 {
                     var usersRequestsList = oldCol.requestedAccess.Where(x => x.clientId == clientId).ToList();
                     var validUsersList = oldCol.confirmedUsers.Where(x => x.clientId == clientId).ToList();
+                    var leavingUser = validUsersList.First();
                     var usersDivisionsList = oldCol.collectionDivision.Where(x => x.clientId == clientId).ToList();
                     if (usersRequestsList != null)
                     {
@@ -276,8 +326,8 @@ namespace FlatBackend.Controllers
                         }
                     }
 
-                    _WebsocketManager.removeWebsocketUser(clientId);
-                    _WebsocketManager.informBossOverLeavingOfUser(id, clientId);
+                    _WebsocketManager.removeWebsocketUser(clientId, id);
+                    _WebsocketManager.informBossOverLeavingOfUser(id, leavingUser);
                     _MongoDBService.ChangeCollection(oldCol);
                     _WebsocketManager.sendUpdateCollection(oldCol.id);
                 }

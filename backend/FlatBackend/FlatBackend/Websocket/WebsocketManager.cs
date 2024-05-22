@@ -63,7 +63,14 @@ namespace FlatBackend.Websocket
         public Guid getCollectionId( WebSocket websocket )
         {
             var user = users.Where(x => x.webSocket == websocket).First();
-            return user.collectionId;
+            if (user != null)
+            {
+                return user.collectionId;
+            }
+            else
+            {
+                return Guid.Empty;
+            }
         }
 
         public void addTrackToTrackCollection( IncrementalTrackDto track, Guid collectionId )
@@ -95,36 +102,39 @@ namespace FlatBackend.Websocket
             accessConfirmationWaiting.Add(accessConfirmationDto);
         }
 
-        public async void saveWebSocketOfUser( WebSocket webSocket, Guid collectionId, Guid userId )//only if User is allready confirmed else not saved
+        public async void saveWebSocketOfUser( WebSocket webSocket, Guid collectionId, Guid userId )//only if User is allready confirmed else ConnectionClosed
         {
             var collection = await _MongoDBService.GetCollection(collectionId);
             UserModel? validUser = new UserModel();
-            if (collection.confirmedUsers != null)
-            { validUser = collection.confirmedUsers.Find(x => x.clientId == userId); }
-            if (validUser != null && validUser.accepted || collection.clientId == userId)
+            if (collection != null)
             {
-                WebSocketUserModel newUser = new WebSocketUserModel { webSocket = webSocket, collectionId = collectionId, clientId = userId };
-                var index = users.IndexOf(newUser);
-                if (index > 0)
+                if (collection.confirmedUsers != null)
+                { validUser = collection.confirmedUsers.Find(x => x.clientId == userId); }
+                if (validUser != null && validUser.accepted || collection.clientId == userId)
                 {
-                    users[index] = newUser;
+                    WebSocketUserModel newUser = new WebSocketUserModel { webSocket = webSocket, collectionId = collectionId, clientId = userId };
+                    var index = users.IndexOf(newUser);
+                    if (index > 0)
+                    {
+                        users[index] = newUser;
+                    }
+                    else
+                    {
+                        users.Add(newUser);
+                    }
+                    if (trackCollections.Count > 0)
+                    {
+                        var TrackCollection = trackCollections.Where(x => x.collectionId == collectionId).First();
+                        if (TrackCollection != null)
+                        {
+                            sendGPSTrackCollection(TrackCollection, collectionId, userId);
+                        }
+                    }
                 }
                 else
                 {
-                    users.Add(newUser);
+                    await webSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "Unauthorised connection this user isn't confirmed by the collection owner.", CancellationToken.None);
                 }
-                if (trackCollections.Count > 0)
-                {
-                    var TrackCollection = trackCollections.Where(x => x.collectionId == collectionId).First();
-                    if (TrackCollection != null)
-                    {
-                        sendGPSTrackCollection(TrackCollection, collectionId, userId);
-                    }
-                }
-            }
-            else
-            {
-                await webSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "Unauthorised connection this user isn't confirmed by the collection owner.", CancellationToken.None);
             }
             return;
         }
@@ -282,14 +292,40 @@ namespace FlatBackend.Websocket
             }
         }
 
-        void IWebsocketManager.removeWebsocketUser( Guid clientId )
+        public void removeWebsocketUser( Guid clientId, Guid collectionId )
         {
-            throw new NotImplementedException();
+            var user = users.Where(x => x.clientId == clientId && x.collectionId == collectionId).First();
+            if (user != null)
+            {
+                users.Remove(user);
+            }
         }
 
-        void IWebsocketManager.informBossOverLeavingOfUser( Guid collectionId, Guid clientId )
+        public async void informKickedUser( Guid clientId, Guid collectionId )
         {
-            throw new NotImplementedException();
+            var kickedUser = users.Find(x => x.clientId == clientId && x.collectionId == collectionId);
+            if (kickedUser != null)
+            {
+                if (kickedUser.webSocket.State == WebSocketState.Open)
+                {
+                    var Json = JsonConvert.SerializeObject(new KickedUserDto { message = "You have been kicked from boss Connection aborted.", type = DTOs.WebSocketMessageType.KickedUser });
+                    await kickedUser.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
+                }
+            }
+        }
+
+        public async void informBossOverLeavingOfUser( Guid collectionId, UserModel leavingUser )
+        {
+            var collection = await _MongoDBService.GetCollection(collectionId);
+            if (collection != null)
+            {
+                var user = users.Find(x => x.collectionId == collection.id && x.clientId == collection.clientId);
+                if (user != null && user.webSocket.State == WebSocketState.Open)
+                {
+                    var Json = JsonConvert.SerializeObject(new LeavingUserDto { user = leavingUser, type = DTOs.WebSocketMessageType.LeavingUser });
+                    await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
+                }
+            }
         }
     }
 }

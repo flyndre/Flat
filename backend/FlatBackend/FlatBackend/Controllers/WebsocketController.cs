@@ -63,8 +63,11 @@ namespace FlatBackend.Controllers
                         case WebSocketMessageType.IncrementalTrack:
                             var track = JsonConvert.DeserializeObject<IncrementalTrackDto>(Json);
                             var collectionId = _WebsocketManager.getCollectionId(webSocket);
-                            _WebsocketManager.addTrackToTrackCollection(track, collectionId);
-                            _WebsocketManager.sendGPSTrack(track, collectionId);
+                            if (collectionId != null || collectionId != Guid.Empty)
+                            {
+                                _WebsocketManager.addTrackToTrackCollection(track, collectionId);
+                                _WebsocketManager.sendGPSTrack(track, collectionId);
+                            }
                             break;
 
                         case WebSocketMessageType.AccessRequest:
