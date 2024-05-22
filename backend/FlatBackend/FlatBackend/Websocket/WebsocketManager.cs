@@ -106,32 +106,35 @@ namespace FlatBackend.Websocket
         {
             var collection = await _MongoDBService.GetCollection(collectionId);
             UserModel? validUser = new UserModel();
-            if (collection.confirmedUsers != null)
-            { validUser = collection.confirmedUsers.Find(x => x.clientId == userId); }
-            if (validUser != null && validUser.accepted || collection.clientId == userId)
+            if (collection != null)
             {
-                WebSocketUserModel newUser = new WebSocketUserModel { webSocket = webSocket, collectionId = collectionId, clientId = userId };
-                var index = users.IndexOf(newUser);
-                if (index > 0)
+                if (collection.confirmedUsers != null)
+                { validUser = collection.confirmedUsers.Find(x => x.clientId == userId); }
+                if (validUser != null && validUser.accepted || collection.clientId == userId)
                 {
-                    users[index] = newUser;
+                    WebSocketUserModel newUser = new WebSocketUserModel { webSocket = webSocket, collectionId = collectionId, clientId = userId };
+                    var index = users.IndexOf(newUser);
+                    if (index > 0)
+                    {
+                        users[index] = newUser;
+                    }
+                    else
+                    {
+                        users.Add(newUser);
+                    }
+                    if (trackCollections.Count > 0)
+                    {
+                        var TrackCollection = trackCollections.Where(x => x.collectionId == collectionId).First();
+                        if (TrackCollection != null)
+                        {
+                            sendGPSTrackCollection(TrackCollection, collectionId, userId);
+                        }
+                    }
                 }
                 else
                 {
-                    users.Add(newUser);
+                    await webSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "Unauthorised connection this user isn't confirmed by the collection owner.", CancellationToken.None);
                 }
-                if (trackCollections.Count > 0)
-                {
-                    var TrackCollection = trackCollections.Where(x => x.collectionId == collectionId).First();
-                    if (TrackCollection != null)
-                    {
-                        sendGPSTrackCollection(TrackCollection, collectionId, userId);
-                    }
-                }
-            }
-            else
-            {
-                await webSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "Unauthorised connection this user isn't confirmed by the collection owner.", CancellationToken.None);
             }
             return;
         }
