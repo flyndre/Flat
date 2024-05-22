@@ -41,7 +41,7 @@ function initialiseWebsocket(){
         console.log("ON CLOSE EVENT:")
         console.log(event)
         ws = null
-        setTimeout(() => ws = new WebSocket('wss://flat.buhss.de/api/ws'), 5000)
+        initialiseWebsocket(); 
         //ws = new WebSocket('wss://flat.buhss.de/api/ws')
     }
 
@@ -109,9 +109,7 @@ function handleWebsocketMessage(message: any) {
         case 'IncrementalTrack':
             handleIncrementalTracks(<IncrementalTrackMessage>message);
             break;
-        //case 'KeepAlive':
-            //ws.send(JSON.stringify({type: 'KeepAlive'}))
-            //break;
+
         //LeaveMessage
         //DeleteMessage
     }
