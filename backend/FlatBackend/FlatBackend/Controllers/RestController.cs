@@ -289,6 +289,7 @@ namespace FlatBackend.Controllers
             catch (Exception ex) { return NotFound(ex.ToString()).ToString(); }
         }
 
+        // POST api/<ValuesController>/LeaveCollection/{id}
         [HttpPost("LeaveCollection/{id}")]
         public async Task<string> LeaveCollection( Guid id, Guid clientId )
         {
