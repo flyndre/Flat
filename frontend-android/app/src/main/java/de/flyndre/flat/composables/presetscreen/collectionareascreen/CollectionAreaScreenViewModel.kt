@@ -166,6 +166,19 @@ class CollectionAreaScreenViewModel() : ViewModel() {
         _listCollectionAreas.value = arrayList
     }
 
+    fun setCollectionAreaName(collectionArea: CollectionArea, name: String){
+        val arrayList: ArrayList<CollectionArea> = ArrayList(_listCollectionAreas.value)
+        val index = arrayList.indexOf(collectionArea)
+        arrayList.remove(collectionArea)
+        val listOfPoints: ArrayList<LatLng> = arrayListOf()
+        for(point in collectionArea.listAreaPoints){
+            listOfPoints.add(LatLng(point.latitude, point.longitude))
+        }
+        arrayList.add(index, CollectionArea(Color(collectionArea.color.value), name, collectionArea.isSelected, listOfPoints))
+
+        _listCollectionAreas.value = arrayList
+    }
+
     fun addPoint(point:LatLng){
         addCollectionAreaPoint(point)
     }
