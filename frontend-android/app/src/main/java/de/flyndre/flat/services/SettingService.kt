@@ -12,9 +12,11 @@ class SettingService(val preferences: SharedPreferences) : ISettingService {
     private val _serverBasePath = "SERVERBASEPATH"
     private val _defaultServerBasePath = "https://flat.buhss.de/api"
     override fun getClientId(): UUID {
-        return UUID.fromString(
-            preferences.getString(_clientIdKey,resetClientId().toString())
-        )
+        val clientId = preferences.getString(_clientIdKey,"")
+        if(clientId!=null&& clientId != ""){
+            return UUID.fromString(clientId)
+        }
+        return resetClientId()
     }
 
     override fun resetClientId(): UUID {

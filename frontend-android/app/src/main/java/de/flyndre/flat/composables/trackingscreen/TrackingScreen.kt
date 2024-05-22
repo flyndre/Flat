@@ -68,8 +68,7 @@ fun TrackingScreen(
     trackingScreenViewModel: TrackingScreenViewModel,
     onNavigateToInitialScreen: () -> Unit,
     onNavigateToParticipantScreen: () -> Unit,
-    onShareLink: ((String) -> Unit),
-    userId: UUID,
+    onShareLink: ((String) -> Unit)
 ) {
     val trackingEnabled by trackingScreenViewModel.trackingEnabled.collectAsState()
     val localTrackList by trackingScreenViewModel.trackList.collectAsState()
@@ -81,6 +80,7 @@ fun TrackingScreen(
     val cameraPositionState = rememberCameraPositionState {
         position = cameraPosition
     }
+    val userId by trackingScreenViewModel.clientId.collectAsState()
     var showLeavingDialog by remember { mutableStateOf(false) }
     var showClosingDialog by remember { mutableStateOf(false) }
     var showAddPaticipantsDialog by remember { mutableStateOf(false) }
@@ -197,7 +197,7 @@ fun TrackingScreen(
                     contentDescription = "center on own location"
                 )
             }
-            FloatingActionButton(modifier = Modifier.padding(10.dp), onClick = { trackingScreenViewModel.centerOnOwnArea(cameraPositionState = cameraPositionState, ownId = userId) }) {
+            FloatingActionButton(modifier = Modifier.padding(10.dp), onClick = { trackingScreenViewModel.centerOnOwnArea(cameraPositionState = cameraPositionState) }) {
                 Icon(
                     painter = painterResource(id = R.drawable.texture_fill),
                     contentDescription = "center on own location"

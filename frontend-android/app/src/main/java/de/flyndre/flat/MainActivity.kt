@@ -88,7 +88,11 @@ class MainActivity : ComponentActivity() {
                     val trackingScreenViewModel:TrackingScreenViewModel = viewModel(
                         it,
                         "TrackingScreenViewModel",
-                        TrackingScreenViewModelFactory(trackingService,connectionService,participantScreenViewModel))
+                        TrackingScreenViewModelFactory(
+                            trackingService,
+                            connectionService,
+                            participantScreenViewModel,
+                            settingService))
                     val collectionAreaScreenViewModel:CollectionAreaScreenViewModel = viewModel()
                     val presetScreenViewModel: PresetScreenViewModel = viewModel(
                         it,
@@ -249,8 +253,7 @@ fun AppEntryPoint(
                 trackingScreenViewModel = trackingScreenViewModel,
                 onNavigateToInitialScreen = { navController.navigate("initial") },
                 onNavigateToParticipantScreen = { navController.navigate("participant") },
-                onShareLink = onShareLink,
-                userId = userId
+                onShareLink = onShareLink
             )
         }
         composable("participant") {
