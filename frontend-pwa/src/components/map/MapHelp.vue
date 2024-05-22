@@ -31,7 +31,7 @@ const visible = defineModel<boolean>('visible', {
         <DefaultLayout height="80vh">
             <template #action-left>
                 <Button
-                    label="Back"
+                    :label="$t('universal.back')"
                     severity="secondary"
                     @click="visible = false"
                     text
@@ -41,20 +41,18 @@ const visible = defineModel<boolean>('visible', {
                     </template>
                 </Button>
             </template>
-            <template #title>Help</template>
+            <template #title>
+                {{ $t('components.map_help.title') }}
+            </template>
             <template #default>
                 <p>
-                    This is the map edit screen. Here, you draw shapes on the
-                    map, representing different divisions of the area in which
-                    you are organizing your collection.
+                    {{ $t('components.map_help.introduction.0') }}
                 </p>
                 <p>
-                    Later, when your collection is in progress, each participant
-                    using Flat is assigned one or more of those divisions.
+                    {{ $t('components.map_help.introduction.1') }}
                 </p>
                 <p>
-                    The following will describe how to use the different tab
-                    menus and buttons:
+                    {{ $t('components.map_help.introduction.2') }}
                 </p>
                 <p>
                     <p class="font-bold border border-solid rounded-lg p-2 w-max mt-8">
@@ -62,9 +60,9 @@ const visible = defineModel<boolean>('visible', {
                             class="overflow-visible ml-1 mr-1.5"
                             :icon="mdiCheck"
                         />
-                        Save
+                        {{ $t('universal.save') }}
                     </p>
-                    The "Save" button will save the areas you created to your collection.
+                    {{ $t('components.map_help.explanation_save') }}
                 </p>
                 <p>
                     <p class="font-bold border border-solid rounded-lg p-2 w-max mt-8">
@@ -72,27 +70,27 @@ const visible = defineModel<boolean>('visible', {
                             class="overflow-visible ml-1 mr-1.5"
                             :icon="mdiMap"
                         />
-                        Map
+                        {{ $t('components.map_with_controls.map') }}
                     </p>
-                    The Map tab provides you with everything you need to navigate the map:
+                    {{ $t('components.map_help.explanation_map.introduction') }}
                     <ul class="list-none [&>*]:mb-2.5 [&>*]:relative [&>li>*]:absolute [&>li>*]:top-1 [&>li>*]:-left-8">
                         <li>
                             <MdiIcon
                                 :icon="mdiCrosshairsGps"
                             />
-                            "Locate Me" button to pan to your current location
+                            {{ $t('components.map_help.explanation_map.locate_me') }}
                         </li>
                         <li>
                             <MdiIcon
                                 :icon="mdiFitToScreen"
                             />
-                            "Locate Shapes" button to pan the map so that all drawn areas are visible
+                            {{ $t('components.map_help.explanation_map.locate_shapes') }}
                         </li>
                         <li>
                             <MdiIcon
                                 :icon="mdiMagnify"
                             />
-                            A search to find a specific location
+                            {{ $t('components.map_help.explanation_map.search') }}
                         </li>
                         
                         <li>
@@ -100,7 +98,7 @@ const visible = defineModel<boolean>('visible', {
                                 class="rotate-90"
                                 :icon="mdiTableColumn"
                             />
-                            A select button to set the map type (roadmap, terrain, satellite and satellite with labels)
+                            {{ $t('components.map_help.explanation_map.map_type') }}
                         </li>
                     </ul>
                 </p>
@@ -111,27 +109,27 @@ const visible = defineModel<boolean>('visible', {
                             class="overflow-visible ml-1 mr-1.5"
                             :icon="mdiPalette"
                         />
-                        Tools
+                        {{ $t('components.map_with_controls.tools') }}
                     </p>
-                    The Tools tab contains anything you need to draw on the map, such as:
+                    {{ $t('components.map_help.explanation_tools.introduction') }}
                     <ul class="list-none [&>*]:mb-2.5 [&>*]:relative [&>li>*]:absolute [&>li>*]:top-1 [&>li>*]:-left-8">
                         <li>
                             <MdiIcon
                                 :icon="mdiVectorSquareEdit"
                             />
-                            "Draw Area" button to draw a new area onto the map and (while drawing) to stop drawing
+                            {{ $t('components.map_help.explanation_tools.draw_division') }}
                         </li>
                         <li>
                             <MdiIcon
                                 :icon="mdiDeleteForever"
                             />
-                            A button to delete the currently selected area
+                            {{ $t('components.map_help.explanation_tools.delete_selected') }}
                         </li>
                         <li>
                             <MdiIcon
                                 :icon="mdiDotsHorizontal"
                             />
-                            Several colors to choose from for the areas
+                            {{ $t('components.map_help.explanation_tools.select_color') }}
                         </li>
                     </ul>
                 </p>
@@ -142,37 +140,36 @@ const visible = defineModel<boolean>('visible', {
                             class="overflow-visible ml-1 mr-1.5"
                             :icon="mdiTextureBox"
                         />
-                        Areas
+                        {{ $t('components.map_with_controls.divisions') }}
                     </p>
-                    Here, you'll find an overview of all maps that have been drawn onto the map.
-                    For each shape, you can:
+                    {{ $t('components.map_help.explanation_divisions.introduction') }}
                     <ul class="list-none [&>*]:mb-2.5 [&>*]:relative [&>li>*]:absolute [&>li>*]:top-1 [&>li>*]:-left-8">
                         <li>
                             <MdiIcon
                                 :icon="mdiCrosshairs"
                             />
-                            Focus the area on the map
+                            {{ $t('components.map_help.explanation_divisions.focus_division') }}
                         </li>
                         <li>
                             <MdiIcon
                                 :icon="mdiTextureBox"
                             />
-                            Give the area a name
+                            {{ $t('components.map_help.explanation_divisions.division_name') }}
                         </li>
                         <li>
                             <MdiIcon
                                 :icon="mdiDeleteForever"
                             />
-                            Delete the area
+                            {{ $t('components.map_help.explanation_divisions.delete_division') }}
                         </li>
                     </ul>
-                    At the bottom of the list you'll find a button to delete all areas:
+                    {{ $t('components.map_help.explanation_divisions.delete_introduction') }}
                     <ul class="list-none [&>*]:mb-2.5 [&>*]:relative [&>li>*]:absolute [&>li>*]:top-1 [&>li>*]:-left-8">
                         <li>
                             <MdiIcon
                                 :icon="mdiCloseBox"
                             />
-                            Delete all
+                            {{ $t('components.map_help.explanation_divisions.delete_all') }}
                         </li>
                     </ul>
                 </p>

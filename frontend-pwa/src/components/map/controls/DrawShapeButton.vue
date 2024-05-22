@@ -6,6 +6,11 @@ import { computed } from 'vue';
 
 const model = defineModel<google.maps.drawing.OverlayType>();
 const isDrawing = computed(() => model.value !== null);
+const messageCode = computed(
+    () =>
+        'components.draw_shape_button.' +
+        (isDrawing.value ? 'stop_drawing' : 'draw_division')
+);
 
 function toggle() {
     model.value = <google.maps.drawing.OverlayType>(
@@ -19,7 +24,7 @@ function toggle() {
         class="grow w-full whitespace-nowrap"
         severity="secondary"
         :text="isDrawing"
-        :label="isDrawing ? 'Stop Drawing' : 'Draw Area'"
+        :label="$t(messageCode)"
         @click="toggle"
     >
         <template #icon>

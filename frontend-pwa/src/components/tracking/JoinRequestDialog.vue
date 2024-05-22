@@ -52,7 +52,9 @@ function decline(request: JoinRequest) {
         }"
     >
         <DefaultLayout height="80vh">
-            <template #title>Join Requests</template>
+            <template #title>
+                {{ $t('components.join_request_dialog.title') }}
+            </template>
             <template #default>
                 <div class="flex flex-col gap-2 items-stretch justify-start">
                     <InputGroup

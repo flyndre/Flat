@@ -15,7 +15,6 @@ import {
     mdiIdentifier,
     mdiImport,
 } from '@mdi/js';
-import { useTimeoutFn } from '@vueuse/core';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import Dialog from 'primevue/dialog';
@@ -23,6 +22,7 @@ import IconField from 'primevue/iconfield';
 import InputText from 'primevue/inputtext';
 import { useToast } from 'primevue/usetoast';
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 const props = defineProps<{
@@ -30,6 +30,7 @@ const props = defineProps<{
 }>();
 const { add } = useToast();
 const router = useRouter();
+const { t } = useI18n();
 
 const joinName = ref('');
 const submittable = computed(() => validateJoinName(joinName.value));
@@ -50,7 +51,7 @@ async function join() {
         add({
             life: TOAST_LIFE,
             severity: 'error',
-            summary: 'Failed to join the Collection.',
+            summary: t('join.error_failed_to_join'),
         });
         dialogVisible.value = false;
     }
@@ -66,17 +67,17 @@ function cancel() {
     <DefaultLayout>
         <template #action-left>
             <router-link :to="{ name: 'scan' }">
-                <Button label="Back" severity="secondary" text>
+                <Button :label="$t('universal.back')" severity="secondary" text>
                     <template #icon>
                         <MdiTextButtonIcon :icon="mdiArrowLeft" />
                     </template>
                 </Button>
             </router-link>
         </template>
-        <template #title> Join a Collection </template>
+        <template #title> {{ $t('join.title') }} </template>
         <template #action-right>
             <Button
-                label="Join"
+                :label="$t('universal.join')"
                 severity="primary"
                 :disabled="!submittable"
                 @click="join"
@@ -94,15 +95,14 @@ function cancel() {
                 modal
                 :position="isOnMobile ? 'bottom' : 'top'"
                 class="overflow-hidden"
-                header="Waiting to join..."
+                :header="$t('join.waiting_title')"
             >
                 <CardProgressIndicator mode="indeterminate" />
-                Please stand by as the collection's admin reviews your join
-                request.
+                {{ $t('join.waiting_text') }}
                 <template #footer>
                     <div class="w-full flex flex-row justify-center">
                         <Button
-                            label="Cancel request"
+                            :label="$t('join.cancel_waiting')"
                             severity="danger"
                             text
                             @click="cancel"
@@ -128,7 +128,7 @@ function cancel() {
                             <MdiInputIcon :icon="mdiIdentifier" />
                             <InputText
                                 class="w-full"
-                                placeholder="Or enter a link manually"
+                                :placeholder="$t('join.enter_link')"
                                 :value="id"
                                 :disabled="id !== undefined"
                             />
@@ -137,7 +137,7 @@ function cancel() {
                             <MdiInputIcon :icon="mdiAccount" />
                             <InputText
                                 class="w-full"
-                                placeholder="Your Name"
+                                :placeholder="$t('join.nickname')"
                                 v-model="joinName"
                             />
                         </IconField>

@@ -2,7 +2,6 @@
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import { Division } from '@/types/Division';
-import { Participant } from '@/types/Participant';
 import { ParticipantTrack } from '@/types/ParticipantTrack';
 import { mdiAccountCircle, mdiAccountOff, mdiTextureBox } from '@mdi/js';
 import Dropdown from 'primevue/dropdown';
@@ -35,7 +34,10 @@ function unassignDivision(division: Division) {
     emit('unassignDivision', division);
 }
 
-function updateAssignment(division: Division, participant: ParticipantTrack | null) {
+function updateAssignment(
+    division: Division,
+    participant: ParticipantTrack | null
+) {
     if (participant == null) {
         unassignDivision(division);
     } else {
@@ -80,7 +82,10 @@ function getAssignedParticipant(division: Division) {
                         "
                         :style="{ color: slotProps.value?.color }"
                     />
-                    {{ slotProps.value?.name ?? 'Unassigned' }}
+                    {{
+                        slotProps.value?.name ??
+                        $t('components.division_assignment.unassigned')
+                    }}
                 </template>
                 <template #option="slotProps">
                     <MdiTextButtonIcon

@@ -14,15 +14,22 @@ import Button from 'primevue/button';
         <template #title> Flat </template>
         <template #subtitle> Fleet Live Area Tracking </template>
         <template #content>
-            The modern cross-platform route tracking app to orchestrate
-            volunteer collection campaigns in your neighborhood.
+            {{ $t('components.about_setting.slogan') }}
         </template>
         <template #footer>
             <a href="https://github.com/flyndre/Flat">
-                <Button class="p-0" link label="Repository" />
+                <Button
+                    class="p-0"
+                    link
+                    :label="$t('components.about_setting.repository')"
+                />
             </a>
             <a href="https://flyndre.github.io">
-                <Button class="p-0" link label="Team Website" />
+                <Button
+                    class="p-0"
+                    link
+                    :label="$t('components.about_setting.website')"
+                />
             </a>
         </template>
     </Card>

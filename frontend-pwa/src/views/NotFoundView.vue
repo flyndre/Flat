@@ -11,16 +11,21 @@ const router = useRouter();
 <template>
     <DefaultLayout>
         <template #action-left>
-            <Button label="Back" severity="secondary" text @click="router.back">
+            <Button
+                :label="$t('universal.back')"
+                severity="secondary"
+                text
+                @click="router.back"
+            >
                 <template #icon>
                     <MdiTextButtonIcon :icon="mdiArrowLeft" />
                 </template>
             </Button>
         </template>
-        <template #title> Error </template>
+        <template #title> {{ $t('not_found.title') }} </template>
         <template #action-right>
             <router-link :to="{ name: 'home' }">
-                <Button label="Go Home">
+                <Button :label="$t('not_found.go_home')">
                     <template #icon>
                         <MdiTextButtonIcon :icon="mdiHome" />
                     </template>
@@ -30,7 +35,7 @@ const router = useRouter();
         <template #default>
             <Card>
                 <template #title> 404 </template>
-                <template #subtitle>Page not found</template>
+                <template #subtitle>{{ $t('not_found.error_text') }}</template>
             </Card>
         </template>
     </DefaultLayout>

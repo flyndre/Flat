@@ -1,0 +1,212 @@
+{
+    "locales": {
+        "en": "Englisch",
+        "de": "Deutsch",
+        "es": "Spanisch"
+    },
+    "universal": {
+        "back": "Zurück",
+        "cancel": "Abbrechen",
+        "close": "Schließen",
+        "confirm": "Ja",
+        "deny": "Nein",
+        "save": "Speichern",
+        "start": "Starten",
+        "join": "Beitreten",
+        "next": "Weiter",
+        "help": "Hilfe",
+        "delete": "Löschen",
+        "share": "Teilen",
+        "copy": "Kopieren"
+    },
+    "home": {
+        "join": "Sammlung beitreten",
+        "presets": "Meine Sammlungen"
+    },
+    "edit": {
+        "title_edit": "Bearbeiten",
+        "title_create": "Erstellen",
+        "collection_name": "Name der Sammlung",
+        "error_collection_not_found": "Die angefragte Sammlungs-ID existiert nicht.",
+        "error_collection_retrieval": "Abrufen der Sammlung fehlgeschlagen.",
+        "error_collection_incomplete": "Es wurden nicht alle erforderlichen Angaben gemacht.",
+        "error_failed_to_save": "Speichern der Sammlung fehlgeschlagen.",
+        "error_failed_to_start": "Starten der Sammlung fehlgeschlagen."
+    },
+    "join": {
+        "title": "Beitreten",
+        "waiting_title": "Warte auf Beitritt...",
+        "waiting_text": "Es dauert einen Moment, bis die Beitrittsanfrage überprüft wurde.",
+        "cancel_waiting": "Beitritt abbrechen",
+        "enter_link": "Oder Link hier einfügen",
+        "nickname": "Nutzername",
+        "error_failed_to_join": "Beitreten der Sammlung fehlgeschlagen."
+    },
+    "map": {
+        "title": "Bereichsaufteilung",
+        "error_collection_not_found": "Die angefragte Sammlungs-ID existiert nicht.",
+        "error_collection_retrieval": "Abrufen der Sammlung fehlgeschlagen.",
+        "error_failed_to_save": "Speichern der Bereichsaufteilung fehlgeschlagen."
+    },
+    "not_found": {
+        "title": "Error",
+        "go_home": "Zum Startbildschirm",
+        "error_text": "Seite nicht gefunden"
+    },
+    "presets": {
+        "title": "Meine Sammlungen",
+        "copy_suffix": "(Kopie)",
+        "action_duplicate": "Duplizieren",
+        "action_export": "Exportieren",
+        "action_import": "Importieren",
+        "action_create": "Erstellen",
+        "action_delete": "Löschen",
+        "selected": "ausgewählt"
+    },
+    "scan": {
+        "title": "Beitreten",
+        "enter_link": "Oder Link hier einfügen"
+    },
+    "settings": {
+        "title": "Einstellungen",
+        "theme": "Design",
+        "locale": "Sprache",
+        "handedness": "Händigkeit",
+        "home_location": "Standort im Startbildschirm",
+        "advanced": "Erweitert",
+        "about": "Über"
+    },
+    "tracking": {
+        "title_active": "Tracke",
+        "title_paused": "Pausiert",
+        "unlock_focus": "Frei",
+        "location_focus": "Position",
+        "area_focus": "Sammlung",
+        "action_end": "Sammlung beenden",
+        "action_manage": "Teilnehmer verwalten",
+        "action_invite": "Teilnehmer einladen",
+        "action_leave": "Sammlung verlassen",
+        "action_start_tracking": "Tracking starten",
+        "action_pause_tracking": "Tracking pausieren"
+    },
+    "components": {
+        "code_reader": {
+            "scan_code": "QR Code scannen",
+            "error_not_allowed": "To scan a QR code, allow this app to use your camera and reload.",
+            "error_not_found": "No camera on this device",
+            "error_not_supported": "Secure context required (HTTPS, localhost)",
+            "error_not_readable": "Is the camera already in use?",
+            "error_overconstrained": "Installed cameras are not suitable",
+            "error_steam_api_not_supported": "Stream API is not supported in this browser",
+            "error_insecure_context": "Camera access is only permitted in secure context. Use HTTPS or localhost rather than HTTP."
+        },
+        "divisions_preview": {
+            "header": "Bereiche",
+            "division_name": "Bereichsbezeichnung",
+            "add_divisions": "Aufteilung hinzufügen",
+            "edit_divisions": "Aufteilung bearbeiten"
+        },
+        "import_dialog": {
+            "title": "Datenimport",
+            "paste_data_here": "Daten hier einfügen...",
+            "overwrite_existing": "Bestehende überschreiben",
+            "keep_duplicates": "Duplikate behalten",
+            "upload_backup": "Backupdatei hochladen",
+            "import_success": "Daten erfolgreich importiert",
+            "import_failed": "Datenimport fehlgeschlagen",
+            "action_import": "Importieren"
+        },
+        "export_dialog": {
+            "title": "Datenexport",
+            "copy_success": "Daten in Zwischenablage kopiert",
+            "copy_failed": "Kopieren der Daten fehlgeschlagen",
+            "action_download": "Herunterladen",
+            "action_copy": "Kopieren"
+        },
+        "advanced_setting": {
+            "reset_settings": "Einstellungen zurücksetzen"
+        },
+        "about_setting": {
+            "slogan": "Die moderne, plattformübergreifende Tracking-App zur Koordination ehrenamtlicher Sammelaktionen in deiner Nachbarschaft.",
+            "repository": "Quellcode",
+            "website": "Team-Website"
+        },
+        "handedness_setting": {
+            "right": "Rechts",
+            "left": "Links"
+        },
+        "home_location_setting": {
+            "live": "Live",
+            "custom": "Angepasst"
+        },
+        "theme_setting": {
+            "light": "Hell",
+            "dark": "Dunkel",
+            "device": "Gerät"
+        },
+        "division_assignment": {
+            "unassigned": "Nicht zugewiesen"
+        },
+        "invitation_dialog": {
+            "title": "Teilnehmer einladen",
+            "copy_success": "Einladungslink kopiert",
+            "copy_failed": "Kopieren des Einladungslinks fehlgeschlagen",
+            "share_title": "{collectionName} beitreten"
+        },
+        "join_request_dialog": {
+            "title": "Beitrittsanfragen"
+        },
+        "participants_list": {
+            "confirmation_message": "Sicher, dass {participantName} aus der Sammlung geschmissen werden soll?"
+        },
+        "map_with_controls": {
+            "map": "Karte",
+            "tools": "Wekzeuge",
+            "divisions": "Bereiche"
+        },
+        "draw_shape_button": {
+            "draw_division": "Bereich einzeichnen",
+            "stop_drawing": "Zeichnen abbrechen"
+        },
+        "location_search_dialog": {
+            "action_search": "Suche",
+            "find_place": "Ort hier eingeben",
+            "search_failed": "Suche fehlgeschlagen",
+            "search_failed_text": "Die API hat mit Statuscode {code} geantwortet."
+        },
+        "divisions_list": {
+            "division_name": "Bereichsbezeichnung",
+            "delete_all": "Alle löschen"
+        },
+        "map_help": {
+            "title": "Hilfe",
+            "introduction": [
+                "Dies ist die Ansicht zum Einzeichnen der Bereichsaufteilung. Die hier eingezeichneten Formen repräsentieren verschiedene Bereiche des Gesamtgebiets, in dem die Sammlung stattfinden wird.",
+                "Später, wennn die Sammlung in Arbeit ist, wird jedem Teilnehmer einer oder mehrere dieser Bereiche zugewiesen.",
+                "Im Folgenden wird beschrieben, wozu die verschiedenen Tabs und Buttons dieser Ansicht verwendet werden:"
+            ],
+            "explanation_save": "Der \"Speichern\"-Button speichert die aktuell eingezeichneten Bereiche als Bereichsaufteilung der Sammlung.",
+            "explanation_map": {
+                "introduction": "Der Tab \"Karte\" bietet alles, um sich auf der Karte zurechtzufeinden:",
+                "locate_me": "Einen \"Finde mich\"-Button, um zum aktuellen eigenen Standort zu navigieren",
+                "locate_shapes": "Einen \"Zeige Bereichsaufteilung\"-Button, der die Karte so positioniert, dass alle eingezeichneten Bereiche sichtbar sind",
+                "search": "Eine Suche für schnellere Navigation",
+                "map_type": "Ein Auswahlknopf für den Kartentyp (Straßenkarte, Gelände, Satellit, Satellit mit Beschriftungen)"
+            },
+            "explanation_tools": {
+                "introduction": "Der \"Werkzeuge\"-Tab beinhaltet alles, was zum Einzeichnen der Bereiche vonnöten ist, wie:",
+                "draw_division": "Einen neuen Bereich einzeichen",
+                "delete_selected": "Löschen des aktuell ausgewählten Bereichs",
+                "select_color": "Palette der verfügbaren Bereichsfarben"
+            },
+            "explanation_divisions": {
+                "introduction": "Im \"Bereiche\"-Tab ist eine Übersicht aller bereits eingezeichneten Bereiche zu finden. Für jeden Bereich gibt es die folgenden Funktionen:",
+                "focus_division": "Den Bereich auf der Karte fokussieren",
+                "division_name": "Bezeichnung des Bereichs",
+                "delete_division": "Löschen des Bereichs",
+                "delete_introduction": "Am Fuße der Liste befindet sich ein Button zum Löschen aller Bereiche.",
+                "delete_all": "Alle löschen"
+            }
+        }
+    }
+}
