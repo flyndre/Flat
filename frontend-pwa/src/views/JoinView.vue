@@ -19,11 +19,13 @@ import Button from 'primevue/button';
 import Card from 'primevue/card';
 import Dialog from 'primevue/dialog';
 import IconField from 'primevue/iconfield';
+import Image from 'primevue/image';
 import InputText from 'primevue/inputtext';
 import { useToast } from 'primevue/usetoast';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import bannerSrc from '@/assets/images/branding-white.webp?url';
 
 const props = defineProps<{
     id: string;
@@ -118,11 +120,10 @@ function cancel() {
             </Dialog>
             <Card :pt="{ root: { class: 'overflow-hidden' } }">
                 <template #header>
-                    <div
-                        class="w-full h-[40vh] bg-gray-500 bg-opacity-50 flex flex-col justify-center items-center select-none rounded-2xl overflow-hidden"
-                    >
-                        [ collection map preview ]
-                    </div>
+                    <img
+                        class="w-full h-[40vh] object-contain bg-flyndre"
+                        :src="bannerSrc"
+                    />
                 </template>
                 <template #content>
                     <div class="flex flex-col gap-2.5">
