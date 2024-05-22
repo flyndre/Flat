@@ -79,7 +79,7 @@ const mapCenter = computedWithControl(
     () => [props.center, props.clientPos, shapes.value],
     () => {
         if (props.center === 'position') {
-            panMapToPos(props.clientPos);
+            panMapToPos(props.clientPos, false);
             return props.clientPos;
         }
         if (props.center === 'area') {
@@ -261,7 +261,10 @@ function setPositionMarker(
     }
 }
 
-function panMapToPos(position: google.maps.LatLngLiteral | google.maps.LatLng) {
+function panMapToPos(
+    position: google.maps.LatLngLiteral | google.maps.LatLng,
+    zoom: number | false = mapZoom
+) {
     if (position == null || Object.values(position).includes(null)) {
         return;
     }
@@ -270,7 +273,7 @@ function panMapToPos(position: google.maps.LatLngLiteral | google.maps.LatLng) {
     } catch (e) {
         console.log(e);
     }
-    map.value?.setZoom(mapZoom);
+    if (zoom != false) map.value?.setZoom(zoom);
 }
 function panMapToShape(shape: TypedOverlay) {
     map.value.fitBounds(getShapeBounds(shape));
