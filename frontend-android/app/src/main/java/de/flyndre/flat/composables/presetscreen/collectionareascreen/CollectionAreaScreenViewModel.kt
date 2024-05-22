@@ -69,111 +69,57 @@ class CollectionAreaScreenViewModel() : ViewModel() {
     }
 
     fun discardChanges(){
-        val tempList: ArrayList<CollectionArea> = arrayListOf()
-
-        for(area in _oldListCollectionAreas){
-            val listOfPoints: ArrayList<LatLng> = arrayListOf()
-            for(p in area.listAreaPoints){
-                listOfPoints.add(LatLng(p.latitude, p.longitude))
-            }
-            tempList.add(CollectionArea(Color(area.color.value), listOfPoints))
-        }
-
-        _listCollectionAreas.value = tempList
+        setListAreas(_oldListCollectionAreas)
     }
 
     fun getListAreas(): ArrayList<CollectionArea> {
         return ArrayList(_listCollectionAreas.value)
     }
 
-    fun addNewCollectionArea(color: Color) {
-        val arrayList: ArrayList<CollectionArea> = ArrayList(_listCollectionAreas.value)
-        val newArea = CollectionArea(
-            color = color,
-            listAreaPoints = arrayListOf()
-        )
-        arrayList.add(
-            newArea
-        )
-        setSelectedArea(newArea)
-        _listCollectionAreas.value = arrayList
-    }
-
     fun checkNewCollectionIsEmpty() {
-        val arrayList: ArrayList<CollectionArea> = ArrayList(_listCollectionAreas.value)
         if(_selectedArea.value!=null&& _selectedArea.value!!.listAreaPoints.size<3){
-            arrayList.remove(_selectedArea.value)
+            setAreaList(_listCollectionAreas.value-_selectedArea.value!!)
         }
-        _listCollectionAreas.value = arrayList
     }
 
     fun addCollectionAreaPoint(point: LatLng,toUpdate:LatLng?=null) {
-        val listOfAreas: ArrayList<CollectionArea> = arrayListOf()
-
-        for(area in _listCollectionAreas.value){
-            val listOfPoints: ArrayList<LatLng> = arrayListOf()
-            for(p in area.listAreaPoints){
-                listOfPoints.add(LatLng(p.latitude, p.longitude))
-            }
-            val newArea = CollectionArea(Color(area.color.value), listOfPoints)
-
-            if(toUpdate==null) {
-                if(area==_selectedArea.value){
-                    newArea.listAreaPoints.add(point)
+        _selectedPoint.value = point
+        _listCollectionAreas.value.forEach { area ->
+            if(area== _selectedArea.value){
+                if(toUpdate!=null){
+                    val index = area.listAreaPoints.indexOf(point)
+                    if(index !=-1){
+                        area.listAreaPoints.removeAt(index)
+                        area.listAreaPoints.add(index,point)
+                    }
+                }else{
+                    area.listAreaPoints.add(point)
                 }
-            }else{
-                if(area.listAreaPoints.contains(toUpdate)) {
-                    val index = newArea.listAreaPoints.indexOf(toUpdate)
-                    newArea.listAreaPoints.remove(toUpdate)
-                    newArea.listAreaPoints.add(index, point)
-                }
-
             }
-            if(_selectedArea.value!=null&&_selectedArea.value==area){
-                _selectedArea.value=newArea
-            }
-            listOfAreas.add(newArea)
         }
-
-        _listCollectionAreas.value = listOfAreas
+        setAreaList(_listCollectionAreas.value)
     }
 
     fun removeLastCollectionAreaPoint() {
-        val listOfAreas: ArrayList<CollectionArea> = arrayListOf()
-
-        for(area in _listCollectionAreas.value){
-            val listOfPoints: ArrayList<LatLng> = arrayListOf()
-            for(point in area.listAreaPoints){
-                listOfPoints.add(LatLng(point.latitude, point.longitude))
-            }
-            val newArea = CollectionArea(Color(area.color.value),listOfPoints)
-            if(area==_selectedArea.value && area.listAreaPoints.isNotEmpty()){
-                newArea.listAreaPoints.removeLast()
-            }
-
-            listOfAreas.add(newArea)
-        }
-
-        _listCollectionAreas.value = listOfAreas
+        _listCollectionAreas.value.findLast {
+            it==_selectedArea.value
+        }?.listAreaPoints?.removeLast()
+        setAreaList(_listCollectionAreas.value)
     }
 
     fun removeCollectionArea(collectionArea: CollectionArea){
-        val arrayList: ArrayList<CollectionArea> = ArrayList(_listCollectionAreas.value)
-
-        arrayList.remove(collectionArea)
-
-        _listCollectionAreas.value = arrayList
+        setAreaList(_listCollectionAreas.value-collectionArea)
     }
 
     fun addPoint(point:LatLng){
         addCollectionAreaPoint(point)
     }
 
-    fun setSelectedPoint(point: LatLng?,cameraPositionState: CameraPositionState) {
+    fun setSelectedPoint(point: LatLng?,cameraPositionState: CameraPositionState?) {
         _selectedPoint.value=point;
         viewModelScope.launch {
             point?.let { CameraUpdateFactory.newLatLng(it) }
-                ?.let { cameraPositionState.animate(it) }
+                ?.let { cameraPositionState?.animate(it) }
         }
     }
 
@@ -190,11 +136,37 @@ class CollectionAreaScreenViewModel() : ViewModel() {
                 }
             }
         }
-
     }
 
     fun updatePoint(selectedPoint: LatLng, target: LatLng) {
         addCollectionAreaPoint(target,selectedPoint)
         _selectedPoint.value = target
+    }
+
+    fun addArea(area:CollectionArea?=null) {
+        if(area!=null){
+            setAreaList(_listCollectionAreas.value+area)
+        }else{
+            setAreaList(_listCollectionAreas.value+CollectionArea(Color.Blue, arrayListOf()))
+        }
+        _selectedArea.value= _listCollectionAreas.value.last()
+    }
+
+    private fun setAreaList(areas: List<CollectionArea>){
+        var newAreaList = arrayListOf<CollectionArea>()
+        areas.forEach { area ->
+            val newPointList = arrayListOf<LatLng>()
+                area.listAreaPoints.forEach {
+                newPointList.add(LatLng(it.latitude,it.longitude))
+                    if(it==_selectedPoint.value){
+                        _selectedPoint.value = newPointList.last()
+                    }
+            }
+            newAreaList.add(CollectionArea(Color(area.color.value),newPointList))
+            if(area==_selectedArea.value){
+                _selectedArea.value=newAreaList.last()
+            }
+        }
+        _listCollectionAreas.value = newAreaList
     }
 }

@@ -1,31 +1,51 @@
 package de.flyndre.flat.composables.presetscreen.collectionareascreen
 
+import android.widget.ListView
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOut
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollableState
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Place
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -35,6 +55,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -45,6 +67,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.LinearGradient
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
@@ -76,12 +99,6 @@ fun CollectionAreaScreen(
     onNavigateToPresetScreen: () -> Unit,
     collectionAreaScreenViewModel: CollectionAreaScreenViewModel,
 ) {
-    //bottom navigation bar
-    var selectedNavigationItem by remember { mutableStateOf(0) }
-    //color picker based on Segmented Button
-    var selectedColorItem by remember { mutableStateOf(AreaBlue) }
-    //drawing state
-    var drawingEnabled by remember { mutableStateOf(false) }
     //map data
     val collectionAreas by collectionAreaScreenViewModel.listCollectionAreas.collectAsState()
     val cameraPosition by collectionAreaScreenViewModel.cameraPosition.collectAsState()
@@ -90,73 +107,132 @@ fun CollectionAreaScreen(
     }
     val selectedPoint by collectionAreaScreenViewModel.selectedPoint.collectAsState()
     val selectedArea by collectionAreaScreenViewModel.selectedArea.collectAsState()
+    var areaListVisible = remember { mutableStateOf(false)}
     //modal bottom sheet for choosing area
     Scaffold(
         topBar = {
-            TopAppBar(title = {
-                Row(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = "area count: " + collectionAreas.size)
+            TopAppBar(
+                title = {
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "Area editieren")
+                        IconButton(onClick = {
+                            collectionAreaScreenViewModel.saveChanges()
+                            collectionAreaScreenViewModel.setCameraPosition(cameraPositionState.position)
+                            onNavigateToPresetScreen()
+                        }) {
+                            Icon(
+                                painter = painterResource(id = de.flyndre.flat.R.drawable.save_fill),
+                                contentDescription = "save and return to preset view"
+                            )
+                        }
+
+                    }
+                },
+                navigationIcon = {
                     IconButton(onClick = {
-                        collectionAreaScreenViewModel.saveChanges()
-                        collectionAreaScreenViewModel.setCameraPosition(cameraPositionState.position)
+                        collectionAreaScreenViewModel.discardChanges()
                         onNavigateToPresetScreen()
                     }) {
                         Icon(
-                            painter = painterResource(id = de.flyndre.flat.R.drawable.save_fill),
-                            contentDescription = "save and return to preset view"
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "back to preset screen"
                         )
                     }
-
-                }
-
-            }, navigationIcon = {
-                IconButton(onClick = {
-                    collectionAreaScreenViewModel.discardChanges()
-                    onNavigateToPresetScreen()
-                }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "back to preset screen"
-                    )
-                }
-            })
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Black.copy(alpha = 0.5f))
+            )
         },
         bottomBar = {
-            NavigationBar {
-                NavigationBarItem(
-                    selected = selectedNavigationItem == 0,
-                    onClick = { selectedNavigationItem = 0 },
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = de.flyndre.flat.R.drawable.map_fill),
-                            contentDescription = "search on map"
-                        )
-                    })
-                NavigationBarItem(
-                    selected = selectedNavigationItem == 1,
-                    onClick = { selectedNavigationItem = 1 },
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = de.flyndre.flat.R.drawable.palette_fill),
-                            contentDescription = "draw collection areas on map"
-                        )
-                    })
-                NavigationBarItem(
-                    selected = selectedNavigationItem == 2,
-                    onClick = { selectedNavigationItem = 2 },
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = de.flyndre.flat.R.drawable.texture_fill),
-                            contentDescription = "chose available collection areas"
-                        )
-                    })
+            Column(modifier = Modifier.heightIn(0.dp,300.dp)) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 10.dp)
+                        .clickable { areaListVisible.value = !areaListVisible.value }
+                    ) {
+                    HorizontalDivider(
+                        Modifier
+                            .height(10.dp)
+                            .align(Alignment.CenterHorizontally), thickness = 3.dp)
+                    HorizontalDivider(
+                        Modifier
+                            .height(10.dp)
+                            .align(Alignment.CenterHorizontally), thickness = 3.dp)
+                }
+                if(areaListVisible.value) {
+                    FloatingActionButton(
+                        modifier = Modifier
+                            .fillMaxWidth(0.7f)
+                            .align(Alignment.CenterHorizontally),
+                        onClick = { collectionAreaScreenViewModel.addArea() }) {
+                        Row(){
+                            Icon(Icons.Filled.Add, contentDescription = "Add new Area")
+                            Text(text = "Neue Area")
+                        }
+                    }
+                    LazyColumn {
+                        items(collectionAreas) {
+                            val border = if(it==selectedArea) 2.dp else 0.dp
+                            ListItem(modifier = Modifier.clickable {
+                                collectionAreaScreenViewModel.setSelectedArea(
+                                    it,
+                                    cameraPositionState
+                                )
+                            }.border(width = border, color = Color.White),
+                                headlineContent = {
+                                    Text(
+                                        text = "Area " + (collectionAreas.indexOf(
+                                            it
+                                        ) + 1)
+                                    )
+                                },
+                                supportingContent = {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(12.dp)
+                                            .clip(shape = RoundedCornerShape(3.dp))
+                                            .background(color = it.color)
+                                    )
+                                },
+                                trailingContent = {
+                                    IconButton(onClick = {
+                                        collectionAreaScreenViewModel.removeCollectionArea(
+                                            it
+                                        )
+                                    }) {
+                                        Icon(
+                                            Icons.Filled.Delete,
+                                            contentDescription = "delete area",
+                                        )
+                                    }
+                                })
+                        }
+                    }
+                }
             }
         },
         floatingActionButton = {
+            Row {
+                if(selectedArea!=null){
+                    SmallFloatingActionButton(onClick = { collectionAreaScreenViewModel.removeLastCollectionAreaPoint() }) {
+                        Icon(Icons.Filled.Clear, contentDescription = "Remove point")
+                    }
+                    SmallFloatingActionButton(onClick = { collectionAreaScreenViewModel.addPoint(cameraPositionState.position.target) }) {
+                        Icon(Icons.Filled.Add, contentDescription = "Add point")
+                    }
+                    if(selectedPoint!=null){
+                        SmallFloatingActionButton(onClick = { collectionAreaScreenViewModel.updatePoint(
+                            selectedPoint!!,cameraPositionState.position.target) }) {
+                            Icon(Icons.Filled.Edit,"Edit point")
+                        }
+                    }
+                }
+            }
+            /*
             if (selectedNavigationItem == 0) {
                 SmallFloatingActionButton(onClick = { /*TODO*/ }) {
                     Icon(Icons.Filled.Search, contentDescription = "search for location")
@@ -267,47 +343,35 @@ fun CollectionAreaScreen(
                 }
             } else {
 
-            }
+            }*/
         }
     ) { innerPadding ->
         var mapsModifier: Modifier = Modifier
         var mapSettings: MapUiSettings
         var mapProperties: MapProperties
-        if (selectedNavigationItem == 0) {
-            mapSettings = MapUiSettings(zoomControlsEnabled = false)
-            mapProperties = MapProperties(isMyLocationEnabled = true)
-        } else if (selectedNavigationItem == 1) {
-            mapSettings = MapUiSettings(
-                zoomControlsEnabled = false,
-                zoomGesturesEnabled = true,
-                tiltGesturesEnabled = false,
-                rotationGesturesEnabled = false,
-                scrollGesturesEnabled = true
-            )
-            mapProperties = MapProperties(isMyLocationEnabled = false)
-        } else {
-            mapSettings = MapUiSettings(zoomControlsEnabled = false)
-            mapProperties = MapProperties(isMyLocationEnabled = true)
-            mapsModifier = mapsModifier.height((LocalConfiguration.current.screenHeightDp * 0.5).dp)
-        }
+        mapSettings = MapUiSettings(
+            zoomControlsEnabled = false,
+            zoomGesturesEnabled = true,
+            tiltGesturesEnabled = false,
+            rotationGesturesEnabled = true,
+            scrollGesturesEnabled = true
+        )
+        mapProperties = MapProperties(isMyLocationEnabled = false)
 
-        Column(modifier = Modifier.padding(innerPadding)) {
+        Box(modifier = Modifier
+            .padding(innerPadding)
+            .fillMaxHeight()
+            .fillMaxWidth()) {
             //map
             GoogleMap(
-                modifier = mapsModifier,
-
                 uiSettings = mapSettings,
                 properties = mapProperties,
                 onMapClick = {
-                    collectionAreaScreenViewModel.setSelectedPoint(null,cameraPositionState)
-                    collectionAreaScreenViewModel.setSelectedArea(null,cameraPositionState)
-                             },
+                    collectionAreaScreenViewModel.setSelectedPoint(null, cameraPositionState)
+                    collectionAreaScreenViewModel.setSelectedArea(null, cameraPositionState)
+                },
                 cameraPositionState = cameraPositionState,
             ) {
-                if(drawingEnabled){
-                    Marker(state = MarkerState(cameraPositionState.position.target))
-                }
-
                 if (collectionAreas.isNotEmpty()) {
                     collectionAreas.forEach { area ->
                         if (area.listAreaPoints.isNotEmpty()) {
@@ -316,17 +380,27 @@ fun CollectionAreaScreen(
                                 fillColor = area.color.copy(alpha = 0.5f),
                                 strokeColor = area.color.copy(alpha = 1F),
                                 clickable = true,
-                                onClick = {collectionAreaScreenViewModel.setSelectedArea(area,cameraPositionState)}
+                                onClick = {
+                                    collectionAreaScreenViewModel.setSelectedArea(
+                                        area,
+                                        cameraPositionState
+                                    )
+                                }
                             )
-                            if(selectedNavigationItem==1&&area==selectedArea){
-                                area.listAreaPoints.forEach{ point ->
+                            if (area == selectedArea) {
+                                area.listAreaPoints.forEach { point ->
                                     Circle(
                                         center = point,
                                         radius = 2.0,
                                         clickable = true,
-                                        onClick = {collectionAreaScreenViewModel.setSelectedPoint(point,cameraPositionState)},
-                                        fillColor = if(point == selectedPoint) Color.Red else Color.Black,
-                                        strokeColor = if(point == selectedPoint) Color.Red else Color.Black
+                                        onClick = {
+                                            collectionAreaScreenViewModel.setSelectedPoint(
+                                                point,
+                                                cameraPositionState
+                                            )
+                                        },
+                                        fillColor = if (point == selectedPoint) Color.Red else Color.Black,
+                                        strokeColor = if (point == selectedPoint) Color.Red else Color.Black
                                     )
                                 }
                             }
@@ -334,47 +408,10 @@ fun CollectionAreaScreen(
                     }
                 }
             }
-
-            //list of areas if navigation is set to
-            if (selectedNavigationItem == 2) {
-                LazyColumn {
-                    items(collectionAreas) {
-                        ListItem(modifier = Modifier.clickable {
-                            collectionAreaScreenViewModel.animateCameraPositionToCollectionArea(
-                                it,
-                                cameraPositionState
-                            )
-                        },
-                            headlineContent = {
-                                Text(
-                                    text = "Area " + (collectionAreas.indexOf(
-                                        it
-                                    ) + 1)
-                                )
-                            },
-                            supportingContent = {
-                                Box(
-                                    modifier = Modifier
-                                        .size(12.dp)
-                                        .clip(shape = RoundedCornerShape(3.dp))
-                                        .background(color = it.color)
-                                )
-                            },
-                            trailingContent = {
-                                IconButton(onClick = {
-                                    collectionAreaScreenViewModel.removeCollectionArea(
-                                        it
-                                    )
-                                }) {
-                                    Icon(
-                                        Icons.Filled.Delete,
-                                        contentDescription = "delete area",
-                                    )
-                                }
-                            })
-                    }
-                }
-            }
+            Icon(Icons.Outlined.Add,"Cursor",modifier = Modifier
+                .align(Alignment.Center)
+                .height(40.dp)
+                .width(40.dp), tint = Color.Black)
         }
     }
 }
