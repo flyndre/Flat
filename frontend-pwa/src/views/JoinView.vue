@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { accessRequest, getCollection } from '@/api/rest';
+import { accessRequest } from '@/api/rest';
 import CardProgressIndicator from '@/components/card/CardProgressIndicator.vue';
 import MdiInputIcon from '@/components/icons/MdiInputIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import { clientId } from '@/data/clientMetadata';
 import { TOAST_LIFE } from '@/data/constants';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
-import { Collection } from '@/types/Collection';
 import { isOnMobile } from '@/util/mobileDetection';
 import validateJoinName from '@/validation/validateJoinName';
 import {
@@ -16,7 +15,6 @@ import {
     mdiIdentifier,
     mdiImport,
 } from '@mdi/js';
-import { asyncComputed, computedAsync, useFetch } from '@vueuse/core';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import Dialog from 'primevue/dialog';
