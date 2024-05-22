@@ -1,6 +1,6 @@
-import { DivisionStats } from '../DivisionStats';
-import { Participant } from '../Participant';
-import { ParticipantStats } from '../ParticipantStats';
+import { Participant } from '@/types/Participant';
+import { DivisionStats } from '@/types/stats/DivisionStats';
+import { ParticipantStats } from '@/types/stats/ParticipantStats';
 
 export type CollectionStats = {
     id: string;
