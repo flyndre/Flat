@@ -29,20 +29,19 @@ import {
     mdiStop,
     mdiTextureBox,
 } from '@mdi/js';
-
-import TabPanel from 'primevue/tabpanel';
+import DivisionsList from '@/components/tracking/DivisionsList.vue';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import Dialog from 'primevue/dialog';
 import { MenuItem } from 'primevue/menuitem';
 import SelectButton from 'primevue/selectbutton';
 import SplitButton from 'primevue/splitbutton';
+import TabPanel from 'primevue/tabpanel';
 import TabView from 'primevue/tabview';
 import { useToast } from 'primevue/usetoast';
-import { computed, onBeforeMount, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import DivisionsList from '@/components/tracking/DivisionsList.vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
 
 const props = defineProps<{
     id: string;
@@ -50,7 +49,6 @@ const props = defineProps<{
 
 const { t } = useI18n();
 const router = useRouter();
-const route = useRoute();
 const { add: pushToast } = useToast();
 const {
     coords: trackingPosition,
@@ -125,7 +123,7 @@ function leaveCollection() {
 
 const endCollectionDialogVisible = ref(false);
 function stopCollection() {
-    closeCollection(route.params.id as string);
+    closeCollection(props.id);
     // TODO: end collection (and fetch and display stats)
     router.push({ name: 'presets' });
 }
