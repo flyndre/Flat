@@ -22,6 +22,7 @@ import { useToast } from 'primevue/usetoast';
 import { v4 as uuidv4 } from 'uuid';
 import { computed, ref } from 'vue';
 import MdiIcon from '../icons/MdiIcon.vue';
+import { useI18n } from 'vue-i18n';
 
 const visible = defineModel<boolean>('visible', {
     default: false,
@@ -36,17 +37,18 @@ const importedCollections = computedAsync(
 );
 const importable = computed(() => importedCollections.value !== undefined);
 
+const { t } = useI18n();
 const { add } = useToast();
 
 const overwriteExisting = ref(false);
 const overwriteExistingOptions = [
     {
-        label: 'Overwrite existing',
+        messageCode: 'components.import_dialog.overwrite_existing',
         value: true,
         icon: mdiCloseBoxMultiple,
     },
     {
-        label: 'Keep Duplicates',
+        messageCode: 'components.import_dialog.keep_duplicates',
         value: false,
         icon: mdiCheckboxMultipleMarked,
     },
@@ -77,14 +79,14 @@ async function importData() {
         add({
             life: TOAST_LIFE,
             severity: 'success',
-            summary: 'Successfully imported collections.',
+            summary: t('components.import_dialog.import_success'),
         });
         visible.value = false;
     } catch (error) {
         add({
             life: TOAST_LIFE,
             severity: 'error',
-            summary: 'Failed to import collections.',
+            summary: t('components.import_dialog.import_failed'),
         });
     } finally {
         loading.value = false;
@@ -112,7 +114,7 @@ async function importData() {
         <DefaultLayout height="60vh">
             <template #action-left>
                 <Button
-                    label="Back"
+                    :label="$t('universal.back')"
                     severity="secondary"
                     @click="visible = false"
                     text
@@ -122,10 +124,12 @@ async function importData() {
                     </template>
                 </Button>
             </template>
-            <template #title>Import</template>
+            <template #title>
+                {{ $t('components.import_dialog.title') }}
+            </template>
             <template #action-right>
                 <Button
-                    label="Import"
+                    :label="$t('components.import_dialog.action_import')"
                     severity="primary"
                     :disabled="!importable"
                     :loading
@@ -143,7 +147,9 @@ async function importData() {
                     <Textarea
                         v-model="importDataString"
                         class="resize-none w-full text-xs grow"
-                        placeholder="Paste data here..."
+                        :placeholder="
+                            $t('components.import_dialog.paste_data_here')
+                        "
                     />
                     <div
                         class="w-full flex flex-row justify-stretch items-stretch gap-2 flex-wrap"
@@ -168,14 +174,16 @@ async function importData() {
                                     <span
                                         class="text-ellipsis overflow-hidden z-10"
                                     >
-                                        {{ slotProps.option.label }}
+                                        {{ $t(slotProps.option.messageCode) }}
                                     </span>
                                 </div>
                             </template>
                         </SelectButton>
                         <FileUpload
                             mode="basic"
-                            chooseLabel="Upload Backup File"
+                            :chooseLabel="
+                                $t('components.import_dialog.upload_backup')
+                            "
                             accept="text/plain"
                             :multiple="false"
                             :auto="true"

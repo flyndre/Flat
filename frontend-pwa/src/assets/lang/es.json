@@ -1,0 +1,212 @@
+{
+    "locales": {
+        "en": "Inglés",
+        "de": "Alemán",
+        "es": "Español"
+    },
+    "universal": {
+        "back": "Atrás",
+        "cancel": "Cancelar",
+        "close": "Cerca",
+        "confirm": "Sí",
+        "deny": "No",
+        "save": "Guardar",
+        "start": "Iniciar",
+        "join": "Unirse",
+        "next": "Más",
+        "help": "Ayuda",
+        "delete": "Eliminar",
+        "share": "Compartir",
+        "copy": "Copiar"
+    },
+    "home": {
+        "join": "Unirse a la colección",
+        "presets": "Mis colecciones"
+    },
+    "edit": {
+        "title_edit": "Editar",
+        "title_create": "Crear",
+        "collection_name": "Nombre de la colección",
+        "error_collection_not_found": "El ID de colección solicitado no existe.",
+        "error_collection_retrieval": "No se pudo recuperar la colección.",
+        "error_collection_incomplete": "No se proporcionó toda la información requerida.",
+        "error_failed_to_save": "Error al guardar la colección.",
+        "error_failed_to_start": "No se pudo iniciar la recopilación."
+    },
+    "join": {
+        "title": "Unirse",
+        "waiting_title": "Esperando unirme...",
+        "waiting_text": "La solicitud de inscripción tardará un momento en revisarse.",
+        "cancel_waiting": "Cancelar unirse",
+        "enter_link": "O insertar enlace aquí",
+        "nickname": "Nombre de usuario",
+        "error_failed_to_join": "No se pudo unir a la colección."
+    },
+    "map": {
+        "title": "División de área",
+        "error_collection_not_found": "El ID de colección solicitado no existe.",
+        "error_collection_retrieval": "No se pudo recuperar la colección.",
+        "error_failed_to_save": "Error al guardar la división del rango."
+    },
+    "not_found": {
+        "title": "Error",
+        "go_home": "A la pantalla de inicio",
+        "error_text": "Página no encontrada"
+    },
+    "presets": {
+        "title": "Mis Recogidas",
+        "copy_suffix": "(copia)",
+        "action_duplicate": "Duplicar",
+        "action_export": "Exportar",
+        "action_import": "Importar",
+        "action_create": "Crear",
+        "action_delete": "Borrar",
+        "selected": "seleccionados"
+    },
+    "scan": {
+        "title": "Escaneado",
+        "enter_link": "O insertar enlace aquí"
+    },
+    "settings": {
+        "title": "Ajustes",
+        "theme": "Apariencia",
+        "locale": "Idioma",
+        "handedness": "Manos",
+        "home_location": "Posición de la pantalla de inicio",
+        "advanced": "Avanzado",
+        "about": "Información"
+    },
+    "tracking": {
+        "title_active": "Pista",
+        "title_paused": "En pausa",
+        "unlock_focus": "Desbloqueado",
+        "location_focus": "En vivo",
+        "area_focus": "Área",
+        "action_end": "Terminar colección",
+        "action_manage": "Administrar participantes",
+        "action_invite": "Invitar participantes",
+        "action_leave": "Dejar colección",
+        "action_start_tracking": "Iniciar seguimiento",
+        "action_pause_tracking": "Pausar seguimiento"
+    },
+    "components": {
+        "code_reader": {
+            "scan_code": "Escanear código QR",
+            "error_not_allowed": "Para escanear un código QR, permita que esta aplicación use su cámara y vuelva a cargarla.",
+            "error_not_found": "No hay cámara en este dispositivo",
+            "error_not_supported": "Se requiere contexto seguro (HTTPS, localhost)",
+            "error_not_readable": "¿La cámara ya está en uso?",
+            "error_overconstrained": "Las cámaras instaladas no son adecuadas",
+            "error_steam_api_not_supported": "Stream API no es compatible con este navegador",
+            "error_insecure_context": "El acceso a la cámara solo está permitido en un contexto seguro. "
+        },
+        "divisions_preview": {
+            "header": "Departamentos",
+            "division_name": "Nombre del Departamento",
+            "add_divisions": "Agregar Departamentos",
+            "edit_divisions": "Editar Departamentos"
+        },
+        "import_dialog": {
+            "title": "Importación de datos",
+            "paste_data_here": "Insertar datos aquí...",
+            "overwrite_existing": "Sobrescribir los existentes",
+            "keep_duplicates": "Mantener duplicados",
+            "upload_backup": "Subir archivo de respaldo",
+            "import_success": "Datos importados exitosamente",
+            "import_failed": "Falló la importación de datos",
+            "action_import": "Importar"
+        },
+        "export_dialog": {
+            "title": "Exportación de datos",
+            "copy_success": "Datos copiados al portapapeles",
+            "copy_failed": "Error al copiar datos",
+            "action_download": "Descargar",
+            "action_copy": "Copiar"
+        },
+        "advanced_setting": {
+            "reset_settings": "Restablecer ajustes"
+        },
+        "about_setting": {
+            "slogan": "La moderna aplicación de seguimiento multiplataforma para coordinar campañas de recogida voluntaria en tu barrio.",
+            "repository": "Código fuente",
+            "website": "Sitio web del team"
+        },
+        "handedness_setting": {
+            "right": "Derecha",
+            "left": "Izquierda"
+        },
+        "home_location_setting": {
+            "live": "En vivo",
+            "custom": "Fijado"
+        },
+        "theme_setting": {
+            "light": "Ligero",
+            "dark": "Oscuro",
+            "device": "Dispositivo"
+        },
+        "division_assignment": {
+            "unassigned": "No asignado"
+        },
+        "invitation_dialog": {
+            "title": "Invitar a los participantes",
+            "copy_success": "Enlace de invitación copiado",
+            "copy_failed": "No se pudo copiar el enlace de invitación",
+            "share_title": "Únete a {collectionName}"
+        },
+        "join_request_dialog": {
+            "title": "Solicitud de ingreso"
+        },
+        "participants_list": {
+            "confirmation_message": "¿Estás seguro de que quieres eliminar a {participantName} de la colección?"
+        },
+        "map_with_controls": {
+            "map": "Mapa",
+            "tools": "Herramientas",
+            "divisions": "Departamentos"
+        },
+        "draw_shape_button": {
+            "draw_division": "Agregar departamento",
+            "stop_drawing": "Cancelar dibujo"
+        },
+        "location_search_dialog": {
+            "action_search": "Buscar",
+            "find_place": "Ingrese la ubicación aquí",
+            "search_failed": "La búsqueda falló",
+            "search_failed_text": "La API respondió con el código de estado {código}."
+        },
+        "divisions_list": {
+            "division_name": "Nombre del área",
+            "delete_all": "Limpiar todo"
+        },
+        "map_help": {
+            "title": "Ayuda",
+            "introduction": [
+                "Esta es la vista para dibujar la división del área. ",
+                "Posteriormente, cuando la recogida esté en curso, a cada participante se le asignará una o más de estas áreas.",
+                "A continuación se describe para qué se utilizan las distintas pestañas y botones de esta vista:"
+            ],
+            "explanation_save": "El botón \"Guardar\" guarda las áreas dibujadas actualmente como la división de áreas de la colección.",
+            "explanation_map": {
+                "introduction": "La pestaña \"Mapa\" ofrece todo lo que necesitas para orientarte en el mapa:",
+                "locate_me": "Un botón \"Encuéntrame\" para navegar a tu ubicación actual",
+                "locate_shapes": "Un botón \"Mostrar división de área\" que posiciona el mapa de manera que todas las áreas dibujadas sean visibles",
+                "search": "Una búsqueda de una navegación más rápida",
+                "map_type": "Un botón selector de tipo de mapa (mapa de carreteras, terreno, satélite, satélite con etiquetas)"
+            },
+            "explanation_tools": {
+                "introduction": "La pestaña \"Herramientas\" contiene todo lo necesario para dibujar las áreas, como por ejemplo:",
+                "draw_division": "Marcar una nueva área",
+                "delete_selected": "Eliminar el área actualmente seleccionada",
+                "select_color": "Paleta de colores de área disponibles"
+            },
+            "explanation_divisions": {
+                "introduction": "En la pestaña \"Departamentos\" puede encontrar una descripción general de todas los departamentos que ya se han dibujado. ",
+                "focus_division": "Centrarse en el departamento en el mapa.",
+                "division_name": "Nombre de la departamento",
+                "delete_division": "Eliminar el departamento",
+                "delete_introduction": "Al final de la lista hay un botón para eliminar todas las departamentos.",
+                "delete_all": "Limpiar todo"
+            }
+        }
+    }
+}

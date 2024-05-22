@@ -4,6 +4,6 @@ export type Collection = {
     id: string;
     name?: string;
     adminClientId: string;
-    area?: GeoJSON.Polygon;
+    area?: GeoJSON.MultiPolygon;
     divisions?: Division[];
 };

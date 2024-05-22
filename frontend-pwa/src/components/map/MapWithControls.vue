@@ -146,6 +146,7 @@ function syncAreas() {
     if (recentlyUpdated) return; // Prevents infinite update loop
     deleteAllShapes(false);
     divisions.value.forEach((d) => {
+        if (d.area == null) return;
         const shape = divisionToShape(
             d,
             d.id === '0'
@@ -182,9 +183,10 @@ function drawTracks() {
             editable: false,
             draggable: false,
         });
+        console.log(t);
         shapes?.forEach((s) => s.overlay?.setMap(map.value));
         progressLines.push(...shapes);
-        const lastPosition = t.progress?.at(-1)?.coordinates?.at(-1);
+        const lastPosition = t.progress?.at(-1)?.track?.coordinates?.at(-1);
         if (lastPosition != null && t.id !== clientId.value) {
             const label = new MarkerWithLabel({
                 position: {
@@ -622,7 +624,7 @@ onMounted(initialize);
                     <template #header>
                         <div class="flex justify-center items-center">
                             <MdiTextButtonIcon :icon="mdiMap" />
-                            Map
+                            {{ $t('components.map_with_controls.map') }}
                         </div>
                     </template>
                     <div
@@ -663,7 +665,7 @@ onMounted(initialize);
                     <template #header>
                         <div class="flex justify-center items-center">
                             <MdiTextButtonIcon :icon="mdiPalette" />
-                            Tools
+                            {{ $t('components.map_with_controls.tools') }}
                         </div>
                     </template>
                     <div
@@ -688,7 +690,7 @@ onMounted(initialize);
                     <template #header>
                         <div class="flex justify-center items-center">
                             <MdiTextButtonIcon :icon="mdiTextureBox" />
-                            Areas
+                            {{ $t('components.map_with_controls.divisions') }}
                         </div>
                     </template>
                     <ShapesList

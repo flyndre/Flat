@@ -9,17 +9,17 @@ import InputNumber from 'primevue/inputnumber';
 
 const { settings } = useSettings();
 const options: {
-    label: string;
+    messageCode: string;
     value: boolean;
     icon: string;
 }[] = [
     {
-        label: 'Live',
+        messageCode: 'components.home_location_setting.live',
         value: true,
         icon: mdiMapMarker,
     },
     {
-        label: 'Custom',
+        messageCode: 'components.home_location_setting.custom',
         value: false,
         icon: mdiPencil,
     },
@@ -43,7 +43,7 @@ const options: {
                 <span
                     class="max-[400px]:hidden text-ellipsis overflow-hidden z-10"
                 >
-                    {{ slotProps.option.label }}
+                    {{ $t(slotProps.option.messageCode) }}
                 </span>
             </div>
         </template>

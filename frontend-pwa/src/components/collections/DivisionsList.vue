@@ -21,7 +21,7 @@ const props = withDefaults(
 
 <template>
     <Panel
-        header="Divisions"
+        :header="$t('components.divisions_preview.header')"
         :pt="{
             root: { class: 'border-none' },
             header: { class: 'px-0' },
@@ -42,7 +42,7 @@ const props = withDefaults(
             <InputText
                 class="w-full"
                 v-model="division.name"
-                placeholder="Area Name"
+                :placeholder="$t('components.divisions_preview.division_name')"
             />
         </IconField>
         <Button
@@ -54,7 +54,14 @@ const props = withDefaults(
                 <MdiTextButtonIcon
                     :icon="divisions?.length > 0 ? mdiPencil : mdiPencilPlus"
                 />
-                {{ (divisions?.length > 0 ? 'Edit' : 'Add') + ' Divisions' }}
+                {{
+                    $t(
+                        'components.divisions_preview.' +
+                            (divisions?.length > 0
+                                ? 'edit_divisions'
+                                : 'add_divisions')
+                    )
+                }}
             </template>
         </Button>
     </Panel>

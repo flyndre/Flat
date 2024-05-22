@@ -1,8 +1,10 @@
 import { useTheme } from '@/plugins/ThemePlugin';
 import { ColorSchemeType } from '@vueuse/core';
 import { Plugin, ref, watch } from 'vue';
+import I18nPlugin from './I18nPlugin';
 
 const { settingsTheme: theme } = useTheme();
+const { locale } = I18nPlugin.global;
 
 const SETTINGS_KEY = 'flat/settings/settings';
 
@@ -12,6 +14,7 @@ type Settings = {
     homeLatitude: number;
     homeLongitude: number;
     handedness: 'left' | 'right';
+    locale: typeof locale.value;
 };
 
 const defaultSettings: Settings = {
@@ -20,6 +23,7 @@ const defaultSettings: Settings = {
     homeLatitude: 8.297651,
     homeLongitude: -79.12684,
     handedness: 'right',
+    locale: locale.value,
 };
 
 const settings = ref<Settings>(defaultSettings);
@@ -28,6 +32,7 @@ watch(
     settings,
     (newValue, _oldValue) => {
         theme.value = newValue.theme;
+        locale.value = newValue.locale;
     },
     {
         deep: true,
@@ -51,6 +56,12 @@ function remove(key: string) {
     localStorage.removeItem(key);
 }
 
+function reset() {
+    Object.entries(defaultSettings).forEach(
+        ([key, value]) => (settings.value[key] = value)
+    );
+}
+
 const SettingsPlugin: Plugin = {
     install(_app, ..._options) {
         settings.value = read(SETTINGS_KEY) ?? defaultSettings;
@@ -69,5 +80,5 @@ export default SettingsPlugin;
 
 export const useSettings = () => ({
     settings,
-    reset: () => remove(SETTINGS_KEY),
+    reset,
 });

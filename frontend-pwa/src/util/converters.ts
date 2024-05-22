@@ -13,17 +13,19 @@ import {
 
 export function areaFromShapeList(
     shapeList: IdentifyableTypedOverlay[]
-): GeoJSON.Polygon {
+): GeoJSON.MultiPolygon {
     const areaBounds = getShapeListBounds(shapeList).toJSON();
     return {
-        type: 'Polygon',
+        type: 'MultiPolygon',
         coordinates: [
             [
-                [areaBounds.north, areaBounds.west],
-                [areaBounds.north, areaBounds.east],
-                [areaBounds.south, areaBounds.east],
-                [areaBounds.south, areaBounds.west],
-                [areaBounds.north, areaBounds.west],
+                [
+                    [areaBounds.north, areaBounds.west],
+                    [areaBounds.north, areaBounds.east],
+                    [areaBounds.south, areaBounds.east],
+                    [areaBounds.south, areaBounds.west],
+                    [areaBounds.north, areaBounds.west],
+                ],
             ],
         ],
     };
@@ -35,11 +37,9 @@ export function shapeToDivision(shape: IdentifyableTypedOverlay): Division {
         name: shape.name,
         color: getShapeColor(shape),
         area: {
-            type: 'MultiPolygon',
-            coordinates: [
-                polygonToGeoJSON(<google.maps.Polygon>shape.overlay)
-                    .coordinates,
-            ],
+            type: 'Polygon',
+            coordinates: polygonToGeoJSON(<google.maps.Polygon>shape.overlay)
+                .coordinates,
         },
     };
 }
@@ -55,7 +55,7 @@ export function divisionToShape(
         overlay: geoJSONtoPolygon(
             {
                 type: 'Polygon',
-                coordinates: division.area.coordinates?.[0],
+                coordinates: division.area.coordinates,
             },
             {
                 ...shapeOptions,
@@ -73,11 +73,12 @@ export function shapeListToTrack(
 ): ParticipantTrack {
     return {
         id: shapeList?.[0]?.id,
-        name: shapeList?.[0]?.name,
+        name: shapeList?.[0]?.name?.split('_#')?.[0],
         color: getShapeColor(shapeList?.[0]),
-        progress: shapeList.map((s) =>
-            polylineToGeoJSON(<google.maps.Polyline>s.overlay)
-        ),
+        progress: shapeList.map((s) => ({
+            id: s.name?.split('_#')?.[1],
+            track: polylineToGeoJSON(<google.maps.Polyline>s.overlay),
+        })),
     };
 }
 
@@ -85,10 +86,10 @@ export function trackToShapeList(
     track: ParticipantTrack,
     shapeOptions: OverlayOptions = {}
 ): IdentifyableTypedOverlay[] {
-    return track.progress.map((p) => ({
-        id: track.id,
-        name: track.name,
+    return track.progress.map((p, i) => ({
+        id: p.id,
+        name: `${track.name}_#${i}`,
         type: <google.maps.drawing.OverlayType>'polyline',
-        overlay: geoJSONtoPolyline(p, shapeOptions),
+        overlay: geoJSONtoPolyline(p.track, shapeOptions),
     }));
 }

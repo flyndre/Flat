@@ -16,6 +16,7 @@ import Button from 'primevue/button';
 import { useToast } from 'primevue/usetoast';
 import { v4 as uuidv4 } from 'uuid';
 import { computed, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 const props = withDefaults(
@@ -35,6 +36,7 @@ const defaultCollection: Collection = {
 };
 
 const router = useRouter();
+const { t } = useI18n();
 const collection = ref<Collection>({
     ...defaultCollection,
     ...collectionDraft.get(),
@@ -49,7 +51,7 @@ onMounted(async () => {
                 add({
                     life: TOAST_LIFE,
                     severity: 'error',
-                    summary: 'The requested collection does not exits.',
+                    summary: t('map.error_collection_not_found'),
                 });
                 await router.replace({ name: 'presets' });
             }
@@ -58,7 +60,7 @@ onMounted(async () => {
             add({
                 life: TOAST_LIFE,
                 severity: 'error',
-                summary: 'Failed to get the requested collection.',
+                summary: t('map.error_collection_retrieval'),
             });
             await router.replace({ name: 'presets' });
         }
@@ -88,7 +90,7 @@ async function save() {
         add({
             life: TOAST_LIFE,
             severity: 'error',
-            summary: 'Failed to save divisions.',
+            summary: t('map.error_failed_to_save'),
         });
     } finally {
         loading.value = false;
@@ -111,17 +113,17 @@ const clientPos = mapCenterWithDefaults(useGeolocation().coords, {
                     params: { id },
                 }"
             >
-                <Button label="Back" severity="secondary" text>
+                <Button :label="$t('universal.back')" severity="secondary" text>
                     <template #icon>
                         <MdiTextButtonIcon :icon="mdiArrowLeft" />
                     </template>
                 </Button>
             </router-link>
         </template>
-        <template #title> Edit Map </template>
+        <template #title> {{ $t('map.title') }} </template>
         <template #action-right>
             <Button
-                label="Save"
+                :label="$t('universal.save')"
                 severity="primary"
                 @click="save"
                 :disabled="!submittable"
@@ -131,7 +133,7 @@ const clientPos = mapCenterWithDefaults(useGeolocation().coords, {
                 </template>
             </Button>
             <Button
-                label="Help"
+                :label="$t('universal.help')"
                 severity="secondary"
                 text
                 @click="helpVisible = true"
