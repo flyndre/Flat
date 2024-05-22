@@ -1,33 +1,27 @@
 package de.flyndre.flat.composables.joinscreen
 
-import android.content.Context
-import android.content.SharedPreferences
 import android.util.Log
-import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import de.flyndre.flat.composables.creategroupscreen.CreateGroupScreenViewModel
 import de.flyndre.flat.composables.trackingscreen.TrackingScreenViewModel
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.interfaces.IConnectionService
+import de.flyndre.flat.interfaces.ISettingService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
 import java.util.UUID
-import java.util.prefs.Preferences
 
-class JoinScreenViewModel(db: AppDatabase,preferences:SharedPreferences,trackingScreenViewModel: TrackingScreenViewModel, connectionService: IConnectionService): ViewModel() {
+class JoinScreenViewModel(db: AppDatabase, settingService: ISettingService, trackingScreenViewModel: TrackingScreenViewModel, connectionService: IConnectionService): ViewModel() {
     //appdatabase
     private val _db = db
     private val _trackingScreenViewModel = trackingScreenViewModel
     //connection service
     private val _connectionService = connectionService
-    private val _preferences = preferences
-    private val _usernameKey = "USERNAME"
-    private val _lastCollectionsKey = "LASTCOLLECTIONS"
+    private val _settingService = settingService
     //join link
     private val _joinLink = MutableStateFlow("")
     val joinLink: StateFlow<String> = _joinLink.asStateFlow()
@@ -37,30 +31,19 @@ class JoinScreenViewModel(db: AppDatabase,preferences:SharedPreferences,tracking
     }
 
     //join name
-    private val _joinName = MutableStateFlow(preferences.getString(_usernameKey,"").toString())
+    private val _joinName = MutableStateFlow(_settingService.getDefaultUserName())
     val joinName: StateFlow<String> = _joinName.asStateFlow()
 
-    fun updateJoinName(joinName: String){
+    fun updateJoinName(joinName: String) {
         _joinName.value = joinName
-        _preferences.edit{
-            putString(_usernameKey,joinName)
-        }
+        _settingService.setDefaultUserName(joinName)
     }
 
     //last collections
-    private val _lastCollections = MutableStateFlow(preferences.getStringSet(_lastCollectionsKey,
-        setOf())!!)
+    private val _lastCollections = MutableStateFlow(_settingService.getResentJoinLinks())
     val lastCollections = _lastCollections.asStateFlow()
     fun updateLastCollections(lastCollection:String){
-        var newSet = _lastCollections.value
-        if(newSet.size>=5){
-            newSet = newSet-newSet.first()
-        }
-        newSet = newSet+lastCollection
-        _lastCollections.value = newSet
-        _preferences.edit {
-            putStringSet(_lastCollectionsKey, newSet)
-        }
+        _lastCollections.value = _settingService.addResentJoinLink(lastCollection)
     }
 
     //connection error handling
@@ -81,8 +64,6 @@ class JoinScreenViewModel(db: AppDatabase,preferences:SharedPreferences,tracking
                     _connectionService.openWebsocket(answer.collection.id!!)
                     updateLastCollections(joinLink.value)
                     navigateToTrackingScreen()
-                }else{
-
                 }
             }catch (e: IllegalArgumentException){
                 e.message?.let { Log.e(this.toString(), it) }
@@ -93,10 +74,10 @@ class JoinScreenViewModel(db: AppDatabase,preferences:SharedPreferences,tracking
 }
 class JoinScreenViewModelFactory(
     val db: AppDatabase,
-    val preferences: SharedPreferences,
+    val settingService: ISettingService,
     val trackingScreenViewModel: TrackingScreenViewModel,
     val connectionService: IConnectionService) : ViewModelProvider.Factory{
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return JoinScreenViewModel(db,preferences,trackingScreenViewModel,connectionService) as T
+        return JoinScreenViewModel(db,settingService,trackingScreenViewModel,connectionService) as T
     }
 }
