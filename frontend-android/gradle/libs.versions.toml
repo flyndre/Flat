@@ -1,5 +1,5 @@
 [versions]
-agp = "8.4.0"
+agp = "8.4.1"
 fragmentKtx = "1.6.2"
 geojson = "0.3.0"
 gson = "2.10.1"
