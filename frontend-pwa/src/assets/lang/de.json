@@ -40,7 +40,8 @@
         "cancel_waiting": "Beitritt abbrechen",
         "enter_link": "Oder Link hier einfügen",
         "nickname": "Nutzername",
-        "error_failed_to_join": "Beitreten der Sammlung fehlgeschlagen."
+        "error_rejected": "Beitrittsanfrage wurde abgelehnt.",
+        "error_failed": "Beitreten der Sammlung fehlgeschlagen."
     },
     "map": {
         "title": "Bereichsaufteilung",

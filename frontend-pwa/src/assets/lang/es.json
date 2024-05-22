@@ -40,7 +40,8 @@
         "cancel_waiting": "Cancelar unirse",
         "enter_link": "O insertar enlace aquí",
         "nickname": "Nombre de usuario",
-        "error_failed_to_join": "No se pudo unir a la colección."
+        "error_rejected": "La solicitud de adhesión fue rechazada.",
+        "error_failed": "No se pudo unir a la colección."
     },
     "map": {
         "title": "División de área",

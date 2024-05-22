@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { accessRequest } from '@/api/rest';
+import { accessRequest, getCollection } from '@/api/rest';
 import CardProgressIndicator from '@/components/card/CardProgressIndicator.vue';
 import MdiInputIcon from '@/components/icons/MdiInputIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import { clientId } from '@/data/clientMetadata';
 import { TOAST_LIFE } from '@/data/constants';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
+import { Collection } from '@/types/Collection';
 import { isOnMobile } from '@/util/mobileDetection';
 import validateJoinName from '@/validation/validateJoinName';
 import {
@@ -15,6 +16,7 @@ import {
     mdiIdentifier,
     mdiImport,
 } from '@mdi/js';
+import { asyncComputed, computedAsync, useFetch } from '@vueuse/core';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import Dialog from 'primevue/dialog';
@@ -35,7 +37,6 @@ const { t } = useI18n();
 const joinName = ref('');
 const submittable = computed(() => validateJoinName(joinName.value));
 const dialogVisible = ref(false);
-// TODO: remove this debug redirect
 
 async function join() {
     dialogVisible.value = true;
@@ -44,22 +45,25 @@ async function join() {
         clientId.value,
         props.id
     );
-
-    if (response.status == 200) {
-        router.push(`/track/${props.id}`);
+    if (response.status == 200 && response.data['accepted'] == true) {
+        router.push({ name: 'track', params: { id: props.id } });
     } else {
+        const messageCode =
+            response.status == 200
+                ? 'join.error_rejected'
+                : 'join.error_failed';
         add({
+            closable: true,
             life: TOAST_LIFE,
             severity: 'error',
-            summary: t('join.error_failed_to_join'),
+            summary: t(messageCode),
         });
         dialogVisible.value = false;
     }
 }
+
 function cancel() {
     dialogVisible.value = false;
-
-    // TODO: cancel join request or send cancelation request
 }
 </script>
 

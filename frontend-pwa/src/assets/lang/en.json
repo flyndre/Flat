@@ -40,7 +40,8 @@
         "cancel_waiting": "Cancel joining",
         "enter_link": "Or enter a link manually",
         "nickname": "Your Name",
-        "error_failed_to_join": "Failed to join the Collection."
+        "error_rejected": "Join request was rejected.",
+        "error_failed": "Failed to join the Collection."
     },
     "map": {
         "title": "Edit Divisions",
