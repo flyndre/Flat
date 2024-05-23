@@ -172,7 +172,7 @@ namespace FlatBackend.Websocket
                     await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
                     if (user.clientId == collection.clientId)
                     {
-                        await sendSummaryToBoss(trackCollections.Where(x => x.collectionId == collectionId).First(), collectionId, user.clientId);
+                        await sendSummaryToBoss(trackCollections.Find(x => x.collectionId == collectionId), collectionId, user.clientId);
                     }
                     await user.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "The Collection was closed so the Connection is closed too.", CancellationToken.None);
 
@@ -196,7 +196,8 @@ namespace FlatBackend.Websocket
         public async Task sendSummaryToBoss( TrackCollectionModel tracks, Guid collectionId, Guid clientId )
         {
             var collection = await _MongoDBService.GetCollection(collectionId);
-            var user = users.Where(x => x.clientId == clientId && x.collectionId == collectionId).First();
+            var user = users.Find(x => x.clientId == clientId && x.collectionId == collectionId);
+            if (user == null) return;
             SummaryModel summary = new SummaryModel() { collection = collection, trackCollection = tracks };
 
             string Json = JsonConvert.SerializeObject(summary);
