@@ -306,7 +306,10 @@ namespace FlatBackend.Websocket
             var user = users.Find(x => x.clientId == clientId && x.collectionId == collectionId);
             if (user != null)
             {
-                await user.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "The Collection was closed so the Connection is closed too.", CancellationToken.None);
+                if (user.webSocket.State == WebSocketState.Open)
+                {
+                    await user.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "The Collection was closed so the Connection is closed too.", CancellationToken.None);
+                }
                 users.Remove(user);
             }
         }
