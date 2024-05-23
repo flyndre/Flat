@@ -39,6 +39,7 @@ async function shareNow() {
             text: [
                 t('components.stats_dialog.share_title', {
                     collectionName: props.stats.name,
+                    startDay: props.stats.startDate.toLocaleDateString(),
                 }),
                 t('components.stats_dialog.share_text', {
                     totalArea: props.stats.converedArea,
