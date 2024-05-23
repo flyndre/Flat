@@ -19,7 +19,7 @@ class ParticipantScreenViewModel: ViewModel() {
         //remove admin from users
         val userList: ArrayList<UserModel> = arrayListOf()
         for(user in collectionInstance.confirmedUsers){
-            if(!user.clientId.equals(collectionInstance.id)){
+            if(!user.clientId.equals(collectionInstance.clientId)){
                 userList.add(user)
             }
         }
