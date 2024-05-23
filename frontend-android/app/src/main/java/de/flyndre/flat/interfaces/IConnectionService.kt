@@ -6,7 +6,10 @@ import de.flyndre.flat.models.CollectionClosedMessage
 import de.flyndre.flat.models.CollectionInstance
 import de.flyndre.flat.models.CollectionUpdateMessage
 import de.flyndre.flat.models.IncrementalTrackMessage
+import de.flyndre.flat.models.KickedUserMessage
+import de.flyndre.flat.models.LeavingUserMessage
 import de.flyndre.flat.models.RequestAccessResult
+import de.flyndre.flat.models.SummaryMessage
 import de.flyndre.flat.models.Track
 import io.github.dellisd.spatialk.geojson.MultiPolygon
 import java.util.UUID
@@ -20,6 +23,9 @@ interface IConnectionService {
     val onCollectionClosed: ArrayList<(CollectionClosedMessage) -> Unit>
     val onTrackUpdate: ArrayList<(IncrementalTrackMessage) -> Unit>
     val onCollectionUpdate: ArrayList<(CollectionUpdateMessage)->Unit>
+    val onUserLeaved: ArrayList<(LeavingUserMessage)->Unit>
+    val onUserKicked: ArrayList<(KickedUserMessage)->Unit>
+    val onSummary: ArrayList<(SummaryMessage)->Unit>
 
     /**
      * opens a collection to the public
@@ -80,6 +86,13 @@ interface IConnectionService {
     suspend fun leaveCollection(collection: CollectionInstance)
 
     /**
+     * Notify the backend to kick a specific user from the specified collection
+     * @param collection the collection to kick from
+     * @param userId the id of the user to kick
+     */
+    suspend fun kickUser(collection: CollectionInstance,userId:UUID)
+
+    /**
      * Send an incremental track update to the backend and all other users.
      * @param track the incremental track
      */
@@ -96,7 +109,11 @@ interface IConnectionService {
                               onAccessRequest: ((AccessResquestMessage) -> Unit)? = null,
                               onCollectionClosed: ((CollectionClosedMessage) -> Unit)? = null,
                               onTrackUpdate: ((IncrementalTrackMessage) -> Unit)? = null,
-                              onCollectionUpdate: ((CollectionUpdateMessage)->Unit)?=null)
+                              onCollectionUpdate: ((CollectionUpdateMessage)->Unit)?=null,
+                              onUserLeaved: ((LeavingUserMessage)->Unit)?=null,
+                              onUserKicked: ((KickedUserMessage)->Unit)?=null,
+                              onSummary: ((SummaryMessage)->Unit)?=null
+    )
 
     /**
      * closes the websocket
@@ -123,5 +140,19 @@ interface IConnectionService {
      */
     fun addOnCollectionUpdate(callback: (CollectionUpdateMessage)->Unit)
 
+    /**
+     * Adds a callback to be called when an user leaved the collection
+     */
+    fun addOnUserLeaved(callback: (LeavingUserMessage) -> Unit)
+
+    /**
+     * Adds a callback to be called when an user was kicked from the collection
+     */
+    fun addOnUserKicked(callback: (KickedUserMessage) -> Unit)
+
+    /**
+     * Adds a callback to be called when a summary was received
+     */
+    fun addOnSummary(callback: (SummaryMessage) -> Unit)
 
 }

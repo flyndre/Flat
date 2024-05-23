@@ -10,7 +10,10 @@ import de.flyndre.flat.models.CollectionClosedMessage
 import de.flyndre.flat.models.CollectionInstance
 import de.flyndre.flat.models.CollectionUpdateMessage
 import de.flyndre.flat.models.IncrementalTrackMessage
+import de.flyndre.flat.models.KickedUserMessage
+import de.flyndre.flat.models.LeavingUserMessage
 import de.flyndre.flat.models.RequestAccessResult
+import de.flyndre.flat.models.SummaryMessage
 import de.flyndre.flat.models.Track
 import de.flyndre.flat.models.UserModel
 import de.flyndre.flat.models.WebSocketMessage
@@ -31,6 +34,9 @@ class ConnectionService(
     override val onCollectionClosed: ArrayList<(CollectionClosedMessage) -> Unit> = arrayListOf(),
     override val onTrackUpdate: ArrayList<(IncrementalTrackMessage) -> Unit> = arrayListOf(),
     override val onCollectionUpdate: ArrayList<(CollectionUpdateMessage) -> Unit> = arrayListOf(),
+    override val onUserLeaved: ArrayList<(LeavingUserMessage) -> Unit> = arrayListOf(),
+    override val onUserKicked: ArrayList<(KickedUserMessage) -> Unit> = arrayListOf(),
+    override val onSummary: ArrayList<(SummaryMessage) -> Unit> = arrayListOf(),
 ):IConnectionService {
     private val restBasePath = settingService.getServerBaseUrl()+"/rest"
     private val websocketBasePath = (settingService.getServerBaseUrl()+"/ws").replace("http","ws")
@@ -42,10 +48,13 @@ class ConnectionService(
         override fun onMessage(message: String) {
             val obj = json.decodeFromString<WebSocketMessage>(message)
             when(obj.type){
-                WebSocketMessageType.IncrementalTrack -> onTrackUpdate.stream().forEach { x->x(json.decodeFromString<IncrementalTrackMessage>(message)) }
-                WebSocketMessageType.AccessRequest -> onAccessRequest.stream().forEach { x->x(json.decodeFromString<AccessResquestMessage>(message)) }
-                WebSocketMessageType.CollectionClosed -> onCollectionClosed.stream().forEach { x->x(json.decodeFromString<CollectionClosedMessage>(message)) }
-                WebSocketMessageType.CollectionUpdate -> onCollectionUpdate.stream().forEach { x->x(json.decodeFromString<CollectionUpdateMessage>(message)) }
+                WebSocketMessageType.IncrementalTrack -> onTrackUpdate.forEach { it(json.decodeFromString<IncrementalTrackMessage>(message)) }
+                WebSocketMessageType.AccessRequest -> onAccessRequest.forEach { it(json.decodeFromString<AccessResquestMessage>(message)) }
+                WebSocketMessageType.CollectionClosed -> onCollectionClosed.forEach { it(json.decodeFromString<CollectionClosedMessage>(message)) }
+                WebSocketMessageType.CollectionUpdate -> onCollectionUpdate.forEach { it(json.decodeFromString<CollectionUpdateMessage>(message)) }
+                WebSocketMessageType.LeavingUser -> onUserLeaved.forEach { (it(json.decodeFromString<LeavingUserMessage>(message))) }
+                WebSocketMessageType.KickedUser -> onUserKicked.forEach { (it(json.decodeFromString<KickedUserMessage>(message))) }
+                WebSocketMessageType.Summary -> onSummary.forEach { (it(json.decodeFromString<SummaryMessage>(message))) }
                 else -> {}
             }
         }
@@ -191,18 +200,30 @@ class ConnectionService(
 
     override suspend fun leaveCollection(collection: CollectionInstance) {
         webSocketClient.disconnect()
-        if(collection.clientId.equals(clientId)){
-            val url = "$restBasePath/Collection/${collection.id}"
-            val request = Request.Builder()
-                .url(url)
-                .delete()
-                .build()
-            val response = restClient.newCall(request).await()
-            if(!response.isSuccessful){
-                val responseString = response.body?.string()
-                response.close()
-                throw RequestFailedException("Could not close collection ${collection.id} alias ${collection.name}:\n $responseString")
-            }
+        val url = "$restBasePath/leaveCollection/${collection.id}?clientId=$clientId"
+        val request = Request.Builder()
+            .url(url)
+            .post("".toRequestBody("application/json".toMediaType()))
+            .build()
+        val response = restClient.newCall(request).await()
+        if(!response.isSuccessful){
+            val responseString = response.body?.string()
+            response.close()
+            throw RequestFailedException("Could not close collection ${collection.id} alias ${collection.name}:\n $responseString")
+        }
+    }
+
+    override suspend fun kickUser(collection: CollectionInstance, userId: UUID) {
+        val url = "$restBasePath/removeUser/${collection.id}?clientId=$userId&bossId=$clientId"
+        val request = Request.Builder()
+            .url(url)
+            .post("".toRequestBody("application/json".toMediaType()))
+            .build()
+        val response = restClient.newCall(request).await()
+        if(!response.isSuccessful){
+            val responseString = response.body?.string()
+            response.close()
+            throw RequestFailedException("Could not kick user $userId from collection ${collection.id} alias ${collection.name}:\n $responseString")
         }
     }
 
@@ -216,13 +237,19 @@ class ConnectionService(
         onAccessRequest: ((AccessResquestMessage) -> Unit)?,
         onCollectionClosed: ((CollectionClosedMessage) -> Unit)?,
         onTrackUpdate: ((IncrementalTrackMessage) -> Unit)?,
-        onCollectionUpdate: ((CollectionUpdateMessage) -> Unit)?
+        onCollectionUpdate: ((CollectionUpdateMessage) -> Unit)?,
+        onUserLeaved: ((LeavingUserMessage)->Unit)?,
+        onUserKicked: ((KickedUserMessage)->Unit)?,
+        onSummary: ((SummaryMessage)->Unit)?
     ) {
 
         onAccessRequest?.let { addOnAccessRequest(it) }
         onCollectionClosed?.let { addOnCollectionClosed(it) }
         onTrackUpdate?.let { addOnTrackUpdate(it) }
         onCollectionUpdate?.let { addOnCollectionUpdate(it) }
+        onUserLeaved?.let { addOnUserLeaved(it) }
+        onUserKicked?.let { addOnUserKicked(it) }
+        onSummary?.let { addOnSummary(it) }
         webSocketClient.setSocketUrl(websocketBasePath)
         webSocketClient.setListener(socketListener)
         webSocketClient.setUserId(clientId)
@@ -248,5 +275,17 @@ class ConnectionService(
 
     override fun addOnCollectionUpdate(callback: (CollectionUpdateMessage) -> Unit) {
         onCollectionUpdate.add(callback)
+    }
+
+    override fun addOnUserLeaved(callback: (LeavingUserMessage) -> Unit) {
+        onUserLeaved.add(callback)
+    }
+
+    override fun addOnUserKicked(callback: (KickedUserMessage) -> Unit) {
+        onUserKicked.add(callback)
+    }
+
+    override fun addOnSummary(callback: (SummaryMessage) -> Unit) {
+        onSummary.add(callback)
     }
 }
