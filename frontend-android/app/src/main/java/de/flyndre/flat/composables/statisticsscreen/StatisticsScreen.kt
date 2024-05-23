@@ -1,4 +1,4 @@
-package de.flyndre.flat.composables.trackingscreen.participantscreen
+package de.flyndre.flat.composables.statisticsscreen
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -14,19 +14,20 @@ import androidx.compose.ui.Modifier
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ParticipantScreen(
-    onNavigateToTrackingScreen: () -> Unit,
-    participantScreenViewModel: ParticipantScreenViewModel
+fun StatisticsScreen(
+    onNavigateToInitialScreen: () -> Unit,
+    statisticsScreenViewModel: StatisticsScreenViewModel
 ){
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(title = { Text(text = "Teilnehmer") },
+            CenterAlignedTopAppBar(title = { Text(text = "Statistiken") },
                 navigationIcon = {
-                    IconButton(onClick = { onNavigateToTrackingScreen() }) {
+                    IconButton(onClick = { onNavigateToInitialScreen() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "back to tracking screen")
+                            contentDescription = "back to start screen"
+                        )
                     }
                 })
         }
