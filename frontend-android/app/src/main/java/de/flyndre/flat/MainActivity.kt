@@ -1,11 +1,13 @@
 package de.flyndre.flat
 
 import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
-import android.os.PowerManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -14,6 +16,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -61,7 +66,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var locationService: ILocationService
     private lateinit var trackingService: ITrackingService
     private lateinit var db: AppDatabase
-
+    val CHANNEL_ID  = "1"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //request permissions
@@ -76,6 +81,20 @@ class MainActivity : ComponentActivity() {
         trackingService = TrackingService(connectionService, locationService, 10000,settingService)
         db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "flat-database")
             .build()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = getString(R.string.app_name)
+            val descriptionText = getString(R.string.app_name)
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+                description = descriptionText
+            }
+            // Register the channel with the system.
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+
 
         setContent {
             FlatTheme {
@@ -145,13 +164,33 @@ class MainActivity : ComponentActivity() {
                             trackingScreenViewModel,
                             participantScreenViewModel,
                             settingScreenViewModel,
-                            settingService.getClientId()
-                        ) { x -> shareLink(x) }
+                            settingService.getClientId(),
+                            {x->shareLink(x)},
+                            {showTrackingNotification()}
+                        )
                     }
                 }
             }
         }
 
+    }
+    fun showTrackingNotification(){
+
+        var builder = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.mipmap.ic_launcher_round)
+            .setContentTitle("Test")
+            .setContentText("Content")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setSilent(true)
+
+        with(NotificationManagerCompat.from(this)){
+            if(ActivityCompat.checkSelfPermission(
+                    this@MainActivity,
+                    Manifest.permission.POST_NOTIFICATIONS)==PackageManager.PERMISSION_GRANTED){
+                notify(1,builder.build())
+            }
+
+        }
     }
 
     private fun requestLocationPermission() {
@@ -169,6 +208,18 @@ class MainActivity : ComponentActivity() {
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+        if(ContextCompat.checkSelfPermission(
+            applicationContext,
+            Manifest.permission.WAKE_LOCK
+        )!=PackageManager.PERMISSION_GRANTED){
+            requestPermissionLauncher.launch(Manifest.permission.WAKE_LOCK)
+        }
+        if(ActivityCompat.checkSelfPermission(
+                this@MainActivity,
+                Manifest.permission.POST_NOTIFICATIONS
+        )!=PackageManager.PERMISSION_GRANTED){
+            requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
     }
 
@@ -197,7 +248,8 @@ fun AppEntryPoint(
     participantScreenViewModel: ParticipantScreenViewModel,
     settingScreenViewModel: SettingScreenViewModel,
     userId: UUID,
-    onShareLink: ((String)->Unit)
+    onShareLink: ((String)->Unit),
+    showNotification: ()->Unit
 ) {
     val navController = rememberNavController()
     var _startDestination = "initial"
@@ -213,7 +265,7 @@ fun AppEntryPoint(
         composable("initial") {
             InitialScreen(
                 modifier = modifier,
-                onNavigateToJoinScreen = { navController.navigate("join") },
+                onNavigateToJoinScreen = { navController.navigate("join");showNotification() },
                 onNavigateToCreateGroupScreen = { navController.navigate("creategroup") },
                 onNavigateToSettingScreen = {navController.navigate("settings")}
             )
