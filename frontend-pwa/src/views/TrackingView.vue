@@ -153,7 +153,8 @@ async function closeCollectionNow() {
         _clearUpBeforeLeave();
         router.push({
             name: 'edit',
-            params: { id: props.id, stats: stats.id },
+            params: { id: props.id },
+            query: { stats: stats.id },
         });
     } catch (e) {
         console.log(e);
