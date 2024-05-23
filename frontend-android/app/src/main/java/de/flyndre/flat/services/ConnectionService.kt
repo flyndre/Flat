@@ -213,6 +213,20 @@ class ConnectionService(
         }
     }
 
+    override suspend fun kickUser(collection: CollectionInstance, userId: UUID) {
+        val url = "$restBasePath/removeUser/${collection.id}?clientId=$userId&bossId=$clientId"
+        val request = Request.Builder()
+            .url(url)
+            .post("".toRequestBody("application/json".toMediaType()))
+            .build()
+        val response = restClient.newCall(request).await()
+        if(!response.isSuccessful){
+            val responseString = response.body?.string()
+            response.close()
+            throw RequestFailedException("Could not kick user $userId from collection ${collection.id} alias ${collection.name}:\n $responseString")
+        }
+    }
+
     override suspend fun sendTrackUpdate(track: Track) {
         val message = Json.encodeToString(IncrementalTrackMessage(track.trackId,clientId,track.toLineString()))
         webSocketClient.sendMessage(message)

@@ -86,6 +86,13 @@ interface IConnectionService {
     suspend fun leaveCollection(collection: CollectionInstance)
 
     /**
+     * Notify the backend to kick a specific user from the specified collection
+     * @param collection the collection to kick from
+     * @param userId the id of the user to kick
+     */
+    suspend fun kickUser(collection: CollectionInstance,userId:UUID)
+
+    /**
      * Send an incremental track update to the backend and all other users.
      * @param track the incremental track
      */
