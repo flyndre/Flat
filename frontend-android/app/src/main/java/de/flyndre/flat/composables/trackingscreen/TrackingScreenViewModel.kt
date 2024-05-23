@@ -47,17 +47,20 @@ class TrackingScreenViewModel(
     private val _settingService = settingService
     private val joinBaseLink = "https://flat.buhss.de/join/"
     private var lastCenteredOwnDivision: CollectionArea? = null
-    var collectionInstance: CollectionInstance = CollectionInstance("", UUID.randomUUID(),
-        MultiPolygon()
-    )
+
+    var collectionInstance: CollectionInstance = CollectionInstance("", UUID.randomUUID(), MultiPolygon())
         set(value) {
             field = value
+            _divisionList.value = value.collectionDivision
             _joinLink.value = joinBaseLink+value.id
             _qrCodeGraphics.value = QRCode.ofSquares().build(_joinLink.value).render()
         }
 
     private val _trackingEnabled = MutableStateFlow(false)
     val trackingEnabled = _trackingEnabled.asStateFlow()
+
+    private val _divisionList = MutableStateFlow(arrayListOf<CollectionArea>())
+    val divisionList = _divisionList.asStateFlow()
 
     private val _trackList: MutableStateFlow<TrackCollection> = MutableStateFlow(TrackCollection())
     val trackList: StateFlow<TrackCollection> = _trackList.asStateFlow()
@@ -83,12 +86,20 @@ class TrackingScreenViewModel(
     private val _participantsLeaved = MutableStateFlow(arrayListOf<LeavingUserMessage>())
     val participantsLeaved = _participantsLeaved.asStateFlow()
 
+    private val _showCollectionClosedDialog = MutableStateFlow(false)
+    val showCollectionClosedDialog = _showCollectionClosedDialog.asStateFlow()
+
+    private val _showParticipantKickedDialog = MutableStateFlow(false)
+    val showParticipantKickedDialog = _showParticipantKickedDialog.asStateFlow()
+
     init {
         trackingService.addOnLocalTrackUpdate{ onLocalTrackUpdate() }
         trackingService.addOnRemoteTrackUpdate { onRemoteTrackUpdate() }
         connectionService.addOnAccessRequest { onAccessRequestMessage(it) }
         connectionService.addOnUserLeaved { onUserLeavedCollection(it) }
         connectionService.addOnCollectionUpdate { onCollectionUpdate(it) }
+        connectionService.addOnCollectionClosed { onCollectionClosed() }
+        connectionService.addOnUserKicked { onParticipantKicked() }
 
         //add initial point for own location
         viewModelScope.launch(Dispatchers.Default) {
@@ -106,6 +117,14 @@ class TrackingScreenViewModel(
             _trackingService.startTracking()
             _trackingEnabled.value = true
         }
+    }
+
+    private fun onParticipantKicked(){
+        _showParticipantKickedDialog.value = true
+    }
+
+    private fun onCollectionClosed(){
+        _showCollectionClosedDialog.value = true
     }
 
     private fun onLocalTrackUpdate(){

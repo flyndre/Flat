@@ -8,6 +8,12 @@ export const collectionStatsDB = db.collectionStats;
 export function statsOf(collectionId: string) {
     return useObservable<CollectionStats[]>(
         /* @ts-ignore */
-        liveQuery(() => db.collectionStats.where({ collectionId }).toArray())
+        liveQuery(() =>
+            db.collectionStats
+                .orderBy('finishDate')
+                .reverse()
+                .filter((cs) => cs.collectionId === collectionId)
+                .toArray()
+        )
     );
 }

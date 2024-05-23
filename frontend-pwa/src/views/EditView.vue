@@ -98,7 +98,7 @@ onMounted(async () => {
     }
 });
 
-async function _saveCollection(target: RouteLocationRaw) {
+async function _saveCollection(afterSavedCallback: () => any) {
     if (!submittable.value) {
         add({
             life: TOAST_LIFE,
@@ -115,7 +115,7 @@ async function _saveCollection(target: RouteLocationRaw) {
             await collectionDB.add(dbSafe(collection.value));
             collectionDraft.set(null);
         }
-        await router.push(target);
+        afterSavedCallback();
     } catch (error) {
         add({
             life: TOAST_LIFE,
@@ -127,17 +127,24 @@ async function _saveCollection(target: RouteLocationRaw) {
     }
 }
 
-const save = () => _saveCollection({ name: 'presets' });
-async function start() {
-    const response = await openCollection(collection.value);
+async function save() {
+    await _saveCollection(() => router.push({ name: 'presets' }));
+}
 
-    response.status == 200
-        ? router.push(`/track/${collection.value.id}`)
-        : add({
-              life: TOAST_LIFE,
-              severity: 'error',
-              summary: t('edit.error_failed_to_start'),
-          });
+async function start() {
+    await _saveCollection(async () => {
+        try {
+            const response = await openCollection(collection.value);
+            if (response.status != 200) throw response;
+            await router.push(`/track/${collection.value.id}`);
+        } catch (e) {
+            add({
+                life: TOAST_LIFE,
+                severity: 'error',
+                summary: t('edit.error_failed_to_start'),
+            });
+        }
+    });
 }
 
 function editDivisions() {
@@ -154,62 +161,6 @@ function back() {
 }
 
 const stats = statsOf(props.id);
-
-const division: GeoJSON.Polygon = {
-    type: 'Polygon',
-    coordinates: [
-        [
-            [48.38294, 8.581605],
-            [48.386865, 8.583229],
-            [48.384984, 8.578389],
-        ],
-    ],
-};
-const stats2: CollectionStats = {
-    id: 'a',
-    collectionId: '',
-    name: 'Altpapiersammlung',
-    admin: {
-        id: '1',
-        name: 'Lubu',
-    },
-    startDate: new Date(),
-    finishDate: new Date(),
-    converedArea: 100,
-    divisionStats: [
-        {
-            id: 'x',
-            name: 'Wittendorf',
-            color: 'goldenrod',
-            clientId: '1',
-            area: division,
-            coveredArea: getGeoJsonArea(division),
-        },
-        {
-            id: 'y',
-            name: 'Dümettstett',
-            color: 'blue',
-            clientId: '1',
-            area: division,
-            coveredArea: getGeoJsonArea(division),
-        },
-    ],
-    participantStats: [
-        {
-            id: '1',
-            name: 'Lubu',
-            coveredDistance: 100,
-        },
-    ],
-};
-
-function addStats() {
-    collectionStatsDB.add({
-        ...stats2,
-        id: uuidv4(),
-        collectionId: collection.value.id,
-    });
-}
 </script>
 
 <template>
@@ -225,9 +176,6 @@ function addStats() {
                     <MdiTextButtonIcon :icon="mdiArrowLeft" />
                 </template>
             </Button>
-
-            <button @click="addStats">add stats</button>
-            <button @click="collectionStatsDB.clear()">clear</button>
         </template>
         <template #title> {{ title }} </template>
         <template #action-right>

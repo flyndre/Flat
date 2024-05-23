@@ -77,6 +77,7 @@ fun TrackingScreen(
     val trackingEnabled by trackingScreenViewModel.trackingEnabled.collectAsState()
     val localTrackList by trackingScreenViewModel.trackList.collectAsState()
     val remoteTrackList by trackingScreenViewModel.remoteTrackList.collectAsState()
+    val divisionList by trackingScreenViewModel.divisionList.collectAsState()
     val participantsToJoin by trackingScreenViewModel.participantsToJoin.collectAsState()
     val participantsLeaved by trackingScreenViewModel.participantsLeaved.collectAsState()
     val qrCodeGraphics by trackingScreenViewModel.qrCodeGraphics.collectAsState()
@@ -89,6 +90,8 @@ fun TrackingScreen(
     var showLeavingDialog by remember { mutableStateOf(false) }
     var showClosingDialog by remember { mutableStateOf(false) }
     var showAddPaticipantsDialog by remember { mutableStateOf(false) }
+    val showCollectionClosedDialog by trackingScreenViewModel.showCollectionClosedDialog.collectAsState()
+    val showParticipantKickedDialog by trackingScreenViewModel.showParticipantKickedDialog.collectAsState()
 
     BackHandler(enabled = true) {
         if (trackingScreenViewModel.isThisUserAdmin()) {
@@ -96,6 +99,14 @@ fun TrackingScreen(
         } else {
             showLeavingDialog = true
         }
+    }
+
+    if(showParticipantKickedDialog){
+        ParticipantKickedDialog(onAccept = onNavigateToInitialScreen)
+    }
+
+    if(showCollectionClosedDialog){
+        CollectionClosedDialog(onAccept = onNavigateToInitialScreen)
     }
 
     if (participantsToJoin.isNotEmpty()) {
@@ -272,8 +283,8 @@ fun TrackingScreen(
                 }
             }
             //rendering collection areas
-            if (trackingScreenViewModel.collectionInstance.collectionDivision.isNotEmpty()) {
-                for (collectionArea in trackingScreenViewModel.collectionInstance.collectionDivision) {
+            if (divisionList.isNotEmpty()) {
+                for (collectionArea in divisionList) {
                     //get inner list of multipolygon and draw it on map
                     val area = collectionArea.area.coordinates[0]
                     //convert list<position> in list<latlong>
@@ -479,6 +490,42 @@ fun UserLeavedCollectionDialog(leavingUserMessage: LeavingUserMessage, onAccept:
             Text(text = "Information")
         },
         text = { Text(text = "Der Nutzer " + leavingUserMessage.user.username + " hat die Sammlung verlassen.")}
+    )
+}
+
+@Composable
+fun CollectionClosedDialog(onAccept: () -> Unit){
+    AlertDialog(onDismissRequest = { onAccept() },
+        confirmButton = { 
+            TextButton(onClick = { onAccept() }) {
+                Text(text = "OK")
+            }
+        },
+        icon = {
+            Icon(imageVector = Icons.Default.Info, contentDescription = "collection was closed")
+        },
+        title = {
+            Text(text = "Information")
+        },
+        text = { Text(text = "Die Sammlung wurde vom Administrator beendet.")}
+    )
+}
+
+@Composable
+fun ParticipantKickedDialog(onAccept: () -> Unit){
+    AlertDialog(onDismissRequest = { onAccept() },
+        confirmButton = {
+            TextButton(onClick = { onAccept() }) {
+                Text(text = "OK")
+            }
+        },
+        icon = {
+            Icon(imageVector = Icons.Default.Info, contentDescription = "collection was closed")
+        },
+        title = {
+            Text(text = "Information")
+        },
+        text = { Text(text = "Du wurdest vom Administrator aus der Sammlung entfernt.")}
     )
 }
 

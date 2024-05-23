@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { CollectionStats } from '@/types/stats/CollectionStats';
-import { formatDateRange, getDuration } from '@/util/datetimeUtils';
+import {
+    formatDateRange,
+    getDateTime,
+    getDuration,
+} from '@/util/datetimeUtils';
 import { getParticipantColor } from '@/util/trackingUtils';
 import {
     mdiAccountCircle,
@@ -13,6 +17,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import MdiTextButtonIcon from '../icons/MdiTextButtonIcon.vue';
 import MapWithControls from '../map/MapWithControls.vue';
+import { NUMBER_FORMAT_OPTIONS } from '@/data/constants';
 
 const props = defineProps<{
     stats?: CollectionStats;
@@ -21,7 +26,20 @@ const statsPresent = computed(() => props.stats != null);
 
 const { locale } = useI18n();
 const dateRange = computed(() =>
-    formatDateRange(props.stats.startDate, props.stats.finishDate, locale.value)
+    props.stats.finishDate == null
+        ? '-'
+        : props.stats.startDate == null
+          ? getDateTime(props.stats.finishDate, locale.value)
+          : formatDateRange(
+                props.stats.startDate,
+                props.stats.finishDate,
+                locale.value
+            )
+);
+const duration = computed(() =>
+    props.stats.startDate == null || props.stats.finishDate == null
+        ? '-'
+        : getDuration(props.stats.startDate, props.stats.finishDate)
 );
 
 const generalStats = computed<
@@ -39,12 +57,12 @@ const generalStats = computed<
     {
         icon: mdiTimerOutline,
         messageCode: 'components.stats_display.duration',
-        value: getDuration(props.stats.startDate, props.stats.finishDate),
+        value: duration.value,
     },
     {
         icon: mdiTextureBox,
         messageCode: 'components.stats_display.area_total',
-        value: `ca. ${props.stats.converedArea} m²`,
+        value: `ca. ${props.stats.converedArea?.toLocaleString(locale.value, NUMBER_FORMAT_OPTIONS)} km²`,
     },
 ]);
 
@@ -62,7 +80,7 @@ const divisionStats = computed<
         icon: mdiTextureBox,
         label: d.name,
         color: d.color,
-        value: `ca. ${d.coveredArea.toFixed(2)} m²`,
+        value: `ca. ${d.coveredArea?.toLocaleString(locale.value, NUMBER_FORMAT_OPTIONS)} km²`,
     }))
 );
 
@@ -80,7 +98,7 @@ const participantStats = computed<
         icon: mdiAccountCircle,
         label: p.name,
         color: p.color ?? getParticipantColor(p.id, props.stats.divisionStats),
-        value: `ca. ${p.coveredDistance.toFixed(2)} m`,
+        value: `ca. ${p.coveredDistance?.toLocaleString(locale.value, NUMBER_FORMAT_OPTIONS)} km`,
     }))
 );
 </script>
@@ -102,6 +120,7 @@ const participantStats = computed<
                 controls="none"
                 center="area"
                 :divisions="stats.divisionStats"
+                :tracks="stats.participantStats"
                 locked
             />
             <Panel :header="$t('components.stats_display.title_general')">

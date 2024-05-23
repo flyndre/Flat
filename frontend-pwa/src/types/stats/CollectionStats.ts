@@ -9,7 +9,7 @@ export type CollectionStats = {
     admin: Participant;
     startDate?: Date;
     finishDate?: Date;
-    /** The total area covered by the collection's divisions,  in square meters. */
+    /** The total area covered by the collection's divisions, in square kilometers. */
     converedArea: number;
     divisionStats: DivisionStats[];
     participantStats: ParticipantStats[];
