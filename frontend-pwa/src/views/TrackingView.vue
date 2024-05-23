@@ -21,7 +21,6 @@ import { calculateCollectionStats } from '@/util/statsUtils';
 import {
     mdiAccountMultiple,
     mdiAccountPlus,
-    mdiCheck,
     mdiCircle,
     mdiClose,
     mdiCrosshairsGps,
@@ -116,6 +115,7 @@ function _clearUpBeforeLeave() {
 }
 
 async function leaveCollectionHandler() {
+    if (!confirm(t('tracking.action_leave_warning'))) return;
     try {
         const response = await leaveCollection(clientId.value, props.id);
         if (response.status == 200) {
@@ -405,18 +405,18 @@ const mapTypeOptions: MenuItem[] = [
                 modal
             >
                 <template #default>
-                    Are you certain that you want to end the ongoing collection?
+                    {{ $t('tracking.action_end_warning.0') }}
                     <br />
                     <span class="text-red-500">
-                        This action is irreversible.
+                        {{ $t('tracking.action_end_warning.1') }}
                     </span>
-                    It will stop the tracking of all participants and save the
-                    tracked movement on your device only.
+                    <br />
+                    {{ $t('tracking.action_end_warning.2') }}
                 </template>
                 <template #footer>
                     <div class="w-full flex flex-row justify-center gap-2">
                         <Button
-                            :label="$t('universal.deny')"
+                            :label="$t('universal.cancel')"
                             severity="secondary"
                             @click="closeCollectionDialogVisible = false"
                         >
@@ -425,12 +425,12 @@ const mapTypeOptions: MenuItem[] = [
                             </template>
                         </Button>
                         <Button
-                            :label="$t('universal.confirm')"
+                            :label="$t('tracking.action_end_confirm')"
                             severity="danger"
                             @click="closeCollectionNow"
                         >
                             <template #icon>
-                                <MdiTextButtonIcon :icon="mdiCheck" />
+                                <MdiTextButtonIcon :icon="mdiStop" />
                             </template>
                         </Button>
                     </div>
