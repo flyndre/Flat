@@ -7,6 +7,8 @@ enum class WebSocketMessageType {
     CollectionClosed,
     CollectionUpdate,
     Summary,
-    KeepAlive
+    KeepAlive,
+    LeavingUser,
+    KickedUser
 
 }
