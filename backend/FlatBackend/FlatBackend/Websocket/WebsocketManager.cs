@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 //using System.Text.Json;
 using Newtonsoft.Json;
 using System.Diagnostics.Metrics;
+using System.IO;
 
 namespace FlatBackend.Websocket
 {
@@ -190,9 +191,12 @@ namespace FlatBackend.Websocket
         {
             var user = users.Find(x => x.clientId == clientId && x.collectionId == collectionId);
             if (user == null || tracks == null) return;
-            List<IncrementalTrackDto> tracksList = tracks.tracks;
-            string Json = JsonConvert.SerializeObject(tracksList);
-            user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
+            foreach (var track in tracks.tracks)
+            {
+                string Json = JsonConvert.SerializeObject(track);
+                user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
+                Thread.Sleep(100);
+            }
         }
 
         public async Task sendSummaryToBoss( TrackCollectionModel tracks, Guid collectionId, Guid clientId )
@@ -202,7 +206,6 @@ namespace FlatBackend.Websocket
             var user = users.Find(x => x.clientId == clientId && x.collectionId == collectionId);
             if (user == null) return;
             SummaryModel summary = new SummaryModel() { collection = collection, trackCollection = tracks };
-
             string Json = JsonConvert.SerializeObject(summary);
             await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
         }
