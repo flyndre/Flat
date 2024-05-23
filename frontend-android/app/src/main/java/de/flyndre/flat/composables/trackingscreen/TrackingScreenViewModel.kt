@@ -10,6 +10,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.CameraPositionState
 import de.flyndre.flat.composables.trackingscreen.assignmentscreen.AssignmentScreenViewModel
+import de.flyndre.flat.composables.trackingscreen.participantscreen.ParticipantScreenViewModel
 import de.flyndre.flat.interfaces.IConnectionService
 import de.flyndre.flat.interfaces.ISettingService
 import de.flyndre.flat.interfaces.ITrackingService
@@ -34,9 +35,11 @@ class TrackingScreenViewModel(
     trackingService: ITrackingService,
     connectionService: IConnectionService,
     assignmentScreenViewModel: AssignmentScreenViewModel,
+    participantScreenViewModel: ParticipantScreenViewModel,
     settingService: ISettingService
 ): ViewModel() {
     private val _assignmentScreenViewModel: AssignmentScreenViewModel = assignmentScreenViewModel
+    private val _participantScreenViewModel: ParticipantScreenViewModel = participantScreenViewModel
     private val _trackingService = trackingService
     private val _connectionService = connectionService
     private val _settingService = settingService
@@ -122,7 +125,7 @@ class TrackingScreenViewModel(
     }
 
     fun updateParticipantScreenViewModel(){
-
+        _participantScreenViewModel.initialValues(collectionInstance)
     }
 
     fun declineParticipantJoinDialog(message: AccessResquestMessage){
@@ -208,12 +211,14 @@ class TrackingScreenViewModelFactory(
     val trackingService: ITrackingService,
     val connectionService: IConnectionService,
     val assignmentScreenViewModel: AssignmentScreenViewModel,
+    val participantScreenViewModel: ParticipantScreenViewModel,
     val settingService: ISettingService) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return TrackingScreenViewModel(
             trackingService,
             connectionService,
             assignmentScreenViewModel,
+            participantScreenViewModel,
             settingService
         ) as T
     }

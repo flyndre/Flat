@@ -91,6 +91,11 @@ class MainActivity : ComponentActivity() {
                         "ParticipantScreenViewModel",
                         ParticipantScreenViewModelFactory(connectionService)
                     )
+                    val participantScreenViewModel: ParticipantScreenViewModel = viewModel(
+                        it,
+                        "ParticipantScreenViewModel",
+                        CreateParticipantScreenViewModelFactory()
+                    )
                     val trackingScreenViewModel:TrackingScreenViewModel = viewModel(
                         it,
                         "TrackingScreenViewModel",
@@ -98,6 +103,7 @@ class MainActivity : ComponentActivity() {
                             trackingService,
                             connectionService,
                             assignmentScreenViewModel,
+                            participantScreenViewModel,
                             settingService))
                     val collectionAreaScreenViewModel:CollectionAreaScreenViewModel = viewModel()
                     val presetScreenViewModel: PresetScreenViewModel = viewModel(
@@ -137,11 +143,6 @@ class MainActivity : ComponentActivity() {
                         it,
                         "StatisticsScreenViewModel",
                         CreateStatisticsScreenViewModelFactory()
-                    )
-                    val participantScreenViewModel: ParticipantScreenViewModel = viewModel(
-                        it,
-                        "ParticipantScreenViewModel",
-                        CreateParticipantScreenViewModelFactory()
                     )
 
                     Surface(
