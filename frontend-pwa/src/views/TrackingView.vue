@@ -45,6 +45,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { watchOnce } from '@vueuse/core';
 import { leaveCollection } from '@/api/rest';
 import { clientId } from '@/data/clientMetadata';
+import { StringMappingType } from 'typescript';
 
 const props = defineProps<{
     id: string;
@@ -153,6 +154,8 @@ const {
     requests,
     startTracking: startTrackingCollection,
     stopTracking: stopTrackingCollection,
+    kick,
+    leave,
 } = useCollectionService(props.id);
 
 function processJoinRequest(joinRequest: JoinRequest) {
@@ -188,6 +191,26 @@ function toggleTracking() {
         startTrackingLogs();
         startTrackingCollection();
     }
+}
+
+function kickParticipant(collectionId: string, participantId: string) {
+    const resp = await kick(collectionId, participantId);
+
+    resp.status == 200
+        ? pushToast({
+              //TODO: i18n
+              summary: 'Kicked Participant',
+              severity: 'success',
+              closable: true,
+              life: TOAST_LIFE,
+          })
+        : pushToast({
+              //TODO: i18n
+              summary: 'Could not Kick Participant',
+              severity: 'error',
+              closable: true,
+              life: TOAST_LIFE,
+          });
 }
 </script>
 
@@ -460,7 +483,9 @@ function toggleTracking() {
                                 :participants="member"
                                 :divisions="activeCollection.divisions"
                                 :admin-mode="isAdmin"
-                                @kick-participant="(p) => console.log(p)"
+                                @kick-participant="
+                                    (p) =>kickParticipant(activeCollection.id, p.id)
+                                "
                             />
                         </TabPanel>
                         <TabPanel
