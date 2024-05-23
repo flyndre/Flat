@@ -32,7 +32,8 @@ function _getParticipantStats(participant: ParticipantTrack) {
 }
 
 export function calculateCollectionStats(
-    collection: ActiveCollection
+    collection: ActiveCollection,
+    startDate: Date = undefined
 ): CollectionStats {
     const divisionStats = collection.divisions.map((d) => ({
         ...d,
@@ -44,6 +45,8 @@ export function calculateCollectionStats(
     return {
         id: uuidv4(),
         collectionId: collection.id,
+        startDate,
+        finishDate: new Date(),
         name: collection.name,
         admin: collection.confirmedUsers.find(
             ({ id }) => id === collection.adminClientId

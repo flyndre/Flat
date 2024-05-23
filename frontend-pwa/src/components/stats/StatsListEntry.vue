@@ -6,16 +6,24 @@ import Button from 'primevue/button';
 import { computed } from 'vue';
 import MdiIcon from '../icons/MdiIcon.vue';
 import StatsDialog from './StatsDialog.vue';
+import { useI18n } from 'vue-i18n';
+import { getDateTime } from '@/util/datetimeUtils';
 
 const props = defineProps<{
     stats: CollectionStats;
 }>();
 
+const { locale } = useI18n();
 const openStatsId = useRouteQuery('stats');
 const dialogVisible = computed({
     get: () => openStatsId.value === props.stats.id,
     set: (v) => (openStatsId.value = v ? props.stats.id : undefined),
 });
+const displayedDate = computed(
+    () =>
+        getDateTime(props.stats.startDate) ??
+        getDateTime(props.stats.finishDate)
+);
 </script>
 
 <template>
@@ -33,7 +41,7 @@ const dialogVisible = computed({
                 <span class="text-left break-all">
                     {{ stats.name }}
                     <span class="opacity-50">
-                        {{ stats.startDate?.toLocaleDateString() }}
+                        {{ displayedDate }}
                     </span>
                 </span>
                 <MdiIcon :icon="mdiChevronRight" />

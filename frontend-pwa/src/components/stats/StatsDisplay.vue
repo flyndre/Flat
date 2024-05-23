@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { CollectionStats } from '@/types/stats/CollectionStats';
-import { formatDateRange, getDuration } from '@/util/datetimeUtils';
+import {
+    formatDateRange,
+    getDateTime,
+    getDuration,
+} from '@/util/datetimeUtils';
 import { getParticipantColor } from '@/util/trackingUtils';
 import {
     mdiAccountCircle,
@@ -22,17 +26,19 @@ const statsPresent = computed(() => props.stats != null);
 
 const { locale } = useI18n();
 const dateRange = computed(() =>
-    props.stats.startDate == null || props.stats.finishDate == null
-        ? undefined
-        : formatDateRange(
-              props.stats.startDate,
-              props.stats.finishDate,
-              locale.value
-          )
+    props.stats.finishDate == null
+        ? '-'
+        : props.stats.startDate == null
+          ? getDateTime(props.stats.finishDate, locale.value)
+          : formatDateRange(
+                props.stats.startDate,
+                props.stats.finishDate,
+                locale.value
+            )
 );
 const duration = computed(() =>
     props.stats.startDate == null || props.stats.finishDate == null
-        ? undefined
+        ? '-'
         : getDuration(props.stats.startDate, props.stats.finishDate)
 );
 
