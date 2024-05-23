@@ -46,6 +46,9 @@ import de.flyndre.flat.composables.trackingscreen.TrackingScreenViewModelFactory
 import de.flyndre.flat.composables.trackingscreen.assignmentscreen.AssignmentScreen
 import de.flyndre.flat.composables.trackingscreen.assignmentscreen.AssignmentScreenViewModel
 import de.flyndre.flat.composables.trackingscreen.assignmentscreen.ParticipantScreenViewModelFactory
+import de.flyndre.flat.composables.trackingscreen.participantscreen.CreateParticipantScreenViewModelFactory
+import de.flyndre.flat.composables.trackingscreen.participantscreen.ParticipantScreen
+import de.flyndre.flat.composables.trackingscreen.participantscreen.ParticipantScreenViewModel
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.interfaces.IConnectionService
 import de.flyndre.flat.interfaces.ILocationService
@@ -135,6 +138,11 @@ class MainActivity : ComponentActivity() {
                         "StatisticsScreenViewModel",
                         CreateStatisticsScreenViewModelFactory()
                     )
+                    val participantScreenViewModel: ParticipantScreenViewModel = viewModel(
+                        it,
+                        "ParticipantScreenViewModel",
+                        CreateParticipantScreenViewModelFactory()
+                    )
 
                     Surface(
                         modifier = Modifier.fillMaxSize(),
@@ -151,6 +159,7 @@ class MainActivity : ComponentActivity() {
                             assignmentScreenViewModel,
                             settingScreenViewModel,
                             statisticsScreenViewModel,
+                            participantScreenViewModel,
                             settingService.getClientId()
                         ) { x -> shareLink(x) }
                     }
@@ -203,6 +212,7 @@ fun AppEntryPoint(
     assignmentScreenViewModel: AssignmentScreenViewModel,
     settingScreenViewModel: SettingScreenViewModel,
     statisticsScreenViewModel: StatisticsScreenViewModel,
+    participantScreenViewModel: ParticipantScreenViewModel,
     userId: UUID,
     onShareLink: ((String)->Unit)
 ) {
@@ -261,11 +271,12 @@ fun AppEntryPoint(
             TrackingScreen(
                 trackingScreenViewModel = trackingScreenViewModel,
                 onNavigateToInitialScreen = { navController.navigate("initial") },
+                onNavigateToAssignmentScreen = { navController.navigate("assignment") },
                 onNavigateToParticipantScreen = { navController.navigate("participant") },
                 onShareLink = onShareLink
             )
         }
-        composable("participant") {
+        composable("assignment") {
             AssignmentScreen(
                 assignmentScreenViewModel = assignmentScreenViewModel,
                 onNavigateToTrackingScreen = { navController.navigate("tracking") })
@@ -279,6 +290,12 @@ fun AppEntryPoint(
             StatisticsScreen(
                 onNavigateToInitialScreen = { navController.navigate("initial") },
                 statisticsScreenViewModel = statisticsScreenViewModel
+            )
+        }
+        composable("participant"){
+            ParticipantScreen(
+                onNavigateToTrackingScreen = { navController.navigate("tracking") },
+                participantScreenViewModel = participantScreenViewModel
             )
         }
     }

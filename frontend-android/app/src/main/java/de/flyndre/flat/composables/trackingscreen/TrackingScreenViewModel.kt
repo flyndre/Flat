@@ -117,8 +117,12 @@ class TrackingScreenViewModel(
         _participantsToJoin.value = tempList
     }
 
-    fun updateParticipantScreenViewModel(){
+    fun updateAssignmentScreenViewModel(){
         _assignmentScreenViewModel.initialValues(collectionInstance)
+    }
+
+    fun updateParticipantScreenViewModel(){
+
     }
 
     fun declineParticipantJoinDialog(message: AccessResquestMessage){
