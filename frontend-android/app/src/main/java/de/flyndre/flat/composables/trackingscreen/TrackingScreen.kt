@@ -91,7 +91,7 @@ fun TrackingScreen(
     var showAddPaticipantsDialog by remember { mutableStateOf(false) }
 
     BackHandler(enabled = true) {
-        if (userId.equals(trackingScreenViewModel.collectionInstance.clientId.toString())) {//if this user is admin
+        if (trackingScreenViewModel.isThisUserAdmin()) {
             showClosingDialog = true
         } else {
             showLeavingDialog = true
@@ -118,7 +118,7 @@ fun TrackingScreen(
         )
     }
 
-    if(participantsLeaved.isNotEmpty() && userId.equals(trackingScreenViewModel.collectionInstance.clientId.toString())){
+    if(participantsLeaved.isNotEmpty() && trackingScreenViewModel.isThisUserAdmin()){
         UserLeavedCollectionDialog(leavingUserMessage = participantsLeaved.first(), onAccept = { trackingScreenViewModel.removeFirstLeavedparticipant() })
     }
 
@@ -144,7 +144,7 @@ fun TrackingScreen(
 
     Scaffold(topBar = {
         Row() {
-            if (!userId.equals(trackingScreenViewModel.collectionInstance.clientId.toString())) {//if this user is no admin
+            if (!trackingScreenViewModel.isThisUserAdmin()) {
                 FloatingActionButton(
                     modifier = Modifier.padding(10.dp),
                     onClick = { showLeavingDialog = true }) {
@@ -195,7 +195,7 @@ fun TrackingScreen(
         }
     }, floatingActionButton = {
         Column {
-            if (userId.equals(trackingScreenViewModel.collectionInstance.clientId.toString())) {
+            if (trackingScreenViewModel.isThisUserAdmin()) {
                 AdminMenu(
                     onClosingCollection = { showClosingDialog = true },
                     onNavigateToAssignmentScreen = onNavigateToAssignmentScreen,

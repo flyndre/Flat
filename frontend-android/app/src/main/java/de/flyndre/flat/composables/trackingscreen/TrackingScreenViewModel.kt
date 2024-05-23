@@ -224,6 +224,10 @@ class TrackingScreenViewModel(
             lastCenteredOwnDivision = division
         }
     }
+
+    fun isThisUserAdmin(): Boolean{
+        return collectionInstance.clientId.equals(_settingService.getClientId())
+    }
 }
 
 class TrackingScreenViewModelFactory(
