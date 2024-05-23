@@ -161,6 +161,7 @@ namespace FlatBackend.Websocket
         public async void sendCollectionClosedInformation( Guid collectionId )
         {
             var collection = await _MongoDBService.GetCollection(collectionId);
+            var tempUsers = new List<WebSocketUserModel>();
             foreach (var user in users)
             {
                 if (user == null) continue;
@@ -175,8 +176,12 @@ namespace FlatBackend.Websocket
                     }
                     await user.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "The Collection was closed so the Connection is closed too.", CancellationToken.None);
 
-                    users.Remove(user);
+                    tempUsers.Add(user);
                 }
+            }
+            foreach (var user in tempUsers)
+            {
+                users.Remove(user);
             }
         }
 
