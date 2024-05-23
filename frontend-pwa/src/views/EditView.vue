@@ -4,13 +4,16 @@ import DivisionsList from '@/components/collections/DivisionsList.vue';
 import MdiInputIcon from '@/components/icons/MdiInputIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
+import StatsList from '@/components/stats/StatsList.vue';
 import { clientId } from '@/data/clientMetadata';
 import { collectionDB, collectionDraft } from '@/data/collections';
 import { TOAST_LIFE } from '@/data/constants';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { Collection } from '@/types/Collection';
 import { Division } from '@/types/Division';
+import { CollectionStats } from '@/types/stats/CollectionStats';
 import { dbSafe } from '@/util/dbUtils';
+import { getGeoJsonArea } from '@/util/statsUtils';
 import validateCollection from '@/validation/validateCollection';
 import { mdiArrowLeft, mdiCheck, mdiMapMarkerPath, mdiPlay } from '@mdi/js';
 import Button from 'primevue/button';
@@ -22,6 +25,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouteLocationRaw, useRouter } from 'vue-router';
+import { statsOf, collectionStatsDB } from '@/data/collectionStats';
 
 const props = withDefaults(
     defineProps<{
@@ -148,6 +152,64 @@ function back() {
     collectionDraft.set(null);
     router.push({ name: 'presets' });
 }
+
+const stats = statsOf(props.id);
+
+const division: GeoJSON.Polygon = {
+    type: 'Polygon',
+    coordinates: [
+        [
+            [48.38294, 8.581605],
+            [48.386865, 8.583229],
+            [48.384984, 8.578389],
+        ],
+    ],
+};
+const stats2: CollectionStats = {
+    id: 'a',
+    collectionId: '',
+    name: 'Altpapiersammlung',
+    admin: {
+        id: '1',
+        name: 'Lubu',
+    },
+    startDate: new Date(),
+    finishDate: new Date(),
+    converedArea: 100,
+    divisionStats: [
+        {
+            id: 'x',
+            name: 'Wittendorf',
+            color: 'goldenrod',
+            clientId: '1',
+            area: division,
+            coveredArea: getGeoJsonArea(division),
+        },
+        {
+            id: 'y',
+            name: 'Dümettstett',
+            color: 'blue',
+            clientId: '1',
+            area: division,
+            coveredArea: getGeoJsonArea(division),
+        },
+    ],
+    participantStats: [
+        {
+            id: '1',
+            name: 'Lubu',
+            coveredDistance: 100,
+        },
+    ],
+};
+
+function addStats() {
+    collectionStatsDB.add({
+        ...stats2,
+        id: uuidv4(),
+        collectionId: collection.value.id,
+    });
+}
 </script>
 
 <template>
@@ -163,6 +225,9 @@ function back() {
                     <MdiTextButtonIcon :icon="mdiArrowLeft" />
                 </template>
             </Button>
+
+            <button @click="addStats">add stats</button>
+            <button @click="collectionStatsDB.clear()">clear</button>
         </template>
         <template #title> {{ title }} </template>
         <template #action-right>
@@ -218,6 +283,10 @@ function back() {
                         <DivisionsList
                             v-model="collection.divisions"
                             :edit-divisions-handler="editDivisions"
+                        />
+                        <StatsList
+                            v-if="edit && stats?.length > 0"
+                            :stats="stats"
                         />
                     </div>
                 </template>
