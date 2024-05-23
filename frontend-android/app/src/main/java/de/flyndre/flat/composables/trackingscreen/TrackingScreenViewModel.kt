@@ -9,8 +9,7 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.CameraPositionState
-import de.flyndre.flat.composables.trackingscreen.participantscreen.ParticipantScreenViewModel
-import de.flyndre.flat.database.AppDatabase
+import de.flyndre.flat.composables.trackingscreen.assignmentscreen.AssignmentScreenViewModel
 import de.flyndre.flat.interfaces.IConnectionService
 import de.flyndre.flat.interfaces.ISettingService
 import de.flyndre.flat.interfaces.ITrackingService
@@ -19,7 +18,6 @@ import de.flyndre.flat.models.CollectionArea
 import de.flyndre.flat.models.CollectionInstance
 import de.flyndre.flat.models.Track
 import de.flyndre.flat.models.TrackCollection
-import de.flyndre.flat.services.SettingService
 import io.github.dellisd.spatialk.geojson.MultiPolygon
 import io.github.dellisd.spatialk.geojson.Position
 import kotlinx.coroutines.Dispatchers
@@ -35,10 +33,10 @@ import java.util.UUID
 class TrackingScreenViewModel(
     trackingService: ITrackingService,
     connectionService: IConnectionService,
-    participantScreenViewModel: ParticipantScreenViewModel,
+    assignmentScreenViewModel: AssignmentScreenViewModel,
     settingService: ISettingService
 ): ViewModel() {
-    private val _participantScreenViewModel: ParticipantScreenViewModel = participantScreenViewModel
+    private val _assignmentScreenViewModel: AssignmentScreenViewModel = assignmentScreenViewModel
     private val _trackingService = trackingService
     private val _connectionService = connectionService
     private val _settingService = settingService
@@ -120,7 +118,7 @@ class TrackingScreenViewModel(
     }
 
     fun updateParticipantScreenViewModel(){
-        _participantScreenViewModel.initialValues(collectionInstance)
+        _assignmentScreenViewModel.initialValues(collectionInstance)
     }
 
     fun declineParticipantJoinDialog(message: AccessResquestMessage){
@@ -205,13 +203,13 @@ class TrackingScreenViewModel(
 class TrackingScreenViewModelFactory(
     val trackingService: ITrackingService,
     val connectionService: IConnectionService,
-    val participantScreenViewModel: ParticipantScreenViewModel,
+    val assignmentScreenViewModel: AssignmentScreenViewModel,
     val settingService: ISettingService) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return TrackingScreenViewModel(
             trackingService,
             connectionService,
-            participantScreenViewModel,
+            assignmentScreenViewModel,
             settingService
         ) as T
     }

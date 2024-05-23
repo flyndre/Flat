@@ -1,4 +1,4 @@
-package de.flyndre.flat.composables.trackingscreen.participantscreen
+package de.flyndre.flat.composables.trackingscreen.assignmentscreen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -34,12 +34,12 @@ import de.flyndre.flat.models.UserModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ParticipantScreen(
-    participantScreenViewModel: ParticipantScreenViewModel,
+fun AssignmentScreen(
+    assignmentScreenViewModel: AssignmentScreenViewModel,
     onNavigateToTrackingScreen: () -> Unit,
 ) {
-    val divisions by participantScreenViewModel.divisions.collectAsState()
-    val users by participantScreenViewModel.users.collectAsState()
+    val divisions by assignmentScreenViewModel.divisions.collectAsState()
+    val users by assignmentScreenViewModel.users.collectAsState()
 
     Scaffold(
         topBar = {
@@ -51,7 +51,7 @@ fun ParticipantScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         IconButton(onClick = {
-                            participantScreenViewModel.saveAssignments()
+                            assignmentScreenViewModel.saveAssignments()
                             onNavigateToTrackingScreen()
                         }) {
                             Icon(
@@ -63,7 +63,7 @@ fun ParticipantScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = {
-                        participantScreenViewModel.restoreAssignments()
+                        assignmentScreenViewModel.restoreAssignments()
                         onNavigateToTrackingScreen()
                     }) {
                         Icon(
@@ -80,7 +80,7 @@ fun ParticipantScreen(
                     headlineContent = { Text(text = it.name) },
                     trailingContent = {
                         DropDownUserSelection(
-                            participantScreenViewModel,
+                            assignmentScreenViewModel,
                             it,
                             users
                         )
@@ -93,7 +93,7 @@ fun ParticipantScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DropDownUserSelection(
-    participantScreenViewModel: ParticipantScreenViewModel,
+    assignmentScreenViewModel: AssignmentScreenViewModel,
     division: CollectionArea,
     users: List<UserModel>,
 ) {
@@ -122,7 +122,7 @@ fun DropDownUserSelection(
             users.forEach { user ->
                 DropdownMenuItem(
                     text = { Text(text = user.username) },
-                    onClick = { participantScreenViewModel.setUserOfDivision(division, user); userDisplay = user.username })
+                    onClick = { assignmentScreenViewModel.setUserOfDivision(division, user); userDisplay = user.username })
             }
         }
     }

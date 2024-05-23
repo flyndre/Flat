@@ -1,11 +1,9 @@
-package de.flyndre.flat.composables.trackingscreen.participantscreen
+package de.flyndre.flat.composables.trackingscreen.assignmentscreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import de.flyndre.flat.composables.trackingscreen.TrackingScreenViewModel
 import de.flyndre.flat.interfaces.IConnectionService
-import de.flyndre.flat.interfaces.ITrackingService
 import de.flyndre.flat.models.CollectionArea
 import de.flyndre.flat.models.CollectionInstance
 import de.flyndre.flat.models.UserModel
@@ -13,7 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class ParticipantScreenViewModel(connectionService: IConnectionService): ViewModel() {
+class AssignmentScreenViewModel(connectionService: IConnectionService): ViewModel() {
     private val connectionService = connectionService
     private lateinit var collectionInstance: CollectionInstance
 
@@ -67,6 +65,6 @@ class ParticipantScreenViewModel(connectionService: IConnectionService): ViewMod
 class ParticipantScreenViewModelFactory(
     val connectionService: IConnectionService) : ViewModelProvider.Factory{
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return ParticipantScreenViewModel(connectionService) as T
+        return AssignmentScreenViewModel(connectionService) as T
     }
 }

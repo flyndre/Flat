@@ -43,9 +43,9 @@ import de.flyndre.flat.composables.statisticsscreen.StatisticsScreenViewModel
 import de.flyndre.flat.composables.trackingscreen.TrackingScreen
 import de.flyndre.flat.composables.trackingscreen.TrackingScreenViewModel
 import de.flyndre.flat.composables.trackingscreen.TrackingScreenViewModelFactory
-import de.flyndre.flat.composables.trackingscreen.participantscreen.ParticipantScreen
-import de.flyndre.flat.composables.trackingscreen.participantscreen.ParticipantScreenViewModel
-import de.flyndre.flat.composables.trackingscreen.participantscreen.ParticipantScreenViewModelFactory
+import de.flyndre.flat.composables.trackingscreen.assignmentscreen.AssignmentScreen
+import de.flyndre.flat.composables.trackingscreen.assignmentscreen.AssignmentScreenViewModel
+import de.flyndre.flat.composables.trackingscreen.assignmentscreen.ParticipantScreenViewModelFactory
 import de.flyndre.flat.database.AppDatabase
 import de.flyndre.flat.interfaces.IConnectionService
 import de.flyndre.flat.interfaces.ILocationService
@@ -83,7 +83,7 @@ class MainActivity : ComponentActivity() {
                 // A surface container using the 'background' color from the theme
                 val owner = LocalViewModelStoreOwner.current
                 owner?.let {
-                    val participantScreenViewModel: ParticipantScreenViewModel = viewModel(
+                    val assignmentScreenViewModel: AssignmentScreenViewModel = viewModel(
                         it,
                         "ParticipantScreenViewModel",
                         ParticipantScreenViewModelFactory(connectionService)
@@ -94,7 +94,7 @@ class MainActivity : ComponentActivity() {
                         TrackingScreenViewModelFactory(
                             trackingService,
                             connectionService,
-                            participantScreenViewModel,
+                            assignmentScreenViewModel,
                             settingService))
                     val collectionAreaScreenViewModel:CollectionAreaScreenViewModel = viewModel()
                     val presetScreenViewModel: PresetScreenViewModel = viewModel(
@@ -148,7 +148,7 @@ class MainActivity : ComponentActivity() {
                             collectionAreaScreenViewModel,
                             joinScreenViewModel,
                             trackingScreenViewModel,
-                            participantScreenViewModel,
+                            assignmentScreenViewModel,
                             settingScreenViewModel,
                             statisticsScreenViewModel,
                             settingService.getClientId()
@@ -200,7 +200,7 @@ fun AppEntryPoint(
     collectionAreaScreenViewModel: CollectionAreaScreenViewModel,
     joinScreenViewModel: JoinScreenViewModel,
     trackingScreenViewModel: TrackingScreenViewModel,
-    participantScreenViewModel: ParticipantScreenViewModel,
+    assignmentScreenViewModel: AssignmentScreenViewModel,
     settingScreenViewModel: SettingScreenViewModel,
     statisticsScreenViewModel: StatisticsScreenViewModel,
     userId: UUID,
@@ -266,8 +266,8 @@ fun AppEntryPoint(
             )
         }
         composable("participant") {
-            ParticipantScreen(
-                participantScreenViewModel = participantScreenViewModel,
+            AssignmentScreen(
+                assignmentScreenViewModel = assignmentScreenViewModel,
                 onNavigateToTrackingScreen = { navController.navigate("tracking") })
         }
         composable("settings"){
