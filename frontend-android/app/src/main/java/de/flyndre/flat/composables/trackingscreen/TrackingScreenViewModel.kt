@@ -89,6 +89,8 @@ class TrackingScreenViewModel(
     private val _showCollectionClosedDialog = MutableStateFlow(false)
     val showCollectionClosedDialog = _showCollectionClosedDialog.asStateFlow()
 
+    private val _showParticipantKickedDialog = MutableStateFlow(false)
+    val showParticipantKickedDialog = _showParticipantKickedDialog.asStateFlow()
 
     init {
         trackingService.addOnLocalTrackUpdate{ onLocalTrackUpdate() }
@@ -97,6 +99,7 @@ class TrackingScreenViewModel(
         connectionService.addOnUserLeaved { onUserLeavedCollection(it) }
         connectionService.addOnCollectionUpdate { onCollectionUpdate(it) }
         connectionService.addOnCollectionClosed { onCollectionClosed() }
+        connectionService.addOnUserKicked { onParticipantKicked() }
 
         //add initial point for own location
         viewModelScope.launch(Dispatchers.Default) {
@@ -114,6 +117,10 @@ class TrackingScreenViewModel(
             _trackingService.startTracking()
             _trackingEnabled.value = true
         }
+    }
+
+    private fun onParticipantKicked(){
+        _showParticipantKickedDialog.value = true
     }
 
     private fun onCollectionClosed(){

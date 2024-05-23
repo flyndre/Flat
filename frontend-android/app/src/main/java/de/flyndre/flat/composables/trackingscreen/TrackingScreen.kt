@@ -91,6 +91,7 @@ fun TrackingScreen(
     var showClosingDialog by remember { mutableStateOf(false) }
     var showAddPaticipantsDialog by remember { mutableStateOf(false) }
     val showCollectionClosedDialog by trackingScreenViewModel.showCollectionClosedDialog.collectAsState()
+    val showParticipantKickedDialog by trackingScreenViewModel.showParticipantKickedDialog.collectAsState()
 
     BackHandler(enabled = true) {
         if (trackingScreenViewModel.isThisUserAdmin()) {
@@ -98,6 +99,10 @@ fun TrackingScreen(
         } else {
             showLeavingDialog = true
         }
+    }
+
+    if(showParticipantKickedDialog){
+        ParticipantKickedDialog(onAccept = onNavigateToInitialScreen)
     }
 
     if(showCollectionClosedDialog){
@@ -507,7 +512,7 @@ fun CollectionClosedDialog(onAccept: () -> Unit){
 }
 
 @Composable
-fun UserKickedDialog(onAccept: () -> Unit){
+fun ParticipantKickedDialog(onAccept: () -> Unit){
     AlertDialog(onDismissRequest = { onAccept() },
         confirmButton = {
             TextButton(onClick = { onAccept() }) {
