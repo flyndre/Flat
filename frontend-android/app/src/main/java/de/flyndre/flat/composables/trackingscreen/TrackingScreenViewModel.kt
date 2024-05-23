@@ -17,6 +17,7 @@ import de.flyndre.flat.interfaces.ITrackingService
 import de.flyndre.flat.models.AccessResquestMessage
 import de.flyndre.flat.models.CollectionArea
 import de.flyndre.flat.models.CollectionInstance
+import de.flyndre.flat.models.LeavingUserMessage
 import de.flyndre.flat.models.Track
 import de.flyndre.flat.models.TrackCollection
 import io.github.dellisd.spatialk.geojson.MultiPolygon
@@ -78,10 +79,14 @@ class TrackingScreenViewModel(
     private val _clientId = MutableStateFlow(_settingService.getClientId().toString())
     val clientId : StateFlow<String> = _clientId.asStateFlow()
 
+    private val _participantsLeaved = MutableStateFlow(arrayListOf<LeavingUserMessage>())
+    val participantsLeaved = _participantsLeaved.asStateFlow()
+
     init {
         trackingService.addOnLocalTrackUpdate{ onLocalTrackUpdate() }
         trackingService.addOnRemoteTrackUpdate { onRemoteTrackUpdate() }
         connectionService.addOnAccessRequest { onAccessRequestMessage(it) }
+        connectionService.addOnUserLeaved { onUserLeavedCollection(it) }
 
         //add initial point for own location
         viewModelScope.launch(Dispatchers.Default) {
@@ -113,11 +118,19 @@ class TrackingScreenViewModel(
         _remoteTrackList.value = newMap
     }
 
+    private fun onUserLeavedCollection(leavingUserMessage: LeavingUserMessage){
+        _participantsLeaved.value.add(leavingUserMessage)
+    }
+
     private fun onAccessRequestMessage(message: AccessResquestMessage){
         val tempList = arrayListOf<AccessResquestMessage>()
         tempList.addAll(_participantsToJoin.value)
         tempList.add(message)
         _participantsToJoin.value = tempList
+    }
+
+    fun removeFirstLeavedparticipant(){
+        _participantsLeaved.value.removeFirst()
     }
 
     fun updateAssignmentScreenViewModel(){
