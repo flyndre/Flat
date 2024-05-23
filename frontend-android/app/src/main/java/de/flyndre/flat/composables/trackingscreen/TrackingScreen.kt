@@ -64,6 +64,7 @@ fun TrackingScreen(
     trackingScreenViewModel: TrackingScreenViewModel,
     onNavigateToInitialScreen: () -> Unit,
     onNavigateToAssignmentScreen: () -> Unit,
+    onNavigateToParticipantScreen: () -> Unit,
     onShareLink: ((String) -> Unit)
 ) {
     val trackingEnabled by trackingScreenViewModel.trackingEnabled.collectAsState()
@@ -184,6 +185,7 @@ fun TrackingScreen(
                 AdminMenu(
                     onClosingCollection = { showClosingDialog = true },
                     onNavigateToAssignmentScreen = onNavigateToAssignmentScreen,
+                    onNavigateToParticipantScreen = onNavigateToParticipantScreen,
                     trackingScreenViewModel = trackingScreenViewModel
                 )
             }
@@ -281,6 +283,7 @@ fun TrackingScreen(
 fun AdminMenu(
     onClosingCollection: () -> Unit,
     onNavigateToAssignmentScreen: () -> Unit,
+    onNavigateToParticipantScreen: () -> Unit,
     trackingScreenViewModel: TrackingScreenViewModel,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -292,8 +295,13 @@ fun AdminMenu(
                 onClick = { onClosingCollection() })
             HorizontalDivider()
             DropdownMenuItem(text = { Text(text = "Manage Groups") }, onClick = {
-                trackingScreenViewModel.updateParticipantScreenViewModel()
+                trackingScreenViewModel.updateAssignmentScreenViewModel()
                 onNavigateToAssignmentScreen()
+            })
+            HorizontalDivider()
+            DropdownMenuItem(text = { Text(text = "Manage Participants") }, onClick = {
+                trackingScreenViewModel.updateParticipantScreenViewModel()
+                onNavigateToParticipantScreen()
             })
         }
         FloatingActionButton(modifier = Modifier.padding(10.dp), onClick = { expanded = true }) {

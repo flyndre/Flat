@@ -272,6 +272,7 @@ fun AppEntryPoint(
                 trackingScreenViewModel = trackingScreenViewModel,
                 onNavigateToInitialScreen = { navController.navigate("initial") },
                 onNavigateToAssignmentScreen = { navController.navigate("assignment") },
+                onNavigateToParticipantScreen = { navController.navigate("participant") },
                 onShareLink = onShareLink
             )
         }
