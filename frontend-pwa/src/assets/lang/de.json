@@ -219,7 +219,7 @@
         "stats_dialog": {
             "title": "Statistiken",
             "share_title": "Sieh dir die Statistiken von {collectionName} am {startDay} an! 💪",
-            "share_text": "Insgesamt wurden {totalArea} m² abgedeckt, wovon {topParticipant} mit einer Gesamtstrecke von {topDistance} m die größte Strecke zurückgelegt hat. 🤯🥳",
+            "share_text": "Insgesamt wurden {totalArea} km² abgedeckt, wovon {topParticipant} mit einer Gesamtstrecke von {topDistance} km die größte Strecke zurückgelegt hat. 🤯🥳",
             "share_failed": "Teilen fehlgeschlagen",
             "delete": "Statistik Löschen",
             "delete_success": "Statistik gelöscht",

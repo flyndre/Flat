@@ -219,7 +219,7 @@
         "stats_dialog": {
             "title": "Stats",
             "share_title": "Take a look at the stats of {collectionName}! 💪",
-            "share_text": "In total, {totalArea} m² were covered. {topParticipant} made the largest contribution to that, covering a distance of {topDistance} m. 🤯🥳",
+            "share_text": "In total, {totalArea} km² were covered. {topParticipant} made the largest contribution to that, covering a distance of {topDistance} km. 🤯🥳",
             "share_failed": "Sharing failed",
             "delete": "Delete Record",
             "delete_success": "Deleted stats record",

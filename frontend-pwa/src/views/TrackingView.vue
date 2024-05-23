@@ -48,6 +48,7 @@ import { clientId } from '@/data/clientMetadata';
 import { collectionStatsDB } from '@/data/collectionStats';
 import { calculateCollectionStats } from '@/util/statsUtils';
 import { StringMappingType } from 'typescript';
+import { dbSafe } from '@/util/dbUtils';
 
 const props = defineProps<{
     id: string;
@@ -142,7 +143,7 @@ async function closeCollectionNow() {
     closeCollectionLoading.value = true;
     try {
         const stats = calculateCollectionStats(activeCollection.value);
-        await collectionStatsDB.add(stats);
+        await collectionStatsDB.add(dbSafe(stats));
         closeCollection(props.id);
         pushToast({
             life: TOAST_LIFE,

@@ -40,12 +40,12 @@ async function shareNow() {
             text: [
                 t('components.stats_dialog.share_title', {
                     collectionName: props.stats.name,
-                    startDay: props.stats.startDate.toLocaleDateString(),
+                    startDay: props.stats.startDate?.toLocaleDateString(),
                 }),
                 t('components.stats_dialog.share_text', {
-                    totalArea: props.stats.converedArea,
+                    totalArea: props.stats.converedArea?.toFixed(2),
                     topParticipant: topParticipant.name,
-                    topDistance: topParticipant.coveredDistance,
+                    topDistance: topParticipant.coveredDistance?.toFixed(2),
                 }),
             ].join('\n'),
             // files: [snapshot],

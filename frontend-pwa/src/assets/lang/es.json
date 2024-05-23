@@ -219,7 +219,7 @@
         "stats_dialog": {
             "title": "Estadísticas",
             "share_title": "¡Mira las estadísticas de {collectionName}! 💪",
-            "share_text": "En total se recorrieron {totalArea} m², de los cuales {topParticipant} cubrió la mayor distancia de {topDistance} m. 🤯🥳",
+            "share_text": "En total se recorrieron {totalArea} km², de los cuales {topParticipant} cubrió la mayor distancia de {topDistance} km. 🤯🥳",
             "share_failed": "Compartir falló",
             "delete": "Eliminar Estadística",
             "delete_success": "Estadísticas eliminadas con éxito",

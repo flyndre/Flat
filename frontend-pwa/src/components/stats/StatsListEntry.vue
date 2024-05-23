@@ -33,7 +33,7 @@ const dialogVisible = computed({
                 <span class="text-left break-all">
                     {{ stats.name }}
                     <span class="opacity-50">
-                        {{ stats.startDate.toLocaleDateString() }}
+                        {{ stats.startDate?.toLocaleDateString() }}
                     </span>
                 </span>
                 <MdiIcon :icon="mdiChevronRight" />

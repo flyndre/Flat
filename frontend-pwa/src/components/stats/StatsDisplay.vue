@@ -21,7 +21,18 @@ const statsPresent = computed(() => props.stats != null);
 
 const { locale } = useI18n();
 const dateRange = computed(() =>
-    formatDateRange(props.stats.startDate, props.stats.finishDate, locale.value)
+    props.stats.startDate == null || props.stats.finishDate == null
+        ? undefined
+        : formatDateRange(
+              props.stats.startDate,
+              props.stats.finishDate,
+              locale.value
+          )
+);
+const duration = computed(() =>
+    props.stats.startDate == null || props.stats.finishDate == null
+        ? undefined
+        : getDuration(props.stats.startDate, props.stats.finishDate)
 );
 
 const generalStats = computed<
@@ -39,12 +50,12 @@ const generalStats = computed<
     {
         icon: mdiTimerOutline,
         messageCode: 'components.stats_display.duration',
-        value: getDuration(props.stats.startDate, props.stats.finishDate),
+        value: duration.value,
     },
     {
         icon: mdiTextureBox,
         messageCode: 'components.stats_display.area_total',
-        value: `ca. ${props.stats.converedArea} m²`,
+        value: `ca. ${props.stats.converedArea?.toFixed(2)} km²`,
     },
 ]);
 
@@ -62,7 +73,7 @@ const divisionStats = computed<
         icon: mdiTextureBox,
         label: d.name,
         color: d.color,
-        value: `ca. ${d.coveredArea.toFixed(2)} m²`,
+        value: `ca. ${d.coveredArea?.toFixed(2)} km²`,
     }))
 );
 
@@ -80,7 +91,7 @@ const participantStats = computed<
         icon: mdiAccountCircle,
         label: p.name,
         color: p.color ?? getParticipantColor(p.id, props.stats.divisionStats),
-        value: `ca. ${p.coveredDistance.toFixed(2)} m`,
+        value: `ca. ${p.coveredDistance?.toFixed(2)} km`,
     }))
 );
 </script>
@@ -102,6 +113,7 @@ const participantStats = computed<
                 controls="none"
                 center="area"
                 :divisions="stats.divisionStats"
+                :tracks="stats.participantStats"
                 locked
             />
             <Panel :header="$t('components.stats_display.title_general')">
