@@ -13,6 +13,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import MdiTextButtonIcon from '../icons/MdiTextButtonIcon.vue';
 import MapWithControls from '../map/MapWithControls.vue';
+import { NUMBER_FORMAT_OPTIONS } from '@/data/constants';
 
 const props = defineProps<{
     stats?: CollectionStats;
@@ -55,7 +56,7 @@ const generalStats = computed<
     {
         icon: mdiTextureBox,
         messageCode: 'components.stats_display.area_total',
-        value: `ca. ${props.stats.converedArea?.toFixed(2)} km²`,
+        value: `ca. ${props.stats.converedArea?.toLocaleString(locale.value, NUMBER_FORMAT_OPTIONS)} km²`,
     },
 ]);
 
@@ -73,7 +74,7 @@ const divisionStats = computed<
         icon: mdiTextureBox,
         label: d.name,
         color: d.color,
-        value: `ca. ${d.coveredArea?.toFixed(2)} km²`,
+        value: `ca. ${d.coveredArea?.toLocaleString(locale.value, NUMBER_FORMAT_OPTIONS)} km²`,
     }))
 );
 
@@ -91,7 +92,7 @@ const participantStats = computed<
         icon: mdiAccountCircle,
         label: p.name,
         color: p.color ?? getParticipantColor(p.id, props.stats.divisionStats),
-        value: `ca. ${p.coveredDistance?.toFixed(2)} km`,
+        value: `ca. ${p.coveredDistance?.toLocaleString(locale.value, NUMBER_FORMAT_OPTIONS)} km`,
     }))
 );
 </script>

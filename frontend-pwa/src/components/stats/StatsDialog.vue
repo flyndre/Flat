@@ -11,7 +11,7 @@ import { useShare } from '@vueuse/core';
 // import { getElementSnapshot } from '@/util/snapshotUtils';
 import { useToast } from 'primevue/usetoast';
 import { useI18n } from 'vue-i18n';
-import { TOAST_LIFE } from '@/data/constants';
+import { NUMBER_FORMAT_OPTIONS, TOAST_LIFE } from '@/data/constants';
 import { collectionStatsDB } from '@/data/collectionStats';
 
 const visible = defineModel<boolean>('visible', {
@@ -24,7 +24,7 @@ const props = defineProps<{
 const statsElement = ref<HTMLDivElement>(undefined);
 
 const { add } = useToast();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { share, isSupported: shareSupported } = useShare();
 
 const shareLoading = ref(false);
@@ -43,9 +43,15 @@ async function shareNow() {
                     startDay: props.stats.startDate?.toLocaleDateString(),
                 }),
                 t('components.stats_dialog.share_text', {
-                    totalArea: props.stats.converedArea?.toFixed(2),
+                    totalArea: props.stats.converedArea?.toLocaleString(
+                        locale.value,
+                        NUMBER_FORMAT_OPTIONS
+                    ),
                     topParticipant: topParticipant.name,
-                    topDistance: topParticipant.coveredDistance?.toFixed(2),
+                    topDistance: topParticipant.coveredDistance?.toLocaleString(
+                        locale.value,
+                        NUMBER_FORMAT_OPTIONS
+                    ),
                 }),
             ].join('\n'),
             // files: [snapshot],
