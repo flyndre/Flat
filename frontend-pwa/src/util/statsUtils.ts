@@ -2,6 +2,7 @@ import { ActiveCollection } from '@/types/ActiveCollection';
 import { CollectionStats } from '@/types/stats/CollectionStats';
 import geoJsonArea from '@mapbox/geojson-area';
 import geoJsonLength from 'geojson-length';
+import { v4 as uuidv4 } from 'uuid';
 
 export function getGeoJsonArea(geometry: GeoJSON.Geometry) {
     return geoJsonArea.geometry(geometry);
@@ -28,7 +29,8 @@ export function calculateCollectionStats(
         }),
     }));
     return {
-        id: collection.id,
+        id: uuidv4(),
+        collectionId: collection.id,
         name: collection.name,
         admin: collection.confirmedUsers.find(
             ({ id }) => id === collection.adminClientId

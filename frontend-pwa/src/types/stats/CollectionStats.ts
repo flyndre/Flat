@@ -4,6 +4,7 @@ import { ParticipantStats } from '@/types/stats/ParticipantStats';
 
 export type CollectionStats = {
     id: string;
+    collectionId: string;
     name: string;
     admin: Participant;
     startDate?: Date;
