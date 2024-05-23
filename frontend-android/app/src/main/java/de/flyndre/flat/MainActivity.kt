@@ -94,7 +94,7 @@ class MainActivity : ComponentActivity() {
                     val participantScreenViewModel: ParticipantScreenViewModel = viewModel(
                         it,
                         "ParticipantScreenViewModel",
-                        CreateParticipantScreenViewModelFactory()
+                        CreateParticipantScreenViewModelFactory(connectionService)
                     )
                     val trackingScreenViewModel:TrackingScreenViewModel = viewModel(
                         it,
