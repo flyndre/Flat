@@ -16,7 +16,15 @@ class ParticipantScreenViewModel: ViewModel() {
     fun initialValues(collectionInstance: CollectionInstance){
         this.collectionInstance = collectionInstance
 
-        _users.value = collectionInstance.confirmedUsers
+        //remove admin from users
+        val userList: ArrayList<UserModel> = arrayListOf()
+        for(user in collectionInstance.confirmedUsers){
+            if(!user.clientId.equals(collectionInstance.id)){
+                userList.add(user)
+            }
+        }
+
+        _users.value = userList
     }
 
     fun kickUser(userModel: UserModel){
