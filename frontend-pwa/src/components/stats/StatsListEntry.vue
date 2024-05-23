@@ -1,16 +1,21 @@
 <script setup lang="ts">
 import { CollectionStats } from '@/types/stats/CollectionStats';
 import { mdiChevronRight } from '@mdi/js';
+import { useRouteQuery } from '@vueuse/router';
 import Button from 'primevue/button';
+import { computed } from 'vue';
 import MdiIcon from '../icons/MdiIcon.vue';
 import StatsDialog from './StatsDialog.vue';
-import { ref } from 'vue';
 
 const props = defineProps<{
     stats: CollectionStats;
 }>();
 
-const dialogVisible = ref(false);
+const openStatsId = useRouteQuery('stats');
+const dialogVisible = computed({
+    get: () => openStatsId.value === props.stats.id,
+    set: (v) => (openStatsId.value = v ? props.stats.id : undefined),
+});
 </script>
 
 <template>
