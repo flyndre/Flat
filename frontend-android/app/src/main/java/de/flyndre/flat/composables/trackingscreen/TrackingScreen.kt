@@ -29,12 +29,10 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,7 +42,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -59,7 +56,6 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import de.flyndre.flat.R
 import de.flyndre.flat.models.AccessResquestMessage
 import qrcode.render.QRCodeGraphics
-import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,6 +63,7 @@ fun TrackingScreen(
     modifier: Modifier = Modifier,
     trackingScreenViewModel: TrackingScreenViewModel,
     onNavigateToInitialScreen: () -> Unit,
+    onNavigateToAssignmentScreen: () -> Unit,
     onNavigateToParticipantScreen: () -> Unit,
     onShareLink: ((String) -> Unit)
 ) {
@@ -187,6 +184,7 @@ fun TrackingScreen(
             if (userId.equals(trackingScreenViewModel.collectionInstance.clientId.toString())) {
                 AdminMenu(
                     onClosingCollection = { showClosingDialog = true },
+                    onNavigateToAssignmentScreen = onNavigateToAssignmentScreen,
                     onNavigateToParticipantScreen = onNavigateToParticipantScreen,
                     trackingScreenViewModel = trackingScreenViewModel
                 )
@@ -284,6 +282,7 @@ fun TrackingScreen(
 @Composable
 fun AdminMenu(
     onClosingCollection: () -> Unit,
+    onNavigateToAssignmentScreen: () -> Unit,
     onNavigateToParticipantScreen: () -> Unit,
     trackingScreenViewModel: TrackingScreenViewModel,
 ) {
@@ -296,6 +295,11 @@ fun AdminMenu(
                 onClick = { onClosingCollection() })
             HorizontalDivider()
             DropdownMenuItem(text = { Text(text = "Manage Groups") }, onClick = {
+                trackingScreenViewModel.updateAssignmentScreenViewModel()
+                onNavigateToAssignmentScreen()
+            })
+            HorizontalDivider()
+            DropdownMenuItem(text = { Text(text = "Manage Participants") }, onClick = {
                 trackingScreenViewModel.updateParticipantScreenViewModel()
                 onNavigateToParticipantScreen()
             })

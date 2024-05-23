@@ -36,6 +36,7 @@ namespace FlatBackend.Controllers
             try
             {
                 var Collection = await _MongoDBService.GetCollection(id);
+                if (Collection == null) return NotFound().ToString();
                 var validUser = Collection.confirmedUsers.Find(x => x.clientId == userId);
                 if (validUser.accepted)
                 {
@@ -66,7 +67,7 @@ namespace FlatBackend.Controllers
             try
             {
                 var oldCol = await _MongoDBService.GetCollection(id);
-
+                if(oldCol==null)return NotFound().ToJson();
                 var validUserList = oldCol.confirmedUsers.Where(x => x.clientId == value.clientId).ToList();
                 if (validUserList.Count > 0)
                 {
@@ -154,6 +155,7 @@ namespace FlatBackend.Controllers
             try
             {
                 var result = await _MongoDBService.GetCollection(id);
+
                 var user = result.confirmedUsers.Find(x => x.clientId == userid);
                 if (user != null || result.clientId == userid)
                 {
