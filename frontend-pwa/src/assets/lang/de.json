@@ -90,7 +90,9 @@
         "action_start_tracking": "Tracking starten",
         "action_pause_tracking": "Tracking pausieren",
         "leave_success": "Die Sammlung {collectionName} wurde verlassen.",
-        "leave_failed": "Verlassen der Sammlung fehlgeschlagen."
+        "leave_failed": "Verlassen der Sammlung fehlgeschlagen.",
+        "close_success": "Sammlung erfolgreich beendet.",
+        "close_failed": "Schließen der Sammlung fehlgeschlagen."
     },
     "components": {
         "code_reader": {

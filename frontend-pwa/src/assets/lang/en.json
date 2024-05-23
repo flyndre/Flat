@@ -90,7 +90,9 @@
         "action_start_tracking": "Start Tracking",
         "action_pause_tracking": "Pause Tracking",
         "leave_success": "The collection {collectionName} has been left.",
-        "leave_failed": "Failed to leave collection."
+        "leave_failed": "Failed to leave collection.",
+        "close_success": "Successfully ended collection.",
+        "close_failed": "Failed to end collection."
     },
     "components": {
         "code_reader": {

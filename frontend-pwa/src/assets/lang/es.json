@@ -90,7 +90,9 @@
         "action_start_tracking": "Iniciar seguimiento",
         "action_pause_tracking": "Pausar seguimiento",
         "leave_success": "El colección {collectionName} fue abandonada.",
-        "leave_failed": "No se pudo salir de la colección."
+        "leave_failed": "No se pudo salir de la colección.",
+        "close_success": "Colección completada exitosamente.",
+        "close_failed": "Error al cerrar la colección."
     },
     "components": {
         "code_reader": {
