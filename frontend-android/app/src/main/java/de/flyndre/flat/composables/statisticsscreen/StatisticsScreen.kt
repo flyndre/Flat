@@ -21,7 +21,7 @@ fun StatisticsScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(title = { Text(text = "Statistiken") },
+            CenterAlignedTopAppBar(title = { Text(text = "Statistics") },
                 navigationIcon = {
                     IconButton(onClick = { onNavigateToInitialScreen() }) {
                         Icon(

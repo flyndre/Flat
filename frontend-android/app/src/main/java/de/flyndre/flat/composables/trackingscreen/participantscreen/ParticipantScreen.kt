@@ -21,7 +21,7 @@ fun ParticipantScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(title = { Text(text = "Teilnehmer") },
+            CenterAlignedTopAppBar(title = { Text(text = "Participants") },
                 navigationIcon = {
                     IconButton(onClick = { onNavigateToTrackingScreen() }) {
                         Icon(
