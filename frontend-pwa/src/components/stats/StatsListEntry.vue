@@ -21,8 +21,8 @@ const dialogVisible = computed({
 });
 const displayedDate = computed(
     () =>
-        getDateTime(props.stats.startDate) ??
-        getDateTime(props.stats.finishDate)
+        getDateTime(props.stats.startDate, locale.value) ??
+        getDateTime(props.stats.finishDate, locale.value)
 );
 </script>
 
