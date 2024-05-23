@@ -47,17 +47,20 @@ class TrackingScreenViewModel(
     private val _settingService = settingService
     private val joinBaseLink = "https://flat.buhss.de/join/"
     private var lastCenteredOwnDivision: CollectionArea? = null
-    var collectionInstance: CollectionInstance = CollectionInstance("", UUID.randomUUID(),
-        MultiPolygon()
-    )
+
+    var collectionInstance: CollectionInstance = CollectionInstance("", UUID.randomUUID(), MultiPolygon())
         set(value) {
             field = value
+            _divisionList.value = value.collectionDivision
             _joinLink.value = joinBaseLink+value.id
             _qrCodeGraphics.value = QRCode.ofSquares().build(_joinLink.value).render()
         }
 
     private val _trackingEnabled = MutableStateFlow(false)
     val trackingEnabled = _trackingEnabled.asStateFlow()
+
+    private val _divisionList = MutableStateFlow(arrayListOf<CollectionArea>())
+    val divisionList = _divisionList.asStateFlow()
 
     private val _trackList: MutableStateFlow<TrackCollection> = MutableStateFlow(TrackCollection())
     val trackList: StateFlow<TrackCollection> = _trackList.asStateFlow()

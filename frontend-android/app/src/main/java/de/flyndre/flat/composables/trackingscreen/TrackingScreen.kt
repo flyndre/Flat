@@ -77,6 +77,7 @@ fun TrackingScreen(
     val trackingEnabled by trackingScreenViewModel.trackingEnabled.collectAsState()
     val localTrackList by trackingScreenViewModel.trackList.collectAsState()
     val remoteTrackList by trackingScreenViewModel.remoteTrackList.collectAsState()
+    val divisionList by trackingScreenViewModel.divisionList.collectAsState()
     val participantsToJoin by trackingScreenViewModel.participantsToJoin.collectAsState()
     val participantsLeaved by trackingScreenViewModel.participantsLeaved.collectAsState()
     val qrCodeGraphics by trackingScreenViewModel.qrCodeGraphics.collectAsState()
@@ -272,8 +273,8 @@ fun TrackingScreen(
                 }
             }
             //rendering collection areas
-            if (trackingScreenViewModel.collectionInstance.collectionDivision.isNotEmpty()) {
-                for (collectionArea in trackingScreenViewModel.collectionInstance.collectionDivision) {
+            if (divisionList.isNotEmpty()) {
+                for (collectionArea in divisionList) {
                     //get inner list of multipolygon and draw it on map
                     val area = collectionArea.area.coordinates[0]
                     //convert list<position> in list<latlong>
