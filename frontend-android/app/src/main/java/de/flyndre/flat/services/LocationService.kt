@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Looper
+import android.os.PowerManager
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -37,6 +38,11 @@ class LocationService(
             }
         }
     }
+    val wakeLock: PowerManager.WakeLock =
+        (context.getSystemService(Context.POWER_SERVICE) as PowerManager).run {
+            newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Flat::TrackingLock")
+        }
+
 
 
 
@@ -58,12 +64,14 @@ class LocationService(
                 Looper.getMainLooper()
             )
             isTracking=true
+            wakeLock.acquire()
         }
     }
 
     override fun stopTracking() {
         fusedLocationClient.removeLocationUpdates(locationCallback)
         isTracking=false
+        wakeLock.release()
     }
 
     override fun addOnLocationUpdate(callback: (Position) -> Unit) {

@@ -1,9 +1,11 @@
 package de.flyndre.flat
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.PowerManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -71,7 +73,7 @@ class MainActivity : ComponentActivity() {
             1000,
             LocationServices.getFusedLocationProviderClient(this), this
         )
-        trackingService = TrackingService(connectionService, locationService, 10000)
+        trackingService = TrackingService(connectionService, locationService, 10000,settingService)
         db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "flat-database")
             .build()
 

@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.android.gms.maps.model.LatLng
 import de.flyndre.flat.interfaces.IConnectionService
 import de.flyndre.flat.interfaces.ILocationService
+import de.flyndre.flat.interfaces.ISettingService
 import de.flyndre.flat.interfaces.ITrackingService
 import de.flyndre.flat.models.IncrementalTrackMessage
 import de.flyndre.flat.models.Track
@@ -21,6 +22,7 @@ class TrackingService(
     override val connectionService: IConnectionService,
     override val locationService: ILocationService,
     override val syncInterval: Long,
+    val settingService: ISettingService
 ) : ITrackingService {
     override val localTrack: TrackCollection = TrackCollection(UUID.randomUUID())
     override val remoteTracks: MutableMap<UUID, TrackCollection> = mutableMapOf()
@@ -56,12 +58,14 @@ class TrackingService(
     }
 
     override fun addIncrementalTrack(track: IncrementalTrackMessage) {
-        if(!remoteTracks.containsKey(track.clientId)) {
+        if(track.clientId != settingService.getClientId()){
+            if(!remoteTracks.containsKey(track.clientId)) {
 
-            remoteTracks[track.clientId] = TrackCollection(track.clientId)
+                remoteTracks[track.clientId] = TrackCollection(track.clientId)
+            }
+            remoteTracks[track.clientId]?.addIncrementalTrack(track.trackId,track.track)
+            onRemoteTrackUpdate.forEach { it() }
         }
-        remoteTracks[track.clientId]?.addIncrementalTrack(track.trackId,track.track)
-        onRemoteTrackUpdate.forEach { x->x() }
     }
 
     override fun addOnLocalTrackUpdate(callback: () -> Unit) {
