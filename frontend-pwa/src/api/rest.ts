@@ -114,21 +114,10 @@ export async function confirmRequest(
  * @param collectionId of the Collection
  * @returns idk
  */
-export async function leaveCollection(clientId: string, collectionId: string) {
+export async function leaveCollection(collectionId: string, clientId: string) {
     const response = await api.post(
-        `api/rest/LeaveCollection/${collectionId}`,
-        {
-            clientId: clientId,
-        }
+        `api/rest/LeaveCollection/${collectionId}?clientId=${clientId}`
     );
-    return response;
-}
-
-export async function leaveCollection(
-    collectionId: string,
-    clientId: string
-){
-    const response = await api.post(`api/rest/LeaveCollection/${collectionId}?clientId=${clientId}`);
     return response;
 }
 
@@ -136,8 +125,9 @@ export async function kickUser(
     collectionId: string,
     clientId: string,
     adminId: string
-){
-    const response = await api.post(`api/rest/RemoveUser/${collectionId}?clientId=${clientId}&bossId=${adminId}`);
+) {
+    const response = await api.post(
+        `api/rest/RemoveUser/${collectionId}?clientId=${clientId}&bossId=${adminId}`
+    );
     return response;
 }
-
