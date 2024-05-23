@@ -34,7 +34,7 @@ async function shareNow() {
         // const snapshot = await getElementSnapshot(statsElement.value);
         await share({
             title: t('components.stats_dialog.share_title'),
-            text: t('components.stats_dialog.share_text'),
+            text: '',
             // files: [snapshot],
         });
     } catch (e) {

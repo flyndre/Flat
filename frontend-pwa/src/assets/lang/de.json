@@ -210,6 +210,19 @@
                 "delete_introduction": "Am Fuße der Liste befindet sich ein Button zum Löschen aller Bereiche.",
                 "delete_all": "Alle löschen"
             }
+        },
+        "stats_dialog": {
+            "title": "Statistiken",
+            "share_title": "Sieh dir die Statistiken von {collectionName} an!",
+            "share_failed": "Teilen fehlgeschlagen"
+        },
+        "stats_display": {
+            "title_general": "Allgemein",
+            "title_divisions": "Bereiche",
+            "title_participants": "Teilnehmer",
+            "date": "Zeitraum",
+            "duration": "Dauer",
+            "area_total": "Gesamtfläche"
         }
     }
 }

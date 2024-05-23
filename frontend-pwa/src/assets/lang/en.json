@@ -210,6 +210,19 @@
                 "delete_introduction": "At the bottom of the list you'll find a button to delete all divisions:",
                 "delete_all": "Delete All"
             }
+        },
+        "stats_dialog": {
+            "title": "Stats",
+            "share_title": "Take a look at the stats of {collectionName}!",
+            "share_failed": "Sharing failed"
+        },
+        "stats_display": {
+            "title_general": "General",
+            "title_divisions": "Divisions",
+            "title_participants": "Participants",
+            "date": "Date",
+            "duration": "Duration",
+            "area_total": "Total Area"
         }
     }
 }
