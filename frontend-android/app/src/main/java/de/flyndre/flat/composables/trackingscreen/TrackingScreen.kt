@@ -90,6 +90,7 @@ fun TrackingScreen(
     var showLeavingDialog by remember { mutableStateOf(false) }
     var showClosingDialog by remember { mutableStateOf(false) }
     var showAddPaticipantsDialog by remember { mutableStateOf(false) }
+    val showCollectionClosedDialog by trackingScreenViewModel.showCollectionClosedDialog.collectAsState()
 
     BackHandler(enabled = true) {
         if (trackingScreenViewModel.isThisUserAdmin()) {
@@ -97,6 +98,10 @@ fun TrackingScreen(
         } else {
             showLeavingDialog = true
         }
+    }
+
+    if(showCollectionClosedDialog){
+        CollectionClosedDialog(onAccept = onNavigateToInitialScreen)
     }
 
     if (participantsToJoin.isNotEmpty()) {
