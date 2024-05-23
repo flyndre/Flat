@@ -338,13 +338,13 @@ namespace FlatBackend.Controllers
 
         // DELETE api/<ValuesController>/Collection/5 CloseCollection
         [HttpDelete("Collection/{id}")]
-        public async Task<ObjectResult> DeleteCollection( Guid id )
+        public async Task<IActionResult> DeleteCollection( Guid id )
         {
             try
             {
                 _WebsocketManager.sendCollectionClosedInformation(id);
                 _MongoDBService.RemoveCollection(id); //and inform all clients
-                return Ok(new object { });
+                return Ok();
             }
             catch (Exception ex)
             {
