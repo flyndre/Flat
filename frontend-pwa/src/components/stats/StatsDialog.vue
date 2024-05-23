@@ -32,9 +32,20 @@ async function shareNow() {
     shareLoading.value = true;
     try {
         // const snapshot = await getElementSnapshot(statsElement.value);
+        const topParticipant = props.stats.participantStats.reduce((p, c) =>
+            p.coveredDistance > c.coveredDistance ? p : c
+        );
         await share({
-            title: t('components.stats_dialog.share_title'),
-            text: '',
+            text: [
+                t('components.stats_dialog.share_title', {
+                    collectionName: props.stats.name,
+                }),
+                t('components.stats_dialog.share_text', {
+                    totalArea: props.stats.converedArea,
+                    topParticipant: topParticipant.name,
+                    topDistance: topParticipant.coveredDistance,
+                }),
+            ].join('\n'),
             // files: [snapshot],
         });
     } catch (e) {

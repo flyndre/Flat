@@ -213,7 +213,8 @@
         },
         "stats_dialog": {
             "title": "Estadísticas",
-            "share_title": "¡Mira las estadísticas de {collectionName}!",
+            "share_title": "¡Mira las estadísticas de {collectionName}! 💪",
+            "share_text": "En total se recorrieron {totalArea} m², de los cuales {topParticipant} cubrió la mayor distancia de {topDistance} m. 🤯🥳",
             "share_failed": "Compartir falló"
         },
         "stats_display": {
