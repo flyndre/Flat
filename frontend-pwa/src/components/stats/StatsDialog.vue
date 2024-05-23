@@ -57,7 +57,6 @@ async function shareNow() {
             // files: [snapshot],
         });
     } catch (e) {
-        console.log(e);
         add({
             closable: true,
             life: TOAST_LIFE,

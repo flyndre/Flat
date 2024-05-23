@@ -183,7 +183,6 @@ function drawTracks() {
             editable: false,
             draggable: false,
         });
-        console.log(t);
         shapes?.forEach((s) => s.overlay?.setMap(map.value));
         progressLines.push(...shapes);
         const lastPosition = t.progress?.at(-1)?.track?.coordinates?.at(-1);
@@ -271,7 +270,7 @@ function panMapToPos(
     try {
         map.value?.panTo(position);
     } catch (e) {
-        console.log(e);
+        console.warn('Failed to pan to pos', e);
     }
     if (zoom != false) map.value?.setZoom(zoom);
 }

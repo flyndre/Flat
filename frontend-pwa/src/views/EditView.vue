@@ -154,62 +154,6 @@ function back() {
 }
 
 const stats = statsOf(props.id);
-
-const division: GeoJSON.Polygon = {
-    type: 'Polygon',
-    coordinates: [
-        [
-            [48.38294, 8.581605],
-            [48.386865, 8.583229],
-            [48.384984, 8.578389],
-        ],
-    ],
-};
-const stats2: CollectionStats = {
-    id: 'a',
-    collectionId: '',
-    name: 'Altpapiersammlung',
-    admin: {
-        id: '1',
-        name: 'Lubu',
-    },
-    startDate: new Date(),
-    finishDate: new Date(),
-    converedArea: 100,
-    divisionStats: [
-        {
-            id: 'x',
-            name: 'Wittendorf',
-            color: 'goldenrod',
-            clientId: '1',
-            area: division,
-            coveredArea: getGeoJsonArea(division),
-        },
-        {
-            id: 'y',
-            name: 'Dümettstett',
-            color: 'blue',
-            clientId: '1',
-            area: division,
-            coveredArea: getGeoJsonArea(division),
-        },
-    ],
-    participantStats: [
-        {
-            id: '1',
-            name: 'Lubu',
-            coveredDistance: 100,
-        },
-    ],
-};
-
-function addStats() {
-    collectionStatsDB.add({
-        ...stats2,
-        id: uuidv4(),
-        collectionId: collection.value.id,
-    });
-}
 </script>
 
 <template>
@@ -225,9 +169,6 @@ function addStats() {
                     <MdiTextButtonIcon :icon="mdiArrowLeft" />
                 </template>
             </Button>
-
-            <button @click="addStats">add stats</button>
-            <button @click="collectionStatsDB.clear()">clear</button>
         </template>
         <template #title> {{ title }} </template>
         <template #action-right>
