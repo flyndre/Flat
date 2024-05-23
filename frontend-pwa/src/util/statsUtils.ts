@@ -1,36 +1,52 @@
 import { ActiveCollection } from '@/types/ActiveCollection';
+import { ParticipantTrack } from '@/types/ParticipantTrack';
 import { CollectionStats } from '@/types/stats/CollectionStats';
-import geoJsonArea from '@mapbox/geojson-area';
-import geoJsonLength from 'geojson-length';
+import area from '@turf/area';
+import length from '@turf/length';
 import { v4 as uuidv4 } from 'uuid';
+import { dbSafe } from './dbUtils';
 
 export function getGeoJsonArea(geometry: GeoJSON.Geometry) {
-    return geoJsonArea.geometry(geometry);
+    return (area(geometry) ?? 0) / 1000000;
 }
 
 export function getGeoJsonLength(
     geometry: GeoJSON.LineString | GeoJSON.MultiLineString
 ) {
-    return geoJsonLength(geometry);
+    return length(geometry);
+}
+
+function _getParticipantStats(participant: ParticipantTrack) {
+    const tracks: GeoJSON.LineString = {
+        type: 'LineString',
+        coordinates: participant.progress
+            .map((t) => t.track.coordinates)
+            .flat(),
+    };
+    console.log(tracks);
+    return {
+        ...participant,
+        coveredDistance:
+            tracks.coordinates?.length > 1 ? getGeoJsonLength(tracks) : 0,
+    };
 }
 
 export function calculateCollectionStats(
-    collection: ActiveCollection
+    collection: ActiveCollection,
+    startDate: Date = undefined
 ): CollectionStats {
     const divisionStats = collection.divisions.map((d) => ({
         ...d,
         coveredArea: getGeoJsonArea(d.area),
     }));
-    const participantStats = collection.confirmedUsers.map((u) => ({
-        ...u,
-        coveredDistance: getGeoJsonLength({
-            type: 'MultiLineString',
-            coordinates: u.progress.map((t) => t.track.coordinates),
-        }),
-    }));
+    const participantStats = collection.confirmedUsers.map((u) =>
+        _getParticipantStats(dbSafe(u))
+    );
     return {
         id: uuidv4(),
         collectionId: collection.id,
+        startDate,
+        finishDate: new Date(),
         name: collection.name,
         admin: collection.confirmedUsers.find(
             ({ id }) => id === collection.adminClientId

@@ -47,6 +47,8 @@ import { leaveCollection } from '@/api/rest';
 import { clientId } from '@/data/clientMetadata';
 import { collectionStatsDB } from '@/data/collectionStats';
 import { calculateCollectionStats } from '@/util/statsUtils';
+import { StringMappingType } from 'typescript';
+import { dbSafe } from '@/util/dbUtils';
 
 const props = defineProps<{
     id: string;
@@ -140,9 +142,9 @@ const closeCollectionLoading = ref(false);
 async function closeCollectionNow() {
     closeCollectionLoading.value = true;
     try {
-        closeCollection(props.id);
         const stats = calculateCollectionStats(activeCollection.value);
-        await collectionStatsDB.add(stats);
+        await collectionStatsDB.add(dbSafe(stats));
+        closeCollection(props.id);
         pushToast({
             life: TOAST_LIFE,
             severity: 'success',
@@ -151,9 +153,11 @@ async function closeCollectionNow() {
         _clearUpBeforeLeave();
         router.push({
             name: 'edit',
-            params: { id: props.id, stats: stats.id },
+            params: { id: props.id },
+            query: { stats: stats.id },
         });
     } catch (e) {
+        console.log(e);
         pushToast({
             life: TOAST_LIFE,
             severity: 'error',
@@ -183,6 +187,8 @@ const {
     requests,
     startTracking: startTrackingCollection,
     stopTracking: stopTrackingCollection,
+    kick,
+    leave,
 } = useCollectionService(props.id);
 
 function processJoinRequest(joinRequest: JoinRequest) {
@@ -218,6 +224,26 @@ function toggleTracking() {
         startTrackingLogs();
         startTrackingCollection();
     }
+}
+
+async function kickParticipant(collectionId: string, participantId: string) {
+    const resp = await kick(collectionId, participantId);
+
+    resp.status == 200
+        ? pushToast({
+              //TODO: i18n
+              summary: 'Kicked Participant',
+              severity: 'success',
+              closable: true,
+              life: TOAST_LIFE,
+          })
+        : pushToast({
+              //TODO: i18n
+              summary: 'Could not Kick Participant',
+              severity: 'error',
+              closable: true,
+              life: TOAST_LIFE,
+          });
 }
 </script>
 
@@ -490,7 +516,13 @@ function toggleTracking() {
                                 :participants="member"
                                 :divisions="activeCollection.divisions"
                                 :admin-mode="isAdmin"
-                                @kick-participant="(p) => console.log(p)"
+                                @kick-participant="
+                                    (p) =>
+                                        kickParticipant(
+                                            activeCollection.id,
+                                            p.id
+                                        )
+                                "
                             />
                         </TabPanel>
                         <TabPanel
