@@ -98,7 +98,7 @@ onMounted(async () => {
     }
 });
 
-async function _saveCollection(target: RouteLocationRaw) {
+async function _saveCollection(afterSavedCallback: () => any) {
     if (!submittable.value) {
         add({
             life: TOAST_LIFE,
@@ -115,7 +115,7 @@ async function _saveCollection(target: RouteLocationRaw) {
             await collectionDB.add(dbSafe(collection.value));
             collectionDraft.set(null);
         }
-        await router.push(target);
+        afterSavedCallback();
     } catch (error) {
         add({
             life: TOAST_LIFE,
@@ -127,17 +127,24 @@ async function _saveCollection(target: RouteLocationRaw) {
     }
 }
 
-const save = () => _saveCollection({ name: 'presets' });
-async function start() {
-    const response = await openCollection(collection.value);
+async function save() {
+    await _saveCollection(() => router.push({ name: 'presets' }));
+}
 
-    response.status == 200
-        ? router.push(`/track/${collection.value.id}`)
-        : add({
-              life: TOAST_LIFE,
-              severity: 'error',
-              summary: t('edit.error_failed_to_start'),
-          });
+async function start() {
+    await _saveCollection(async () => {
+        try {
+            const response = await openCollection(collection.value);
+            if (response.status != 200) throw response;
+            await router.push(`/track/${collection.value.id}`);
+        } catch (e) {
+            add({
+                life: TOAST_LIFE,
+                severity: 'error',
+                summary: t('edit.error_failed_to_start'),
+            });
+        }
+    });
 }
 
 function editDivisions() {
