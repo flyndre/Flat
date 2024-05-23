@@ -101,3 +101,21 @@ export async function confirmRequest(
     });
     return response;
 }
+
+export async function leaveCollection(
+    collectionId: string,
+    clientId: string
+){
+    const response = await api.post(`api/rest/LeaveCollection/${collectionId}?clientId=${clientId}`);
+    return response;
+}
+
+export async function kickUser(
+    collectionId: string,
+    clientId: string,
+    adminId: string
+){
+    const response = await api.post(`api/rest/RemoveUser/${collectionId}?clientId=${clientId}&bossId=${adminId}`);
+    return response;
+}
+

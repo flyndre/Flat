@@ -2,6 +2,9 @@ import {
     confirmRequest,
     divideCollectionArea,
     getCollection,
+    kickCollection,
+    kickUser,
+    leaveCollection,
 } from '@/api/rest';
 import { clientId } from '@/data/clientMetadata';
 import { SERVER_UPDATE_INTERVAL } from '@/data/constants';
@@ -64,7 +67,7 @@ let latestSendTimestamp = Date.now();
 const {
     isActive,
     pause: pauseInterval,
-    resume: resumeInterval,
+    resume: resumeInterval, 
 } = useIntervalFn(
     async () => {
         console.log('Sending Trackingpoints...');
@@ -213,6 +216,8 @@ export const useCollectionService = (id: string) => {
         })),
         assignDivision: (d: Division, p: ParticipantTrack | null) =>
             _assignDivision(d, p),
+        leave: (collId: string, clientId: string) => leaveCollection(collId, clientId),
+        kick: (collId: string, clId: string) => kickUser(collId, clId, clientId.value),
         requests: computed(() => _activeCollection.value.requestedUsers),
         member: computed(() => _activeCollection.value.confirmedUsers),
         handleRequest: (
@@ -275,6 +280,8 @@ function handleCollectionUpdate(message: UpdateCollectionMessage) {
             });
         }
     });
+
+    _activeCollection.value.confirmedUsers = _activeCollection.value.confirmedUsers.filter(elem => message.collection.confirmedUsers.find(el => elem.id === el.clientId) !== undefined)
 }
 
 function handleIncrementalTracks(message: IncrementalTrackMessage) {
