@@ -16,48 +16,52 @@ import { IncrementalTrackMessage } from '@/types/websocket/IncrementalTrackMessa
 import { InviteMessage } from '@/types/websocket/InviteMessage';
 import { UpdateCollectionMessage } from '@/types/websocket/UpdateCollectionMessage';
 import { getParticipantColor } from '@/util/trackingUtils';
-import { useIntervalFn, useWebSocket } from '@vueuse/core';
-import { computed, ref, watch } from 'vue';
+import { useIntervalFn } from '@vueuse/core';
+import { computed, ref } from 'vue';
 
-let ws = null;
+let ws: WebSocket = null;
+const _websocketStatus = ref<number>(null);
 
+function initialiseWebsocket() {
+    ws = new WebSocket('wss://flat.buhss.de/api/ws');
 
-function initialiseWebsocket(){
-    ws = new WebSocket('wss://flat.buhss.de/api/ws')
-    ws.onmessage = function(event) {
-    
-        console.log("ON MESSAGE EVENT:")
-        console.log(event)
+    ws.onmessage = function (event) {
+        _websocketStatus.value = ws.readyState;
+        console.log('ON MESSAGE EVENT:');
+        console.log(event);
         let websocketMsg = JSON.parse(event.data);
         Array.isArray(websocketMsg)
             ? websocketMsg.forEach((el) => handleWebsocketMessage(el))
             : handleWebsocketMessage(websocketMsg);
-    }
-    
-    ws.onopen = function(event){
-        console.log("ON OPEN EVENT:")
-        console.log(event)
-        establishWebsocket(clientId.value, _activeCollection.value.id)
-    }
-    
-    ws.onclose = function(event){
-        console.log("ON CLOSE EVENT:")
-        console.log(event)
-        ws = null
-        initialiseWebsocket(); 
-        //ws = new WebSocket('wss://flat.buhss.de/api/ws')
-    }
+    };
 
-    ws.onerror = function(event){
-        console.log("HANDELSGUT WICHTIG !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        console.log("ON ERROR EVENT:")
-        console.log(event)
-        console.log("HANDELSGUT WICHTIG !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    }
+    ws.onopen = function (event) {
+        _websocketStatus.value = ws.readyState;
+        console.log('ON OPEN EVENT:');
+        console.log(event);
+        establishWebsocket(clientId.value, _activeCollection.value.id);
+    };
+
+    ws.onclose = function (event) {
+        _websocketStatus.value = ws.readyState;
+        console.log('ON CLOSE EVENT:');
+        console.log(event);
+        ws = null;
+        initialiseWebsocket();
+    };
+
+    ws.onerror = function (event) {
+        _websocketStatus.value = ws.readyState;
+        console.log(
+            'HANDELSGUT WICHTIG !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+        );
+        console.log('ON ERROR EVENT:');
+        console.log(event);
+        console.log(
+            'HANDELSGUT WICHTIG !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+        );
+    };
 }
-
-
-
 
 const _isAdmin = ref(false);
 const _activeCollection = ref<ActiveCollection>({} as ActiveCollection);
@@ -65,7 +69,7 @@ const _isLoading = ref(true);
 let latestSendTimestamp = Date.now();
 
 const {
-    isActive,
+    isActive: _isTracking,
     pause: pauseInterval,
     resume: resumeInterval, 
 } = useIntervalFn(
@@ -85,21 +89,24 @@ const {
             };
 
             const msg = {
-                type: "IncrementalTrack",
+                type: 'IncrementalTrack',
                 trackId: key,
                 track: lineStringOfPosition,
                 clientId: clientId.value,
             };
-            console.log("Sending this Message:");
+            console.log('Sending this Message:');
             console.log(msg);
             ws.send(JSON.stringify(msg));
         });
 
-
-    console.log(tracks);
-    latestSendTimestamp = tracks.at(-1)?.timestamp ?? Date.now();
-}, SERVER_UPDATE_INTERVAL);
-
+        console.log(tracks);
+        latestSendTimestamp = tracks.at(-1)?.timestamp ?? Date.now();
+    },
+    SERVER_UPDATE_INTERVAL,
+    {
+        immediate: false,
+    }
+);
 
 function handleWebsocketMessage(message: any) {
     switch (message.type) {
@@ -140,8 +147,10 @@ function _stopTracking() {
 }
 
 export function _closeCollection(collectionId: string) {
+    _stopTracking();
     const answer = { type: 'CollectionClosed', collectionId: collectionId };
     ws.send(JSON.stringify(answer));
+    ws.close();
 }
 
 export function _acceptOrDeclineAccessRequest(
@@ -155,7 +164,6 @@ export function _acceptOrDeclineAccessRequest(
 }
 
 export function establishWebsocket(clientId: string, collectionId: string) {
-    
     ws.send(
         JSON.stringify({
             type: 'WebsocketConnection',
@@ -166,8 +174,7 @@ export function establishWebsocket(clientId: string, collectionId: string) {
 }
 
 export const useCollectionService = (id: string) => {
-    
-    _activeCollection.value.id = id; 
+    _activeCollection.value.id = id;
     let response = getCollection(id, clientId.value);
 
     response.then(({ data }) => {
@@ -194,12 +201,12 @@ export const useCollectionService = (id: string) => {
 
         _activeCollection.value.requestedUsers = data.requestedUsers;
         _isAdmin.value = data.clientId === clientId.value;
-        
+
         _isLoading.value = false;
     });
 
     initialiseWebsocket();
-    
+
     console.log('READY');
     return {
         activeCollection: computed(() => ({
@@ -236,9 +243,10 @@ export const useCollectionService = (id: string) => {
             _closeCollection(collectionId),
         startTracking: _startTracking,
         stopTracking: _stopTracking,
+        isTracking: _isTracking,
         isLoading: computed(() => _isLoading.value),
         isAdmin: computed(() => _isAdmin.value),
-        connectionStatus: status,
+        connectionStatus: computed(() => _websocketStatus.value),
     };
 };
 
@@ -285,14 +293,13 @@ function handleCollectionUpdate(message: UpdateCollectionMessage) {
 }
 
 function handleIncrementalTracks(message: IncrementalTrackMessage) {
-    
-    console.log(message)
+    console.log(message);
     let memberOfTrack = _activeCollection.value.confirmedUsers.find(
         (el) => el.id === message.clientId
     );
 
-    console.log("Owner of Track:")
-    console.log(memberOfTrack); 
+    console.log('Owner of Track:');
+    console.log(memberOfTrack);
 
     let listOfTracks = memberOfTrack.progress.filter(
         (el) => el.id === message.trackId

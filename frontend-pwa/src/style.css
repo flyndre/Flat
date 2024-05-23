@@ -18,3 +18,7 @@ body {
     margin: 0;
     padding: 0;
 }
+
+.bg-flyndre {
+    background: linear-gradient(0.375turn, #ffa6ba, #ff9ff6, #c698ff);
+}

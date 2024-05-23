@@ -19,11 +19,13 @@ import Button from 'primevue/button';
 import Card from 'primevue/card';
 import Dialog from 'primevue/dialog';
 import IconField from 'primevue/iconfield';
+import Image from 'primevue/image';
 import InputText from 'primevue/inputtext';
 import { useToast } from 'primevue/usetoast';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import bannerSrc from '@/assets/images/branding-white.webp?url';
 
 const props = defineProps<{
     id: string;
@@ -35,7 +37,6 @@ const { t } = useI18n();
 const joinName = ref('');
 const submittable = computed(() => validateJoinName(joinName.value));
 const dialogVisible = ref(false);
-// TODO: remove this debug redirect
 
 async function join() {
     dialogVisible.value = true;
@@ -44,22 +45,25 @@ async function join() {
         clientId.value,
         props.id
     );
-
-    if (response.status == 200) {
-        router.push(`/track/${props.id}`);
+    if (response.status == 200 && response.data['accepted'] == true) {
+        router.push({ name: 'track', params: { id: props.id } });
     } else {
+        const messageCode =
+            response.status == 200
+                ? 'join.error_rejected'
+                : 'join.error_failed';
         add({
+            closable: true,
             life: TOAST_LIFE,
             severity: 'error',
-            summary: t('join.error_failed_to_join'),
+            summary: t(messageCode),
         });
         dialogVisible.value = false;
     }
 }
+
 function cancel() {
     dialogVisible.value = false;
-
-    // TODO: cancel join request or send cancelation request
 }
 </script>
 
@@ -116,11 +120,10 @@ function cancel() {
             </Dialog>
             <Card :pt="{ root: { class: 'overflow-hidden' } }">
                 <template #header>
-                    <div
-                        class="w-full h-[40vh] bg-gray-500 bg-opacity-50 flex flex-col justify-center items-center select-none rounded-2xl overflow-hidden"
-                    >
-                        [ collection map preview ]
-                    </div>
+                    <img
+                        class="w-full h-[40vh] object-contain bg-flyndre"
+                        :src="bannerSrc"
+                    />
                 </template>
                 <template #content>
                     <div class="flex flex-col gap-2.5">

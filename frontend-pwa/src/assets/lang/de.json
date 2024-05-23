@@ -40,7 +40,8 @@
         "cancel_waiting": "Beitritt abbrechen",
         "enter_link": "Oder Link hier einfügen",
         "nickname": "Nutzername",
-        "error_failed_to_join": "Beitreten der Sammlung fehlgeschlagen."
+        "error_rejected": "Beitrittsanfrage wurde abgelehnt.",
+        "error_failed": "Beitreten der Sammlung fehlgeschlagen."
     },
     "map": {
         "title": "Bereichsaufteilung",
@@ -87,7 +88,9 @@
         "action_invite": "Teilnehmer einladen",
         "action_leave": "Sammlung verlassen",
         "action_start_tracking": "Tracking starten",
-        "action_pause_tracking": "Tracking pausieren"
+        "action_pause_tracking": "Tracking pausieren",
+        "leave_success": "Die Sammlung {collectionName} wurde verlassen.",
+        "leave_failed": "Verlassen der Sammlung fehlgeschlagen."
     },
     "components": {
         "code_reader": {
