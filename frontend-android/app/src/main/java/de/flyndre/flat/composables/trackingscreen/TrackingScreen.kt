@@ -3,6 +3,7 @@ package de.flyndre.flat.composables.trackingscreen
 import android.graphics.BitmapFactory
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,12 +40,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.Popup
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
@@ -288,26 +293,49 @@ fun AdminMenu(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    Box {
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(
-                text = { Text(text = "End Collection") },
-                onClick = { onClosingCollection() })
-            HorizontalDivider()
-            DropdownMenuItem(text = { Text(text = "Manage Groups") }, onClick = {
-                trackingScreenViewModel.updateAssignmentScreenViewModel()
-                onNavigateToAssignmentScreen()
-            })
-            HorizontalDivider()
-            DropdownMenuItem(text = { Text(text = "Manage Participants") }, onClick = {
-                trackingScreenViewModel.updateParticipantScreenViewModel()
-                onNavigateToParticipantScreen()
-            })
+        Row(){
+
+            FloatingActionButton(modifier = Modifier.padding(10.dp), onClick = { expanded = true }) {
+                Icon(Icons.Filled.MoreVert, contentDescription = "open collection management")
+                if(expanded){
+                    Popup(
+                        onDismissRequest = { expanded = false },
+                        alignment = Alignment.TopEnd,
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.End) {
+                            ExtendedFloatingActionButton(
+                                modifier = Modifier.padding(bottom = 10.dp),
+                                onClick = {
+                                    expanded = false
+                                    onClosingCollection() })
+                            {
+                                Text(text = "End Collection")
+                            }
+                            ExtendedFloatingActionButton(
+                                modifier = Modifier.padding(vertical = 10.dp),
+                                onClick = {
+                                    expanded = false
+                                    trackingScreenViewModel.updateAssignmentScreenViewModel()
+                                    onNavigateToAssignmentScreen()
+                                }){
+                                Text(text = "Manage Groups")
+                            }
+                            ExtendedFloatingActionButton(
+                                modifier = Modifier.padding(vertical = 10.dp),
+                                onClick = {
+                                    expanded = false
+                                    trackingScreenViewModel.updateParticipantScreenViewModel()
+                                    onNavigateToParticipantScreen()
+                                }){
+                                Text(text = "Manage Participants")
+                            }
+                        }
+                    }
+                }
+            }
         }
-        FloatingActionButton(modifier = Modifier.padding(10.dp), onClick = { expanded = true }) {
-            Icon(Icons.Filled.MoreVert, contentDescription = "open collection management")
-        }
-    }
+
 }
 
 @Composable
