@@ -211,6 +211,9 @@
                 "delete_all": "Alle löschen"
             }
         },
+        "stats_list": {
+            "header": "Archivierte Durchführungen"
+        },
         "stats_dialog": {
             "title": "Statistiken",
             "share_title": "Sieh dir die Statistiken von {collectionName} am {startDay} an! 💪",

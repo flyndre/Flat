@@ -211,6 +211,9 @@
                 "delete_all": "Delete All"
             }
         },
+        "stats_list": {
+            "header": "Archive"
+        },
         "stats_dialog": {
             "title": "Stats",
             "share_title": "Take a look at the stats of {collectionName}! 💪",

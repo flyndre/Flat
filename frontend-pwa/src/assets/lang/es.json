@@ -211,6 +211,9 @@
                 "delete_all": "Limpiar todo"
             }
         },
+        "stats_list": {
+            "header": "Archivo"
+        },
         "stats_dialog": {
             "title": "Estadísticas",
             "share_title": "¡Mira las estadísticas de {collectionName}! 💪",
