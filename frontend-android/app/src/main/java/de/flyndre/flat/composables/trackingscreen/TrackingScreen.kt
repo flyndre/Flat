@@ -484,6 +484,24 @@ fun UserLeavedCollectionDialog(leavingUserMessage: LeavingUserMessage, onAccept:
 }
 
 @Composable
+fun CollectionClosedDialog(onAccept: () -> Unit){
+    AlertDialog(onDismissRequest = { onAccept() },
+        confirmButton = { 
+            TextButton(onClick = { onAccept() }) {
+                Text(text = "OK")
+            }
+        },
+        icon = {
+            Icon(imageVector = Icons.Default.Info, contentDescription = "collection was closed")
+        },
+        title = {
+            Text(text = "Information")
+        },
+        text = { Text(text = "Die Sammlung wurde vom Administrator beendet.")}
+    )
+}
+
+@Composable
 fun AddParticipantDialog(
     onDismissRequest: () -> Unit,
     onShareButtonClick: (String) -> Unit,
