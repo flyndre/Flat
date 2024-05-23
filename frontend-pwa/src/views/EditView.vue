@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { openCollection } from '@/api/rest';
 import DivisionsList from '@/components/collections/DivisionsList.vue';
 import MdiInputIcon from '@/components/icons/MdiInputIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
@@ -19,6 +20,7 @@ import InputText from 'primevue/inputtext';
 import { useToast } from 'primevue/usetoast';
 import { v4 as uuidv4 } from 'uuid';
 import { computed, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { RouteLocationRaw, useRouter } from 'vue-router';
 
 const props = withDefaults(
@@ -38,6 +40,7 @@ const defaultCollection: Collection = {
     name: '',
 };
 
+const { t } = useI18n();
 const router = useRouter();
 const collection = ref<Collection>({
     ...defaultCollection,
@@ -45,7 +48,7 @@ const collection = ref<Collection>({
 });
 
 const loading = ref(false);
-const title = props.edit ? 'Edit' : 'Create';
+const title = t(props.edit ? 'edit.title_edit' : 'edit.title_create');
 const submittable = computed(() => validateCollection(collection.value));
 
 const displayedDivisions = computed<Division[]>(() => [
@@ -55,8 +58,10 @@ const displayedDivisions = computed<Division[]>(() => [
               {
                   id: '0',
                   area: {
-                      type: 'MultiPolygon',
-                      coordinates: [collection.value.area?.coordinates ?? [[]]],
+                      type: 'Polygon',
+                      coordinates: collection.value.area?.coordinates[0] ?? [
+                          [],
+                      ],
                   },
               },
           ]),
@@ -73,7 +78,7 @@ onMounted(async () => {
                 add({
                     life: TOAST_LIFE,
                     severity: 'error',
-                    summary: 'The requested collection id does not exist.',
+                    summary: t('edit.error_collection_not_found'),
                 });
                 await router.replace({ name: 'presets' });
             }
@@ -82,7 +87,7 @@ onMounted(async () => {
             add({
                 life: TOAST_LIFE,
                 severity: 'error',
-                summary: 'Failed to get the requested collection.',
+                summary: t('edit.error_collection_retrieval'),
             });
             await router.replace({ name: 'presets' });
         }
@@ -94,7 +99,7 @@ async function _saveCollection(target: RouteLocationRaw) {
         add({
             life: TOAST_LIFE,
             severity: 'error',
-            summary: 'The collection is missing required information.',
+            summary: t('edit.error_collection_incomplete'),
         });
         return;
     }
@@ -111,7 +116,7 @@ async function _saveCollection(target: RouteLocationRaw) {
         add({
             life: TOAST_LIFE,
             severity: 'error',
-            summary: 'Failed to save the colelction.',
+            summary: t('edit.error_failed_to_save'),
         });
     } finally {
         loading.value = false;
@@ -119,7 +124,17 @@ async function _saveCollection(target: RouteLocationRaw) {
 }
 
 const save = () => _saveCollection({ name: 'presets' });
-const start = () => _saveCollection({ name: 'presets' });
+async function start() {
+    const response = await openCollection(collection.value);
+
+    response.status == 200
+        ? router.push(`/track/${collection.value.id}`)
+        : add({
+              life: TOAST_LIFE,
+              severity: 'error',
+              summary: t('edit.error_failed_to_start'),
+          });
+}
 
 function editDivisions() {
     collectionDraft.set(collection.value);
@@ -138,7 +153,12 @@ function back() {
 <template>
     <DefaultLayout>
         <template #action-left>
-            <Button label="Back" severity="secondary" text @click="back">
+            <Button
+                :label="$t('universal.back')"
+                severity="secondary"
+                text
+                @click="back"
+            >
                 <template #icon>
                     <MdiTextButtonIcon :icon="mdiArrowLeft" />
                 </template>
@@ -148,7 +168,7 @@ function back() {
         <template #action-right>
             <div class="flex flex-row gap-2">
                 <Button
-                    label="Save"
+                    :label="$t('universal.save')"
                     severity="primary"
                     text
                     @click="save"
@@ -159,7 +179,7 @@ function back() {
                     </template>
                 </Button>
                 <Button
-                    label="Start"
+                    :label="$t('universal.start')"
                     severity="primary"
                     @click="start"
                     :disabled="!submittable"
@@ -191,7 +211,7 @@ function back() {
                             <MdiInputIcon :icon="mdiMapMarkerPath" />
                             <InputText
                                 class="w-full"
-                                placeholder="Collection Name"
+                                :placeholder="$t('edit.collection_name')"
                                 v-model="collection.name"
                             />
                         </IconField>

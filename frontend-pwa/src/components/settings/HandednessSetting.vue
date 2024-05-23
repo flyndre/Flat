@@ -6,17 +6,17 @@ import SelectButton from 'primevue/selectbutton';
 
 const { settings } = useSettings();
 const options: {
-    label: string;
+    messageCode: string;
     value: 'left' | 'right';
     icon: string;
 }[] = [
     {
-        label: 'Left',
+        messageCode: 'components.handedness_setting.left',
         value: 'left',
         icon: mdiHandBackLeft,
     },
     {
-        label: 'Right',
+        messageCode: 'components.handedness_setting.right',
         value: 'right',
         icon: mdiHandBackRight,
     },
@@ -40,7 +40,7 @@ const options: {
                 <span
                     class="max-[400px]:hidden text-ellipsis overflow-hidden z-10"
                 >
-                    {{ slotProps.option.label }}
+                    {{ $t(slotProps.option.messageCode) }}
                 </span>
             </div>
         </template>

@@ -1,4 +1,5 @@
 import App from '@/App.vue';
+import I18nPlugin from '@/plugins/I18nPlugin';
 import SettingsPlugin from '@/plugins/SettingsPlugin';
 import ThemePlugin from '@/plugins/ThemePlugin';
 import router from '@/router';
@@ -9,6 +10,7 @@ import { createApp } from 'vue';
 
 createApp(App)
     .use(router)
+    .use(I18nPlugin)
     .use(ToastService)
     .use(SettingsPlugin)
     .use(ThemePlugin)

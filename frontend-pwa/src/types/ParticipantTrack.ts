@@ -1,6 +1,6 @@
-export type ParticipantTrack = {
-    id: string;
-    name: string;
-    color: string;
-    progress: GeoJSON.LineString[];
+import { Participant } from './Participant';
+import { TrackInstance } from './TrackInstance';
+
+export type ParticipantTrack = Participant & {
+    progress: TrackInstance[];
 };

@@ -10,6 +10,7 @@ import InputText from 'primevue/inputtext';
 import Sidebar from 'primevue/sidebar';
 import { useToast } from 'primevue/usetoast';
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
     placesService: google.maps.places.PlacesService;
@@ -17,6 +18,8 @@ const props = defineProps<{
 }>();
 
 const { add } = useToast();
+const { t } = useI18n();
+
 const visible = ref(false);
 const searchTerm = ref('');
 const searchResults = ref<google.maps.places.PlaceResult[]>([]);
@@ -34,8 +37,13 @@ function submitSearch() {
                         closable: true,
                         life: TOAST_LIFE,
                         severity: 'error',
-                        summary: 'Search Failed',
-                        detail: `The Maps API responded with code ${status}.`,
+                        summary: t(
+                            'components.location_search_dialog.search_failed'
+                        ),
+                        detail: t(
+                            'components.location_search_dialog.search_failed_text',
+                            { code: status }
+                        ),
                     });
                     return;
                 }
@@ -57,7 +65,7 @@ function selectResult(result: google.maps.places.PlaceResult) {
 <template>
     <Button
         class="grow"
-        label="Search"
+        :label="$t('components.location_search_dialog.action_search')"
         severity="secondary"
         @click="() => (visible = true)"
         outlined
@@ -86,7 +94,7 @@ function selectResult(result: google.maps.places.PlaceResult) {
         <DefaultLayout height="80vh">
             <template #action-left>
                 <Button
-                    label="Back"
+                    :label="$t('universal.back')"
                     severity="secondary"
                     @click="visible = false"
                     text
@@ -102,7 +110,9 @@ function selectResult(result: google.maps.places.PlaceResult) {
                         type="search"
                         class="grow"
                         v-model="searchTerm"
-                        placeholder="Look for a place"
+                        :placeholder="
+                            $t('components.location_search_dialog.find_place')
+                        "
                         @keydown.enter="submitSearch"
                         autofocus
                         :disabled="searchLoading"

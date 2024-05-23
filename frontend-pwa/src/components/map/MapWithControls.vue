@@ -79,7 +79,7 @@ const mapCenter = computedWithControl(
     () => [props.center, props.clientPos, shapes.value],
     () => {
         if (props.center === 'position') {
-            panMapToPos(props.clientPos);
+            panMapToPos(props.clientPos, false);
             return props.clientPos;
         }
         if (props.center === 'area') {
@@ -146,6 +146,7 @@ function syncAreas() {
     if (recentlyUpdated) return; // Prevents infinite update loop
     deleteAllShapes(false);
     divisions.value.forEach((d) => {
+        if (d.area == null) return;
         const shape = divisionToShape(
             d,
             d.id === '0'
@@ -182,9 +183,10 @@ function drawTracks() {
             editable: false,
             draggable: false,
         });
+        console.log(t);
         shapes?.forEach((s) => s.overlay?.setMap(map.value));
         progressLines.push(...shapes);
-        const lastPosition = t.progress?.at(-1)?.coordinates?.at(-1);
+        const lastPosition = t.progress?.at(-1)?.track?.coordinates?.at(-1);
         if (lastPosition != null && t.id !== clientId.value) {
             const label = new MarkerWithLabel({
                 position: {
@@ -259,7 +261,10 @@ function setPositionMarker(
     }
 }
 
-function panMapToPos(position: google.maps.LatLngLiteral | google.maps.LatLng) {
+function panMapToPos(
+    position: google.maps.LatLngLiteral | google.maps.LatLng,
+    zoom: number | false = mapZoom
+) {
     if (position == null || Object.values(position).includes(null)) {
         return;
     }
@@ -268,7 +273,7 @@ function panMapToPos(position: google.maps.LatLngLiteral | google.maps.LatLng) {
     } catch (e) {
         console.log(e);
     }
-    map.value?.setZoom(mapZoom);
+    if (zoom != false) map.value?.setZoom(zoom);
 }
 function panMapToShape(shape: TypedOverlay) {
     map.value.fitBounds(getShapeBounds(shape));
@@ -622,7 +627,7 @@ onMounted(initialize);
                     <template #header>
                         <div class="flex justify-center items-center">
                             <MdiTextButtonIcon :icon="mdiMap" />
-                            Map
+                            {{ $t('components.map_with_controls.map') }}
                         </div>
                     </template>
                     <div
@@ -663,7 +668,7 @@ onMounted(initialize);
                     <template #header>
                         <div class="flex justify-center items-center">
                             <MdiTextButtonIcon :icon="mdiPalette" />
-                            Tools
+                            {{ $t('components.map_with_controls.tools') }}
                         </div>
                     </template>
                     <div
@@ -688,7 +693,7 @@ onMounted(initialize);
                     <template #header>
                         <div class="flex justify-center items-center">
                             <MdiTextButtonIcon :icon="mdiTextureBox" />
-                            Areas
+                            {{ $t('components.map_with_controls.divisions') }}
                         </div>
                     </template>
                     <ShapesList

@@ -1,32 +1,36 @@
 <script setup lang="ts">
+import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import { TOAST_LIFE } from '@/data/constants';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { mdiArrowLeft, mdiContentCopy, mdiShare } from '@mdi/js';
 import { useClipboard, useShare, watchOnce } from '@vueuse/core';
 import Button from 'primevue/button';
-import Sidebar from 'primevue/sidebar';
-import Textarea from 'primevue/textarea';
-import { useToast } from 'primevue/usetoast';
-import MdiTextButtonIcon from '../icons/MdiTextButtonIcon.vue';
-import QRCodeVue3 from 'qrcode-vue3';
 import InputText from 'primevue/inputtext';
+import Sidebar from 'primevue/sidebar';
+import { useToast } from 'primevue/usetoast';
+import QRCodeVue3 from 'qrcode-vue3';
+import { useI18n } from 'vue-i18n';
 
 const visible = defineModel<boolean>('visible', {
     default: false,
 });
 const props = defineProps<{
     link: string;
+    collectionName?: string;
 }>();
 
 const { add } = useToast();
+const { t } = useI18n();
 
 const { isSupported: copySupported, copy, copied } = useClipboard();
 function copyInvitationLink() {
     copy(props.link);
-    watchOnce(copied, () => {
+    watchOnce(copied, (success) => {
         add({
-            summary: 'Invitation link copied!',
-            severity: 'success',
+            summary: success
+                ? t('components.invitation_dialog.copy_success')
+                : t('components.invitation_dialog.copy_failed'),
+            severity: success ? 'success' : 'error',
             closable: true,
             life: TOAST_LIFE,
         });
@@ -35,7 +39,9 @@ function copyInvitationLink() {
 
 const { isSupported: shareSupported, share } = useShare({
     url: props.link,
-    title: `Join ${'<Collection Name>'}`,
+    title: t('components.invitation_dialog.share_title', {
+        collectionName: props.collectionName,
+    }),
     text: '...',
 });
 function shareInvitationLink() {
@@ -63,7 +69,7 @@ function shareInvitationLink() {
         <DefaultLayout height="80vh">
             <template #action-left>
                 <Button
-                    label="Back"
+                    :label="$t('universal.back')"
                     severity="secondary"
                     @click="visible = false"
                     text
@@ -73,11 +79,13 @@ function shareInvitationLink() {
                     </template>
                 </Button>
             </template>
-            <template #title>Invite Participants</template>
+            <template #title>
+                {{ $t('components.invitation_dialog.title') }}
+            </template>
             <template #action-right>
                 <Button
                     v-if="shareSupported"
-                    label="Share"
+                    :label="$t('universal.share')"
                     @click="shareInvitationLink"
                 >
                     <template #icon>
@@ -87,7 +95,7 @@ function shareInvitationLink() {
                 <Button
                     v-if="copySupported"
                     :text="shareSupported"
-                    label="Copy"
+                    :label="$t('universal.copy')"
                     @click="copyInvitationLink"
                 >
                     <template #icon>
