@@ -17,6 +17,7 @@ import de.flyndre.flat.interfaces.ITrackingService
 import de.flyndre.flat.models.AccessResquestMessage
 import de.flyndre.flat.models.CollectionArea
 import de.flyndre.flat.models.CollectionInstance
+import de.flyndre.flat.models.CollectionUpdateMessage
 import de.flyndre.flat.models.LeavingUserMessage
 import de.flyndre.flat.models.Track
 import de.flyndre.flat.models.TrackCollection
@@ -87,6 +88,7 @@ class TrackingScreenViewModel(
         trackingService.addOnRemoteTrackUpdate { onRemoteTrackUpdate() }
         connectionService.addOnAccessRequest { onAccessRequestMessage(it) }
         connectionService.addOnUserLeaved { onUserLeavedCollection(it) }
+        connectionService.addOnCollectionUpdate { onCollectionUpdate(it) }
 
         //add initial point for own location
         viewModelScope.launch(Dispatchers.Default) {
@@ -120,6 +122,10 @@ class TrackingScreenViewModel(
 
     private fun onUserLeavedCollection(leavingUserMessage: LeavingUserMessage){
         _participantsLeaved.value.add(leavingUserMessage)
+    }
+
+    private fun onCollectionUpdate(collectionUpdateMessage: CollectionUpdateMessage){
+        collectionInstance = collectionUpdateMessage.collection
     }
 
     private fun onAccessRequestMessage(message: AccessResquestMessage){
