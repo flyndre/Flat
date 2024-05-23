@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { mdiArrowLeft, mdiShare } from '@mdi/js';
+import { mdiArrowLeft, mdiDelete, mdiShare } from '@mdi/js';
 import Button from 'primevue/button';
 import Sidebar from 'primevue/sidebar';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
@@ -12,6 +12,7 @@ import { useShare } from '@vueuse/core';
 import { useToast } from 'primevue/usetoast';
 import { useI18n } from 'vue-i18n';
 import { TOAST_LIFE } from '@/data/constants';
+import { collectionStatsDB } from '@/data/collectionStats';
 
 const visible = defineModel<boolean>('visible', {
     default: false,
@@ -59,6 +60,26 @@ async function shareNow() {
         });
     }
     shareLoading.value = false;
+}
+
+async function deleteStats() {
+    try {
+        await collectionStatsDB.delete(props.stats.id);
+        visible.value = false;
+        add({
+            closable: true,
+            life: TOAST_LIFE,
+            severity: 'success',
+            summary: t('components.stats_dialog.delete_success'),
+        });
+    } catch (e) {
+        add({
+            closable: true,
+            life: TOAST_LIFE,
+            severity: 'error',
+            summary: t('components.stats_dialog.delete_failed'),
+        });
+    }
 }
 </script>
 
@@ -108,8 +129,23 @@ async function shareNow() {
                 </Button>
             </template>
             <template #default>
-                <div ref="statsElement">
-                    <StatsDisplay :stats />
+                <div class="flex flex-col items-stretch justify-start gap-2">
+                    <div ref="statsElement">
+                        <StatsDisplay :stats />
+                    </div>
+                    <div class="flex flex-row justify-center">
+                        <Button
+                            class="grow-0"
+                            :label="$t('components.stats_dialog.delete')"
+                            severity="danger"
+                            text
+                            @click="deleteStats"
+                        >
+                            <template #icon>
+                                <MdiTextButtonIcon :icon="mdiDelete" />
+                            </template>
+                        </Button>
+                    </div>
                 </div>
             </template>
         </DefaultLayout>

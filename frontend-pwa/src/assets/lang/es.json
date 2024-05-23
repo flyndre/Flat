@@ -218,7 +218,10 @@
             "title": "Estadísticas",
             "share_title": "¡Mira las estadísticas de {collectionName}! 💪",
             "share_text": "En total se recorrieron {totalArea} m², de los cuales {topParticipant} cubrió la mayor distancia de {topDistance} m. 🤯🥳",
-            "share_failed": "Compartir falló"
+            "share_failed": "Compartir falló",
+            "delete": "Eliminar Estadística",
+            "delete_success": "Estadísticas eliminadas con éxito",
+            "delete_failed": "Eliminar falló"
         },
         "stats_display": {
             "title_general": "Generalmente",
