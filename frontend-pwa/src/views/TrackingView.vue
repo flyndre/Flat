@@ -141,9 +141,9 @@ const closeCollectionLoading = ref(false);
 async function closeCollectionNow() {
     closeCollectionLoading.value = true;
     try {
-        closeCollection(props.id);
         const stats = calculateCollectionStats(activeCollection.value);
         await collectionStatsDB.add(stats);
+        closeCollection(props.id);
         pushToast({
             life: TOAST_LIFE,
             severity: 'success',
@@ -155,6 +155,7 @@ async function closeCollectionNow() {
             params: { id: props.id, stats: stats.id },
         });
     } catch (e) {
+        console.log(e);
         pushToast({
             life: TOAST_LIFE,
             severity: 'error',
