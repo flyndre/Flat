@@ -91,7 +91,7 @@ const adminActions: MenuItem[] = [
     {
         label: t('tracking.action_end'),
         icon: mdiStop,
-        command: () => (endCollectionDialogVisible.value = true),
+        command: () => (stopCollectionDialogVisible.value = true),
     },
     {
         label: t('tracking.action_manage'),
@@ -126,8 +126,8 @@ async function leaveCollectionHandler() {
     }
 }
 
-const endCollectionDialogVisible = ref(false);
-function stopCollection() {
+const stopCollectionDialogVisible = ref(false);
+function closeCollectionNow() {
     closeCollection(props.id);
     // TODO: fetch and display stats
     router.push({ name: 'presets' });
@@ -309,7 +309,7 @@ function toggleTracking() {
             <Dialog
                 class="max-w-[750px]"
                 :position="isOnMobile ? 'bottom' : 'top'"
-                v-model:visible="endCollectionDialogVisible"
+                v-model:visible="stopCollectionDialogVisible"
                 header="End Collection"
                 :draggable="false"
                 :closable="false"
@@ -329,7 +329,7 @@ function toggleTracking() {
                         <Button
                             :label="$t('universal.deny')"
                             severity="secondary"
-                            @click="endCollectionDialogVisible = false"
+                            @click="stopCollectionDialogVisible = false"
                         >
                             <template #icon>
                                 <MdiTextButtonIcon :icon="mdiClose" />
@@ -338,7 +338,7 @@ function toggleTracking() {
                         <Button
                             :label="$t('universal.confirm')"
                             severity="danger"
-                            @click="stopCollection"
+                            @click="closeCollectionNow"
                         >
                             <template #icon>
                                 <MdiTextButtonIcon :icon="mdiCheck" />
