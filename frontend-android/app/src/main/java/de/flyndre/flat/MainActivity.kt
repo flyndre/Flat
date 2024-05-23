@@ -37,6 +37,9 @@ import de.flyndre.flat.composables.presetscreen.collectionareascreen.CollectionA
 import de.flyndre.flat.composables.settingScreen.CreateSettingScreenViewModelFactory
 import de.flyndre.flat.composables.settingScreen.SettingScreen
 import de.flyndre.flat.composables.settingScreen.SettingScreenViewModel
+import de.flyndre.flat.composables.statisticsscreen.CreateStatisticsScreenViewModelFactory
+import de.flyndre.flat.composables.statisticsscreen.StatisticsScreen
+import de.flyndre.flat.composables.statisticsscreen.StatisticsScreenViewModel
 import de.flyndre.flat.composables.trackingscreen.TrackingScreen
 import de.flyndre.flat.composables.trackingscreen.TrackingScreenViewModel
 import de.flyndre.flat.composables.trackingscreen.TrackingScreenViewModelFactory
@@ -127,7 +130,11 @@ class MainActivity : ComponentActivity() {
                             settingService
                         )
                     )
-
+                    val statisticsScreenViewModel: StatisticsScreenViewModel = viewModel(
+                        it,
+                        "StatisticsScreenViewModel",
+                        CreateStatisticsScreenViewModelFactory()
+                    )
 
                     Surface(
                         modifier = Modifier.fillMaxSize(),
@@ -143,6 +150,7 @@ class MainActivity : ComponentActivity() {
                             trackingScreenViewModel,
                             participantScreenViewModel,
                             settingScreenViewModel,
+                            statisticsScreenViewModel,
                             settingService.getClientId()
                         ) { x -> shareLink(x) }
                     }
@@ -194,6 +202,7 @@ fun AppEntryPoint(
     trackingScreenViewModel: TrackingScreenViewModel,
     participantScreenViewModel: ParticipantScreenViewModel,
     settingScreenViewModel: SettingScreenViewModel,
+    statisticsScreenViewModel: StatisticsScreenViewModel,
     userId: UUID,
     onShareLink: ((String)->Unit)
 ) {
@@ -264,6 +273,12 @@ fun AppEntryPoint(
         composable("settings"){
             SettingScreen(onNavigateToInitialScreen = { navController.navigate("initial") },
                 settingScreenViewModel = settingScreenViewModel
+            )
+        }
+        composable("statistics"){
+            StatisticsScreen(
+                onNavigateToInitialScreen = { navController.navigate("initial") },
+                statisticsScreenViewModel = statisticsScreenViewModel
             )
         }
     }
