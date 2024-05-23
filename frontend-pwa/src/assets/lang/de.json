@@ -87,12 +87,19 @@
         "action_manage": "Teilnehmer verwalten",
         "action_invite": "Teilnehmer einladen",
         "action_leave": "Sammlung verlassen",
+        "action_leave_warning": "Sicher, dass die Sammlung verlassen werden soll?",
         "action_start_tracking": "Tracking starten",
         "action_pause_tracking": "Tracking pausieren",
         "leave_success": "Die Sammlung {collectionName} wurde verlassen.",
         "leave_failed": "Verlassen der Sammlung fehlgeschlagen.",
         "close_success": "Sammlung erfolgreich beendet.",
-        "close_failed": "Schließen der Sammlung fehlgeschlagen."
+        "close_failed": "Schließen der Sammlung fehlgeschlagen.",
+        "action_end_warning": [
+            "Sicher, dass die laufende Sammlung beendet werden soll?",
+            "Diese Aktion ist endgültig.",
+            "Das Tracken aller Teilnehmer wird beendet und alle aufgenommenen Routen werden allein auf diesem Gerät gespeichert."
+        ],
+        "action_end_confirm": "Sammlung endgültig beenden"
     },
     "components": {
         "code_reader": {

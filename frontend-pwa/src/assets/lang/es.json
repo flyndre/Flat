@@ -87,12 +87,19 @@
         "action_manage": "Administrar participantes",
         "action_invite": "Invitar participantes",
         "action_leave": "Dejar colección",
+        "action_leave_warning": "¿Estás seguro de que quieres dejar esta colección?",
         "action_start_tracking": "Iniciar seguimiento",
         "action_pause_tracking": "Pausar seguimiento",
         "leave_success": "El colección {collectionName} fue abandonada.",
         "leave_failed": "No se pudo salir de la colección.",
         "close_success": "Colección completada exitosamente.",
-        "close_failed": "Error al cerrar la colección."
+        "close_failed": "Error al cerrar la colección.",
+        "action_end_warning": [
+            "¿Está seguro de que desea terminar la colección en curso?",
+            "Esta acción es irreversible.",
+            "Detendrá el seguimiento de todos los participantes y guardará todos los movimientos rastreados únicamente en su dispositivo."
+        ],
+        "action_end_confirm": "Finalizar permanente"
     },
     "components": {
         "code_reader": {
