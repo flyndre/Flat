@@ -161,6 +161,7 @@ namespace FlatBackend.Websocket
         public async void sendCollectionClosedInformation( Guid collectionId )
         {
             var collection = await _MongoDBService.GetCollection(collectionId);
+            if (collection == null) return;
             var tempUsers = new List<WebSocketUserModel>();
             foreach (var user in users)
             {
@@ -196,6 +197,7 @@ namespace FlatBackend.Websocket
         public async Task sendSummaryToBoss( TrackCollectionModel tracks, Guid collectionId, Guid clientId )
         {
             var collection = await _MongoDBService.GetCollection(collectionId);
+            if (collection == null) return;
             var user = users.Find(x => x.clientId == clientId && x.collectionId == collectionId);
             if (user == null) return;
             SummaryModel summary = new SummaryModel() { collection = collection, trackCollection = tracks };
