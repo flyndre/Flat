@@ -306,13 +306,16 @@ fun AdminMenu(
                             horizontalAlignment = Alignment.End) {
                             ExtendedFloatingActionButton(
                                 modifier = Modifier.padding(bottom = 10.dp),
-                                onClick = { onClosingCollection() })
+                                onClick = {
+                                    expanded = false
+                                    onClosingCollection() })
                             {
                                 Text(text = "End Collection")
                             }
                             ExtendedFloatingActionButton(
                                 modifier = Modifier.padding(vertical = 10.dp),
                                 onClick = {
+                                    expanded = false
                                     trackingScreenViewModel.updateAssignmentScreenViewModel()
                                     onNavigateToAssignmentScreen()
                                 }){
@@ -321,6 +324,7 @@ fun AdminMenu(
                             ExtendedFloatingActionButton(
                                 modifier = Modifier.padding(vertical = 10.dp),
                                 onClick = {
+                                    expanded = false
                                     trackingScreenViewModel.updateParticipantScreenViewModel()
                                     onNavigateToParticipantScreen()
                                 }){
