@@ -62,7 +62,7 @@ namespace FlatBackend.Websocket
 
         public Guid getCollectionId( WebSocket websocket )
         {
-            var user = users.Where(x => x.webSocket == websocket).First();
+            var user = users.Find(x => x.webSocket == websocket);
             if (user != null)
             {
                 return user.collectionId;
@@ -76,7 +76,7 @@ namespace FlatBackend.Websocket
         public void addTrackToTrackCollection( IncrementalTrackDto track, Guid collectionId )
         {
             if (trackCollections.Count == 0) { trackCollections = new List<TrackCollectionModel>() { new TrackCollectionModel() { collectionId = collectionId, tracks = new List<IncrementalTrackDto>() { track } } }; }
-            var trackCollection = trackCollections.Where(x => x.collectionId == collectionId).First();
+            var trackCollection = trackCollections.Find(x => x.collectionId == collectionId);
             if (trackCollection != null)
             {
                 var oldTrack = trackCollection.tracks.Find(x => x.trackId == track.trackId);
@@ -124,7 +124,7 @@ namespace FlatBackend.Websocket
                     }
                     if (trackCollections.Count > 0)
                     {
-                        var TrackCollection = trackCollections.Where(x => x.collectionId == collectionId).First();
+                        var TrackCollection = trackCollections.Find(x => x.collectionId == collectionId);
                         if (TrackCollection != null)
                         {
                             sendGPSTrackCollection(TrackCollection, collectionId, userId);
@@ -172,7 +172,7 @@ namespace FlatBackend.Websocket
                     await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
                     if (user.clientId == collection.clientId)
                     {
-                        await sendSummaryToBoss(trackCollections.Where(x => x.collectionId == collectionId).First(), collectionId, user.clientId);
+                        await sendSummaryToBoss(trackCollections.Find(x => x.collectionId == collectionId), collectionId, user.clientId);
                     }
                     await user.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "The Collection was closed so the Connection is closed too.", CancellationToken.None);
 
@@ -196,7 +196,8 @@ namespace FlatBackend.Websocket
         public async Task sendSummaryToBoss( TrackCollectionModel tracks, Guid collectionId, Guid clientId )
         {
             var collection = await _MongoDBService.GetCollection(collectionId);
-            var user = users.Where(x => x.clientId == clientId && x.collectionId == collectionId).First();
+            var user = users.Find(x => x.clientId == clientId && x.collectionId == collectionId);
+            if (user == null) return;
             SummaryModel summary = new SummaryModel() { collection = collection, trackCollection = tracks };
 
             string Json = JsonConvert.SerializeObject(summary);
@@ -290,7 +291,7 @@ namespace FlatBackend.Websocket
 
         public void removeWebsocketUser( WebSocket webSocket )
         {
-            var user = users.Where(x => x.webSocket == webSocket).First();
+            var user = users.Find(x => x.webSocket == webSocket);
             if (user != null)
             {
                 users.Remove(user);
@@ -299,7 +300,7 @@ namespace FlatBackend.Websocket
 
         public async void removeWebsocketUser( Guid clientId, Guid collectionId )
         {
-            var user = users.Where(x => x.clientId == clientId && x.collectionId == collectionId).First();
+            var user = users.Find(x => x.clientId == clientId && x.collectionId == collectionId);
             if (user != null)
             {
                 await user.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "The Collection was closed so the Connection is closed too.", CancellationToken.None);
