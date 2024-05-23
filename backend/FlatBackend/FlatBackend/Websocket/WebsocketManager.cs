@@ -60,41 +60,26 @@ namespace FlatBackend.Websocket
             }), state: null, dueTime: 1000, period: 30000);
         }
 
-        private void sendKeepaliveMessages()
-        {
-            List<WebSocketUserModel> deprecatedUsers = new List<WebSocketUserModel>();
-            var keepAlive = new KeepAliveDto();
-            string Json = JsonConvert.SerializeObject(keepAlive);
-            foreach (var user in users)
-            {
-                if (user != null && user.webSocket.State == WebSocketState.Open)
-                {
-                    user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
-                }
-                else { deprecatedUsers.Add(user); }
-            }
-            if (deprecatedUsers.Count > 0)
-            {
-                foreach (var user in deprecatedUsers)
-                {
-                    users.Remove(user);
-                }
-            }
-        }
-
         public Guid getCollectionId( WebSocket websocket )
         {
-            var user = users.Where(x => x.webSocket == websocket).First();
-            return user.collectionId;
+            var user = users.Find(x => x.webSocket == websocket);
+            if (user != null)
+            {
+                return user.collectionId;
+            }
+            else
+            {
+                return Guid.Empty;
+            }
         }
 
         public void addTrackToTrackCollection( IncrementalTrackDto track, Guid collectionId )
         {
             if (trackCollections.Count == 0) { trackCollections = new List<TrackCollectionModel>() { new TrackCollectionModel() { collectionId = collectionId, tracks = new List<IncrementalTrackDto>() { track } } }; }
-            var trackCollection = trackCollections.Where(x => x.collectionId == collectionId).First();
+            var trackCollection = trackCollections.Find(x => x.collectionId == collectionId);
             if (trackCollection != null)
             {
-                var oldTrack = trackCollection.tracks.Where(x => x.trackId == track.trackId).First();
+                var oldTrack = trackCollection.tracks.Find(x => x.trackId == track.trackId);
                 if (oldTrack != null)
                 {
                     var index = trackCollection.tracks.IndexOf(oldTrack);
@@ -117,36 +102,39 @@ namespace FlatBackend.Websocket
             accessConfirmationWaiting.Add(accessConfirmationDto);
         }
 
-        public async void saveWebSocketOfUser( WebSocket webSocket, Guid collectionId, Guid userId )//only if User is allready confirmed else not saved
+        public async void saveWebSocketOfUser( WebSocket webSocket, Guid collectionId, Guid userId )//only if User is allready confirmed else ConnectionClosed
         {
             var collection = await _MongoDBService.GetCollection(collectionId);
             UserModel? validUser = new UserModel();
-            if (collection.confirmedUsers != null)
-            { validUser = collection.confirmedUsers.Find(x => x.clientId == userId); }
-            if (validUser != null && validUser.accepted || collection.clientId == userId)
+            if (collection != null)
             {
-                WebSocketUserModel newUser = new WebSocketUserModel { webSocket = webSocket, collectionId = collectionId, clientId = userId };
-                var index = users.IndexOf(newUser);
-                if (index > 0)
+                if (collection.confirmedUsers != null)
+                { validUser = collection.confirmedUsers.Find(x => x.clientId == userId); }
+                if (validUser != null && validUser.accepted || collection.clientId == userId)
                 {
-                    users[index] = newUser;
+                    WebSocketUserModel newUser = new WebSocketUserModel { webSocket = webSocket, collectionId = collectionId, clientId = userId };
+                    var index = users.IndexOf(newUser);
+                    if (index > 0)
+                    {
+                        users[index] = newUser;
+                    }
+                    else
+                    {
+                        users.Add(newUser);
+                    }
+                    if (trackCollections.Count > 0)
+                    {
+                        var TrackCollection = trackCollections.Find(x => x.collectionId == collectionId);
+                        if (TrackCollection != null)
+                        {
+                            sendGPSTrackCollection(TrackCollection, collectionId, userId);
+                        }
+                    }
                 }
                 else
                 {
-                    users.Add(newUser);
+                    await webSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "Unauthorised connection this user isn't confirmed by the collection owner.", CancellationToken.None);
                 }
-                if (trackCollections.Count > 0)
-                {
-                    var TrackCollection = trackCollections.Where(x => x.collectionId == collectionId).First();
-                    if (TrackCollection != null)
-                    {
-                        sendGPSTrackCollection(TrackCollection, collectionId, userId);
-                    }
-                }
-            }
-            else
-            {
-                await webSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "Unauthorised connection this user isn't confirmed by the collection owner.", CancellationToken.None);
             }
             return;
         }
@@ -156,6 +144,7 @@ namespace FlatBackend.Websocket
             var collection = await _MongoDBService.GetCollection(collectionId);
             foreach (var user in users)
             {
+                if (user == null) continue;
                 if (user.collectionId == collectionId && user.webSocket.State == WebSocketState.Open)
                 {
                     var validUser = collection.confirmedUsers.Find(x => x.clientId == user.clientId);
@@ -172,8 +161,11 @@ namespace FlatBackend.Websocket
         public async void sendCollectionClosedInformation( Guid collectionId )
         {
             var collection = await _MongoDBService.GetCollection(collectionId);
+            if (collection == null) return;
+            var tempUsers = new List<WebSocketUserModel>();
             foreach (var user in users)
             {
+                if (user == null) continue;
                 if (user.collectionId == collectionId && user.webSocket.State == WebSocketState.Open)
                 {
                     CollectionClosedDto collectionClosedDto = new CollectionClosedDto() { collectionId = collectionId };
@@ -181,12 +173,16 @@ namespace FlatBackend.Websocket
                     await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
                     if (user.clientId == collection.clientId)
                     {
-                        await sendSummaryToBoss(trackCollections.Where(x => x.collectionId == collectionId).First(), collectionId, user.clientId);
+                        await sendSummaryToBoss(trackCollections.Find(x => x.collectionId == collectionId), collectionId, user.clientId);
                     }
                     await user.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "The Collection was closed so the Connection is closed too.", CancellationToken.None);
 
-                    users.Remove(user);
+                    tempUsers.Add(user);
                 }
+            }
+            foreach (var user in tempUsers)
+            {
+                users.Remove(user);
             }
         }
 
@@ -201,7 +197,9 @@ namespace FlatBackend.Websocket
         public async Task sendSummaryToBoss( TrackCollectionModel tracks, Guid collectionId, Guid clientId )
         {
             var collection = await _MongoDBService.GetCollection(collectionId);
-            var user = users.Where(x => x.clientId == clientId && x.collectionId == collectionId).First();
+            if (collection == null) return;
+            var user = users.Find(x => x.clientId == clientId && x.collectionId == collectionId);
+            if (user == null) return;
             SummaryModel summary = new SummaryModel() { collection = collection, trackCollection = tracks };
 
             string Json = JsonConvert.SerializeObject(summary);
@@ -212,6 +210,7 @@ namespace FlatBackend.Websocket
         {
             foreach (var user in users)
             {
+                if (user == null) continue;
                 if (user.collectionId == collectionId && user.webSocket.State == WebSocketState.Open)
                 {
                     string Json = JsonConvert.SerializeObject(track);
@@ -235,7 +234,7 @@ namespace FlatBackend.Websocket
             if (collection != null)
             {
                 var user = users.Find(x => x.collectionId == collection.id && x.clientId == collection.clientId);
-                if (user != null/*&& user.webSocket.State!=WebSocketState.Aborted*/)
+                if (user != null && user.webSocket.State == WebSocketState.Open)
                 {
                     var Json = JsonConvert.SerializeObject(request);
                     await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
@@ -246,7 +245,7 @@ namespace FlatBackend.Websocket
                     return model;
                 }
             }
-            return null;
+            throw new InvalidOperationException("There have been an Problem. It could be that the Admin is not available...");
         }
 
         public async void sendAccessConfirmationToUser( AccessConfirmationDto request )
@@ -294,21 +293,49 @@ namespace FlatBackend.Websocket
 
         public void removeWebsocketUser( WebSocket webSocket )
         {
-            var user = users.Where(x => x.webSocket == webSocket).First();
+            var user = users.Find(x => x.webSocket == webSocket);
             if (user != null)
             {
                 users.Remove(user);
             }
         }
 
-        void IWebsocketManager.removeWebsocketUser( Guid clientId )
+        public async void removeWebsocketUser( Guid clientId, Guid collectionId )
         {
-            throw new NotImplementedException();
+            var user = users.Find(x => x.clientId == clientId && x.collectionId == collectionId);
+            if (user != null)
+            {
+                await user.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "The Collection was closed so the Connection is closed too.", CancellationToken.None);
+                users.Remove(user);
+            }
         }
 
-        void IWebsocketManager.informBossOverLeavingOfUser( Guid collectionId, Guid clientId )
+        public async void informKickedUser( Guid clientId, Guid collectionId )
         {
-            throw new NotImplementedException();
+            var kickedUser = users.Find(x => x.clientId == clientId && x.collectionId == collectionId);
+            if (kickedUser != null)
+            {
+                if (kickedUser.webSocket.State == WebSocketState.Open)
+                {
+                    var Json = JsonConvert.SerializeObject(new KickedUserDto { message = "You have been kicked from boss Connection aborted.", type = DTOs.WebSocketMessageType.KickedUser });
+                    await kickedUser.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
+                    await kickedUser.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "The Collection was closed so the Connection is closed too.", CancellationToken.None);
+                }
+            }
+        }
+
+        public async void informBossOverLeavingOfUser( Guid collectionId, UserModel leavingUser )
+        {
+            var collection = await _MongoDBService.GetCollection(collectionId);
+            if (collection != null)
+            {
+                var user = users.Find(x => x.collectionId == collection.id && x.clientId == collection.clientId);
+                if (user != null && user.webSocket.State == WebSocketState.Open)
+                {
+                    var Json = JsonConvert.SerializeObject(new LeavingUserDto { user = leavingUser, type = DTOs.WebSocketMessageType.LeavingUser });
+                    await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
+                }
+            }
         }
     }
 }

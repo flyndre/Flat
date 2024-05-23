@@ -45,6 +45,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { watchOnce } from '@vueuse/core';
 import { leaveCollection } from '@/api/rest';
 import { clientId } from '@/data/clientMetadata';
+import { collectionStatsDB } from '@/data/collectionStats';
+import { calculateCollectionStats } from '@/util/statsUtils';
 import { StringMappingType } from 'typescript';
 
 const props = defineProps<{
@@ -92,7 +94,8 @@ const adminActions: MenuItem[] = [
     {
         label: t('tracking.action_end'),
         icon: mdiStop,
-        command: () => (endCollectionDialogVisible.value = true),
+        disabled: () => closeCollectionLoading.value,
+        command: () => (closeCollectionDialogVisible.value = true),
     },
     {
         label: t('tracking.action_manage'),
@@ -100,6 +103,11 @@ const adminActions: MenuItem[] = [
         command: () => (manageParticipantsDialogVisible.value = true),
     },
 ];
+
+function _clearUpBeforeLeave() {
+    stopTrackingLogs();
+    stopTrackingCollection();
+}
 
 async function leaveCollectionHandler() {
     try {
@@ -113,6 +121,7 @@ async function leaveCollectionHandler() {
                 closable: true,
                 life: TOAST_LIFE,
             });
+            _clearUpBeforeLeave();
             router.push({ name: 'home' });
         } else {
             throw response.statusText;
@@ -127,11 +136,32 @@ async function leaveCollectionHandler() {
     }
 }
 
-const endCollectionDialogVisible = ref(false);
-function stopCollection() {
-    closeCollection(props.id);
-    // TODO: fetch and display stats
-    router.push({ name: 'presets' });
+const closeCollectionDialogVisible = ref(false);
+const closeCollectionLoading = ref(false);
+async function closeCollectionNow() {
+    closeCollectionLoading.value = true;
+    try {
+        closeCollection(props.id);
+        const stats = calculateCollectionStats(activeCollection.value);
+        await collectionStatsDB.add(stats);
+        pushToast({
+            life: TOAST_LIFE,
+            severity: 'success',
+            summary: t('tracking.close_success'),
+        });
+        _clearUpBeforeLeave();
+        router.push({
+            name: 'edit',
+            params: { id: props.id, stats: stats.id },
+        });
+    } catch (e) {
+        pushToast({
+            life: TOAST_LIFE,
+            severity: 'error',
+            summary: t('tracking.close_failed'),
+        });
+    }
+    closeCollectionLoading.value = false;
 }
 
 const invitationScreenVisible = ref(false);
@@ -193,7 +223,7 @@ function toggleTracking() {
     }
 }
 
-function kickParticipant(collectionId: string, participantId: string) {
+async function kickParticipant(collectionId: string, participantId: string) {
     const resp = await kick(collectionId, participantId);
 
     resp.status == 200
@@ -332,7 +362,7 @@ function kickParticipant(collectionId: string, participantId: string) {
             <Dialog
                 class="max-w-[750px]"
                 :position="isOnMobile ? 'bottom' : 'top'"
-                v-model:visible="endCollectionDialogVisible"
+                v-model:visible="closeCollectionDialogVisible"
                 header="End Collection"
                 :draggable="false"
                 :closable="false"
@@ -352,7 +382,7 @@ function kickParticipant(collectionId: string, participantId: string) {
                         <Button
                             :label="$t('universal.deny')"
                             severity="secondary"
-                            @click="endCollectionDialogVisible = false"
+                            @click="closeCollectionDialogVisible = false"
                         >
                             <template #icon>
                                 <MdiTextButtonIcon :icon="mdiClose" />
@@ -361,7 +391,7 @@ function kickParticipant(collectionId: string, participantId: string) {
                         <Button
                             :label="$t('universal.confirm')"
                             severity="danger"
-                            @click="stopCollection"
+                            @click="closeCollectionNow"
                         >
                             <template #icon>
                                 <MdiTextButtonIcon :icon="mdiCheck" />
@@ -484,7 +514,11 @@ function kickParticipant(collectionId: string, participantId: string) {
                                 :divisions="activeCollection.divisions"
                                 :admin-mode="isAdmin"
                                 @kick-participant="
-                                    (p) =>kickParticipant(activeCollection.id, p.id)
+                                    (p) =>
+                                        kickParticipant(
+                                            activeCollection.id,
+                                            p.id
+                                        )
                                 "
                             />
                         </TabPanel>

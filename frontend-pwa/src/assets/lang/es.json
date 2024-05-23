@@ -178,7 +178,7 @@
             "search_failed_text": "La API respondió con el código de estado {código}."
         },
         "divisions_list": {
-            "division_name": "Nombre del área",
+            "division_name": "Nombre del división",
             "delete_all": "Limpiar todo"
         },
         "map_help": {
@@ -198,9 +198,9 @@
             },
             "explanation_tools": {
                 "introduction": "La pestaña \"Herramientas\" contiene todo lo necesario para dibujar las áreas, como por ejemplo:",
-                "draw_division": "Marcar una nueva área",
-                "delete_selected": "Eliminar el área actualmente seleccionada",
-                "select_color": "Paleta de colores de área disponibles"
+                "draw_division": "Marcar una nuevo departamento",
+                "delete_selected": "Eliminar el departamento actualmente seleccionado",
+                "select_color": "Paleta de colores de departamentos disponibles"
             },
             "explanation_divisions": {
                 "introduction": "En la pestaña \"Departamentos\" puede encontrar una descripción general de todas los departamentos que ya se han dibujado. ",
@@ -210,6 +210,26 @@
                 "delete_introduction": "Al final de la lista hay un botón para eliminar todas las departamentos.",
                 "delete_all": "Limpiar todo"
             }
+        },
+        "stats_list": {
+            "header": "Archivo"
+        },
+        "stats_dialog": {
+            "title": "Estadísticas",
+            "share_title": "¡Mira las estadísticas de {collectionName}! 💪",
+            "share_text": "En total se recorrieron {totalArea} m², de los cuales {topParticipant} cubrió la mayor distancia de {topDistance} m. 🤯🥳",
+            "share_failed": "Compartir falló",
+            "delete": "Eliminar Estadística",
+            "delete_success": "Estadísticas eliminadas con éxito",
+            "delete_failed": "Eliminar falló"
+        },
+        "stats_display": {
+            "title_general": "Generalmente",
+            "title_divisions": "Departamentos",
+            "title_participants": "Participantes",
+            "date": "Fecha",
+            "duration": "Período",
+            "area_total": "Área Total"
         }
     }
 }

@@ -7,6 +7,7 @@ import Button from 'primevue/button';
 import IconField from 'primevue/iconfield';
 import InputText from 'primevue/inputtext';
 import Panel from 'primevue/panel';
+import { computed } from 'vue';
 
 const divisions = defineModel<Division[]>();
 const props = withDefaults(
@@ -17,6 +18,8 @@ const props = withDefaults(
         editDivisionsHandler: () => {},
     }
 );
+
+const divisionsPresent = computed(() => divisions.value?.length > 0);
 </script>
 
 <template>
@@ -47,17 +50,17 @@ const props = withDefaults(
         </IconField>
         <Button
             class="justify-center"
-            severity="secondary"
+            :severity="divisionsPresent ? 'secondary' : 'primary'"
             @click="editDivisionsHandler"
         >
             <template #default>
                 <MdiTextButtonIcon
-                    :icon="divisions?.length > 0 ? mdiPencil : mdiPencilPlus"
+                    :icon="divisionsPresent ? mdiPencil : mdiPencilPlus"
                 />
                 {{
                     $t(
                         'components.divisions_preview.' +
-                            (divisions?.length > 0
+                            (divisionsPresent
                                 ? 'edit_divisions'
                                 : 'add_divisions')
                     )
