@@ -4,13 +4,16 @@ import DivisionsList from '@/components/collections/DivisionsList.vue';
 import MdiInputIcon from '@/components/icons/MdiInputIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
+import StatsList from '@/components/stats/StatsList.vue';
 import { clientId } from '@/data/clientMetadata';
 import { collectionDB, collectionDraft } from '@/data/collections';
 import { TOAST_LIFE } from '@/data/constants';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { Collection } from '@/types/Collection';
 import { Division } from '@/types/Division';
+import { CollectionStats } from '@/types/stats/CollectionStats';
 import { dbSafe } from '@/util/dbUtils';
+import { getGeoJsonArea } from '@/util/statsUtils';
 import validateCollection from '@/validation/validateCollection';
 import { mdiArrowLeft, mdiCheck, mdiMapMarkerPath, mdiPlay } from '@mdi/js';
 import Button from 'primevue/button';
@@ -22,6 +25,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouteLocationRaw, useRouter } from 'vue-router';
+import { statsOf, collectionStatsDB } from '@/data/collectionStats';
 
 const props = withDefaults(
     defineProps<{
@@ -94,7 +98,7 @@ onMounted(async () => {
     }
 });
 
-async function _saveCollection(target: RouteLocationRaw) {
+async function _saveCollection(afterSavedCallback: () => any) {
     if (!submittable.value) {
         add({
             life: TOAST_LIFE,
@@ -111,7 +115,7 @@ async function _saveCollection(target: RouteLocationRaw) {
             await collectionDB.add(dbSafe(collection.value));
             collectionDraft.set(null);
         }
-        await router.push(target);
+        afterSavedCallback();
     } catch (error) {
         add({
             life: TOAST_LIFE,
@@ -123,17 +127,24 @@ async function _saveCollection(target: RouteLocationRaw) {
     }
 }
 
-const save = () => _saveCollection({ name: 'presets' });
-async function start() {
-    const response = await openCollection(collection.value);
+async function save() {
+    await _saveCollection(() => router.push({ name: 'presets' }));
+}
 
-    response.status == 200
-        ? router.push(`/track/${collection.value.id}`)
-        : add({
-              life: TOAST_LIFE,
-              severity: 'error',
-              summary: t('edit.error_failed_to_start'),
-          });
+async function start() {
+    await _saveCollection(async () => {
+        try {
+            const response = await openCollection(collection.value);
+            if (response.status != 200) throw response;
+            await router.push(`/track/${collection.value.id}`);
+        } catch (e) {
+            add({
+                life: TOAST_LIFE,
+                severity: 'error',
+                summary: t('edit.error_failed_to_start'),
+            });
+        }
+    });
 }
 
 function editDivisions() {
@@ -148,6 +159,8 @@ function back() {
     collectionDraft.set(null);
     router.push({ name: 'presets' });
 }
+
+const stats = statsOf(props.id);
 </script>
 
 <template>
@@ -218,6 +231,10 @@ function back() {
                         <DivisionsList
                             v-model="collection.divisions"
                             :edit-divisions-handler="editDivisions"
+                        />
+                        <StatsList
+                            v-if="edit && stats?.length > 0"
+                            :stats="stats"
                         />
                     </div>
                 </template>

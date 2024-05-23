@@ -58,13 +58,13 @@ Must-have:
     - [x] End collection
 -   [x] Join the team via link
     -   [x] Join collection
-    -   [ ] Leave collection
+    -   [x] Leave collection
 -   [x] User name
 
 Optional:
 
 -   [x] Join via QR code
--   [ ] Leaderboard/Statistics
+-   [x] Leaderboard/Statistics
 -   [x] Dark Mode
 -   [x] Define collection templates
     -   Achieved by enabling collection duplication
