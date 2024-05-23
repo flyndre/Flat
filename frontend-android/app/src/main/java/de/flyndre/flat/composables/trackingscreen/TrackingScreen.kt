@@ -507,6 +507,24 @@ fun CollectionClosedDialog(onAccept: () -> Unit){
 }
 
 @Composable
+fun UserKickedDialog(onAccept: () -> Unit){
+    AlertDialog(onDismissRequest = { onAccept() },
+        confirmButton = {
+            TextButton(onClick = { onAccept() }) {
+                Text(text = "OK")
+            }
+        },
+        icon = {
+            Icon(imageVector = Icons.Default.Info, contentDescription = "collection was closed")
+        },
+        title = {
+            Text(text = "Information")
+        },
+        text = { Text(text = "Du wurdest vom Administrator aus der Sammlung entfernt.")}
+    )
+}
+
+@Composable
 fun AddParticipantDialog(
     onDismissRequest: () -> Unit,
     onShareButtonClick: (String) -> Unit,
