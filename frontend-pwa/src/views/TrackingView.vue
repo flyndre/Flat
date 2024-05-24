@@ -1,17 +1,23 @@
 <script setup lang="ts">
+import { leaveCollection } from '@/api/rest';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
+import DivisionsList from '@/components/tracking/DivisionsList.vue';
 import InvitationDialog from '@/components/tracking/InvitationDialog.vue';
 import JoinRequestDialog from '@/components/tracking/JoinRequestDialog.vue';
 import ParticipantsList from '@/components/tracking/ParticipantsList.vue';
+import { clientId } from '@/data/clientMetadata';
+import { collectionStatsDB } from '@/data/collectionStats';
 import { TOAST_LIFE } from '@/data/constants';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { useCollectionService } from '@/service/collectionService';
 import { useTrackingService } from '@/service/trackingService';
 import { JoinRequest } from '@/types/JoinRequest';
+import { dbSafe } from '@/util/dbUtils';
 import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
 import { isOnMobile } from '@/util/mobileDetection';
+import { calculateCollectionStats } from '@/util/statsUtils';
 import {
     mdiAccountMultiple,
     mdiAccountPlus,
@@ -19,20 +25,26 @@ import {
     mdiCircle,
     mdiClose,
     mdiCrosshairsGps,
+    mdiEarth,
+    mdiEarthPlus,
     mdiExport,
     mdiFitToScreen,
     mdiHandBackRight,
     mdiMap,
+    mdiMenu,
     mdiPause,
     mdiPauseCircle,
     mdiPlay,
+    mdiRoadVariant,
     mdiStop,
+    mdiTerrain,
     mdiTextureBox,
 } from '@mdi/js';
-import DivisionsList from '@/components/tracking/DivisionsList.vue';
+import { watchOnce } from '@vueuse/core';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import Dialog from 'primevue/dialog';
+import Menu from 'primevue/menu';
 import { MenuItem } from 'primevue/menuitem';
 import SelectButton from 'primevue/selectbutton';
 import SplitButton from 'primevue/splitbutton';
@@ -41,10 +53,7 @@ import TabView from 'primevue/tabview';
 import { useToast } from 'primevue/usetoast';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
-import { watchOnce } from '@vueuse/core';
-import { leaveCollection } from '@/api/rest';
-import { clientId } from '@/data/clientMetadata';
+import { useRouter } from 'vue-router';
 
 const props = defineProps<{
     id: string;
@@ -91,7 +100,8 @@ const adminActions: MenuItem[] = [
     {
         label: t('tracking.action_end'),
         icon: mdiStop,
-        command: () => (endCollectionDialogVisible.value = true),
+        disabled: () => closeCollectionLoading.value,
+        command: () => (closeCollectionDialogVisible.value = true),
     },
     {
         label: t('tracking.action_manage'),
@@ -99,6 +109,11 @@ const adminActions: MenuItem[] = [
         command: () => (manageParticipantsDialogVisible.value = true),
     },
 ];
+
+function _clearUpBeforeLeave() {
+    stopTrackingLogs();
+    stopTrackingCollection();
+}
 
 async function leaveCollectionHandler() {
     try {
@@ -112,6 +127,7 @@ async function leaveCollectionHandler() {
                 closable: true,
                 life: TOAST_LIFE,
             });
+            _clearUpBeforeLeave();
             router.push({ name: 'home' });
         } else {
             throw response.statusText;
@@ -126,11 +142,34 @@ async function leaveCollectionHandler() {
     }
 }
 
-const endCollectionDialogVisible = ref(false);
-function stopCollection() {
-    closeCollection(props.id);
-    // TODO: fetch and display stats
-    router.push({ name: 'presets' });
+const closeCollectionDialogVisible = ref(false);
+const closeCollectionLoading = ref(false);
+async function closeCollectionNow() {
+    closeCollectionLoading.value = true;
+    try {
+        const stats = calculateCollectionStats(activeCollection.value);
+        await collectionStatsDB.add(dbSafe(stats));
+        closeCollection(props.id);
+        pushToast({
+            life: TOAST_LIFE,
+            severity: 'success',
+            summary: t('tracking.close_success'),
+        });
+        _clearUpBeforeLeave();
+        router.push({
+            name: 'edit',
+            params: { id: props.id },
+            query: { stats: stats.id },
+        });
+    } catch (e) {
+        console.log(e);
+        pushToast({
+            life: TOAST_LIFE,
+            severity: 'error',
+            summary: t('tracking.close_failed'),
+        });
+    }
+    closeCollectionLoading.value = false;
 }
 
 const invitationScreenVisible = ref(false);
@@ -153,6 +192,8 @@ const {
     requests,
     startTracking: startTrackingCollection,
     stopTracking: stopTrackingCollection,
+    kick,
+    leave,
 } = useCollectionService(props.id);
 
 function processJoinRequest(joinRequest: JoinRequest) {
@@ -189,6 +230,54 @@ function toggleTracking() {
         startTrackingCollection();
     }
 }
+
+async function kickParticipant(collectionId: string, participantId: string) {
+    const resp = await kick(collectionId, participantId);
+
+    resp.status == 200
+        ? pushToast({
+              //TODO: i18n
+              summary: 'Kicked Participant',
+              severity: 'success',
+              closable: true,
+              life: TOAST_LIFE,
+          })
+        : pushToast({
+              //TODO: i18n
+              summary: 'Could not Kick Participant',
+              severity: 'error',
+              closable: true,
+              life: TOAST_LIFE,
+          });
+}
+
+const mapTypeId = ref<`${google.maps.MapTypeId}`>('roadmap');
+const mapTypeMenu = ref<InstanceType<typeof Menu>>(null);
+function toggleMapTypeMenu(e: Event) {
+    mapTypeMenu.value.toggle(e);
+}
+const mapTypeOptions: MenuItem[] = [
+    {
+        value: 'roadmap',
+        icon: mdiRoadVariant,
+        command: () => (mapTypeId.value = 'roadmap'),
+    },
+    {
+        value: 'terrain',
+        icon: mdiTerrain,
+        command: () => (mapTypeId.value = 'terrain'),
+    },
+    {
+        value: 'satellite',
+        icon: mdiEarth,
+        command: () => (mapTypeId.value = 'satellite'),
+    },
+    {
+        value: 'hybrid',
+        icon: mdiEarthPlus,
+        command: () => (mapTypeId.value = 'hybrid'),
+    },
+];
 </script>
 
 <template>
@@ -309,7 +398,7 @@ function toggleTracking() {
             <Dialog
                 class="max-w-[750px]"
                 :position="isOnMobile ? 'bottom' : 'top'"
-                v-model:visible="endCollectionDialogVisible"
+                v-model:visible="closeCollectionDialogVisible"
                 header="End Collection"
                 :draggable="false"
                 :closable="false"
@@ -329,7 +418,7 @@ function toggleTracking() {
                         <Button
                             :label="$t('universal.deny')"
                             severity="secondary"
-                            @click="endCollectionDialogVisible = false"
+                            @click="closeCollectionDialogVisible = false"
                         >
                             <template #icon>
                                 <MdiTextButtonIcon :icon="mdiClose" />
@@ -338,7 +427,7 @@ function toggleTracking() {
                         <Button
                             :label="$t('universal.confirm')"
                             severity="danger"
-                            @click="stopCollection"
+                            @click="closeCollectionNow"
                         >
                             <template #icon>
                                 <MdiTextButtonIcon :icon="mdiCheck" />
@@ -401,34 +490,74 @@ function toggleTracking() {
                                     Map
                                 </div>
                             </template>
-                            <SelectButton
-                                class="flex w-full flex-row"
-                                v-model="mapCenterSelected"
-                                :options="mapCenterOptions"
-                                :option-value="(o) => o.value"
-                                :allow-empty="false"
-                                :pt="{ button: { class: 'w-full' } }"
+                            <div
+                                class="flex flex-row gap-2 items-center justify-stretch flex-wrap"
                             >
-                                <template #option="slotProps">
-                                    <div
-                                        class="flex flex-row justify-center items-center flex-nowrap w-full gap-3 min-h-6"
-                                    >
-                                        <MdiIcon
-                                            :icon="slotProps.option.icon"
-                                        />
-                                        <span
-                                            class="max-[400px]:hidden text-ellipsis overflow-hidden z-10"
+                                <SelectButton
+                                    class="basis-7/12"
+                                    v-model="mapCenterSelected"
+                                    :options="mapCenterOptions"
+                                    :option-value="(o) => o.value"
+                                    :allow-empty="false"
+                                    :pt="{
+                                        button: {
+                                            class: 'h-9 w-auto grow flex flex-row justify-center',
+                                        },
+                                        root: {
+                                            class: 'w-auto flex flex-row grow justify-stretch',
+                                        },
+                                    }"
+                                >
+                                    <template #option="slotProps">
+                                        <div
+                                            class="flex flex-row justify-center items-center flex-nowrap w-full gap-3"
                                         >
-                                            {{
-                                                $t(slotProps.option.messageCode)
-                                            }}
-                                        </span>
-                                    </div>
-                                </template>
-                            </SelectButton>
+                                            <MdiIcon
+                                                :icon="slotProps.option.icon"
+                                            />
+                                            <span
+                                                class="max-[400px]:hidden text-ellipsis overflow-hidden z-10"
+                                            >
+                                                {{
+                                                    $t(
+                                                        slotProps.option
+                                                            .messageCode
+                                                    )
+                                                }}
+                                            </span>
+                                        </div>
+                                    </template>
+                                </SelectButton>
+                                <Button
+                                    severity="secondary"
+                                    @click="toggleMapTypeMenu"
+                                >
+                                    <template #icon>
+                                        <MdiIcon :icon="mdiMenu" />
+                                    </template>
+                                </Button>
+                                <Menu
+                                    ref="mapTypeMenu"
+                                    :model="mapTypeOptions"
+                                    popup
+                                    :pt="{
+                                        root: {
+                                            class: 'min-w-0 cursor-pointer',
+                                        },
+                                    }"
+                                >
+                                    <template #item="slotProps">
+                                        <MdiIcon
+                                            class="m-3"
+                                            :icon="slotProps.item.icon"
+                                        />
+                                    </template>
+                                </Menu>
+                            </div>
                             <MapWithControls
                                 class="!min-h-32 !h-32 -m-2.5"
                                 controls="none"
+                                :map-type="mapTypeId"
                                 :center="mapCenterSelected"
                                 :locked="mapCenterSelected != null"
                                 :divisions="activeCollection.divisions"
@@ -460,7 +589,13 @@ function toggleTracking() {
                                 :participants="member"
                                 :divisions="activeCollection.divisions"
                                 :admin-mode="isAdmin"
-                                @kick-participant="(p) => console.log(p)"
+                                @kick-participant="
+                                    (p) =>
+                                        kickParticipant(
+                                            activeCollection.id,
+                                            p.id
+                                        )
+                                "
                             />
                         </TabPanel>
                         <TabPanel

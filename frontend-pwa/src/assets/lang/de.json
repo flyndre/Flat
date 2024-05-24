@@ -90,7 +90,9 @@
         "action_start_tracking": "Tracking starten",
         "action_pause_tracking": "Tracking pausieren",
         "leave_success": "Die Sammlung {collectionName} wurde verlassen.",
-        "leave_failed": "Verlassen der Sammlung fehlgeschlagen."
+        "leave_failed": "Verlassen der Sammlung fehlgeschlagen.",
+        "close_success": "Sammlung erfolgreich beendet.",
+        "close_failed": "Schließen der Sammlung fehlgeschlagen."
     },
     "components": {
         "code_reader": {
@@ -210,6 +212,26 @@
                 "delete_introduction": "Am Fuße der Liste befindet sich ein Button zum Löschen aller Bereiche.",
                 "delete_all": "Alle löschen"
             }
+        },
+        "stats_list": {
+            "header": "Archivierte Durchführungen"
+        },
+        "stats_dialog": {
+            "title": "Statistiken",
+            "share_title": "Sieh dir die Statistiken von {collectionName} am {startDay} an! 💪",
+            "share_text": "Insgesamt wurden {totalArea} km² abgedeckt, wovon {topParticipant} mit einer Gesamtstrecke von {topDistance} km die größte Strecke zurückgelegt hat. 🤯🥳",
+            "share_failed": "Teilen fehlgeschlagen",
+            "delete": "Statistik löschen",
+            "delete_success": "Statistik gelöscht",
+            "delete_failed": "Löschen fehlgeschlagen"
+        },
+        "stats_display": {
+            "title_general": "Allgemein",
+            "title_divisions": "Bereiche",
+            "title_participants": "Teilnehmer",
+            "date": "Zeitraum",
+            "duration": "Dauer",
+            "area_total": "Gesamtfläche"
         }
     }
 }

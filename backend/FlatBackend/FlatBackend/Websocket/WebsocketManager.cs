@@ -188,7 +188,8 @@ namespace FlatBackend.Websocket
 
         public async void sendGPSTrackCollection( TrackCollectionModel tracks, Guid collectionId, Guid clientId )
         {
-            var user = users.Where(x => x.clientId == clientId && x.collectionId == collectionId).First();
+            var user = users.Find(x => x.clientId == clientId && x.collectionId == collectionId);
+            if (user == null || tracks == null) return;
             List<IncrementalTrackDto> tracksList = tracks.tracks;
             string Json = JsonConvert.SerializeObject(tracksList);
             user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);

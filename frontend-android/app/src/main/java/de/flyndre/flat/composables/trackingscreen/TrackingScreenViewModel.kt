@@ -17,6 +17,8 @@ import de.flyndre.flat.interfaces.ITrackingService
 import de.flyndre.flat.models.AccessResquestMessage
 import de.flyndre.flat.models.CollectionArea
 import de.flyndre.flat.models.CollectionInstance
+import de.flyndre.flat.models.CollectionUpdateMessage
+import de.flyndre.flat.models.LeavingUserMessage
 import de.flyndre.flat.models.Track
 import de.flyndre.flat.models.TrackCollection
 import io.github.dellisd.spatialk.geojson.MultiPolygon
@@ -45,17 +47,20 @@ class TrackingScreenViewModel(
     private val _settingService = settingService
     private val joinBaseLink = "https://flat.buhss.de/join/"
     private var lastCenteredOwnDivision: CollectionArea? = null
-    var collectionInstance: CollectionInstance = CollectionInstance("", UUID.randomUUID(),
-        MultiPolygon()
-    )
+
+    var collectionInstance: CollectionInstance = CollectionInstance("", UUID.randomUUID(), MultiPolygon())
         set(value) {
             field = value
+            _divisionList.value = value.collectionDivision
             _joinLink.value = joinBaseLink+value.id
             _qrCodeGraphics.value = QRCode.ofSquares().build(_joinLink.value).render()
         }
 
     private val _trackingEnabled = MutableStateFlow(false)
     val trackingEnabled = _trackingEnabled.asStateFlow()
+
+    private val _divisionList = MutableStateFlow(arrayListOf<CollectionArea>())
+    val divisionList = _divisionList.asStateFlow()
 
     private val _trackList: MutableStateFlow<TrackCollection> = MutableStateFlow(TrackCollection())
     val trackList: StateFlow<TrackCollection> = _trackList.asStateFlow()
@@ -78,10 +83,15 @@ class TrackingScreenViewModel(
     private val _clientId = MutableStateFlow(_settingService.getClientId().toString())
     val clientId : StateFlow<String> = _clientId.asStateFlow()
 
+    private val _participantsLeaved = MutableStateFlow(arrayListOf<LeavingUserMessage>())
+    val participantsLeaved = _participantsLeaved.asStateFlow()
+
     init {
         trackingService.addOnLocalTrackUpdate{ onLocalTrackUpdate() }
         trackingService.addOnRemoteTrackUpdate { onRemoteTrackUpdate() }
         connectionService.addOnAccessRequest { onAccessRequestMessage(it) }
+        connectionService.addOnUserLeaved { onUserLeavedCollection(it) }
+        connectionService.addOnCollectionUpdate { onCollectionUpdate(it) }
 
         //add initial point for own location
         viewModelScope.launch(Dispatchers.Default) {
@@ -113,11 +123,23 @@ class TrackingScreenViewModel(
         _remoteTrackList.value = newMap
     }
 
+    private fun onUserLeavedCollection(leavingUserMessage: LeavingUserMessage){
+        _participantsLeaved.value.add(leavingUserMessage)
+    }
+
+    private fun onCollectionUpdate(collectionUpdateMessage: CollectionUpdateMessage){
+        collectionInstance = collectionUpdateMessage.collection
+    }
+
     private fun onAccessRequestMessage(message: AccessResquestMessage){
         val tempList = arrayListOf<AccessResquestMessage>()
         tempList.addAll(_participantsToJoin.value)
         tempList.add(message)
         _participantsToJoin.value = tempList
+    }
+
+    fun removeFirstLeavedparticipant(){
+        _participantsLeaved.value.removeFirst()
     }
 
     fun updateAssignmentScreenViewModel(){
@@ -204,6 +226,10 @@ class TrackingScreenViewModel(
 
             lastCenteredOwnDivision = division
         }
+    }
+
+    fun isThisUserAdmin(): Boolean{
+        return collectionInstance.clientId.equals(_settingService.getClientId())
     }
 }
 
