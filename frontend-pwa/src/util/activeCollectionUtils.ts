@@ -16,7 +16,10 @@ export function mergeActiveCollections(
             merged.confirmedUsers.push(pFrom);
             return;
         }
-        merged[index] = mergeParticipantTracks(pFrom, merged[index]);
+        merged.confirmedUsers[index] = mergeParticipantTracks(
+            pFrom,
+            merged[index]
+        );
     });
     return merged;
 }
