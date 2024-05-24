@@ -24,7 +24,7 @@ let ws: WebSocket = null;
 const _websocketStatus = ref<number>(null);
 
 function initialiseWebsocket() {
-    ws = new WebSocket('wss://flat.buhss.de/api/ws');
+    ws = new WebSocket(import.meta.env.VITE_WS_BASE_URL);
 
     ws.onmessage = function (event) {
         _websocketStatus.value = ws.readyState;
@@ -121,9 +121,10 @@ function handleWebsocketMessage(message: any) {
             handleIncrementalTracks(<IncrementalTrackMessage>message);
             break;
 
-        //LeaveMessage
-        //DeleteMessage
-        //EndCollectionMessage
+        // TODO:
+        // LeaveMessage (message to admin that participant left)
+        // DeleteMessage & EndCollectionMessage (messages to participants that collection is closed and message to admin with collection summary)
+        // KickedUserMessage (message to participant that he has been kicked)
     }
 }
 
