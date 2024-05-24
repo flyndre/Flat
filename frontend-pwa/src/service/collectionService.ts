@@ -14,6 +14,7 @@ import { Division } from '@/types/Division';
 import { ParticipantTrack } from '@/types/ParticipantTrack';
 import { IncrementalTrackMessage } from '@/types/websocket/IncrementalTrackMessage';
 import { InviteMessage } from '@/types/websocket/InviteMessage';
+import { KickMessage } from '@/types/websocket/KickMessage';
 import { UpdateCollectionMessage } from '@/types/websocket/UpdateCollectionMessage';
 import { mergeActiveCollections } from '@/util/activeCollectionUtils';
 import { getParticipantColor } from '@/util/trackingUtils';
@@ -67,6 +68,7 @@ function initialiseWebsocket() {
 const _isAdmin = ref(false);
 const _activeCollection = ref<ActiveCollection>({} as ActiveCollection);
 const _isLoading = ref(true);
+const _kickMessage = ref("");
 let latestSendTimestamp = Date.now();
 
 const {
@@ -120,12 +122,19 @@ function handleWebsocketMessage(message: any) {
         case 'IncrementalTrack':
             handleIncrementalTracks(<IncrementalTrackMessage>message);
             break;
+        case 'KickedUser':
+                handleKick(<KickMessage>message);
+                break;
 
         // TODO:
         // LeaveMessage (message to admin that participant left)
         // DeleteMessage & EndCollectionMessage (messages to participants that collection is closed and message to admin with collection summary)
         // KickedUserMessage (message to participant that he has been kicked)
     }
+}
+
+function handleKick(message : KickMessage){
+    _kickMessage.value = message.message;
 }
 
 function _assignDivision(d: Division, p: ParticipantTrack | null) {
@@ -267,6 +276,7 @@ export const useCollectionService = (id: string) => {
         isLoading: computed(() => _isLoading.value),
         isAdmin: computed(() => _isAdmin.value),
         connectionStatus: computed(() => _websocketStatus.value),
+        kickMessage: computed(() => _kickMessage.value)
     };
 };
 

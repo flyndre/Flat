@@ -51,7 +51,7 @@ import SplitButton from 'primevue/splitbutton';
 import TabPanel from 'primevue/tabpanel';
 import TabView from 'primevue/tabview';
 import { useToast } from 'primevue/usetoast';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -181,6 +181,7 @@ const invitationLink = computed(
 
 const manageParticipantsDialogVisible = ref(false);
 
+
 const {
     activeCollection,
     assignDivision,
@@ -194,7 +195,17 @@ const {
     stopTracking: stopTrackingCollection,
     kick,
     leave,
+    kickMessage
 } = useCollectionService(props.id);
+
+watch(kickMessage, value => {
+    pushToast({
+            summary: value,
+            severity: 'error',
+            life: TOAST_LIFE,
+        });
+    router.push({ name: 'home' });
+})
 
 function processJoinRequest(joinRequest: JoinRequest) {
     handleRequest(
