@@ -75,18 +75,26 @@ const props = withDefaults(
 
 watch(() => props.clientPos, setPositionMarker);
 
-const mapCenter = computedWithControl(
+let pannedOnce = false;
+const mapCenter = computedWithControl<
+    google.maps.LatLngLiteral | google.maps.LatLng,
+    any
+>(
     () => [props.center, props.clientPos, shapes.value],
     () => {
+        if (!props.locked && pannedOnce) return;
         if (props.center === 'position') {
             panMapToPos(props.clientPos, false);
-            return props.clientPos;
+            return undefined;
         }
         if (props.center === 'area') {
             if (all_overlays?.length > 0) panMapToShapes(all_overlays);
-            return map.value?.getCenter();
+            return undefined;
         }
-        return props.center ?? map.value?.getCenter();
+        if (props.center.lat != null && props.center.lng != null) {
+            return props.center;
+        }
+        return undefined;
     }
 );
 
@@ -183,24 +191,24 @@ function drawTracks() {
             editable: false,
             draggable: false,
         });
-        console.log(t);
         shapes?.forEach((s) => s.overlay?.setMap(map.value));
         progressLines.push(...shapes);
         const lastPosition = t.progress?.at(-1)?.track?.coordinates?.at(-1);
         if (lastPosition != null && t.id !== clientId.value) {
             const label = new MarkerWithLabel({
                 position: {
-                    lat: lastPosition[0],
-                    lng: lastPosition[1],
+                    lng: lastPosition[0],
+                    lat: lastPosition[1],
                 },
                 labelContent: markerHtmlFromTrack(t),
-                labelAnchor: new google.maps.Point(9, -6),
+                labelAnchor: new google.maps.Point(6, -6),
                 clickable: false,
                 draggable: false,
                 cursor: 'default',
                 icon: {
                     ...POSITION_ICON_INNER,
                     fillColor: t.color,
+                    scale: POSITION_ICON_INNER.scale * 0.6,
                     anchor: new google.maps.Point(12, 12),
                 },
             });
@@ -265,21 +273,25 @@ function panMapToPos(
     position: google.maps.LatLngLiteral | google.maps.LatLng,
     zoom: number | false = mapZoom
 ) {
-    if (position == null || Object.values(position).includes(null)) {
+    console.log(position.lat, position.lng);
+    if (position == null || position.lat == null || position.lng == null) {
         return;
     }
     try {
         map.value?.panTo(position);
+        pannedOnce = true;
     } catch (e) {
-        console.log(e);
+        console.warn('Failed to pan to pos', e);
     }
     if (zoom != false) map.value?.setZoom(zoom);
 }
 function panMapToShape(shape: TypedOverlay) {
     map.value.fitBounds(getShapeBounds(shape));
+    pannedOnce = true;
 }
 function panMapToShapes(shapes: TypedOverlay[]) {
     map.value.fitBounds(getShapeListBounds(shapes));
+    pannedOnce = true;
 }
 
 function addShapeChangeListeners(shape: any) {

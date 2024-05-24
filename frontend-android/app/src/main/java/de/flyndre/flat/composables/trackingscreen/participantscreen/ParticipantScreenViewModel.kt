@@ -3,10 +3,7 @@ package de.flyndre.flat.composables.trackingscreen.participantscreen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import de.flyndre.flat.composables.trackingscreen.TrackingScreenViewModel
 import de.flyndre.flat.interfaces.IConnectionService
-import de.flyndre.flat.interfaces.ITrackingService
-import de.flyndre.flat.models.CollectionArea
 import de.flyndre.flat.models.CollectionInstance
 import de.flyndre.flat.models.UserModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,58 +11,36 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class ParticipantScreenViewModel(connectionService: IConnectionService): ViewModel() {
-    private val connectionService = connectionService
     private lateinit var collectionInstance: CollectionInstance
+    private val connectionService = connectionService
 
     private val _users = MutableStateFlow(arrayListOf<UserModel>())
     val users = _users.asStateFlow()
 
-    private var _initialDivisions = arrayListOf<CollectionArea>()
-    private val _divisions = MutableStateFlow(arrayListOf<CollectionArea>())
-    val divisions = _divisions.asStateFlow()
-
     fun initialValues(collectionInstance: CollectionInstance){
-        _users.value = arrayListOf()
-        _users.value.addAll(collectionInstance.confirmedUsers)
-
-        _divisions.value = arrayListOf()
-        collectionInstance.collectionDivision.forEach { div ->
-            _divisions.value.add(div.copy())
-        }
-        _initialDivisions.clear()
-        _initialDivisions.addAll(collectionInstance.collectionDivision)
-
         this.collectionInstance = collectionInstance
-    }
 
-    fun saveAssignments(){
-        viewModelScope.launch {
-            for(iDiv in _initialDivisions){
-                val newDiv = _divisions.value.find { it.id.equals(iDiv.id) }
-                if(newDiv!!.clientId != null){
-                    if(!newDiv.clientId!!.equals(iDiv.clientId)){
-                        connectionService.assignCollectionArea(collectionInstance.id!!, iDiv, newDiv.clientId)
-                    }
-                }
+        //remove admin from users
+        val userList: ArrayList<UserModel> = arrayListOf()
+        for(user in collectionInstance.confirmedUsers){
+            if(!user.clientId.equals(collectionInstance.clientId)){
+                userList.add(user)
             }
         }
+
+        _users.value = userList
     }
 
-    fun restoreAssignments(){
-        _divisions.value = arrayListOf()
-
-        _initialDivisions.forEach { div ->
-            _divisions.value.add(div.copy())
+    fun kickUser(userModel: UserModel){
+        viewModelScope.launch {
+            connectionService.kickUser(collectionInstance, userModel.clientId)
         }
     }
-
-    fun setUserOfDivision(division: CollectionArea, user: UserModel){
-        _divisions.value.remove(division)
-        _divisions.value.add(division.copy(clientId = user.clientId))
-    }
 }
-class ParticipantScreenViewModelFactory(
-    val connectionService: IConnectionService) : ViewModelProvider.Factory{
+
+class CreateParticipantScreenViewModelFactory(
+    val connectionService: IConnectionService
+) : ViewModelProvider.Factory{
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return ParticipantScreenViewModel(connectionService) as T
     }

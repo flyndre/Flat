@@ -1,7 +1,9 @@
 package de.flyndre.flat.composables.trackingscreen
 
 import android.graphics.BitmapFactory
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,24 +30,26 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.Popup
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
@@ -56,8 +60,9 @@ import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import de.flyndre.flat.R
 import de.flyndre.flat.models.AccessResquestMessage
+import de.flyndre.flat.models.LeavingUserMessage
+import de.flyndre.flat.models.UserModel
 import qrcode.render.QRCodeGraphics
-import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,23 +70,44 @@ fun TrackingScreen(
     modifier: Modifier = Modifier,
     trackingScreenViewModel: TrackingScreenViewModel,
     onNavigateToInitialScreen: () -> Unit,
+    onNavigateToAssignmentScreen: () -> Unit,
     onNavigateToParticipantScreen: () -> Unit,
     onShareLink: ((String) -> Unit),
-    userId: UUID,
 ) {
     val trackingEnabled by trackingScreenViewModel.trackingEnabled.collectAsState()
     val localTrackList by trackingScreenViewModel.trackList.collectAsState()
     val remoteTrackList by trackingScreenViewModel.remoteTrackList.collectAsState()
+    val divisionList by trackingScreenViewModel.divisionList.collectAsState()
     val participantsToJoin by trackingScreenViewModel.participantsToJoin.collectAsState()
+    val participantsLeaved by trackingScreenViewModel.participantsLeaved.collectAsState()
     val qrCodeGraphics by trackingScreenViewModel.qrCodeGraphics.collectAsState()
     val joinLink by trackingScreenViewModel.joinLink.collectAsState()
     val cameraPosition by trackingScreenViewModel.cameraPosition.collectAsState()
     val cameraPositionState = rememberCameraPositionState {
         position = cameraPosition
     }
+    val userId by trackingScreenViewModel.clientId.collectAsState()
     var showLeavingDialog by remember { mutableStateOf(false) }
     var showClosingDialog by remember { mutableStateOf(false) }
     var showAddPaticipantsDialog by remember { mutableStateOf(false) }
+    val showCollectionClosedDialog by trackingScreenViewModel.showCollectionClosedDialog.collectAsState()
+    val showParticipantKickedDialog by trackingScreenViewModel.showParticipantKickedDialog.collectAsState()
+
+    BackHandler(enabled = true) {
+        if (trackingScreenViewModel.isThisUserAdmin()) {
+            showClosingDialog = true
+        } else {
+            showLeavingDialog = true
+        }
+    }
+
+    if(showParticipantKickedDialog){
+        ParticipantKickedDialog(onAccept = onNavigateToInitialScreen)
+    }
+
+    if(showCollectionClosedDialog){
+        CollectionClosedDialog(onAccept = onNavigateToInitialScreen)
+    }
 
     if (participantsToJoin.isNotEmpty()) {
         ParticipantJoinDialog(
@@ -101,6 +127,10 @@ fun TrackingScreen(
             },
             accessResquestMessage = participantsToJoin.get(0)
         )
+    }
+
+    if(participantsLeaved.isNotEmpty() && trackingScreenViewModel.isThisUserAdmin()){
+        UserLeavedCollectionDialog(leavingUserMessage = participantsLeaved.first(), onAccept = { trackingScreenViewModel.removeFirstLeavedparticipant() })
     }
 
     if (showLeavingDialog) {
@@ -124,9 +154,11 @@ fun TrackingScreen(
     }
 
     Scaffold(topBar = {
-        Row(){
-            if (!userId.equals(trackingScreenViewModel.collectionInstance.clientId)) {//if this user is no admin
-                FloatingActionButton(modifier = Modifier.padding(10.dp),onClick = { showLeavingDialog = true }) {
+        Row() {
+            if (!trackingScreenViewModel.isThisUserAdmin()) {
+                FloatingActionButton(
+                    modifier = Modifier.padding(10.dp),
+                    onClick = { showLeavingDialog = true }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "back to start screen"
@@ -174,20 +206,25 @@ fun TrackingScreen(
         }
     }, floatingActionButton = {
         Column {
-            if (userId.equals(trackingScreenViewModel.collectionInstance.clientId)) {
+            if (trackingScreenViewModel.isThisUserAdmin()) {
                 AdminMenu(
                     onClosingCollection = { showClosingDialog = true },
+                    onNavigateToAssignmentScreen = onNavigateToAssignmentScreen,
                     onNavigateToParticipantScreen = onNavigateToParticipantScreen,
                     trackingScreenViewModel = trackingScreenViewModel
                 )
             }
-            FloatingActionButton(modifier = Modifier.padding(10.dp), onClick = { trackingScreenViewModel.centerOnPosition(cameraPositionState = cameraPositionState) }) {
+            FloatingActionButton(
+                modifier = Modifier.padding(10.dp),
+                onClick = { trackingScreenViewModel.centerOnPosition(cameraPositionState = cameraPositionState) }) {
                 Icon(
                     imageVector = Icons.Filled.LocationOn,
                     contentDescription = "center on own location"
                 )
             }
-            FloatingActionButton(modifier = Modifier.padding(10.dp), onClick = { trackingScreenViewModel.centerOnOwnArea(cameraPositionState = cameraPositionState, ownId = userId) }) {
+            FloatingActionButton(
+                modifier = Modifier.padding(10.dp),
+                onClick = { trackingScreenViewModel.centerOnOwnArea(cameraPositionState = cameraPositionState) }) {
                 Icon(
                     painter = painterResource(id = R.drawable.texture_fill),
                     contentDescription = "center on own location"
@@ -210,7 +247,15 @@ fun TrackingScreen(
                         list.add(LatLng(position.latitude, position.longitude))
                     }
                     if (list.isNotEmpty()) {
-                        Polyline(points = list)
+                        Polyline(points = list, color = Color(66, 90, 245))
+                        if (track.equals(localTrackList.tracks.last())) {
+                            Circle(
+                                center = list.last(),
+                                radius = 2.0,
+                                strokeColor = Color(66, 90, 245),
+                                fillColor = Color(66, 90, 245)
+                            )
+                        }
                     }
                 }
             }
@@ -223,16 +268,23 @@ fun TrackingScreen(
                             list.add(LatLng(position.latitude, position.longitude))
                         }
                         if (list.isNotEmpty()) {
-                            Polyline(points = list)
-                            Circle(center = list.last(), radius = 5.0)
+                            Polyline(points = list, color = Color(66, 90, 245))
+                            if (track.equals(trackCollection.value.tracks.last())) {
+                                Circle(
+                                    center = list.last(),
+                                    radius = 2.0,
+                                    strokeColor = Color(66, 90, 245),
+                                    fillColor = Color(66, 90, 245)
+                                )
+                            }
                         }
                     }
 
                 }
             }
             //rendering collection areas
-            if (trackingScreenViewModel.collectionInstance.collectionDivision.isNotEmpty()) {
-                for (collectionArea in trackingScreenViewModel.collectionInstance.collectionDivision) {
+            if (divisionList.isNotEmpty()) {
+                for (collectionArea in divisionList) {
                     //get inner list of multipolygon and draw it on map
                     val area = collectionArea.area.coordinates[0]
                     //convert list<position> in list<latlong>
@@ -247,13 +299,13 @@ fun TrackingScreen(
                     val blue: Int = Integer.parseInt(collectionArea.color.substring(5), 16)
 
                     //paint own collections with higher alpha
-                    if(userId.equals(collectionArea.clientId)){
+                    if (userId.equals(collectionArea.clientId.toString())) {
                         Polygon(
                             points = list,
                             strokeColor = Color(red, green, blue, alpha = 255),
                             fillColor = Color(red, green, blue, alpha = 127)
                         )
-                    }else{
+                    } else {
                         Polygon(
                             points = list,
                             strokeColor = Color(red, green, blue, alpha = 63),
@@ -269,26 +321,57 @@ fun TrackingScreen(
 @Composable
 fun AdminMenu(
     onClosingCollection: () -> Unit,
+    onNavigateToAssignmentScreen: () -> Unit,
     onNavigateToParticipantScreen: () -> Unit,
     trackingScreenViewModel: TrackingScreenViewModel,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    Box {
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(
-                text = { Text(text = "End Collection") },
-                onClick = { onClosingCollection() })
-            HorizontalDivider()
-            DropdownMenuItem(text = { Text(text = "Manage Groups") }, onClick = {
-                trackingScreenViewModel.updateParticipantScreenViewModel()
-                onNavigateToParticipantScreen()
-            })
-        }
+    Row() {
+
         FloatingActionButton(modifier = Modifier.padding(10.dp), onClick = { expanded = true }) {
             Icon(Icons.Filled.MoreVert, contentDescription = "open collection management")
+            if (expanded) {
+                Popup(
+                    onDismissRequest = { expanded = false },
+                    alignment = Alignment.TopEnd,
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.End
+                    ) {
+                        ExtendedFloatingActionButton(
+                            modifier = Modifier.padding(bottom = 10.dp),
+                            onClick = {
+                                expanded = false
+                                onClosingCollection()
+                            })
+                        {
+                            Text(text = "End Collection")
+                        }
+                        ExtendedFloatingActionButton(
+                            modifier = Modifier.padding(vertical = 10.dp),
+                            onClick = {
+                                expanded = false
+                                trackingScreenViewModel.updateAssignmentScreenViewModel()
+                                onNavigateToAssignmentScreen()
+                            }) {
+                            Text(text = "Manage Groups")
+                        }
+                        ExtendedFloatingActionButton(
+                            modifier = Modifier.padding(vertical = 10.dp),
+                            onClick = {
+                                expanded = false
+                                trackingScreenViewModel.updateParticipantScreenViewModel()
+                                onNavigateToParticipantScreen()
+                            }) {
+                            Text(text = "Manage Participants")
+                        }
+                    }
+                }
+            }
         }
     }
+
 }
 
 @Composable
@@ -392,6 +475,61 @@ fun ClosingDialog(onDecline: () -> Unit, onAccept: () -> Unit) {
 }
 
 @Composable
+fun UserLeavedCollectionDialog(leavingUserMessage: LeavingUserMessage, onAccept: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = { onAccept() },
+        confirmButton = {
+            TextButton(onClick = { onAccept() }) {
+                Text(text = "OK")
+            }
+        },
+        icon = {
+            Icon(imageVector = Icons.Default.Info, contentDescription = "user left the collection")
+        },
+        title = {
+            Text(text = "Information")
+        },
+        text = { Text(text = "Der Nutzer " + leavingUserMessage.user.username + " hat die Sammlung verlassen.")}
+    )
+}
+
+@Composable
+fun CollectionClosedDialog(onAccept: () -> Unit){
+    AlertDialog(onDismissRequest = { onAccept() },
+        confirmButton = { 
+            TextButton(onClick = { onAccept() }) {
+                Text(text = "OK")
+            }
+        },
+        icon = {
+            Icon(imageVector = Icons.Default.Info, contentDescription = "collection was closed")
+        },
+        title = {
+            Text(text = "Information")
+        },
+        text = { Text(text = "Die Sammlung wurde vom Administrator beendet.")}
+    )
+}
+
+@Composable
+fun ParticipantKickedDialog(onAccept: () -> Unit){
+    AlertDialog(onDismissRequest = { onAccept() },
+        confirmButton = {
+            TextButton(onClick = { onAccept() }) {
+                Text(text = "OK")
+            }
+        },
+        icon = {
+            Icon(imageVector = Icons.Default.Info, contentDescription = "collection was closed")
+        },
+        title = {
+            Text(text = "Information")
+        },
+        text = { Text(text = "Du wurdest vom Administrator aus der Sammlung entfernt.")}
+    )
+}
+
+@Composable
 fun AddParticipantDialog(
     onDismissRequest: () -> Unit,
     onShareButtonClick: (String) -> Unit,
@@ -408,7 +546,7 @@ fun AddParticipantDialog(
                 ).asImageBitmap(), contentDescription = ""
             )
             SelectionContainer(modifier = Modifier.padding(10.dp)) {
-                TextField(joinLink,{val s = it}, readOnly = true)
+                TextField(joinLink, { val s = it }, readOnly = true)
             }
             Button(onClick = { onShareButtonClick(joinLink) }) {
                 Text(text = "Share")

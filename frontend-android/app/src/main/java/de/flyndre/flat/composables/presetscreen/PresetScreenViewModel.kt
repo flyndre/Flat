@@ -130,7 +130,7 @@ class PresetScreenViewModel(
                         Polygon(coordinates = listOf(positionList), null)
                     val collectionArea = de.flyndre.flat.models.CollectionArea(
                         multiPolygon,
-                        name = "Area" + _collectionAreaScreenViewModel.getListAreas().indexOf(area),
+                        name = area.name,
                         color = "#" + Integer.toHexString((area.color.red*255).toInt()) + Integer.toHexString((area.color.green*255).toInt()) + Integer.toHexString((area.color.blue*255).toInt())
                     )
                     collectionAreaModelList.add(collectionArea)

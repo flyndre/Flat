@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,6 +24,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,6 +36,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -44,11 +47,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
@@ -83,16 +88,18 @@ fun CollectionAreaScreen(
     val cameraPositionState = rememberCameraPositionState {
         position = cameraPosition
     }
-    //modal bottom sheet for choosing area
+    //editing area names
+    var areaName by remember { mutableStateOf("") }
+    var areaIndex: Long? by remember { mutableStateOf(null) }
+
     Scaffold(
         topBar = {
             TopAppBar(title = {
                 Row(
                     Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "area count: " + collectionAreas.size)
                     IconButton(onClick = {
                         collectionAreaScreenViewModel.saveChanges()
                         collectionAreaScreenViewModel.setCameraPosition(cameraPositionState.position)
@@ -171,7 +178,7 @@ fun CollectionAreaScreen(
                             )
                         }
                         SmallFloatingActionButton(onClick = {
-                            collectionAreaScreenViewModel.addPoint(
+                            collectionAreaScreenViewModel.addCollectionAreaPoint(
                                 cameraPositionState.position.target
                             )
                         }) {
@@ -278,9 +285,12 @@ fun CollectionAreaScreen(
             mapProperties = MapProperties(isMyLocationEnabled = true)
             mapsModifier = mapsModifier.height((LocalConfiguration.current.screenHeightDp * 0.5).dp)
         }
-
-        Column(modifier = Modifier.padding(innerPadding)) {
+        Box(modifier = Modifier
+            .padding(innerPadding)
+            .fillMaxHeight()
+            .fillMaxWidth()) {
             //map
+
             GoogleMap(
                 modifier = mapsModifier,
 
@@ -289,10 +299,6 @@ fun CollectionAreaScreen(
 
                 cameraPositionState = cameraPositionState,
             ) {
-                if(drawingEnabled){
-                    Marker(state = MarkerState(cameraPositionState.position.target))
-                }
-
                 if (collectionAreas.isNotEmpty()) {
                     collectionAreas.forEach { area ->
                         if (area.listAreaPoints.isNotEmpty()) {
@@ -301,11 +307,27 @@ fun CollectionAreaScreen(
                                 fillColor = area.color.copy(alpha = 0.5f),
                                 strokeColor = area.color.copy(alpha = 1F)
                             )
+                            if(area.isSelected&&area.listAreaPoints.isNotEmpty()){
+                                area.listAreaPoints.forEach {
+                                    Circle(
+                                        center = it,
+                                        radius = 2.0,
+                                        fillColor = area.color.copy(alpha = 1F),
+                                        strokeColor = area.color.copy(alpha = 1F))
+                                }
+                            }
                         }
                     }
                 }
             }
-
+            if(drawingEnabled){
+                Icon(
+                    Icons.Filled.Add, "Cursor", modifier = Modifier
+                        .align(Alignment.Center)
+                        .height(40.dp)
+                        .width(40.dp), tint = Color.Black
+                )
+            }
             //list of areas if navigation is set to
             if (selectedNavigationItem == 2) {
                 LazyColumn {
@@ -317,13 +339,47 @@ fun CollectionAreaScreen(
                             )
                         },
                             headlineContent = {
-                                Text(
-                                    text = "Area " + (collectionAreas.indexOf(
-                                        it
-                                    ) + 1)
-                                )
+                                if(areaIndex == null){
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = it.name
+                                        )
+                                        IconButton(onClick = {
+                                            areaName = it.name
+                                            areaIndex = collectionAreas.indexOf(it).toLong()
+                                        }) {
+                                            Icon(imageVector = Icons.Filled.Edit, contentDescription = "edit area name")
+                                        }
+                                    }
+                                }else{
+                                    if(areaIndex!!.toInt() == collectionAreas.indexOf(it)){
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            TextField(value = areaName, onValueChange = {areaName = it}, trailingIcon = {
+                                                IconButton(onClick = {
+                                                    collectionAreaScreenViewModel.setCollectionAreaName(it, areaName)
+                                                    areaName = ""
+                                                    areaIndex = null
+                                                }) {
+                                                    Icon(painterResource(id = de.flyndre.flat.R.drawable.save_fill), contentDescription = "save area name")
+                                                }
+                                            })
+                                        }
+                                    }else{
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Text(
+                                                text = it.name
+                                            )
+                                            IconButton(onClick = {
+                                                areaName = it.name
+                                                areaIndex = collectionAreas.indexOf(it).toLong()
+                                            }) {
+                                                Icon(imageVector = Icons.Filled.Edit, contentDescription = "edit area name")
+                                            }
+                                        }
+                                    }
+                                }
                             },
-                            supportingContent = {
+                            leadingContent = {
                                 Box(
                                     modifier = Modifier
                                         .size(12.dp)

@@ -12,7 +12,7 @@ namespace FlatBackend.Database
         public MongoClient Mongo;
         public IMongoCollection<CollectionModel> collection;
 
-        public MongoDBService(string connectionString)
+        public MongoDBService( string connectionString )
         {
             Mongo = new MongoClient(connectionString);
             collection = Mongo.GetDatabase("CollectionsDatabase").GetCollection<CollectionModel>("collections");
@@ -40,7 +40,12 @@ namespace FlatBackend.Database
         {
             try
             {
-                return await collection.Find(r => r.id == id).FirstAsync();
+                var collections = await collection.Find(r => r.id == id).ToListAsync();
+                if (collections.Count > 0)
+                {
+                    return collections.First();
+                }
+                else return null;
             }
             catch (Exception ex)
             {

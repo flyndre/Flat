@@ -87,10 +87,21 @@
         "action_manage": "Teilnehmer verwalten",
         "action_invite": "Teilnehmer einladen",
         "action_leave": "Sammlung verlassen",
+        "action_leave_warning": "Sicher, dass die Sammlung verlassen werden soll?",
         "action_start_tracking": "Tracking starten",
         "action_pause_tracking": "Tracking pausieren",
         "leave_success": "Die Sammlung {collectionName} wurde verlassen.",
-        "leave_failed": "Verlassen der Sammlung fehlgeschlagen."
+        "leave_failed": "Verlassen der Sammlung fehlgeschlagen.",
+        "close_success": "Sammlung erfolgreich beendet.",
+        "close_failed": "Schließen der Sammlung fehlgeschlagen.",
+        "action_end_warning": [
+            "Sicher, dass die laufende Sammlung beendet werden soll?",
+            "Diese Aktion ist endgültig.",
+            "Das Tracken aller Teilnehmer wird beendet und alle aufgenommenen Routen werden allein auf diesem Gerät gespeichert."
+        ],
+        "action_end_confirm": "Sammlung endgültig beenden",
+        "kick_success": "{participantName} erfolgreich rausgeschmissen",
+        "kick_failed": "Rausschmiss von {participantName} fehlgeschlagen"
     },
     "components": {
         "code_reader": {
@@ -160,7 +171,9 @@
             "title": "Beitrittsanfragen"
         },
         "participants_list": {
-            "confirmation_message": "Sicher, dass {participantName} aus der Sammlung geschmissen werden soll?"
+            "confirmation_message": "Sicher, dass {participantName} aus der Sammlung geschmissen werden soll?",
+            "inactive": "Ausgeschieden",
+            "self": "Dieses Gerät"
         },
         "map_with_controls": {
             "map": "Karte",
@@ -210,6 +223,26 @@
                 "delete_introduction": "Am Fuße der Liste befindet sich ein Button zum Löschen aller Bereiche.",
                 "delete_all": "Alle löschen"
             }
+        },
+        "stats_list": {
+            "header": "Archivierte Durchführungen"
+        },
+        "stats_dialog": {
+            "title": "Statistiken",
+            "share_title": "Sieh dir die Statistiken von {collectionName} am {startDay} an! 💪",
+            "share_text": "Insgesamt wurden {totalArea} km² abgedeckt, wovon {topParticipant} mit einer Gesamtstrecke von {topDistance} km die größte Strecke zurückgelegt hat. 🤯🥳",
+            "share_failed": "Teilen fehlgeschlagen",
+            "delete": "Statistik löschen",
+            "delete_success": "Statistik gelöscht",
+            "delete_failed": "Löschen fehlgeschlagen"
+        },
+        "stats_display": {
+            "title_general": "Allgemein",
+            "title_divisions": "Bereiche",
+            "title_participants": "Teilnehmer",
+            "date": "Zeitraum",
+            "duration": "Dauer",
+            "area_total": "Gesamtfläche"
         }
     }
 }

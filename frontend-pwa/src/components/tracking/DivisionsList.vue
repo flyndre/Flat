@@ -7,6 +7,7 @@ import { mdiAccountCircle, mdiAccountOff, mdiTextureBox } from '@mdi/js';
 import Dropdown from 'primevue/dropdown';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
+import { computed } from 'vue';
 
 const props = withDefaults(
     defineProps<{
@@ -19,6 +20,10 @@ const props = withDefaults(
         divisions: () => [],
         adminMode: false,
     }
+);
+
+const activeParticipants = computed(() =>
+    props.participants.filter((p) => p.active !== false)
 );
 
 const emit = defineEmits<{
@@ -46,7 +51,9 @@ function updateAssignment(
 }
 
 function getAssignedParticipant(division: Division) {
-    return props.participants.find((p) => p.id === division.clientId);
+    return props.participants.find(
+        (p) => p.id === division.clientId && p.active !== false
+    );
 }
 </script>
 
@@ -63,12 +70,12 @@ function getAssignedParticipant(division: Division) {
                     }"
                     :icon="mdiTextureBox"
                 />
-                {{ division.name }}
+                <span class="font-semibold">{{ division.name }}</span>
             </InputGroupAddon>
             <Dropdown
                 class="basis-3/5"
                 :model-value="getAssignedParticipant(division)"
-                :options="participants"
+                :options="activeParticipants"
                 @update:model-value="(v) => updateAssignment(division, v)"
                 :disabled="!adminMode"
                 show-clear

@@ -87,10 +87,21 @@
         "action_manage": "Administrar participantes",
         "action_invite": "Invitar participantes",
         "action_leave": "Dejar colección",
+        "action_leave_warning": "¿Estás seguro de que quieres dejar esta colección?",
         "action_start_tracking": "Iniciar seguimiento",
         "action_pause_tracking": "Pausar seguimiento",
         "leave_success": "El colección {collectionName} fue abandonada.",
-        "leave_failed": "No se pudo salir de la colección."
+        "leave_failed": "No se pudo salir de la colección.",
+        "close_success": "Colección completada exitosamente.",
+        "close_failed": "Error al cerrar la colección.",
+        "action_end_warning": [
+            "¿Está seguro de que desea terminar la colección en curso?",
+            "Esta acción es irreversible.",
+            "Detendrá el seguimiento de todos los participantes y guardará todos los movimientos rastreados únicamente en su dispositivo."
+        ],
+        "action_end_confirm": "Finalizar permanente",
+        "kick_success": "{participantName} fue expulsado con éxito.",
+        "kick_failed": "No se pudo expulsar a {participantName}"
     },
     "components": {
         "code_reader": {
@@ -160,7 +171,9 @@
             "title": "Solicitud de ingreso"
         },
         "participants_list": {
-            "confirmation_message": "¿Estás seguro de que quieres eliminar a {participantName} de la colección?"
+            "confirmation_message": "¿Estás seguro de que quieres eliminar a {participantName} de la colección?",
+            "inactive": "Eliminado",
+            "self": "Este Dispositivo"
         },
         "map_with_controls": {
             "map": "Mapa",
@@ -178,7 +191,7 @@
             "search_failed_text": "La API respondió con el código de estado {código}."
         },
         "divisions_list": {
-            "division_name": "Nombre del área",
+            "division_name": "Nombre del división",
             "delete_all": "Limpiar todo"
         },
         "map_help": {
@@ -198,9 +211,9 @@
             },
             "explanation_tools": {
                 "introduction": "La pestaña \"Herramientas\" contiene todo lo necesario para dibujar las áreas, como por ejemplo:",
-                "draw_division": "Marcar una nueva área",
-                "delete_selected": "Eliminar el área actualmente seleccionada",
-                "select_color": "Paleta de colores de área disponibles"
+                "draw_division": "Marcar una nuevo departamento",
+                "delete_selected": "Eliminar el departamento actualmente seleccionado",
+                "select_color": "Paleta de colores de departamentos disponibles"
             },
             "explanation_divisions": {
                 "introduction": "En la pestaña \"Departamentos\" puede encontrar una descripción general de todas los departamentos que ya se han dibujado. ",
@@ -210,6 +223,26 @@
                 "delete_introduction": "Al final de la lista hay un botón para eliminar todas las departamentos.",
                 "delete_all": "Limpiar todo"
             }
+        },
+        "stats_list": {
+            "header": "Archivo"
+        },
+        "stats_dialog": {
+            "title": "Estadísticas",
+            "share_title": "¡Mira las estadísticas de {collectionName}! 💪",
+            "share_text": "En total se recorrieron {totalArea} km², de los cuales {topParticipant} cubrió la mayor distancia de {topDistance} km. 🤯🥳",
+            "share_failed": "Compartir falló",
+            "delete": "Eliminar Estadística",
+            "delete_success": "Estadísticas eliminadas con éxito",
+            "delete_failed": "Eliminar falló"
+        },
+        "stats_display": {
+            "title_general": "Generalmente",
+            "title_divisions": "Departamentos",
+            "title_participants": "Participantes",
+            "date": "Fecha",
+            "duration": "Período",
+            "area_total": "Área Total"
         }
     }
 }

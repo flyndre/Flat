@@ -63,8 +63,11 @@ namespace FlatBackend.Controllers
                         case WebSocketMessageType.IncrementalTrack:
                             var track = JsonConvert.DeserializeObject<IncrementalTrackDto>(Json);
                             var collectionId = _WebsocketManager.getCollectionId(webSocket);
-                            _WebsocketManager.addTrackToTrackCollection(track, collectionId);
-                            _WebsocketManager.sendGPSTrack(track, collectionId);
+                            if (collectionId != null || collectionId != Guid.Empty)
+                            {
+                                _WebsocketManager.addTrackToTrackCollection(track, collectionId);
+                                _WebsocketManager.sendGPSTrack(track, collectionId);
+                            }
                             break;
 
                         case WebSocketMessageType.AccessRequest:
@@ -84,15 +87,18 @@ namespace FlatBackend.Controllers
                             break;
                     };
                 }
+                buffer = new byte[1024 * 4];
 
                 //await webSocket.SendAsync(
                 //    new ArraySegment<byte>(buffer, 0, receiveResult.Count),
                 //    receiveResult.MessageType,
                 //    receiveResult.EndOfMessage,
                 //    CancellationToken.None);
-
-                receiveResult = await webSocket.ReceiveAsync(
-                    new ArraySegment<byte>(buffer), CancellationToken.None);
+                if (webSocket.State == WebSocketState.Open)
+                {
+                    receiveResult = await webSocket.ReceiveAsync(
+                        new ArraySegment<byte>(buffer), CancellationToken.None);
+                }
             }
             _WebsocketManager.removeWebsocketUser(webSocket);
             await webSocket.CloseAsync(
