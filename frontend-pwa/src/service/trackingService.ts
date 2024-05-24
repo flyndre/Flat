@@ -31,7 +31,7 @@ const {
             stop();
             return;
         }
-        const position = [coords.value.latitude, coords.value.longitude];
+        const position = [coords.value.longitude, coords.value.latitude];
         if (position.includes(null) || position.includes(undefined)) {
             _errorOverride.value = {
                 code: 3,
