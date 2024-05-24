@@ -8,6 +8,7 @@ import InvitationDialog from '@/components/tracking/InvitationDialog.vue';
 import JoinRequestDialog from '@/components/tracking/JoinRequestDialog.vue';
 import ParticipantsList from '@/components/tracking/ParticipantsList.vue';
 import { clientId } from '@/data/clientMetadata';
+import { lastActiveCollection } from '@/data/collections';
 import { collectionStatsDB } from '@/data/collectionStats';
 import { TOAST_LIFE } from '@/data/constants';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
@@ -112,6 +113,7 @@ const adminActions: MenuItem[] = [
 function _clearUpBeforeLeave() {
     stopTrackingLogs();
     stopTrackingCollection();
+    lastActiveCollection.set(undefined);
 }
 
 async function leaveCollectionHandler() {

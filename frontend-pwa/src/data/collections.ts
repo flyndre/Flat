@@ -22,7 +22,7 @@ export const lastActiveCollection = {
     get: (): ActiveCollection =>
         JSON.parse(localStorage.getItem('lastActiveCollection')),
     set: (v: ActiveCollection) =>
-        localStorage.setItem('lastActiveCollection', JSON.stringify(v)),
+        localStorage.setItem('lastActiveCollection', JSON.stringify(v ?? null)),
 };
 
 export function autoUpdateLastActiveCollection(
