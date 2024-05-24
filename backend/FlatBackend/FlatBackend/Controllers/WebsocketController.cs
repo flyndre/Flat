@@ -94,9 +94,11 @@ namespace FlatBackend.Controllers
                 //    receiveResult.MessageType,
                 //    receiveResult.EndOfMessage,
                 //    CancellationToken.None);
-
-                receiveResult = await webSocket.ReceiveAsync(
-                    new ArraySegment<byte>(buffer), CancellationToken.None);
+                if (webSocket.State == WebSocketState.Open)
+                {
+                    receiveResult = await webSocket.ReceiveAsync(
+                        new ArraySegment<byte>(buffer), CancellationToken.None);
+                }
             }
             _WebsocketManager.removeWebsocketUser(webSocket);
             await webSocket.CloseAsync(
