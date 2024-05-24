@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { accessRequest } from '@/api/rest';
+import bannerSrc from '@/assets/images/branding-white.webp?url';
 import CardProgressIndicator from '@/components/card/CardProgressIndicator.vue';
 import MdiInputIcon from '@/components/icons/MdiInputIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import { clientId } from '@/data/clientMetadata';
+import { lastActiveCollection } from '@/data/collections';
 import { TOAST_LIFE } from '@/data/constants';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { isOnMobile } from '@/util/mobileDetection';
@@ -19,13 +21,11 @@ import Button from 'primevue/button';
 import Card from 'primevue/card';
 import Dialog from 'primevue/dialog';
 import IconField from 'primevue/iconfield';
-import Image from 'primevue/image';
 import InputText from 'primevue/inputtext';
 import { useToast } from 'primevue/usetoast';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import bannerSrc from '@/assets/images/branding-white.webp?url';
 
 const props = defineProps<{
     id: string;
@@ -39,6 +39,7 @@ const submittable = computed(() => validateJoinName(joinName.value));
 const dialogVisible = ref(false);
 
 async function join() {
+    lastActiveCollection.set(undefined);
     dialogVisible.value = true;
     const response = await accessRequest(
         joinName.value,

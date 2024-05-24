@@ -6,6 +6,7 @@ import {
     leaveCollection,
 } from '@/api/rest';
 import { clientId } from '@/data/clientMetadata';
+import { lastActiveCollection } from '@/data/collections';
 import { SERVER_UPDATE_INTERVAL } from '@/data/constants';
 import { trackingLogDB } from '@/data/trackingLogs';
 import { ActiveCollection } from '@/types/ActiveCollection';
@@ -14,15 +15,16 @@ import { ParticipantTrack } from '@/types/ParticipantTrack';
 import { IncrementalTrackMessage } from '@/types/websocket/IncrementalTrackMessage';
 import { InviteMessage } from '@/types/websocket/InviteMessage';
 import { UpdateCollectionMessage } from '@/types/websocket/UpdateCollectionMessage';
+import { mergeActiveCollections } from '@/util/activeCollectionUtils';
 import { getParticipantColor } from '@/util/trackingUtils';
-import { useIntervalFn } from '@vueuse/core';
+import { useIntervalFn, watchDebounced } from '@vueuse/core';
 import { computed, ref } from 'vue';
 
 let ws: WebSocket = null;
 const _websocketStatus = ref<number>(null);
 
 function initialiseWebsocket() {
-    ws = new WebSocket('wss://flat.buhss.de/api/ws');
+    ws = new WebSocket(import.meta.env.VITE_WS_BASE_URL);
 
     ws.onmessage = function (event) {
         _websocketStatus.value = ws.readyState;
@@ -119,23 +121,16 @@ function handleWebsocketMessage(message: any) {
             handleIncrementalTracks(<IncrementalTrackMessage>message);
             break;
 
-        //LeaveMessage
-        //DeleteMessage
+        // TODO:
+        // LeaveMessage (message to admin that participant left)
+        // DeleteMessage & EndCollectionMessage (messages to participants that collection is closed and message to admin with collection summary)
+        // KickedUserMessage (message to participant that he has been kicked)
     }
 }
 
 function _assignDivision(d: Division, p: ParticipantTrack | null) {
-    let div = _activeCollection.value.divisions.find((el) => d.id === el.id);
-
-    div.clientId = p === null ? null : p.id;
-    divideCollectionArea(_activeCollection.value.id, [div]);
-
-    if (p !== null) {
-        let user = _activeCollection.value.confirmedUsers.filter(
-            (el) => el.id === p.id
-        )[0];
-        user.color = div.color;
-    }
+    d.clientId = p === null ? null : p.id;
+    divideCollectionArea(_activeCollection.value.id, [d]);
 }
 
 function _startTracking() {
@@ -172,20 +167,25 @@ export function establishWebsocket(clientId: string, collectionId: string) {
     );
 }
 
+let stopWatchHandle = null;
+
 export const useCollectionService = (id: string) => {
     _activeCollection.value.id = id;
     let response = getCollection(id, clientId.value);
 
     response.then(({ data }) => {
         console.log(data);
-        _activeCollection.value.id = data.id;
-        _activeCollection.value.adminClientId = data.clientId;
-        _activeCollection.value.name = data.name;
-        _activeCollection.value.area = data.area;
-        _activeCollection.value.divisions = data.collectionDivision;
-        _activeCollection.value.requestedUsers = [];
-        _activeCollection.value.confirmedUsers = data.confirmedUsers.map(
-            (user) => {
+
+        _isAdmin.value = data.clientId === clientId.value;
+
+        const collection = {
+            id: data.id,
+            adminClientId: data.clientId,
+            name: data.name,
+            area: data.area,
+            divisions: data.collectionDivision,
+            requestedUsers: data.requestedUsers,
+            confirmedUsers: data.confirmedUsers.map((user) => {
                 return {
                     name: user.username,
                     id: user.clientId,
@@ -195,11 +195,32 @@ export const useCollectionService = (id: string) => {
                     ),
                     progress: [],
                 };
+            }),
+        };
+
+        const lastActive = lastActiveCollection.get();
+        if (lastActive != null && lastActive.id === id) {
+            _activeCollection.value = mergeActiveCollections(
+                lastActive,
+                collection
+            );
+        } else {
+            lastActiveCollection.set(collection);
+            _activeCollection.value = collection;
+        }
+
+        stopWatchHandle = watchDebounced(
+            _activeCollection,
+            (v) => lastActiveCollection.set(v),
+            {
+                deep: true,
+                debounce: 1000,
             }
         );
 
-        _activeCollection.value.requestedUsers = data.requestedUsers;
-        _isAdmin.value = data.clientId === clientId.value;
+        if (_isAdmin.value && _activeCollection.value.startDate == null) {
+            _activeCollection.value.startDate = new Date();
+        }
 
         _isLoading.value = false;
     });
@@ -211,10 +232,10 @@ export const useCollectionService = (id: string) => {
         activeCollection: computed(() => ({
             ..._activeCollection.value,
             confirmedUsers: _activeCollection.value.confirmedUsers?.map(
-                (u) => ({
-                    ...u,
+                (participant) => ({
+                    ...participant,
                     color: getParticipantColor(
-                        u.id,
+                        participant,
                         _activeCollection.value.divisions
                     ),
                 })
@@ -226,8 +247,6 @@ export const useCollectionService = (id: string) => {
             leaveCollection(collId, clientId),
         kick: (collId: string, clId: string) =>
             kickUser(collId, clId, clientId.value),
-        requests: computed(() => _activeCollection.value.requestedUsers),
-        member: computed(() => _activeCollection.value.confirmedUsers),
         handleRequest: (
             choice: boolean,
             username: string,
@@ -281,22 +300,19 @@ function handleCollectionUpdate(message: UpdateCollectionMessage) {
             _activeCollection.value.confirmedUsers.push({
                 name: element.username,
                 id: element.clientId,
-                color: getParticipantColor(
-                    element.clientId,
-                    message.collection.collectionDivision
-                ),
                 progress: [],
             });
         }
     });
 
     _activeCollection.value.confirmedUsers =
-        _activeCollection.value.confirmedUsers.filter(
-            (elem) =>
+        _activeCollection.value.confirmedUsers.map((existing) => ({
+            ...existing,
+            active:
                 message.collection.confirmedUsers.find(
-                    (el) => elem.id === el.clientId
-                ) !== undefined
-        );
+                    (active) => existing.id === active.clientId
+                ) !== undefined,
+        }));
 }
 
 function handleIncrementalTracks(message: IncrementalTrackMessage) {

@@ -20,11 +20,11 @@ export function areaFromShapeList(
         coordinates: [
             [
                 [
-                    [areaBounds.north, areaBounds.west],
-                    [areaBounds.north, areaBounds.east],
-                    [areaBounds.south, areaBounds.east],
-                    [areaBounds.south, areaBounds.west],
-                    [areaBounds.north, areaBounds.west],
+                    [areaBounds.west, areaBounds.north],
+                    [areaBounds.east, areaBounds.north],
+                    [areaBounds.east, areaBounds.south],
+                    [areaBounds.west, areaBounds.south],
+                    [areaBounds.west, areaBounds.north],
                 ],
             ],
         ],

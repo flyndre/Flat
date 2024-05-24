@@ -122,7 +122,7 @@ fun DropDownUserSelection(
             users.forEach { user ->
                 DropdownMenuItem(
                     text = { Text(text = user.username) },
-                    onClick = { assignmentScreenViewModel.setUserOfDivision(division, user); userDisplay = user.username })
+                    onClick = { assignmentScreenViewModel.setUserOfDivision(division, user); userDisplay = user.username; expanded = false })
             }
         }
     }
