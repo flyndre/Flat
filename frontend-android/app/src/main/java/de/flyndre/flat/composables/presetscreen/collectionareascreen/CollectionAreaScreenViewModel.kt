@@ -29,11 +29,16 @@ class CollectionAreaScreenViewModel(
     private val _cameraPosition = MutableStateFlow(CameraPosition(LatLng(0.0, 0.0), 0F, 0F, 0F))
     val cameraPosition: StateFlow<CameraPosition> = _cameraPosition.asStateFlow()
 
+    //own location marker
+    private val _ownLocation = MutableStateFlow<LatLng?>(null)
+    val ownLocation = _ownLocation.asStateFlow()
+
 
     fun centerOnPosition(cameraPositionState: CameraPositionState){
         var currentPosition :LatLng
         viewModelScope.launch(Dispatchers.Default){
             currentPosition = _trackingService.getCurrentPosition()
+            _ownLocation.value = currentPosition
             viewModelScope.launch(Dispatchers.Main) {
                 cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(currentPosition, 18F))
             }

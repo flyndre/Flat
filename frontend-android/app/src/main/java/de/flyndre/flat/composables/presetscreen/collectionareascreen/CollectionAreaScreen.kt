@@ -88,6 +88,7 @@ fun CollectionAreaScreen(
     val cameraPositionState = rememberCameraPositionState {
         position = cameraPosition
     }
+    val ownLocation by collectionAreaScreenViewModel.ownLocation.collectAsState()
     //editing area names
     var areaName by remember { mutableStateOf("") }
     var areaIndex: Long? by remember { mutableStateOf(null) }
@@ -299,6 +300,7 @@ fun CollectionAreaScreen(
 
                 cameraPositionState = cameraPositionState,
             ) {
+                //draw areas
                 if (collectionAreas.isNotEmpty()) {
                     collectionAreas.forEach { area ->
                         if (area.listAreaPoints.isNotEmpty()) {
@@ -318,6 +320,15 @@ fun CollectionAreaScreen(
                             }
                         }
                     }
+                }
+                //draw own location indicator
+                if(ownLocation != null){
+                    Circle(
+                        center = ownLocation!!,
+                        radius = 2.0,
+                        strokeColor = Color(66, 90, 245),
+                        fillColor = Color(66, 90, 245)
+                    )
                 }
             }
             if(drawingEnabled){
