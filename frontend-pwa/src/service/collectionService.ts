@@ -129,17 +129,8 @@ function handleWebsocketMessage(message: any) {
 }
 
 function _assignDivision(d: Division, p: ParticipantTrack | null) {
-    let div = _activeCollection.value.divisions.find((el) => d.id === el.id);
-
-    div.clientId = p === null ? null : p.id;
-    divideCollectionArea(_activeCollection.value.id, [div]);
-
-    if (p !== null) {
-        let user = _activeCollection.value.confirmedUsers.filter(
-            (el) => el.id === p.id
-        )[0];
-        user.color = div.color;
-    }
+    d.clientId = p === null ? null : p.id;
+    divideCollectionArea(_activeCollection.value.id, [d]);
 }
 
 function _startTracking() {
