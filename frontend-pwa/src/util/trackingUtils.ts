@@ -1,13 +1,18 @@
-import { UNASSIGNED_PARTICIPANT_COLOR } from '@/data/constants';
+import {
+    INACTIVE_PARTICIPANT_COLOR,
+    UNASSIGNED_PARTICIPANT_COLOR,
+} from '@/data/constants';
 import { Division } from '@/types/Division';
+import { Participant } from '@/types/Participant';
 import { blendColors } from './colorUtils';
 
 export function getParticipantColor(
-    participantId: string,
+    participant: Participant,
     divisions: Division[]
 ) {
+    if (participant.active === false) return INACTIVE_PARTICIPANT_COLOR;
     const assignedDivisionColors = divisions
-        .filter((d) => d.clientId === participantId)
+        .filter((d) => d.clientId === participant.id)
         .map((d) => d.color);
     switch (assignedDivisionColors.length) {
         case 0:

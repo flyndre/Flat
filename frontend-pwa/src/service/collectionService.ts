@@ -240,10 +240,10 @@ export const useCollectionService = (id: string) => {
         activeCollection: computed(() => ({
             ..._activeCollection.value,
             confirmedUsers: _activeCollection.value.confirmedUsers?.map(
-                (u) => ({
-                    ...u,
+                (participant) => ({
+                    ...participant,
                     color: getParticipantColor(
-                        u.id,
+                        participant,
                         _activeCollection.value.divisions
                     ),
                 })
@@ -310,10 +310,6 @@ function handleCollectionUpdate(message: UpdateCollectionMessage) {
             _activeCollection.value.confirmedUsers.push({
                 name: element.username,
                 id: element.clientId,
-                color: getParticipantColor(
-                    element.clientId,
-                    message.collection.collectionDivision
-                ),
                 progress: [],
             });
         }
