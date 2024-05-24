@@ -1,5 +1,6 @@
 package de.flyndre.flat.services
 
+import android.util.Log
 import de.flyndre.flat.WebSocketClient
 import de.flyndre.flat.exceptions.RequestFailedException
 import de.flyndre.flat.interfaces.IConnectionService
@@ -46,16 +47,22 @@ class ConnectionService(
 
     private val socketListener = object : WebSocketClient.SocketListener {
         override fun onMessage(message: String) {
-            val obj = json.decodeFromString<WebSocketMessage>(message)
-            when(obj.type){
-                WebSocketMessageType.IncrementalTrack -> onTrackUpdate.forEach { it(json.decodeFromString<IncrementalTrackMessage>(message)) }
-                WebSocketMessageType.AccessRequest -> onAccessRequest.forEach { it(json.decodeFromString<AccessResquestMessage>(message)) }
-                WebSocketMessageType.CollectionClosed -> onCollectionClosed.forEach { it(json.decodeFromString<CollectionClosedMessage>(message)) }
-                WebSocketMessageType.CollectionUpdate -> onCollectionUpdate.forEach { it(json.decodeFromString<CollectionUpdateMessage>(message)) }
-                WebSocketMessageType.LeavingUser -> onUserLeaved.forEach { (it(json.decodeFromString<LeavingUserMessage>(message))) }
-                WebSocketMessageType.KickedUser -> onUserKicked.forEach { (it(json.decodeFromString<KickedUserMessage>(message))) }
-                WebSocketMessageType.Summary -> onSummary.forEach { (it(json.decodeFromString<SummaryMessage>(message))) }
-                else -> {}
+            try{
+                val obj = json.decodeFromString<WebSocketMessage>(message)
+                when(obj.type){
+                    WebSocketMessageType.IncrementalTrack -> onTrackUpdate.forEach { it(json.decodeFromString<IncrementalTrackMessage>(message)) }
+                    WebSocketMessageType.AccessRequest -> onAccessRequest.forEach { it(json.decodeFromString<AccessResquestMessage>(message)) }
+                    WebSocketMessageType.CollectionClosed -> onCollectionClosed.forEach { it(json.decodeFromString<CollectionClosedMessage>(message)) }
+                    WebSocketMessageType.CollectionUpdate -> onCollectionUpdate.forEach { it(json.decodeFromString<CollectionUpdateMessage>(message)) }
+                    WebSocketMessageType.LeavingUser -> onUserLeaved.forEach { (it(json.decodeFromString<LeavingUserMessage>(message))) }
+                    WebSocketMessageType.KickedUser -> onUserKicked.forEach { (it(json.decodeFromString<KickedUserMessage>(message))) }
+                    WebSocketMessageType.Summary -> onSummary.forEach { (it(json.decodeFromString<SummaryMessage>(message))) }
+                    else -> {
+
+                    }
+                }
+            }catch (e:Exception){
+                e.message?.let { Log.e(this.toString(), it) }
             }
         }
     }
@@ -122,9 +129,10 @@ class ConnectionService(
     override suspend fun assignCollectionArea(collectionId: UUID, area: CollectionArea, clientId: UUID?) {
         val url = "$restBasePath/collection/$collectionId"
         area.clientId = clientId
+        var requestString = json.encodeToString(listOf(area))
         val request = Request.Builder()
             .url(url)
-            .put(json.encodeToString(listOf(area)).toRequestBody("application/json".toMediaType()))
+            .put(requestString.toRequestBody("application/json".toMediaType()))
             .build()
         val response = restClient.newCall(request).await()
         if(!response.isSuccessful){
