@@ -121,6 +121,7 @@ function handleWebsocketMessage(message: any) {
 
         //LeaveMessage
         //DeleteMessage
+        //EndCollectionMessage
     }
 }
 

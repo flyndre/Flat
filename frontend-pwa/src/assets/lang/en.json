@@ -87,12 +87,19 @@
         "action_manage": "Manage Participants",
         "action_invite": "Add Participants",
         "action_leave": "Leave Collection",
+        "action_leave_warning": "Are you certain that you want to leave this collection?",
         "action_start_tracking": "Start Tracking",
         "action_pause_tracking": "Pause Tracking",
         "leave_success": "The collection {collectionName} has been left.",
         "leave_failed": "Failed to leave collection.",
         "close_success": "Successfully ended collection.",
-        "close_failed": "Failed to end collection."
+        "close_failed": "Failed to end collection.",
+        "action_end_warning": [
+            "Are you certain that you want to end the ongoing collection?",
+            "This action is irreversible.",
+            "It will stop the tracking of all participants and save all tracked movement on your device only."
+        ],
+        "action_end_confirm": "End collection permanently"
     },
     "components": {
         "code_reader": {
