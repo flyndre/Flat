@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { leaveCollection } from '@/api/rest';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
@@ -120,7 +119,7 @@ function _clearUpBeforeLeave() {
 async function leaveCollectionHandler() {
     if (!confirm(t('tracking.action_leave_warning'))) return;
     try {
-        const response = await leaveCollection(clientId.value, props.id);
+        const response = await leave(clientId.value, props.id);
         if (response.status == 200) {
             pushToast({
                 summary: t('tracking.leave_success', {
