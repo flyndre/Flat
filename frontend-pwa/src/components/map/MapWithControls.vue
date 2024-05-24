@@ -193,13 +193,14 @@ function drawTracks() {
                     lng: lastPosition[1],
                 },
                 labelContent: markerHtmlFromTrack(t),
-                labelAnchor: new google.maps.Point(9, -6),
+                labelAnchor: new google.maps.Point(6, -6),
                 clickable: false,
                 draggable: false,
                 cursor: 'default',
                 icon: {
                     ...POSITION_ICON_INNER,
                     fillColor: t.color,
+                    scale: POSITION_ICON_INNER.scale * 0.6,
                     anchor: new google.maps.Point(12, 12),
                 },
             });
