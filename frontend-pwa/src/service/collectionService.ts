@@ -247,8 +247,6 @@ export const useCollectionService = (id: string) => {
             leaveCollection(collId, clientId),
         kick: (collId: string, clId: string) =>
             kickUser(collId, clId, clientId.value),
-        requests: computed(() => _activeCollection.value.requestedUsers),
-        member: computed(() => _activeCollection.value.confirmedUsers),
         handleRequest: (
             choice: boolean,
             username: string,

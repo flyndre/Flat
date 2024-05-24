@@ -10,6 +10,8 @@ export function getParticipantColor(
     participant: Participant,
     divisions: Division[]
 ) {
+    if (participant == null || divisions == null || divisions.length === 0)
+        return UNASSIGNED_PARTICIPANT_COLOR;
     if (participant.active === false) return INACTIVE_PARTICIPANT_COLOR;
     const assignedDivisionColors = getAssignedDivisions(
         participant,

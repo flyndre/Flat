@@ -190,8 +190,6 @@ const {
     isAdmin,
     isLoading,
     isTracking: collectionTrackingActive,
-    member,
-    requests,
     startTracking: startTrackingCollection,
     stopTracking: stopTrackingCollection,
     kick,
@@ -289,7 +287,7 @@ const mapTypeOptions: MenuItem[] = [
 <template>
     {{ activeCollection }}
     <JoinRequestDialog
-        :requests="requests"
+        :requests="activeCollection.requestedUsers"
         @request-answered="processJoinRequest"
     />
     <DefaultLayout>
@@ -396,7 +394,7 @@ const mapTypeOptions: MenuItem[] = [
             />
 
             <JoinRequestDialog
-                :requests="requests"
+                :requests="activeCollection.requestedUsers"
                 @request-answered="processJoinRequest"
             />
 
@@ -568,7 +566,7 @@ const mapTypeOptions: MenuItem[] = [
                                 :locked="mapCenterSelected != null"
                                 :divisions="activeCollection.divisions"
                                 :client-pos
-                                :tracks="member"
+                                :tracks="activeCollection.confirmedUsers"
                             />
                         </TabPanel>
                         <TabPanel
@@ -592,7 +590,7 @@ const mapTypeOptions: MenuItem[] = [
                                 </div>
                             </template>
                             <ParticipantsList
-                                :participants="member"
+                                :participants="activeCollection.confirmedUsers"
                                 :divisions="activeCollection.divisions"
                                 :admin-mode="isAdmin"
                                 @kick-participant="
@@ -620,7 +618,7 @@ const mapTypeOptions: MenuItem[] = [
                                 </div>
                             </template>
                             <DivisionsList
-                                :participants="member"
+                                :participants="activeCollection.confirmedUsers"
                                 :divisions="activeCollection.divisions"
                                 :admin-mode="isAdmin"
                                 @unassign-division="
