@@ -216,6 +216,7 @@ export const useCollectionService = (id: string) => {
             lastActiveCollection.set(collection);
             _activeCollection.value = collection;
         }
+
         stopWatchHandle = watchDebounced(
             _activeCollection,
             (v) => lastActiveCollection.set(v),
@@ -224,6 +225,10 @@ export const useCollectionService = (id: string) => {
                 debounce: 1000,
             }
         );
+
+        if (_isAdmin.value && _activeCollection.value.startDate == null) {
+            _activeCollection.value.startDate = new Date();
+        }
 
         _isLoading.value = false;
     });

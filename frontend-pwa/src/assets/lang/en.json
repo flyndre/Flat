@@ -169,7 +169,9 @@
             "title": "Join Requests"
         },
         "participants_list": {
-            "confirmation_message": "Are you certain that you want to kick {participantName} from the ongoing collection?"
+            "confirmation_message": "Are you certain that you want to kick {participantName} from the ongoing collection?",
+            "inactive": "Eliminated",
+            "self": "You"
         },
         "map_with_controls": {
             "map": "Map",

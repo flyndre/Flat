@@ -169,7 +169,9 @@
             "title": "Solicitud de ingreso"
         },
         "participants_list": {
-            "confirmation_message": "¿Estás seguro de que quieres eliminar a {participantName} de la colección?"
+            "confirmation_message": "¿Estás seguro de que quieres eliminar a {participantName} de la colección?",
+            "inactive": "Eliminado",
+            "self": "Este Dispositivo"
         },
         "map_with_controls": {
             "map": "Mapa",

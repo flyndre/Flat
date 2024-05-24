@@ -169,7 +169,9 @@
             "title": "Beitrittsanfragen"
         },
         "participants_list": {
-            "confirmation_message": "Sicher, dass {participantName} aus der Sammlung geschmissen werden soll?"
+            "confirmation_message": "Sicher, dass {participantName} aus der Sammlung geschmissen werden soll?",
+            "inactive": "Ausgeschieden",
+            "self": "Dieses Gerät"
         },
         "map_with_controls": {
             "map": "Karte",
