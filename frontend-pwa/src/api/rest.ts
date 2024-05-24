@@ -124,13 +124,6 @@ export async function leaveCollection(clientId: string, collectionId: string) {
     return response;
 }
 
-export async function leaveCollection(
-    collectionId: string,
-    clientId: string
-){
-    const response = await api.post(`api/rest/LeaveCollection/${collectionId}?clientId=${clientId}`);
-    return response;
-}
 
 export async function kickUser(
     collectionId: string,

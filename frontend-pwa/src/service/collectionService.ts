@@ -223,8 +223,8 @@ export const useCollectionService = (id: string) => {
         })),
         assignDivision: (d: Division, p: ParticipantTrack | null) =>
             _assignDivision(d, p),
-        leave: (collId: string, clientId: string) => leaveCollection(collId, clientId),
-        kick: (collId: string, clId: string) => kickUser(collId, clId, clientId.value),
+        leave: async (collId: string, clientId: string) => await leaveCollection(collId, clientId),
+        kick: async (collId: string, clId: string) => await kickUser(collId, clId, clientId.value),
         requests: computed(() => _activeCollection.value.requestedUsers),
         member: computed(() => _activeCollection.value.confirmedUsers),
         handleRequest: (
