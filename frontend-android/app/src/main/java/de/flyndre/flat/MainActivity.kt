@@ -34,6 +34,7 @@ import de.flyndre.flat.composables.presetscreen.PresetScreen
 import de.flyndre.flat.composables.presetscreen.PresetScreenViewModel
 import de.flyndre.flat.composables.presetscreen.PresetScreenViewModelFactory
 import de.flyndre.flat.composables.presetscreen.collectionareascreen.CollectionAreaScreenViewModel
+import de.flyndre.flat.composables.presetscreen.collectionareascreen.CollectionAreaScreenViewModelFactory
 import de.flyndre.flat.composables.settingScreen.CreateSettingScreenViewModelFactory
 import de.flyndre.flat.composables.settingScreen.SettingScreen
 import de.flyndre.flat.composables.settingScreen.SettingScreenViewModel
@@ -97,7 +98,13 @@ class MainActivity : ComponentActivity() {
                             assignmentScreenViewModel,
                             participantScreenViewModel,
                             settingService))
-                    val collectionAreaScreenViewModel:CollectionAreaScreenViewModel = viewModel()
+                    val collectionAreaScreenViewModel:CollectionAreaScreenViewModel = viewModel(
+                        it,
+                        "CollectionAreaScreenViewModel",
+                        CollectionAreaScreenViewModelFactory(
+                            trackingService
+                        )
+                    )
                     val presetScreenViewModel: PresetScreenViewModel = viewModel(
                         it,
                         "PresetScreenViewModel",
