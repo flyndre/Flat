@@ -77,7 +77,7 @@ class MainActivity : ComponentActivity() {
             1000,
             LocationServices.getFusedLocationProviderClient(this), this
         )
-        trackingService = TrackingService(connectionService, locationService, 10000)
+        trackingService = TrackingService(connectionService, locationService, 10000,settingService)
         db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "flat-database")
             .build()
 
