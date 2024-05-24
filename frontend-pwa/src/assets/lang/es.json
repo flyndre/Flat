@@ -99,7 +99,9 @@
             "Esta acción es irreversible.",
             "Detendrá el seguimiento de todos los participantes y guardará todos los movimientos rastreados únicamente en su dispositivo."
         ],
-        "action_end_confirm": "Finalizar permanente"
+        "action_end_confirm": "Finalizar permanente",
+        "kick_success": "{participantName} fue expulsado con éxito.",
+        "kick_failed": "No se pudo expulsar a {participantName}"
     },
     "components": {
         "code_reader": {

@@ -15,6 +15,7 @@ import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { useCollectionService } from '@/service/collectionService';
 import { useTrackingService } from '@/service/trackingService';
 import { JoinRequest } from '@/types/JoinRequest';
+import { Participant } from '@/types/Participant';
 import { dbSafe } from '@/util/dbUtils';
 import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
 import { isOnMobile } from '@/util/mobileDetection';
@@ -233,24 +234,28 @@ function toggleTracking() {
     }
 }
 
-async function kickParticipant(collectionId: string, participantId: string) {
-    const resp = await kick(collectionId, participantId);
-
-    resp.status == 200
-        ? pushToast({
-              //TODO: i18n
-              summary: 'Kicked Participant',
-              severity: 'success',
-              closable: true,
-              life: TOAST_LIFE,
-          })
-        : pushToast({
-              //TODO: i18n
-              summary: 'Could not Kick Participant',
-              severity: 'error',
-              closable: true,
-              life: TOAST_LIFE,
-          });
+async function kickParticipant(collectionId: string, participant: Participant) {
+    try {
+        const response = await kick(collectionId, participant.id);
+        if (response.status !== 200) {
+            throw response;
+        }
+        pushToast({
+            summary: t('tracking.kick_success', {
+                participantName: participant.name,
+            }),
+            severity: 'success',
+            life: TOAST_LIFE,
+        });
+    } catch (error) {
+        pushToast({
+            summary: t('tracking.kick_failed', {
+                participantName: participant.name,
+            }),
+            severity: 'error',
+            life: TOAST_LIFE,
+        });
+    }
 }
 
 const mapTypeId = ref<`${google.maps.MapTypeId}`>('roadmap');
@@ -593,10 +598,7 @@ const mapTypeOptions: MenuItem[] = [
                                 :admin-mode="isAdmin"
                                 @kick-participant="
                                     (p) =>
-                                        kickParticipant(
-                                            activeCollection.id,
-                                            p.id
-                                        )
+                                        kickParticipant(activeCollection.id, p)
                                 "
                             />
                         </TabPanel>

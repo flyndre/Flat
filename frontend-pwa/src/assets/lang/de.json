@@ -99,7 +99,9 @@
             "Diese Aktion ist endgültig.",
             "Das Tracken aller Teilnehmer wird beendet und alle aufgenommenen Routen werden allein auf diesem Gerät gespeichert."
         ],
-        "action_end_confirm": "Sammlung endgültig beenden"
+        "action_end_confirm": "Sammlung endgültig beenden",
+        "kick_success": "{participantName} erfolgreich rausgeschmissen",
+        "kick_failed": "Rausschmiss von {participantName} fehlgeschlagen"
     },
     "components": {
         "code_reader": {
