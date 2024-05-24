@@ -99,7 +99,9 @@
             "This action is irreversible.",
             "It will stop the tracking of all participants and save all tracked movement on your device only."
         ],
-        "action_end_confirm": "End collection permanently"
+        "action_end_confirm": "End collection permanently",
+        "kick_success": "Kicked {participantName}",
+        "kick_failed": "Failed to kick {participantName}"
     },
     "components": {
         "code_reader": {
@@ -169,7 +171,9 @@
             "title": "Join Requests"
         },
         "participants_list": {
-            "confirmation_message": "Are you certain that you want to kick {participantName} from the ongoing collection?"
+            "confirmation_message": "Are you certain that you want to kick {participantName} from the ongoing collection?",
+            "inactive": "Eliminated",
+            "self": "You"
         },
         "map_with_controls": {
             "map": "Map",

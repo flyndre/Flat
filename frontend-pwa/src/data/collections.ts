@@ -19,10 +19,16 @@ export const collectionDraft = {
 };
 
 export const lastActiveCollection = {
-    get: (): ActiveCollection =>
-        JSON.parse(localStorage.getItem('lastActiveCollection')),
+    get: (): ActiveCollection => {
+        try {
+            return JSON.parse(localStorage.getItem('lastActiveCollection'));
+        } catch (e) {
+            lastActiveCollection.set(null);
+            return undefined;
+        }
+    },
     set: (v: ActiveCollection) =>
-        localStorage.setItem('lastActiveCollection', JSON.stringify(v)),
+        localStorage.setItem('lastActiveCollection', JSON.stringify(v ?? null)),
 };
 
 export function autoUpdateLastActiveCollection(

@@ -6,7 +6,11 @@ import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
 import StatsList from '@/components/stats/StatsList.vue';
 import { clientId } from '@/data/clientMetadata';
-import { collectionDB, collectionDraft } from '@/data/collections';
+import {
+    collectionDB,
+    collectionDraft,
+    lastActiveCollection,
+} from '@/data/collections';
 import { TOAST_LIFE } from '@/data/constants';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { Collection } from '@/types/Collection';
@@ -132,6 +136,7 @@ async function save() {
 }
 
 async function start() {
+    lastActiveCollection.set(undefined);
     await _saveCollection(async () => {
         try {
             const response = await openCollection(collection.value);
