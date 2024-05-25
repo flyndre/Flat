@@ -176,7 +176,8 @@ namespace FlatBackend.Websocket
                     {
                         await sendSummaryToBoss(trackCollections.Find(x => x.collectionId == collectionId), collectionId, user.clientId);
                     }
-                    await user.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "The Collection was closed so the Connection is closed too.", CancellationToken.None);
+                    if (user.webSocket.State == WebSocketState.Open)
+                    { await user.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "The Collection was closed so the Connection is closed too.", CancellationToken.None); }
 
                     tempUsers.Add(user);
                 }
@@ -252,7 +253,7 @@ namespace FlatBackend.Websocket
                     }
                     else
                     {
-                        //accessConfirmationWaiting.Add(response);
+                        accessConfirmationWaiting.Add(response);
                         Json = "An Error accured while setting the User confirmation please retry.";
                         return null;
                     }
