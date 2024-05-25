@@ -34,6 +34,9 @@ class ParticipantScreenViewModel(connectionService: IConnectionService): ViewMod
     fun kickUser(userModel: UserModel){
         viewModelScope.launch {
             connectionService.kickUser(collectionInstance, userModel.clientId)
+
+            //remove kicked user from local list
+            _users.value.remove(userModel)
         }
     }
 }

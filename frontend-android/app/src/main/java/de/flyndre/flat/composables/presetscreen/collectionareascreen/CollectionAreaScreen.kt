@@ -88,6 +88,7 @@ fun CollectionAreaScreen(
     val cameraPositionState = rememberCameraPositionState {
         position = cameraPosition
     }
+    val ownLocation by collectionAreaScreenViewModel.ownLocation.collectAsState()
     //editing area names
     var areaName by remember { mutableStateOf("") }
     var areaIndex: Long? by remember { mutableStateOf(null) }
@@ -158,8 +159,8 @@ fun CollectionAreaScreen(
         },
         floatingActionButton = {
             if (selectedNavigationItem == 0) {
-                SmallFloatingActionButton(onClick = { /*TODO*/ }) {
-                    Icon(Icons.Filled.Search, contentDescription = "search for location")
+                SmallFloatingActionButton(onClick = { collectionAreaScreenViewModel.centerOnPosition(cameraPositionState) }) {
+                    Icon(Icons.Filled.LocationOn, contentDescription = "focus on own location")
                 }
             } else if (selectedNavigationItem == 1) {
                 Row(
@@ -270,7 +271,7 @@ fun CollectionAreaScreen(
         var mapProperties: MapProperties
         if (selectedNavigationItem == 0) {
             mapSettings = MapUiSettings(zoomControlsEnabled = false)
-            mapProperties = MapProperties(isMyLocationEnabled = true)
+            mapProperties = MapProperties()
         } else if (selectedNavigationItem == 1) {
             mapSettings = MapUiSettings(
                 zoomControlsEnabled = false,
@@ -299,6 +300,7 @@ fun CollectionAreaScreen(
 
                 cameraPositionState = cameraPositionState,
             ) {
+                //draw areas
                 if (collectionAreas.isNotEmpty()) {
                     collectionAreas.forEach { area ->
                         if (area.listAreaPoints.isNotEmpty()) {
@@ -318,6 +320,15 @@ fun CollectionAreaScreen(
                             }
                         }
                     }
+                }
+                //draw own location indicator
+                if(ownLocation != null){
+                    Circle(
+                        center = ownLocation!!,
+                        radius = 2.0,
+                        strokeColor = Color(66, 90, 245),
+                        fillColor = Color(66, 90, 245)
+                    )
                 }
             }
             if(drawingEnabled){

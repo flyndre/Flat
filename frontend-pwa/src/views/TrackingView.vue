@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { leaveCollection } from '@/api/rest';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
@@ -8,12 +7,14 @@ import InvitationDialog from '@/components/tracking/InvitationDialog.vue';
 import JoinRequestDialog from '@/components/tracking/JoinRequestDialog.vue';
 import ParticipantsList from '@/components/tracking/ParticipantsList.vue';
 import { clientId } from '@/data/clientMetadata';
+import { lastActiveCollection } from '@/data/collections';
 import { collectionStatsDB } from '@/data/collectionStats';
 import { TOAST_LIFE } from '@/data/constants';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { useCollectionService } from '@/service/collectionService';
 import { useTrackingService } from '@/service/trackingService';
 import { JoinRequest } from '@/types/JoinRequest';
+import { Participant } from '@/types/Participant';
 import { dbSafe } from '@/util/dbUtils';
 import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
 import { isOnMobile } from '@/util/mobileDetection';
@@ -112,12 +113,13 @@ const adminActions: MenuItem[] = [
 function _clearUpBeforeLeave() {
     stopTrackingLogs();
     stopTrackingCollection();
+    lastActiveCollection.set(undefined);
 }
 
 async function leaveCollectionHandler() {
     if (!confirm(t('tracking.action_leave_warning'))) return;
     try {
-        const response = await leaveCollection(clientId.value, props.id);
+        const response = await leave(clientId.value, props.id);
         if (response.status == 200) {
             pushToast({
                 summary: t('tracking.leave_success', {
@@ -188,8 +190,6 @@ const {
     isAdmin,
     isLoading,
     isTracking: collectionTrackingActive,
-    member,
-    requests,
     startTracking: startTrackingCollection,
     stopTracking: stopTrackingCollection,
     kick,
@@ -231,24 +231,28 @@ function toggleTracking() {
     }
 }
 
-async function kickParticipant(collectionId: string, participantId: string) {
-    const resp = await kick(collectionId, participantId);
-
-    resp.status == 200
-        ? pushToast({
-              //TODO: i18n
-              summary: 'Kicked Participant',
-              severity: 'success',
-              closable: true,
-              life: TOAST_LIFE,
-          })
-        : pushToast({
-              //TODO: i18n
-              summary: 'Could not Kick Participant',
-              severity: 'error',
-              closable: true,
-              life: TOAST_LIFE,
-          });
+async function kickParticipant(collectionId: string, participant: Participant) {
+    try {
+        const response = await kick(collectionId, participant.id);
+        if (response.status !== 200) {
+            throw response;
+        }
+        pushToast({
+            summary: t('tracking.kick_success', {
+                participantName: participant.name,
+            }),
+            severity: 'success',
+            life: TOAST_LIFE,
+        });
+    } catch (error) {
+        pushToast({
+            summary: t('tracking.kick_failed', {
+                participantName: participant.name,
+            }),
+            severity: 'error',
+            life: TOAST_LIFE,
+        });
+    }
 }
 
 const mapTypeId = ref<`${google.maps.MapTypeId}`>('roadmap');
@@ -283,7 +287,7 @@ const mapTypeOptions: MenuItem[] = [
 <template>
     {{ activeCollection }}
     <JoinRequestDialog
-        :requests="requests"
+        :requests="activeCollection.requestedUsers"
         @request-answered="processJoinRequest"
     />
     <DefaultLayout>
@@ -390,7 +394,7 @@ const mapTypeOptions: MenuItem[] = [
             />
 
             <JoinRequestDialog
-                :requests="requests"
+                :requests="activeCollection.requestedUsers"
                 @request-answered="processJoinRequest"
             />
 
@@ -562,7 +566,7 @@ const mapTypeOptions: MenuItem[] = [
                                 :locked="mapCenterSelected != null"
                                 :divisions="activeCollection.divisions"
                                 :client-pos
-                                :tracks="member"
+                                :tracks="activeCollection.confirmedUsers"
                             />
                         </TabPanel>
                         <TabPanel
@@ -586,15 +590,12 @@ const mapTypeOptions: MenuItem[] = [
                                 </div>
                             </template>
                             <ParticipantsList
-                                :participants="member"
+                                :participants="activeCollection.confirmedUsers"
                                 :divisions="activeCollection.divisions"
                                 :admin-mode="isAdmin"
                                 @kick-participant="
                                     (p) =>
-                                        kickParticipant(
-                                            activeCollection.id,
-                                            p.id
-                                        )
+                                        kickParticipant(activeCollection.id, p)
                                 "
                             />
                         </TabPanel>
@@ -617,7 +618,7 @@ const mapTypeOptions: MenuItem[] = [
                                 </div>
                             </template>
                             <DivisionsList
-                                :participants="member"
+                                :participants="activeCollection.confirmedUsers"
                                 :divisions="activeCollection.divisions"
                                 :admin-mode="isAdmin"
                                 @unassign-division="

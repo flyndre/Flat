@@ -126,7 +126,7 @@ function _coordinatesFromPolything(
     return polything
         .getPath()
         .getArray()
-        .map((vertex) => [vertex.lat(), vertex.lng()]);
+        .map((vertex) => [vertex.lng(), vertex.lat()]);
 }
 
 export function geoJSONtoShape(
@@ -151,8 +151,8 @@ export function geoJSONtoPolygon(
         ...shapeOptions,
         paths: [
             geoJSON.coordinates?.[0].map((coords) => ({
-                lat: coords?.[0] ?? 0,
-                lng: coords?.[1] ?? 0,
+                lng: coords?.[0] ?? 0,
+                lat: coords?.[1] ?? 0,
             })),
         ],
     });
@@ -165,8 +165,8 @@ export function geoJSONtoPolyline(
     return new google.maps.Polyline({
         ...shapeOptions,
         path: geoJSON.coordinates?.map((coords) => ({
-            lat: coords?.[0] ?? 0,
-            lng: coords?.[1] ?? 0,
+            lng: coords?.[0] ?? 0,
+            lat: coords?.[1] ?? 0,
         })),
     });
 }

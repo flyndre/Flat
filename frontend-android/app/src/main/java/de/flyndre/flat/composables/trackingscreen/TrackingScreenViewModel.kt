@@ -83,7 +83,7 @@ class TrackingScreenViewModel(
     private val _clientId = MutableStateFlow(_settingService.getClientId().toString())
     val clientId : StateFlow<String> = _clientId.asStateFlow()
 
-    private val _participantsLeaved = MutableStateFlow(arrayListOf<LeavingUserMessage>())
+    private val _participantsLeaved = MutableStateFlow(listOf<LeavingUserMessage>())
     val participantsLeaved = _participantsLeaved.asStateFlow()
 
     private val _showCollectionClosedDialog = MutableStateFlow(false)
@@ -140,7 +140,7 @@ class TrackingScreenViewModel(
     }
 
     private fun onUserLeavedCollection(leavingUserMessage: LeavingUserMessage){
-        _participantsLeaved.value.add(leavingUserMessage)
+        _participantsLeaved.value += leavingUserMessage
     }
 
     private fun onCollectionUpdate(collectionUpdateMessage: CollectionUpdateMessage){
@@ -155,7 +155,7 @@ class TrackingScreenViewModel(
     }
 
     fun removeFirstLeavedparticipant(){
-        _participantsLeaved.value.removeFirst()
+        _participantsLeaved.value-=_participantsLeaved.value.first()
     }
 
     fun updateAssignmentScreenViewModel(){
