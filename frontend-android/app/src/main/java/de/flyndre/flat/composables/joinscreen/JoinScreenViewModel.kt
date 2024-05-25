@@ -57,12 +57,13 @@ class JoinScreenViewModel(db: AppDatabase, settingService: ISettingService, trac
     fun join(navigateToTrackingScreen: ()->Unit){
         viewModelScope.launch {
             try {
+                updateLastCollections(joinLink.value)
                 val collcetionId = _joinLink.value.split('/').last()
                 val answer = _connectionService.requestAccess(_joinName.value, UUID.fromString(collcetionId))
                 if(answer.accepted){
                     _trackingScreenViewModel.collectionInstance= answer.collection!!
                     _connectionService.openWebsocket(answer.collection.id!!)
-                    updateLastCollections(joinLink.value)
+
                     navigateToTrackingScreen()
                 }
             }catch (e: IllegalArgumentException){
