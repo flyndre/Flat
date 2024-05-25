@@ -123,7 +123,13 @@ function handleWebsocketMessage(message: any) {
             handleIncrementalTracks(<IncrementalTrackMessage>message);
             break;
         case 'KickedUser':
-                handleKick(<KickMessage>message);
+            handleKick(<KickMessage>message);
+            break;
+        case 'Collectionclosed':
+            handleCollectionClosed();
+            break;
+        case 'LeavingUser':
+            _handleLeavingUser(message);
                 break;
 
         // TODO:
@@ -133,8 +139,19 @@ function handleWebsocketMessage(message: any) {
     }
 }
 
+const _latestLeavedUser = ref(""); 
+
+function _handleLeavingUser(message : {user : {clientId: string, username : string}}){
+    _latestLeavedUser.value = message.user.username
+}
+
+const _collectionClosed = ref(false);
 function handleKick(message : KickMessage){
     _kickMessage.value = message.message;
+}
+
+function handleCollectionClosed(){
+    _collectionClosed.value = true;
 }
 
 function _assignDivision(d: Division, p: ParticipantTrack | null) {
@@ -276,7 +293,9 @@ export const useCollectionService = (id: string) => {
         isLoading: computed(() => _isLoading.value),
         isAdmin: computed(() => _isAdmin.value),
         connectionStatus: computed(() => _websocketStatus.value),
-        kickMessage: computed(() => _kickMessage.value)
+        kickMessage: computed(() => _kickMessage.value),
+        collectionClosed: computed(() => _collectionClosed.value),
+        latestLeavedUser: computed(() => _latestLeavedUser.value)
     };
 };
 

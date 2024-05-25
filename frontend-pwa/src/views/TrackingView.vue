@@ -195,8 +195,28 @@ const {
     stopTracking: stopTrackingCollection,
     kick,
     leave,
-    kickMessage
+    kickMessage,
+    latestLeavedUser,
+    collectionClosed
 } = useCollectionService(props.id);
+
+
+watch(collectionClosed, value => {
+    pushToast({
+            summary: "Collection was closed by an Admin.",
+            severity: 'info',
+            life: TOAST_LIFE,
+        });
+    router.push({ name: 'home' });
+})
+
+watch(latestLeavedUser, value => {
+    pushToast({
+            summary: `User left Collection: ${value}. Please check if Division have to be redistributed`,
+            severity: 'info',
+            life: TOAST_LIFE,
+        });
+})
 
 watch(kickMessage, value => {
     pushToast({
