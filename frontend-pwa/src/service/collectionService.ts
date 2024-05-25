@@ -14,6 +14,7 @@ import { Division } from '@/types/Division';
 import { ParticipantTrack } from '@/types/ParticipantTrack';
 import { IncrementalTrackMessage } from '@/types/websocket/IncrementalTrackMessage';
 import { InviteMessage } from '@/types/websocket/InviteMessage';
+import { KickMessage } from '@/types/websocket/KickMessage';
 import { UpdateCollectionMessage } from '@/types/websocket/UpdateCollectionMessage';
 import { mergeActiveCollections } from '@/util/activeCollectionUtils';
 import { getParticipantColor } from '@/util/trackingUtils';
@@ -67,6 +68,7 @@ function initialiseWebsocket() {
 const _isAdmin = ref(false);
 const _activeCollection = ref<ActiveCollection>({} as ActiveCollection);
 const _isLoading = ref(true);
+const _kickMessage = ref("");
 let latestSendTimestamp = Date.now();
 
 const {
@@ -120,12 +122,36 @@ function handleWebsocketMessage(message: any) {
         case 'IncrementalTrack':
             handleIncrementalTracks(<IncrementalTrackMessage>message);
             break;
+        case 'KickedUser':
+            handleKick(<KickMessage>message);
+            break;
+        case 'Collectionclosed':
+            handleCollectionClosed();
+            break;
+        case 'LeavingUser':
+            _handleLeavingUser(message);
+                break;
 
         // TODO:
         // LeaveMessage (message to admin that participant left)
         // DeleteMessage & EndCollectionMessage (messages to participants that collection is closed and message to admin with collection summary)
         // KickedUserMessage (message to participant that he has been kicked)
     }
+}
+
+const _latestLeavedUser = ref(""); 
+
+function _handleLeavingUser(message : {user : {clientId: string, username : string}}){
+    _latestLeavedUser.value = message.user.username
+}
+
+const _collectionClosed = ref(false);
+function handleKick(message : KickMessage){
+    _kickMessage.value = message.message;
+}
+
+function handleCollectionClosed(){
+    _collectionClosed.value = true;
 }
 
 function _assignDivision(d: Division, p: ParticipantTrack | null) {
@@ -243,10 +269,10 @@ export const useCollectionService = (id: string) => {
         })),
         assignDivision: (d: Division, p: ParticipantTrack | null) =>
             _assignDivision(d, p),
-        leave: (collId: string, clientId: string) =>
-            leaveCollection(collId, clientId),
-        kick: (collId: string, clId: string) =>
-            kickUser(collId, clId, clientId.value),
+        leave: async (collId: string, clientId: string) => await leaveCollection(collId, clientId),
+        kick: async (collId: string, clId: string) => await kickUser(collId, clId, clientId.value),
+        requests: computed(() => _activeCollection.value.requestedUsers),
+        member: computed(() => _activeCollection.value.confirmedUsers),
         handleRequest: (
             choice: boolean,
             username: string,
@@ -267,6 +293,9 @@ export const useCollectionService = (id: string) => {
         isLoading: computed(() => _isLoading.value),
         isAdmin: computed(() => _isAdmin.value),
         connectionStatus: computed(() => _websocketStatus.value),
+        kickMessage: computed(() => _kickMessage.value),
+        collectionClosed: computed(() => _collectionClosed.value),
+        latestLeavedUser: computed(() => _latestLeavedUser.value)
     };
 };
 
