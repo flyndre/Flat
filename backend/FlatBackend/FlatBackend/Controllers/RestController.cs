@@ -67,7 +67,7 @@ namespace FlatBackend.Controllers
             try
             {
                 var oldCol = await _MongoDBService.GetCollection(id);
-                if(oldCol==null)return NotFound().ToJson();
+                if (oldCol == null) return NotFound().ToJson();
                 var validUserList = oldCol.confirmedUsers.Where(x => x.clientId == value.clientId).ToList();
                 if (validUserList.Count > 0)
                 {
