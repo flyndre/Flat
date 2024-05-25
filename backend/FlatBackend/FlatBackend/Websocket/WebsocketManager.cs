@@ -272,6 +272,7 @@ namespace FlatBackend.Websocket
             if (collection != null && user != null)
             {
                 UserModel? requestedUser = collection.requestedAccess.Find(e => e.clientId == user.clientId);
+                if (requestedUser == null) { return; }
                 UserModel? validUser = collection.confirmedUsers.Find(x => x.clientId == user.clientId);
                 if (validUser == null)
                 {
