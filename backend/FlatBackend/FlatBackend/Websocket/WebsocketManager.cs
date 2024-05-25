@@ -134,7 +134,8 @@ namespace FlatBackend.Websocket
                 }
                 else
                 {
-                    await webSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "Unauthorised connection this user isn't confirmed by the collection owner.", CancellationToken.None);
+                    if (webSocket.State == WebSocketState.Open)
+                    { await webSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "Unauthorised connection this user isn't confirmed by the collection owner.", CancellationToken.None); }
                 }
             }
             return;
@@ -337,7 +338,8 @@ namespace FlatBackend.Websocket
                 {
                     var Json = JsonConvert.SerializeObject(new KickedUserDto { message = "You have been kicked from boss Connection aborted.", type = DTOs.WebSocketMessageType.KickedUser });
                     await kickedUser.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
-                    await kickedUser.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "The Collection was closed so the Connection is closed too.", CancellationToken.None);
+                    if (kickedUser.webSocket.State == WebSocketState.Open)
+                    { await kickedUser.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "The Collection was closed so the Connection is closed too.", CancellationToken.None); }
                 }
             }
         }
