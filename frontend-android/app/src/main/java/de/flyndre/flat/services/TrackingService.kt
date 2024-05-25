@@ -30,6 +30,7 @@ class TrackingService(
     override val onLocalTrackUpdate: ArrayList<() -> Unit> = arrayListOf()
     override val onRemoteTrackUpdate: ArrayList<() -> Unit> = arrayListOf()
     private val sendUpdateLock = Mutex()
+    val messages = arrayListOf<IncrementalTrackMessage>()
 
     init {
         locationService.addOnLocationUpdate {addNewPosition(it) }
@@ -58,6 +59,11 @@ class TrackingService(
     }
 
     override fun addIncrementalTrack(track: IncrementalTrackMessage) {
+        if(messages.contains(track)){
+            Log.d(this.toString(),"Double message +${track}")
+            return
+        }
+        messages.add(track)
         if(track.clientId!=settingService.getClientId()){
             if(!remoteTracks.containsKey(track.clientId)) {
 

@@ -39,8 +39,8 @@ class ConnectionService(
     override val onUserKicked: ArrayList<(KickedUserMessage) -> Unit> = arrayListOf(),
     override val onSummary: ArrayList<(SummaryMessage) -> Unit> = arrayListOf(),
 ):IConnectionService {
-    private val restBasePath = settingService.getServerBaseUrl()+"/rest"
-    private val websocketBasePath = (settingService.getServerBaseUrl()+"/ws").replace("http","ws")
+    private val restBasePath = settingService.getServerBaseUrl()+"/api/rest"
+    private val websocketBasePath = (settingService.getServerBaseUrl()+"/api/ws").replace("http","ws")
     private val clientId = settingService.getClientId()
     private val restClient = OkHttpClient.Builder().build()
     private val webSocketClient: WebSocketClient = WebSocketClient.getInstance()
@@ -81,6 +81,7 @@ class ConnectionService(
             val collection: CollectionInstance = json.decodeFromString(bodyString)
             response.close()
             openWebsocket(collection.id!!)
+            settingService.addResentJoinLink("${settingService.getServerBaseUrl()}/join/${collection.id}")
             return collection
         }else{
             val responseString = response.body?.string()
@@ -207,7 +208,6 @@ class ConnectionService(
     }
 
     override suspend fun leaveCollection(collection: CollectionInstance) {
-        webSocketClient.disconnect()
         val url = "$restBasePath/leaveCollection/${collection.id}?clientId=$clientId"
         val request = Request.Builder()
             .url(url)
