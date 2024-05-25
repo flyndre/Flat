@@ -208,7 +208,6 @@ class ConnectionService(
     }
 
     override suspend fun leaveCollection(collection: CollectionInstance) {
-        webSocketClient.disconnect()
         val url = "$restBasePath/leaveCollection/${collection.id}?clientId=$clientId"
         val request = Request.Builder()
             .url(url)
