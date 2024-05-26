@@ -119,7 +119,7 @@ function _clearUpBeforeLeave() {
 async function leaveCollectionHandler() {
     if (!confirm(t('tracking.action_leave_warning'))) return;
     try {
-        const response = await leave(clientId.value, props.id);
+        const response = await leave(props.id, clientId.value);
         if (response.status == 200) {
             pushToast({
                 summary: t('tracking.leave_success', {
@@ -345,7 +345,7 @@ const mapTypeOptions: MenuItem[] = [
                 v-else
                 :label="$t('tracking.action_leave')"
                 severity="secondary"
-                @click="leaveCollectionHandler"
+                @click="leaveCollectionHandler()"
             >
                 <template #icon>
                     <MdiTextButtonIcon

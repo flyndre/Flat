@@ -125,7 +125,7 @@ function handleWebsocketMessage(message: any) {
         case 'KickedUser':
             handleKick(<KickMessage>message);
             break;
-        case 'Collectionclosed':
+        case 'CollectionClosed':
             handleCollectionClosed();
             break;
         case 'LeavingUser':
@@ -151,6 +151,8 @@ function handleKick(message : KickMessage){
 }
 
 function handleCollectionClosed(){
+    console.log("Wird gehandled, cheffe")
+    ws.onclose = null;  
     _collectionClosed.value = true;
 }
 
@@ -340,7 +342,7 @@ function handleCollectionUpdate(message: UpdateCollectionMessage) {
             active:
                 message.collection.confirmedUsers.find(
                     (active) => existing.id === active.clientId
-                ) !== undefined,
+                ) !== undefined, 
         }));
 }
 
