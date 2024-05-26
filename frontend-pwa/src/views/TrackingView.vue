@@ -51,14 +51,14 @@ import SplitButton from 'primevue/splitbutton';
 import TabPanel from 'primevue/tabpanel';
 import TabView from 'primevue/tabview';
 import { useToast } from 'primevue/usetoast';
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 const props = defineProps<{
     id: string;
 }>();
-
+const wakeLock = ref<WakeLockSentinel | null>(null);
 const { t } = useI18n();
 const router = useRouter();
 const { add: pushToast } = useToast();
@@ -181,7 +181,6 @@ const invitationLink = computed(
 
 const manageParticipantsDialogVisible = ref(false);
 
-
 const {
     activeCollection,
     assignDivision,
@@ -197,35 +196,34 @@ const {
     leave,
     kickMessage,
     latestLeavedUser,
-    collectionClosed
+    collectionClosed,
 } = useCollectionService(props.id);
 
-
-watch(collectionClosed, value => {
+watch(collectionClosed, (value) => {
     pushToast({
-            summary: "Collection was closed by an Admin.",
-            severity: 'info',
-            life: TOAST_LIFE,
-        });
+        summary: 'Collection was closed by an Admin.',
+        severity: 'info',
+        life: TOAST_LIFE,
+    });
     router.push({ name: 'home' });
-})
+});
 
-watch(latestLeavedUser, value => {
+watch(latestLeavedUser, (value) => {
     pushToast({
-            summary: `User left Collection: ${value}. Please check if Division have to be redistributed`,
-            severity: 'info',
-            life: TOAST_LIFE,
-        });
-})
+        summary: `User left Collection: ${value}. Please check if Division have to be redistributed`,
+        severity: 'info',
+        life: TOAST_LIFE,
+    });
+});
 
-watch(kickMessage, value => {
+watch(kickMessage, (value) => {
     pushToast({
-            summary: value,
-            severity: 'error',
-            life: TOAST_LIFE,
-        });
+        summary: value,
+        severity: 'error',
+        life: TOAST_LIFE,
+    });
     router.push({ name: 'home' });
-})
+});
 
 function processJoinRequest(joinRequest: JoinRequest) {
     handleRequest(
@@ -313,6 +311,27 @@ const mapTypeOptions: MenuItem[] = [
         command: () => (mapTypeId.value = 'hybrid'),
     },
 ];
+
+onMounted(async () => {
+    try {
+        if ('wakeLock' in navigator) {
+            wakeLock.value = await navigator.wakeLock.request('screen');
+            console.log("Got Wakelock")
+        } else {
+            console.error('Wake Lock API not supported on this browser.');
+        }
+    } catch (err) {
+        console.log('Error at Requesting of WakeLock');
+    }
+});
+
+onBeforeUnmount(async () => {
+    if (wakeLock.value !== null) {
+        await wakeLock.value.release();
+        wakeLock.value = null;
+        console.log('Screen Wake Lock released');
+    }
+});
 </script>
 
 <template>
