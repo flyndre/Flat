@@ -240,24 +240,25 @@ namespace FlatBackend.Websocket
             if (collection != null)
             {
                 var user = users.Find(x => x.collectionId == collection.id && x.clientId == collection.clientId);
+                string Json;
                 if (user != null && user.webSocket.State == WebSocketState.Open)
                 {
-                    var Json = JsonConvert.SerializeObject(request);
+                    Json = JsonConvert.SerializeObject(request);
                     await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
                     var buffer = new byte[1024 * 4];
-                    var response = accessConfirmationWaiting.Take();
-                    if (response.collectionId == request.collectionId && response.clientId == request.clientId)
-                    {
-                        UserModel model = new UserModel { clientId = response.clientId, username = request.username, accepted = response.accepted };
-                        setUserConfirmation(request.collectionId, model);
-                        return model;
-                    }
-                    else
-                    {
-                        accessConfirmationWaiting.Add(response);
-                        Json = "An Error accured while setting the User confirmation please retry.";
-                        return null;
-                    }
+                }
+                var response = accessConfirmationWaiting.Take();
+                if (response.collectionId == request.collectionId && response.clientId == request.clientId)
+                {
+                    UserModel model = new UserModel { clientId = response.clientId, username = request.username, accepted = response.accepted };
+                    setUserConfirmation(request.collectionId, model);
+                    return model;
+                }
+                else
+                {
+                    accessConfirmationWaiting.Add(response);
+                    Json = "An Error accured while setting the User confirmation please retry.";
+                    return null;
                 }
             }
             throw new InvalidOperationException("There have been an Problem. It could be that the Admin is not available...");
