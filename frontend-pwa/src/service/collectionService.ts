@@ -23,8 +23,11 @@ import { computed, ref } from 'vue';
 
 let ws: WebSocket = null;
 const _websocketStatus = ref<number>(null);
+let _stopRetries = false;
 
 function initialiseWebsocket() {
+    if (_stopRetries) return;
+
     ws = new WebSocket(import.meta.env.VITE_WS_BASE_URL);
 
     ws.onmessage = function (event) {
@@ -131,10 +134,12 @@ function _handleLeavingUser(message: {
 
 const _collectionClosed = ref(false);
 function handleKick(message: KickMessage) {
+    _stopRetries = true;
     _kickMessage.value = message.message;
 }
 
 function handleCollectionClosed() {
+    _stopRetries = true;
     _collectionClosed.value = true;
 }
 
@@ -150,8 +155,14 @@ function _stopTracking() {
     pauseInterval();
 }
 
+async function _leaveCollection(collId: string, clientId: string) {
+    _stopRetries = true;
+    return await leaveCollection(collId, clientId);
+}
+
 export function _closeCollection(collectionId: string) {
     _stopTracking();
+    _stopRetries = true;
     const answer = { type: 'CollectionClosed', collectionId: collectionId };
     ws.send(JSON.stringify(answer));
 }
@@ -179,6 +190,7 @@ export function establishWebsocket(clientId: string, collectionId: string) {
 let stopWatchHandle = null;
 
 export const useCollectionService = (id: string) => {
+    _stopRetries = false;
     _activeCollection.value.id = id;
     let response = getCollection(id, clientId.value);
 
@@ -251,8 +263,8 @@ export const useCollectionService = (id: string) => {
         })),
         assignDivision: (d: Division, p: ParticipantTrack | null) =>
             _assignDivision(d, p),
-        leave: async (collId: string, clientId: string) =>
-            await leaveCollection(collId, clientId),
+        leave: (collId: string, clientId: string) =>
+            _leaveCollection(collId, clientId),
         kick: async (collId: string, clId: string) =>
             await kickUser(collId, clId, clientId.value),
         requests: computed(() => _activeCollection.value.requestedUsers),
