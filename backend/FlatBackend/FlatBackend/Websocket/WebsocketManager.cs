@@ -162,7 +162,7 @@ namespace FlatBackend.Websocket
             }
         }
 
-        public async void sendCollectionClosedInformation( Guid collectionId )
+        public async Task sendCollectionClosedInformation( Guid collectionId )
         {
             var collection = await _MongoDBService.GetCollection(collectionId);
             if (collection == null) return;

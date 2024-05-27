@@ -18,7 +18,7 @@ namespace FlatBackend.Interfaces
 
         public void sendUpdateCollection( Guid collectionId );
 
-        public void sendCollectionClosedInformation( Guid collectionId );
+        public Task sendCollectionClosedInformation( Guid collectionId );
 
         public void sendGPSTrackCollection( TrackCollectionModel tracks, Guid collectionId, Guid clientId );
 

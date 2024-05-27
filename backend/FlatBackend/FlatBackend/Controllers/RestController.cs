@@ -346,7 +346,7 @@ namespace FlatBackend.Controllers
         {
             try
             {
-                _WebsocketManager.sendCollectionClosedInformation(id);
+                await _WebsocketManager.sendCollectionClosedInformation(id);
                 _MongoDBService.RemoveCollection(id); //and inform all clients
                 return Ok();
             }
