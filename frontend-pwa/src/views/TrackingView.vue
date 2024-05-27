@@ -10,6 +10,7 @@ import { clientId } from '@/data/clientMetadata';
 import { lastActiveCollection } from '@/data/collections';
 import { collectionStatsDB } from '@/data/collectionStats';
 import { TOAST_LIFE } from '@/data/constants';
+import { trackingLogDB, trackingLogs } from '@/data/trackingLogs';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { useCollectionService } from '@/service/collectionService';
 import { useTrackingService } from '@/service/trackingService';
@@ -105,12 +106,6 @@ const adminActions: MenuItem[] = [
     },
 ];
 
-function _clearUpBeforeLeave() {
-    stopTrackingLogs();
-    stopTrackingCollection();
-    lastActiveCollection.set(undefined);
-}
-
 async function leaveCollectionHandler() {
     if (!confirm(t('tracking.action_leave_warning'))) return;
     try {
@@ -124,7 +119,6 @@ async function leaveCollectionHandler() {
                 closable: true,
                 life: TOAST_LIFE,
             });
-            _clearUpBeforeLeave();
             router.push({ name: 'home' });
         } else {
             throw response.statusText;
@@ -152,7 +146,6 @@ async function closeCollectionNow() {
             severity: 'success',
             summary: t('tracking.close_success'),
         });
-        _clearUpBeforeLeave();
         router.push({
             name: 'edit',
             params: { id: props.id },
@@ -319,13 +312,19 @@ onMounted(async () => {
     }
 });
 
-onBeforeUnmount(async () => {
+async function _clearUpBeforeLeave() {
+    stopTrackingLogs();
+    stopTrackingCollection();
     if (wakeLock.value !== null) {
         await wakeLock.value.release();
         wakeLock.value = null;
         console.debug('Screen Wake Lock released');
     }
-});
+    trackingLogDB.clear();
+    lastActiveCollection.set(undefined);
+}
+
+onBeforeUnmount(_clearUpBeforeLeave);
 </script>
 
 <template>
