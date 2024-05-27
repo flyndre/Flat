@@ -103,11 +103,6 @@ const adminActions: MenuItem[] = [
         disabled: () => closeCollectionLoading.value,
         command: () => (closeCollectionDialogVisible.value = true),
     },
-    {
-        label: t('tracking.action_manage'),
-        icon: mdiAccountMultiple,
-        command: () => (manageParticipantsDialogVisible.value = true),
-    },
 ];
 
 function _clearUpBeforeLeave() {
