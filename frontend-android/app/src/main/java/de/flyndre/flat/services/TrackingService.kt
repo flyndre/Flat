@@ -102,14 +102,14 @@ class TrackingService(
         }
         sendUpdateLock.lock()
         try {
-            val newstPointIndex = track.positions.lastIndex
-            if(newstPointIndex<=lastPointIndex){
+            val newestPointIndex = track.positions.lastIndex
+            if(newestPointIndex <= lastPointIndex+1){
                 return lastPointIndex
             }
             val incrementalTrack = Track(track.trackId)
-            incrementalTrack.positions.addAll(track.positions.subList(lastPointIndex,newstPointIndex))
+            incrementalTrack.positions.addAll(track.positions.subList(lastPointIndex,newestPointIndex))
             connectionService.sendTrackUpdate(incrementalTrack)
-            return newstPointIndex
+            return newestPointIndex
         }catch (e:Exception){
             e.message?.let { Log.e(this.toString(), it) }
             return  lastPointIndex
