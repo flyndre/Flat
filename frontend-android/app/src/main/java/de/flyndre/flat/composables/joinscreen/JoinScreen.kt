@@ -46,8 +46,17 @@ fun JoinScreen(
     var isNameEmpty by remember { mutableStateOf(false) }
     //connection error handling
     val showConnectionError by joinScreenViewModel.showConnectionError.collectAsState()
+    //timeout error handling
+    val showTimeoutError by joinScreenViewModel.showTimeoutError.collectAsState()
     //server connection in progress
     var loading by remember { mutableStateOf(false) }
+
+    if(showTimeoutError){
+        TimeoutErrorDialog(onDecline = {
+            loading = false
+            joinScreenViewModel.hideTimeoutError()
+        })
+    }
 
     if (showConnectionError) {
         ConnectionErrorDialog(onDecline = {
@@ -137,5 +146,22 @@ fun ConnectionErrorDialog(onDecline: () -> Unit) {
     }, title = { Text(text = "Verbindungsfehler") },
         text = {
             Text(text = "Es konnte der Sammlung nicht beigetreten werden.")
+        })
+}
+
+@Composable
+fun TimeoutErrorDialog(onDecline: () -> Unit) {
+    AlertDialog(onDismissRequest = { onDecline() }, confirmButton = {
+        TextButton(onClick = { onDecline() }) {
+            Text(text = "OK")
+        }
+    }, icon = {
+        Icon(
+            Icons.Default.Info,
+            contentDescription = "timeout while trying to connect to server"
+        )
+    }, title = { Text(text = "Verbindungsfehler") },
+        text = {
+            Text(text = "Der Administrator hat die Anfrage nicht beantwortet. Versuche es erneut.")
         })
 }
