@@ -124,7 +124,9 @@ class TrackingScreenViewModel(
     }
 
     private fun onCollectionClosed(){
-        _showCollectionClosedDialog.value = true
+        if(!isThisUserAdmin()){
+            _showCollectionClosedDialog.value = true
+        }
     }
 
     private fun onLocalTrackUpdate(){
