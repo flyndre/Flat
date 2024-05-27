@@ -54,6 +54,7 @@ class TrackingScreenViewModel(
             _divisionList.value = value.collectionDivision
             _joinLink.value = joinBaseLink+value.id
             _qrCodeGraphics.value = QRCode.ofSquares().build(_joinLink.value).render()
+            _userList.value = value.confirmedUsers.associate { Pair(it.clientId.toString(),it.username) }
         }
 
     private val _trackingEnabled = MutableStateFlow(false)
@@ -91,6 +92,9 @@ class TrackingScreenViewModel(
 
     private val _showParticipantKickedDialog = MutableStateFlow(false)
     val showParticipantKickedDialog = _showParticipantKickedDialog.asStateFlow()
+
+    private val _userList = MutableStateFlow(mapOf<String,String>())
+    val userList : StateFlow<Map<String,String>> = _userList.asStateFlow()
 
     init {
         trackingService.addOnLocalTrackUpdate{ onLocalTrackUpdate() }

@@ -50,7 +50,7 @@ fun CreateGroupScreen(
         }, onDismiss = { showDeleteConfirmationDialog = false })
     }
     Scaffold(topBar = {
-        CenterAlignedTopAppBar(title = { Text(text = "Presets") },
+        CenterAlignedTopAppBar(title = { Text(text = "Vorlagen") },
             navigationIcon = {
                 IconButton(onClick = { onNavigateToInitialScreen() }) {
                     Icon(
@@ -67,7 +67,7 @@ fun CreateGroupScreen(
             )
         }) {
             Icon(Icons.Filled.Add, contentDescription = "add new preset")
-            Text(text = "create preset")
+            Text(text = "Vorlage erstellen")
         }
     }
     ) { innerPadding ->

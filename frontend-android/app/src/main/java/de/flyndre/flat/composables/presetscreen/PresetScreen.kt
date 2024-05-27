@@ -91,7 +91,7 @@ fun PresetScreen(
                         presetScreenViewModel.openCollection(onSuccess = onNavigateToTrackingScreen, onFailure = {showConnectionError = true})
                     }
                 }) {
-                    Text("Save and Start")
+                    Text("Speichern und starten")
                 }
                 Button(onClick = {
                     if (presetName.equals("")) {
@@ -103,7 +103,7 @@ fun PresetScreen(
                         onNavigateToCreateGroupScreen()
                     }
                 }) {
-                    Text("Save")
+                    Text("Speichern")
                 }
             }
         }) { innerPadding ->
@@ -113,7 +113,7 @@ fun PresetScreen(
                 modifier = modifier,
                 value = presetName,
                 onValueChange = { presetScreenViewModel.updatePresetName(it) },
-                label = { Text(text = "Preset Name") },
+                label = { Text(text = "Vorlagenname") },
                 isError = isNameEmpty,
                 supportingText = {
                     if (isNameEmpty) {
@@ -124,7 +124,7 @@ fun PresetScreen(
                 modifier = modifier,
                 value = presetDescription,
                 onValueChange = { presetScreenViewModel.updatePresetDescription(it) },
-                label = { Text(text = "Preset Description") },
+                label = { Text(text = "Beschreibung der Vorlage") },
                 isError = isDescriptionEmpty,
                 supportingText = {
                     if (isDescriptionEmpty) {

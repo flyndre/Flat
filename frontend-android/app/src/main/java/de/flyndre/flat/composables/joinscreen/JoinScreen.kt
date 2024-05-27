@@ -95,7 +95,7 @@ fun JoinScreen(
                 modifier = modifier,
                 value = joinLink,
                 onValueChange = { joinScreenViewModel.updateJoinLink(it) },
-                label = { Text(text = "Link for joining") },
+                label = { Text(text = "Link zum beitreten") },
                 isError = isLinkEmpty,
                 supportingText = {
                     if (isLinkEmpty) {
@@ -106,7 +106,7 @@ fun JoinScreen(
                 modifier = modifier,
                 value = joinName,
                 onValueChange = { joinScreenViewModel.updateJoinName(it) },
-                label = { Text(text = "Name for joining") },
+                label = { Text(text = "Anzeigename") },
                 isError = isNameEmpty,
                 supportingText = {
                     if (isNameEmpty) {
@@ -124,7 +124,7 @@ fun JoinScreen(
                         joinScreenViewModel.join { onNavigateToTrackingScreen() }
                     }
                 }) {
-                    Text(text = "Join")
+                    Text(text = "Beitreten")
                 }
                 if(loading){
                     CircularProgressIndicator(modifier.padding(5.dp))
