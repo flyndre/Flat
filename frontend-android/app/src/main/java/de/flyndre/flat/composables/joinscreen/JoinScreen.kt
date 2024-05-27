@@ -44,12 +44,22 @@ fun JoinScreen(
     //input error handling
     var isLinkEmpty by remember { mutableStateOf(false) }
     var isNameEmpty by remember { mutableStateOf(false) }
+    //access denied dialog
+    val showAccessDenied by joinScreenViewModel.showAccessDenied.collectAsState()
     //connection error handling
     val showConnectionError by joinScreenViewModel.showConnectionError.collectAsState()
     //timeout error handling
     val showTimeoutError by joinScreenViewModel.showTimeoutError.collectAsState()
     //server connection in progress
     var loading by remember { mutableStateOf(false) }
+
+    if(showAccessDenied){
+        AccessDeniedDialog(onDecline = {
+            loading = false
+            joinScreenViewModel.hideAccessDenied()
+        }
+        )
+    }
 
     if(showTimeoutError){
         TimeoutErrorDialog(onDecline = {
@@ -163,5 +173,22 @@ fun TimeoutErrorDialog(onDecline: () -> Unit) {
     }, title = { Text(text = "Verbindungsfehler") },
         text = {
             Text(text = "Der Administrator hat die Anfrage nicht beantwortet. Versuche es erneut.")
+        })
+}
+
+@Composable
+fun AccessDeniedDialog(onDecline: () -> Unit) {
+    AlertDialog(onDismissRequest = { onDecline() }, confirmButton = {
+        TextButton(onClick = { onDecline() }) {
+            Text(text = "OK")
+        }
+    }, icon = {
+        Icon(
+            Icons.Default.Info,
+            contentDescription = "administrator denied access"
+        )
+    }, title = { Text(text = "Beitritt abgelehnt") },
+        text = {
+            Text(text = "Der Administrator hat die Anfrage abgelehnt.")
         })
 }

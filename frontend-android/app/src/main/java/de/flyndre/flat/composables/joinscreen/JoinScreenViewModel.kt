@@ -26,6 +26,9 @@ class JoinScreenViewModel(db: AppDatabase, settingService: ISettingService, trac
     //join link
     private val _joinLink = MutableStateFlow("")
     val joinLink: StateFlow<String> = _joinLink.asStateFlow()
+    //access denied dialog
+    private val _showAccessDenied = MutableStateFlow(false)
+    val showAccessDenied = _showAccessDenied.asStateFlow()
 
     fun updateJoinLink(joinLink: String){
         _joinLink.value = joinLink
@@ -63,6 +66,10 @@ class JoinScreenViewModel(db: AppDatabase, settingService: ISettingService, trac
         _showTimeoutError.value = false
     }
 
+    fun hideAccessDenied(){
+        _showAccessDenied.value = false
+    }
+
     fun join(navigateToTrackingScreen: ()->Unit){
         viewModelScope.launch {
             try {
@@ -74,6 +81,8 @@ class JoinScreenViewModel(db: AppDatabase, settingService: ISettingService, trac
                     _connectionService.openWebsocket(answer.collection.id!!)
 
                     navigateToTrackingScreen()
+                }else{
+                    _showAccessDenied.value = true
                 }
             }catch (e: IllegalArgumentException){
                 e.message?.let { Log.e(this.toString(), it) }
