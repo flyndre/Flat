@@ -3,12 +3,14 @@ package de.flyndre.flat.composables.joinscreen
 import android.app.AlertDialog
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -44,9 +46,14 @@ fun JoinScreen(
     var isNameEmpty by remember { mutableStateOf(false) }
     //connection error handling
     val showConnectionError by joinScreenViewModel.showConnectionError.collectAsState()
+    //server connection in progress
+    var loading by remember { mutableStateOf(false) }
 
     if (showConnectionError) {
-        ConnectionErrorDialog(onDecline = { joinScreenViewModel.hideConnectionError() })
+        ConnectionErrorDialog(onDecline = {
+            loading = false
+            joinScreenViewModel.hideConnectionError()
+        })
     }
 
     Scaffold(
@@ -87,16 +94,22 @@ fun JoinScreen(
                         Text(text = "Darf nicht leer sein")
                     }
                 })
-            Button(modifier = modifier, onClick = {
-                if (joinLink.equals("")) {
-                    isLinkEmpty = true
-                } else if (joinName.equals("")) {
-                    isNameEmpty = true
-                } else {
-                    joinScreenViewModel.join { onNavigateToTrackingScreen() }
+            Row {
+                Button(modifier = modifier, onClick = {
+                    if (joinLink.equals("")) {
+                        isLinkEmpty = true
+                    } else if (joinName.equals("")) {
+                        isNameEmpty = true
+                    } else {
+                        loading = true
+                        joinScreenViewModel.join { onNavigateToTrackingScreen() }
+                    }
+                }) {
+                    Text(text = "Join")
                 }
-            }) {
-                Text(text = "Join")
+                if(loading){
+                    CircularProgressIndicator(modifier.padding(5.dp))
+                }
             }
             Column(Modifier.padding(15.dp)) {
                 Text(text = "Verlauf")
