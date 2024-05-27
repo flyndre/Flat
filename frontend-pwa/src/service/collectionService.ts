@@ -7,7 +7,7 @@ import {
 } from '@/api/rest';
 import { clientId } from '@/data/clientMetadata';
 import { lastActiveCollection } from '@/data/collections';
-import { SERVER_UPDATE_INTERVAL } from '@/data/constants';
+import { SERVER_UPDATE_INTERVAL, WS_RECONNECT_DELAY } from '@/data/constants';
 import { trackingLogDB } from '@/data/trackingLogs';
 import { ActiveCollection } from '@/types/ActiveCollection';
 import { Division } from '@/types/Division';
@@ -46,7 +46,7 @@ function initialiseWebsocket() {
         _websocketStatus.value = ws.readyState;
         console.debug('ON CLOSE EVENT:', event);
         ws = null;
-        initialiseWebsocket();
+        setTimeout(initialiseWebsocket, WS_RECONNECT_DELAY);
     };
 
     ws.onerror = function (event) {
@@ -154,7 +154,6 @@ export function _closeCollection(collectionId: string) {
     _stopTracking();
     const answer = { type: 'CollectionClosed', collectionId: collectionId };
     ws.send(JSON.stringify(answer));
-    if (ws.readyState === ws.OPEN) ws.close();
 }
 
 export function _acceptOrDeclineAccessRequest(

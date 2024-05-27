@@ -62,6 +62,17 @@
         "action_import": "Importieren",
         "action_create": "Erstellen",
         "action_delete": "Löschen",
+        "action_delete_prompt_title": {
+            "single": "Eine Sammlung löschen?",
+            "multiple": "{count} Sammlungen löschen?",
+            "all": "Alle Sammlungen löschen?"
+        },
+        "action_delete_prompt": {
+            "single": "Sicher, dass diese eine Sammlung gelöscht werden soll?",
+            "multiple": "Sicher, dass {count} Sammlungen gelöscht werden sollen?",
+            "all": "Sicher, dass alle {count} Sammlungen gelöscht werden sollen?"
+        },
+        "empty": "Keine gespeicherten Sammlungen",
         "selected": "ausgewählt"
     },
     "scan": {
@@ -92,16 +103,19 @@
         "action_pause_tracking": "Tracking pausieren",
         "leave_success": "Die Sammlung {collectionName} wurde verlassen.",
         "leave_failed": "Verlassen der Sammlung fehlgeschlagen.",
+        "leave_notice": "Der Teilnehmer {name} hat die Sammlung verlassen.",
         "close_success": "Sammlung erfolgreich beendet.",
         "close_failed": "Schließen der Sammlung fehlgeschlagen.",
+        "close_notice": "Der Administrator hat die Sammlung beendet.",
+        "kick_success": "{participantName} erfolgreich rausgeschmissen",
+        "kick_failed": "Rausschmiss von {participantName} fehlgeschlagen",
+        "kick_notice": "Du wurdest vom Administrator der Sammlung rausgeschmissen.",
         "action_end_warning": [
             "Sicher, dass die laufende Sammlung beendet werden soll?",
             "Diese Aktion ist endgültig.",
             "Das Tracken aller Teilnehmer wird beendet und alle aufgenommenen Routen werden allein auf diesem Gerät gespeichert."
         ],
-        "action_end_confirm": "Sammlung endgültig beenden",
-        "kick_success": "{participantName} erfolgreich rausgeschmissen",
-        "kick_failed": "Rausschmiss von {participantName} fehlgeschlagen"
+        "action_end_confirm": "Sammlung endgültig beenden"
     },
     "components": {
         "code_reader": {

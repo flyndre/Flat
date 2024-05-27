@@ -10,6 +10,7 @@ import { clientId } from '@/data/clientMetadata';
 import { lastActiveCollection } from '@/data/collections';
 import { collectionStatsDB } from '@/data/collectionStats';
 import { TOAST_LIFE } from '@/data/constants';
+import { trackingLogDB, trackingLogs } from '@/data/trackingLogs';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { useCollectionService } from '@/service/collectionService';
 import { useTrackingService } from '@/service/trackingService';
@@ -103,18 +104,7 @@ const adminActions: MenuItem[] = [
         disabled: () => closeCollectionLoading.value,
         command: () => (closeCollectionDialogVisible.value = true),
     },
-    {
-        label: t('tracking.action_manage'),
-        icon: mdiAccountMultiple,
-        command: () => (manageParticipantsDialogVisible.value = true),
-    },
 ];
-
-function _clearUpBeforeLeave() {
-    stopTrackingLogs();
-    stopTrackingCollection();
-    lastActiveCollection.set(undefined);
-}
 
 async function leaveCollectionHandler() {
     if (!confirm(t('tracking.action_leave_warning'))) return;
@@ -129,7 +119,6 @@ async function leaveCollectionHandler() {
                 closable: true,
                 life: TOAST_LIFE,
             });
-            _clearUpBeforeLeave();
             router.push({ name: 'home' });
         } else {
             throw response.statusText;
@@ -157,7 +146,6 @@ async function closeCollectionNow() {
             severity: 'success',
             summary: t('tracking.close_success'),
         });
-        _clearUpBeforeLeave();
         router.push({
             name: 'edit',
             params: { id: props.id },
@@ -200,7 +188,7 @@ const {
 
 watch(collectionClosed, (value) => {
     pushToast({
-        summary: 'Collection was closed by an Admin.',
+        summary: t('tracking.close_notice'),
         severity: 'info',
         life: TOAST_LIFE,
     });
@@ -209,7 +197,7 @@ watch(collectionClosed, (value) => {
 
 watch(latestLeavedUser, (value) => {
     pushToast({
-        summary: `User left Collection: ${value}. Please check if Division have to be redistributed`,
+        summary: t('tracking.leave_notice', { name: value }),
         severity: 'info',
         life: TOAST_LIFE,
     });
@@ -217,7 +205,7 @@ watch(latestLeavedUser, (value) => {
 
 watch(kickMessage, (value) => {
     pushToast({
-        summary: value,
+        summary: t('tracking.kick_notice'),
         severity: 'error',
         life: TOAST_LIFE,
     });
@@ -315,22 +303,28 @@ onMounted(async () => {
     try {
         if ('wakeLock' in navigator) {
             wakeLock.value = await navigator.wakeLock.request('screen');
-            console.log("Got Wakelock")
+            console.debug('Got Wakelock');
         } else {
-            console.error('Wake Lock API not supported on this browser.');
+            console.warn('Wake Lock API not supported on this browser.');
         }
     } catch (err) {
-        console.log('Error at Requesting of WakeLock');
+        console.debug('Error at Requesting of WakeLock');
     }
 });
 
-onBeforeUnmount(async () => {
+async function _clearUpBeforeLeave() {
+    stopTrackingLogs();
+    stopTrackingCollection();
     if (wakeLock.value !== null) {
         await wakeLock.value.release();
         wakeLock.value = null;
-        console.log('Screen Wake Lock released');
+        console.debug('Screen Wake Lock released');
     }
-});
+    trackingLogDB.clear();
+    lastActiveCollection.set(undefined);
+}
+
+onBeforeUnmount(_clearUpBeforeLeave);
 </script>
 
 <template>

@@ -76,6 +76,17 @@ function deleteDialogConfirm() {
     deleteDialogVisible.value = false;
 }
 
+const collectionSelectCount = computed(() => {
+    switch (selectedCollections.value?.length) {
+        case 1:
+            return 'single';
+        case collections.value?.length:
+            return 'all';
+        default:
+            return 'multiple';
+    }
+});
+
 const exportDialogVisible = ref(false);
 const importDialogVisible = ref(false);
 const deleteDialogVisible = ref(false);
@@ -125,15 +136,20 @@ const deleteDialogVisible = ref(false);
                 modal
                 :position="isOnMobile ? 'bottom' : 'top'"
                 class="overflow-hidden"
-                :header="`Delete ${selectedCollections?.length === collections?.length ? 'all' : selectedCollections?.length} Collection${selectedCollections?.length === 1 ? '' : 's'}?`"
+                :header="
+                    $t(
+                        'presets.action_delete_prompt_title.' +
+                            collectionSelectCount,
+                        selectedCollections?.length
+                    )
+                "
             >
-                Are you sure you want to delete
                 {{
-                    selectedCollections?.length === collections?.length
-                        ? 'all'
-                        : selectedCollections?.length
+                    $t(
+                        'presets.action_delete_prompt.' + collectionSelectCount,
+                        selectedCollections?.length
+                    )
                 }}
-                Collection{{ selectedCollections?.length === 1 ? '' : 's' }}?
                 <template #footer>
                     <div
                         class="w-full flex flex-row justify-stretch gap-2 [&>*]:grow"
@@ -162,7 +178,7 @@ const deleteDialogVisible = ref(false);
             <Card>
                 <template #content>
                     <div v-if="collections?.length === 0" class="opacity-30">
-                        No Collections yet
+                        {{ $t('presets.empty') }}
                     </div>
                     <div v-else class="flex flex-col">
                         <DataTable
