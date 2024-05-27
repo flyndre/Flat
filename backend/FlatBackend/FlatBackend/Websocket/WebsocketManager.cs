@@ -257,8 +257,7 @@ namespace FlatBackend.Websocket
                 else
                 {
                     // accessConfirmationWaiting.Add(response);
-                    Json = "An Error accured while setting the User confirmation please retry.";
-                    return null;
+                    throw new InvalidOperationException("An Error accured while setting the User confirmation please retry.");
                 }
             }
             throw new InvalidOperationException("There have been an Problem. It could be that the Admin is not available...");
