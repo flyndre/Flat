@@ -138,7 +138,7 @@ namespace FlatBackend.Websocket
                     { await webSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "Unauthorised connection this user isn't confirmed by the collection owner.", CancellationToken.None); }
                 }
             }
-            if (webSocket.State == WebSocketState.Open)
+            else if (webSocket.State == WebSocketState.Open)
             { await webSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "Unauthorised connection this user isn't confirmed by the collection owner.", CancellationToken.None); }
             return;
         }
