@@ -104,7 +104,7 @@ fun JoinScreen(
                     }
                 })
             Row {
-                Button(modifier = modifier, onClick = {
+                Button(enabled = !loading, modifier = modifier, onClick = {
                     if (joinLink.equals("")) {
                         isLinkEmpty = true
                     } else if (joinName.equals("")) {
