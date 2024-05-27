@@ -46,7 +46,7 @@ fun InitialScreen(
                 ExtendedFloatingActionButton(onClick = { onNavigateToCreateGroupScreen() }, icon = {
                     Icon(
                         imageVector = Icons.Filled.Create,
-                        contentDescription = "Sammlung leiten"
+                        contentDescription = "Leiten"
                     )
                 }, text = {
                     Text(
