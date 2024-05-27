@@ -40,13 +40,13 @@ fun InitialScreen(
                     )
                 }, text = {
                     Text(
-                        text = "Join"
+                        text = "Beitreten"
                     )
                 }, modifier = Modifier.padding(10.dp))
                 ExtendedFloatingActionButton(onClick = { onNavigateToCreateGroupScreen() }, icon = {
                     Icon(
                         imageVector = Icons.Filled.Create,
-                        contentDescription = "create new collection"
+                        contentDescription = "Sammlung leiten"
                     )
                 }, text = {
                     Text(

@@ -91,6 +91,7 @@ fun TrackingScreen(
     var showSummaryDialog by remember { mutableStateOf(false) }
     val showCollectionClosedDialog by trackingScreenViewModel.showCollectionClosedDialog.collectAsState()
     val showParticipantKickedDialog by trackingScreenViewModel.showParticipantKickedDialog.collectAsState()
+    val userList by trackingScreenViewModel.userList.collectAsState()
 
     BackHandler(enabled = true) {
         if (trackingScreenViewModel.isThisUserAdmin()) {
@@ -105,7 +106,7 @@ fun TrackingScreen(
     }
 
     if(showCollectionClosedDialog){
-        CollectionClosedDialog(onAccept = onNavigateToInitialScreen)
+        CollectionClosedDialog(onAccept = {showSummaryDialog=true})
     }
 
     if (participantsToJoin.isNotEmpty()) {
@@ -155,7 +156,8 @@ fun TrackingScreen(
         SummaryDialog(
             onDismissRequest = {showSummaryDialog =false;onNavigateToInitialScreen()},
             localTrackList = localTrackList,
-            remoteTrackList = remoteTrackList
+            remoteTrackList = remoteTrackList,
+            userList = userList
         )
     }
 
@@ -236,7 +238,6 @@ fun TrackingScreen(
                     contentDescription = "center on own location"
                 )
             }
-            Text(text = "Distanz: ${localTrackList.distance}")
         }
     }) { innerPadding ->
         Modifier.padding(innerPadding)
@@ -566,7 +567,8 @@ fun AddParticipantDialog(
 fun SummaryDialog(
     onDismissRequest: () -> Unit,
     localTrackList: TrackCollection,
-    remoteTrackList: Map<UUID, TrackCollection>
+    remoteTrackList: Map<UUID, TrackCollection>,
+    userList: Map<String,String>
 ){
     Dialog(onDismissRequest = onDismissRequest) {
         Card(shape = RoundedCornerShape(16.dp),) {
@@ -577,7 +579,10 @@ fun SummaryDialog(
 
                 Text(text = "Du hast ${localTrackList.distance} m gesammelt")
                 remoteTrackList.values.forEach {
-                    Text(text = "Ein Helfer hat: = ${it.distance} m gesammelt")
+                    Text(text = "${userList[it.clientId.toString()]} hat: = ${it.distance} m gesammelt")
+                }
+                Button(onClick = onDismissRequest) {
+                    Text(text = "Weiter")
                 }
             }
         }
