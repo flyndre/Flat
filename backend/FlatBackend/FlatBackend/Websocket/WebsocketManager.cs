@@ -134,7 +134,8 @@ namespace FlatBackend.Websocket
                 }
                 else
                 {
-                    await webSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "Unauthorised connection this user isn't confirmed by the collection owner.", CancellationToken.None);
+                    if (webSocket.State == WebSocketState.Open)
+                    { await webSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "Unauthorised connection this user isn't confirmed by the collection owner.", CancellationToken.None); }
                 }
             }
             return;
@@ -176,7 +177,8 @@ namespace FlatBackend.Websocket
                     {
                         await sendSummaryToBoss(trackCollections.Find(x => x.collectionId == collectionId), collectionId, user.clientId);
                     }
-                    await user.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "The Collection was closed so the Connection is closed too.", CancellationToken.None);
+                    if (user.webSocket.State == WebSocketState.Open)
+                    { await user.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "The Collection was closed so the Connection is closed too.", CancellationToken.None); }
 
                     tempUsers.Add(user);
                 }
@@ -238,15 +240,25 @@ namespace FlatBackend.Websocket
             if (collection != null)
             {
                 var user = users.Find(x => x.collectionId == collection.id && x.clientId == collection.clientId);
+                string Json;
                 if (user != null && user.webSocket.State == WebSocketState.Open)
                 {
-                    var Json = JsonConvert.SerializeObject(request);
+                    Json = JsonConvert.SerializeObject(request);
                     await user.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
                     var buffer = new byte[1024 * 4];
-                    var response = accessConfirmationWaiting.Take();
+                }
+                var response = accessConfirmationWaiting.Take();
+                if (response.collectionId == request.collectionId && response.clientId == request.clientId)
+                {
                     UserModel model = new UserModel { clientId = response.clientId, username = request.username, accepted = response.accepted };
                     setUserConfirmation(request.collectionId, model);
                     return model;
+                }
+                else
+                {
+                    // accessConfirmationWaiting.Add(response);
+                    Json = "An Error accured while setting the User confirmation please retry.";
+                    return null;
                 }
             }
             throw new InvalidOperationException("There have been an Problem. It could be that the Admin is not available...");
@@ -272,6 +284,7 @@ namespace FlatBackend.Websocket
             if (collection != null && user != null)
             {
                 UserModel? requestedUser = collection.requestedAccess.Find(e => e.clientId == user.clientId);
+                if (requestedUser == null) { return; }
                 UserModel? validUser = collection.confirmedUsers.Find(x => x.clientId == user.clientId);
                 if (validUser == null)
                 {
@@ -326,7 +339,8 @@ namespace FlatBackend.Websocket
                 {
                     var Json = JsonConvert.SerializeObject(new KickedUserDto { message = "You have been kicked from boss Connection aborted.", type = DTOs.WebSocketMessageType.KickedUser });
                     await kickedUser.webSocket.SendAsync(Encoding.ASCII.GetBytes(Json), 0, true, CancellationToken.None);
-                    await kickedUser.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "The Collection was closed so the Connection is closed too.", CancellationToken.None);
+                    if (kickedUser.webSocket.State == WebSocketState.Open)
+                    { await kickedUser.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "The Collection was closed so the Connection is closed too.", CancellationToken.None); }
                 }
             }
         }

@@ -2,18 +2,24 @@ package de.flyndre.flat.composables.presetscreen.collectionareascreen
 
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
+import de.flyndre.flat.interfaces.ITrackingService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class CollectionAreaScreenViewModel() : ViewModel() {
+class CollectionAreaScreenViewModel(
+    trackingService: ITrackingService
+) : ViewModel() {
+    private val _trackingService = trackingService
+
     //list of points for selection area
     private val _oldListCollectionAreas: ArrayList<CollectionArea> = arrayListOf()
     private val _listCollectionAreas = MutableStateFlow<List<CollectionArea>>(listOf())
@@ -22,6 +28,22 @@ class CollectionAreaScreenViewModel() : ViewModel() {
     //saved camera position
     private val _cameraPosition = MutableStateFlow(CameraPosition(LatLng(0.0, 0.0), 0F, 0F, 0F))
     val cameraPosition: StateFlow<CameraPosition> = _cameraPosition.asStateFlow()
+
+    //own location marker
+    private val _ownLocation = MutableStateFlow<LatLng?>(null)
+    val ownLocation = _ownLocation.asStateFlow()
+
+
+    fun centerOnPosition(cameraPositionState: CameraPositionState){
+        var currentPosition :LatLng
+        viewModelScope.launch(Dispatchers.Default){
+            currentPosition = _trackingService.getCurrentPosition()
+            _ownLocation.value = currentPosition
+            viewModelScope.launch(Dispatchers.Main) {
+                cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(currentPosition, 18F))
+            }
+        }
+    }
 
     //used to clear viewModel for creation of new empty preset
     fun clearCollectionArea() {
@@ -177,5 +199,15 @@ class CollectionAreaScreenViewModel() : ViewModel() {
         arrayList.add(index, CollectionArea(Color(collectionArea.color.value), name, collectionArea.isSelected, listOfPoints))
 
         _listCollectionAreas.value = arrayList
+    }
+}
+
+class CollectionAreaScreenViewModelFactory(
+    val trackingService: ITrackingService
+): ViewModelProvider.Factory{
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return CollectionAreaScreenViewModel(
+            trackingService
+        ) as T
     }
 }

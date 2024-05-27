@@ -4,13 +4,16 @@ import de.flyndre.flat.interfaces.ISettingService
 import java.util.UUID
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 class SettingService(val preferences: SharedPreferences) : ISettingService {
     private val _clientIdKey = "USERID"
     private val _usernameKey = "USERNAME"
     private val _lastCollectionsKey = "LASTCOLLECTIONS"
     private val _serverBasePath = "SERVERBASEPATH"
-    private val _defaultServerBasePath = "https://flat.buhss.de/api"
+    private val _defaultServerBasePath = "https://flat.buhss.de"
+
     override fun getClientId(): UUID {
         val clientId = preferences.getString(_clientIdKey,"")
         if(clientId!=null&& clientId != ""){
@@ -56,9 +59,16 @@ class SettingService(val preferences: SharedPreferences) : ISettingService {
     }
 
     override fun getResentJoinLinks(): Set<String> {
-        val links = preferences.getStringSet(_lastCollectionsKey, setOf())
-        if(links!=null){
-            return links
+        try{
+
+            val links = preferences.getString(_lastCollectionsKey, "[]")
+            if(links!=null){
+                return Json.decodeFromString<Set<String>>(links)
+            }
+        }catch (_:Exception){
+            preferences.edit {
+                putString(_lastCollectionsKey,Json.encodeToString(setOf<String>())).commit()
+            }
         }
         return setOf()
     }
@@ -70,7 +80,7 @@ class SettingService(val preferences: SharedPreferences) : ISettingService {
             linkSet=linkSet-linkSet.first()
         }
         preferences.edit {
-            putStringSet(_lastCollectionsKey,linkSet)
+            putString(_lastCollectionsKey,Json.encodeToString(linkSet)).commit()
         }
         return linkSet
     }

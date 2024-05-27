@@ -5,6 +5,7 @@ import Button from 'primevue/button';
 import MdiTextButtonIcon from '../icons/MdiTextButtonIcon.vue';
 
 const { reset } = useSettings();
+const buildDate = import.meta.env.BUILD_DATE;
 </script>
 
 <template>
@@ -17,4 +18,7 @@ const { reset } = useSettings();
             <MdiTextButtonIcon :icon="mdiCogCounterclockwise" />
         </template>
     </Button>
+    <span class="opacity-50">
+        {{ buildDate }}
+    </span>
 </template>

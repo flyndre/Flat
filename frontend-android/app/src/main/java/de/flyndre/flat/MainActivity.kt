@@ -34,6 +34,7 @@ import de.flyndre.flat.composables.presetscreen.PresetScreen
 import de.flyndre.flat.composables.presetscreen.PresetScreenViewModel
 import de.flyndre.flat.composables.presetscreen.PresetScreenViewModelFactory
 import de.flyndre.flat.composables.presetscreen.collectionareascreen.CollectionAreaScreenViewModel
+import de.flyndre.flat.composables.presetscreen.collectionareascreen.CollectionAreaScreenViewModelFactory
 import de.flyndre.flat.composables.settingScreen.CreateSettingScreenViewModelFactory
 import de.flyndre.flat.composables.settingScreen.SettingScreen
 import de.flyndre.flat.composables.settingScreen.SettingScreenViewModel
@@ -70,17 +71,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         //request permissions
         requestLocationPermission()
-        settingService = SettingService(getPreferences(MODE_PRIVATE))
-        connectionService =
-            ConnectionService(settingService)
-        locationService = LocationService(
-            1000,
-            LocationServices.getFusedLocationProviderClient(this), this
-        )
-        trackingService = TrackingService(connectionService, locationService, 10000,settingService)
-        db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "flat-database")
-            .build()
+    }
 
+    private fun proccedAfterPermissionsGranted(){
         setContent {
             FlatTheme {
                 // A surface container using the 'background' color from the theme
@@ -105,7 +98,13 @@ class MainActivity : ComponentActivity() {
                             assignmentScreenViewModel,
                             participantScreenViewModel,
                             settingService))
-                    val collectionAreaScreenViewModel:CollectionAreaScreenViewModel = viewModel()
+                    val collectionAreaScreenViewModel:CollectionAreaScreenViewModel = viewModel(
+                        it,
+                        "CollectionAreaScreenViewModel",
+                        CollectionAreaScreenViewModelFactory(
+                            trackingService
+                        )
+                    )
                     val presetScreenViewModel: PresetScreenViewModel = viewModel(
                         it,
                         "PresetScreenViewModel",
@@ -167,7 +166,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-
     }
 
     private fun requestLocationPermission() {
@@ -177,6 +175,9 @@ class MainActivity : ComponentActivity() {
             ) { isGranted: Boolean ->
                 if (!isGranted) {
                     finishAndRemoveTask()
+                }else{
+                    initializeServices()
+                    proccedAfterPermissionsGranted()
                 }
             }
         if (ContextCompat.checkSelfPermission(
@@ -185,6 +186,9 @@ class MainActivity : ComponentActivity() {
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        } else{
+            initializeServices()
+            proccedAfterPermissionsGranted()
         }
     }
 
@@ -198,6 +202,18 @@ class MainActivity : ComponentActivity() {
         val shareIntent = Intent.createChooser(sendIntent, null)
         startActivity(shareIntent)
 
+    }
+
+    private fun initializeServices(){
+        settingService = SettingService(getPreferences(MODE_PRIVATE))
+        connectionService = ConnectionService(settingService)
+        locationService = LocationService(
+            1000,
+            LocationServices.getFusedLocationProviderClient(this), this
+        )
+        trackingService = TrackingService(connectionService, locationService, 10000,settingService)
+        db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "flat-database")
+            .build()
     }
 }
 

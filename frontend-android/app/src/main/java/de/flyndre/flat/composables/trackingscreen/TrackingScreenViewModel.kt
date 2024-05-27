@@ -45,7 +45,7 @@ class TrackingScreenViewModel(
     private val _trackingService = trackingService
     private val _connectionService = connectionService
     private val _settingService = settingService
-    private val joinBaseLink = "https://flat.buhss.de/join/"
+    private val joinBaseLink = "${settingService.getServerBaseUrl()}/join/"
     private var lastCenteredOwnDivision: CollectionArea? = null
 
     var collectionInstance: CollectionInstance = CollectionInstance("", UUID.randomUUID(), MultiPolygon())
