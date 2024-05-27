@@ -200,7 +200,7 @@ const {
 
 watch(collectionClosed, (value) => {
     pushToast({
-        summary: 'Collection was closed by an Admin.',
+        summary: t('tracking.close_notice'),
         severity: 'info',
         life: TOAST_LIFE,
     });
@@ -209,7 +209,7 @@ watch(collectionClosed, (value) => {
 
 watch(latestLeavedUser, (value) => {
     pushToast({
-        summary: `User left Collection: ${value}. Please check if Division have to be redistributed`,
+        summary: t('tracking.leave_notice', { name: value }),
         severity: 'info',
         life: TOAST_LIFE,
     });
@@ -217,7 +217,7 @@ watch(latestLeavedUser, (value) => {
 
 watch(kickMessage, (value) => {
     pushToast({
-        summary: value,
+        summary: t('tracking.kick_notice'),
         severity: 'error',
         life: TOAST_LIFE,
     });
@@ -315,12 +315,12 @@ onMounted(async () => {
     try {
         if ('wakeLock' in navigator) {
             wakeLock.value = await navigator.wakeLock.request('screen');
-            console.log("Got Wakelock")
+            console.debug('Got Wakelock');
         } else {
-            console.error('Wake Lock API not supported on this browser.');
+            console.warn('Wake Lock API not supported on this browser.');
         }
     } catch (err) {
-        console.log('Error at Requesting of WakeLock');
+        console.debug('Error at Requesting of WakeLock');
     }
 });
 
@@ -328,7 +328,7 @@ onBeforeUnmount(async () => {
     if (wakeLock.value !== null) {
         await wakeLock.value.release();
         wakeLock.value = null;
-        console.log('Screen Wake Lock released');
+        console.debug('Screen Wake Lock released');
     }
 });
 </script>

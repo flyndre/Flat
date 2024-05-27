@@ -62,6 +62,17 @@
         "action_import": "Import",
         "action_create": "Create new",
         "action_delete": "Delete",
+        "action_delete_prompt_title": {
+            "single": "Delete 1 collection?",
+            "multiple": "Delete {count} collections?",
+            "all": "Delete all collections?"
+        },
+        "action_delete_prompt": {
+            "single": "Are you sure you want to delete 1 collection?",
+            "multiple": "Are you sure you want to delete {count} collections?",
+            "all": "Are you sure you want to delete all {count} collections?"
+        },
+        "empty": "No Collections yet",
         "selected": "Selected"
     },
     "scan": {
@@ -92,16 +103,19 @@
         "action_pause_tracking": "Pause Tracking",
         "leave_success": "The collection {collectionName} has been left.",
         "leave_failed": "Failed to leave collection.",
+        "leave_notice": "The participant {name} has left the collection.",
         "close_success": "Successfully ended collection.",
         "close_failed": "Failed to end collection.",
+        "close_notice": "The collection has been closed.",
+        "kick_success": "Kicked {participantName}",
+        "kick_failed": "Failed to kick {participantName}",
+        "kick_notice": "You have been kicked from the collection.",
         "action_end_warning": [
             "Are you certain that you want to end the ongoing collection?",
             "This action is irreversible.",
             "It will stop the tracking of all participants and save all tracked movement on your device only."
         ],
-        "action_end_confirm": "End collection permanently",
-        "kick_success": "Kicked {participantName}",
-        "kick_failed": "Failed to kick {participantName}"
+        "action_end_confirm": "End collection permanently"
     },
     "components": {
         "code_reader": {

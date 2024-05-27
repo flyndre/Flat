@@ -15,7 +15,7 @@
         "join": "Unirse",
         "next": "Más",
         "help": "Ayuda",
-        "delete": "Eliminar",
+        "delete": "Borrar",
         "share": "Compartir",
         "copy": "Copiar"
     },
@@ -62,6 +62,17 @@
         "action_import": "Importar",
         "action_create": "Crear",
         "action_delete": "Borrar",
+        "action_delete_prompt_title": {
+            "single": "¿Borrar 1 colección?",
+            "multiple": "¿Borrar {count} colecciones?",
+            "all": "¿Borrar todas las colecciones?"
+        },
+        "action_delete_prompt": {
+            "single": "¿Estás seguro de que quieres borrar 1 colección?",
+            "multiple": "¿Estás seguro de que quieres borrar {count} colecciones?",
+            "all": "¿Estás seguro de que quieres borrar todas las {count} colecciones?"
+        },
+        "empty": "No hay colecciones",
         "selected": "seleccionados"
     },
     "scan": {
@@ -92,16 +103,19 @@
         "action_pause_tracking": "Pausar seguimiento",
         "leave_success": "El colección {collectionName} fue abandonada.",
         "leave_failed": "No se pudo salir de la colección.",
+        "leave_notice": "El participante {name} ha abandonado la colección.",
         "close_success": "Colección completada exitosamente.",
         "close_failed": "Error al cerrar la colección.",
+        "close_notice": "El administrador ha detenido la colección.",
+        "kick_success": "{participantName} fue expulsado con éxito.",
+        "kick_failed": "No se pudo expulsar a {participantName}",
+        "kick_notice": "El administrador de la colección te echó.",
         "action_end_warning": [
             "¿Está seguro de que desea terminar la colección en curso?",
             "Esta acción es irreversible.",
             "Detendrá el seguimiento de todos los participantes y guardará todos los movimientos rastreados únicamente en su dispositivo."
         ],
-        "action_end_confirm": "Finalizar permanente",
-        "kick_success": "{participantName} fue expulsado con éxito.",
-        "kick_failed": "No se pudo expulsar a {participantName}"
+        "action_end_confirm": "Finalizar permanente"
     },
     "components": {
         "code_reader": {
