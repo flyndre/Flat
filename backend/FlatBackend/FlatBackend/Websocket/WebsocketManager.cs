@@ -256,7 +256,7 @@ namespace FlatBackend.Websocket
                 }
                 else
                 {
-                    accessConfirmationWaiting.Add(response);
+                    // accessConfirmationWaiting.Add(response);
                     Json = "An Error accured while setting the User confirmation please retry.";
                     return null;
                 }
