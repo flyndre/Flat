@@ -100,11 +100,15 @@ namespace FlatBackend.Controllers
                         new ArraySegment<byte>(buffer), CancellationToken.None);
                 }
             }
-            _WebsocketManager.removeWebsocketUser(webSocket);
-            await webSocket.CloseAsync(
-                receiveResult.CloseStatus.Value,
-                receiveResult.CloseStatusDescription,
-                CancellationToken.None);
+
+            if (webSocket.State == WebSocketState.Open)
+            {
+                _WebsocketManager.removeWebsocketUser(webSocket);
+                await webSocket.CloseAsync(
+                    receiveResult.CloseStatus.Value,
+                    receiveResult.CloseStatusDescription,
+                    CancellationToken.None);
+            }
         }
     }
 }
