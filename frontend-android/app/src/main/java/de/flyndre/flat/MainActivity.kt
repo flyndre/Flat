@@ -271,7 +271,7 @@ fun AppEntryPoint(
         composable("preset") {
             PresetScreen(
                 navController = navController,
-                topBarText = "Edit Preset",
+                topBarText = "Vorlage bearbeiten",
                 onNavigateToCreateGroupScreen = { navController.navigate("creategroup") },
                 onNavigateToTrackingScreen = { navController.navigate("tracking") },
                 onNavigateToCollectionAreaScreen = { navController.navigate("collectionarea") },

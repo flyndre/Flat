@@ -50,7 +50,7 @@ fun InitialScreen(
                     )
                 }, text = {
                     Text(
-                        text = "Create"
+                        text = "Sammlung leiten"
                     )
                 }, modifier = Modifier.padding(10.dp))
                 FloatingActionButton(onClick = onNavigateToSettingScreen, modifier = Modifier.padding(10.dp)) {

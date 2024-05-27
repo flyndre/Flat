@@ -194,9 +194,9 @@ fun TrackingScreen(
                 },
                 text = {
                     if (trackingEnabled) {
-                        Text(text = "Stop Tracking")
+                        Text(text = "Stop tracking")
                     } else {
-                        Text(text = "Start Tracking")
+                        Text(text = "Start tracking")
                     }
                 },
                 modifier = Modifier.padding(10.dp)
@@ -208,7 +208,7 @@ fun TrackingScreen(
                 )
             }, text = {
                 Text(
-                    text = "Add Participant"
+                    text = "Einladen"
                 )
             }, modifier = Modifier.padding(10.dp))
         }
@@ -354,7 +354,7 @@ fun AdminMenu(
                                 onClosingCollection()
                             })
                         {
-                            Text(text = "End Collection")
+                            Text(text = "Sammlung beenden")
                         }
                         ExtendedFloatingActionButton(
                             modifier = Modifier.padding(vertical = 10.dp),
@@ -363,7 +363,7 @@ fun AdminMenu(
                                 trackingScreenViewModel.updateAssignmentScreenViewModel()
                                 onNavigateToAssignmentScreen()
                             }) {
-                            Text(text = "Manage Groups")
+                            Text(text = "Zuweisungen verwalten")
                         }
                         ExtendedFloatingActionButton(
                             modifier = Modifier.padding(vertical = 10.dp),
@@ -372,7 +372,7 @@ fun AdminMenu(
                                 trackingScreenViewModel.updateParticipantScreenViewModel()
                                 onNavigateToParticipantScreen()
                             }) {
-                            Text(text = "Manage Participants")
+                            Text(text = "Teilnehmer verwalten")
                         }
                     }
                 }
@@ -557,7 +557,7 @@ fun AddParticipantDialog(
                 TextField(joinLink, { val s = it }, readOnly = true)
             }
             Button(onClick = { onShareButtonClick(joinLink) }) {
-                Text(text = "Share")
+                Text(text = "Teilen")
             }
         }
     }
@@ -581,7 +581,9 @@ fun SummaryDialog(
                 remoteTrackList.values.forEach {
                     Text(text = "${userList[it.clientId.toString()]} hat: = ${it.distance} m gesammelt")
                 }
-                Button(onClick = onDismissRequest) {
+                TextButton(
+                    onClick = onDismissRequest,
+                    modifier = Modifier.align(Alignment.End)) {
                     Text(text = "Weiter")
                 }
             }
