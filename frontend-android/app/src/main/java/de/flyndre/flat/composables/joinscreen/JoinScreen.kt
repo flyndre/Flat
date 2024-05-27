@@ -3,12 +3,14 @@ package de.flyndre.flat.composables.joinscreen
 import android.app.AlertDialog
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,11 +44,35 @@ fun JoinScreen(
     //input error handling
     var isLinkEmpty by remember { mutableStateOf(false) }
     var isNameEmpty by remember { mutableStateOf(false) }
+    //access denied dialog
+    val showAccessDenied by joinScreenViewModel.showAccessDenied.collectAsState()
     //connection error handling
     val showConnectionError by joinScreenViewModel.showConnectionError.collectAsState()
+    //timeout error handling
+    val showTimeoutError by joinScreenViewModel.showTimeoutError.collectAsState()
+    //server connection in progress
+    var loading by remember { mutableStateOf(false) }
+
+    if(showAccessDenied){
+        AccessDeniedDialog(onDecline = {
+            loading = false
+            joinScreenViewModel.hideAccessDenied()
+        }
+        )
+    }
+
+    if(showTimeoutError){
+        TimeoutErrorDialog(onDecline = {
+            loading = false
+            joinScreenViewModel.hideTimeoutError()
+        })
+    }
 
     if (showConnectionError) {
-        ConnectionErrorDialog(onDecline = { joinScreenViewModel.hideConnectionError() })
+        ConnectionErrorDialog(onDecline = {
+            loading = false
+            joinScreenViewModel.hideConnectionError()
+        })
     }
 
     Scaffold(
@@ -87,16 +113,22 @@ fun JoinScreen(
                         Text(text = "Darf nicht leer sein")
                     }
                 })
-            Button(modifier = modifier, onClick = {
-                if (joinLink.equals("")) {
-                    isLinkEmpty = true
-                } else if (joinName.equals("")) {
-                    isNameEmpty = true
-                } else {
-                    joinScreenViewModel.join { onNavigateToTrackingScreen() }
+            Row {
+                Button(enabled = !loading, modifier = modifier, onClick = {
+                    if (joinLink.equals("")) {
+                        isLinkEmpty = true
+                    } else if (joinName.equals("")) {
+                        isNameEmpty = true
+                    } else {
+                        loading = true
+                        joinScreenViewModel.join { onNavigateToTrackingScreen() }
+                    }
+                }) {
+                    Text(text = "Join")
                 }
-            }) {
-                Text(text = "Join")
+                if(loading){
+                    CircularProgressIndicator(modifier.padding(5.dp))
+                }
             }
             Column(Modifier.padding(15.dp)) {
                 Text(text = "Verlauf")
@@ -124,5 +156,39 @@ fun ConnectionErrorDialog(onDecline: () -> Unit) {
     }, title = { Text(text = "Verbindungsfehler") },
         text = {
             Text(text = "Es konnte der Sammlung nicht beigetreten werden.")
+        })
+}
+
+@Composable
+fun TimeoutErrorDialog(onDecline: () -> Unit) {
+    AlertDialog(onDismissRequest = { onDecline() }, confirmButton = {
+        TextButton(onClick = { onDecline() }) {
+            Text(text = "OK")
+        }
+    }, icon = {
+        Icon(
+            Icons.Default.Info,
+            contentDescription = "timeout while trying to connect to server"
+        )
+    }, title = { Text(text = "Verbindungsfehler") },
+        text = {
+            Text(text = "Der Administrator hat die Anfrage nicht beantwortet. Versuche es erneut.")
+        })
+}
+
+@Composable
+fun AccessDeniedDialog(onDecline: () -> Unit) {
+    AlertDialog(onDismissRequest = { onDecline() }, confirmButton = {
+        TextButton(onClick = { onDecline() }) {
+            Text(text = "OK")
+        }
+    }, icon = {
+        Icon(
+            Icons.Default.Info,
+            contentDescription = "administrator denied access"
+        )
+    }, title = { Text(text = "Beitritt abgelehnt") },
+        text = {
+            Text(text = "Der Administrator hat die Anfrage abgelehnt.")
         })
 }

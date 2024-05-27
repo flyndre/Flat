@@ -164,7 +164,6 @@ async function closeCollectionNow() {
             query: { stats: stats.id },
         });
     } catch (e) {
-        console.log(e);
         pushToast({
             life: TOAST_LIFE,
             severity: 'error',
@@ -335,7 +334,6 @@ onBeforeUnmount(async () => {
 </script>
 
 <template>
-    {{ activeCollection }}
     <JoinRequestDialog
         :requests="activeCollection.requestedUsers"
         @request-answered="processJoinRequest"

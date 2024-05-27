@@ -29,8 +29,7 @@ function initialiseWebsocket() {
 
     ws.onmessage = function (event) {
         _websocketStatus.value = ws.readyState;
-        console.log('ON MESSAGE EVENT:');
-        console.log(event);
+        console.debug('ON MESSAGE EVENT:', event);
         let websocketMsg = JSON.parse(event.data);
         Array.isArray(websocketMsg)
             ? websocketMsg.forEach((el) => handleWebsocketMessage(el))
@@ -39,36 +38,27 @@ function initialiseWebsocket() {
 
     ws.onopen = function (event) {
         _websocketStatus.value = ws.readyState;
-        console.log('ON OPEN EVENT:');
-        console.log(event);
+        console.debug('ON OPEN EVENT:', event);
         establishWebsocket(clientId.value, _activeCollection.value.id);
     };
 
     ws.onclose = function (event) {
         _websocketStatus.value = ws.readyState;
-        console.log('ON CLOSE EVENT:');
-        console.log(event);
+        console.debug('ON CLOSE EVENT:', event);
         ws = null;
         initialiseWebsocket();
     };
 
     ws.onerror = function (event) {
         _websocketStatus.value = ws.readyState;
-        console.log(
-            'HANDELSGUT WICHTIG !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-        );
-        console.log('ON ERROR EVENT:');
-        console.log(event);
-        console.log(
-            'HANDELSGUT WICHTIG !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-        );
+        console.debug('ON ERROR EVENT:', event);
     };
 }
 
 const _isAdmin = ref(false);
 const _activeCollection = ref<ActiveCollection>({} as ActiveCollection);
 const _isLoading = ref(true);
-const _kickMessage = ref("");
+const _kickMessage = ref('');
 let latestSendTimestamp = Date.now();
 
 const {
@@ -77,8 +67,6 @@ const {
     resume: resumeInterval,
 } = useIntervalFn(
     async () => {
-        console.log('Sending Trackingpoints...');
-
         let tracks = await trackingLogDB
             .where('timestamp')
             .above(latestSendTimestamp)
@@ -97,12 +85,10 @@ const {
                 track: lineStringOfPosition,
                 clientId: clientId.value,
             };
-            console.log('Sending this Message:');
-            console.log(msg);
+            console.debug('Sending Tracks:', msg);
             ws.send(JSON.stringify(msg));
         });
 
-        console.log(tracks);
         latestSendTimestamp = tracks.at(-1)?.timestamp ?? Date.now();
     },
     SERVER_UPDATE_INTERVAL,
@@ -112,47 +98,43 @@ const {
 );
 
 function handleWebsocketMessage(message: any) {
-    switch (message.type) {
-        case 'AccessRequest':
+    console.debug('RECEIVED:', message);
+    switch (message.type?.toLowerCase()) {
+        case 'accessrequest':
             handleAccessRequest(<InviteMessage>message);
             break;
-        case 'CollectionUpdate':
+        case 'collectionupdate':
             handleCollectionUpdate(<UpdateCollectionMessage>message);
             break;
-        case 'IncrementalTrack':
+        case 'incrementaltrack':
             handleIncrementalTracks(<IncrementalTrackMessage>message);
             break;
-        case 'KickedUser':
+        case 'kickeduser':
             handleKick(<KickMessage>message);
             break;
-        case 'CollectionClosed':
+        case 'collectionclosed':
             handleCollectionClosed();
             break;
-        case 'LeavingUser':
+        case 'leavinguser':
             _handleLeavingUser(message);
-                break;
-
-        // TODO:
-        // LeaveMessage (message to admin that participant left)
-        // DeleteMessage & EndCollectionMessage (messages to participants that collection is closed and message to admin with collection summary)
-        // KickedUserMessage (message to participant that he has been kicked)
+            break;
     }
 }
 
-const _latestLeavedUser = ref(""); 
+const _latestLeavedUser = ref('');
 
-function _handleLeavingUser(message : {user : {clientId: string, username : string}}){
-    _latestLeavedUser.value = message.user.username
+function _handleLeavingUser(message: {
+    user: { clientId: string; username: string };
+}) {
+    _latestLeavedUser.value = message.user.username;
 }
 
 const _collectionClosed = ref(false);
-function handleKick(message : KickMessage){
+function handleKick(message: KickMessage) {
     _kickMessage.value = message.message;
 }
 
-function handleCollectionClosed(){
-    console.log("Wird gehandled, cheffe")
-    ws.onclose = null;  
+function handleCollectionClosed() {
     _collectionClosed.value = true;
 }
 
@@ -202,7 +184,7 @@ export const useCollectionService = (id: string) => {
     let response = getCollection(id, clientId.value);
 
     response.then(({ data }) => {
-        console.log(data);
+        console.debug(data);
 
         _isAdmin.value = data.clientId === clientId.value;
 
@@ -255,7 +237,6 @@ export const useCollectionService = (id: string) => {
 
     initialiseWebsocket();
 
-    console.log('READY');
     return {
         activeCollection: computed(() => ({
             ..._activeCollection.value,
@@ -271,8 +252,10 @@ export const useCollectionService = (id: string) => {
         })),
         assignDivision: (d: Division, p: ParticipantTrack | null) =>
             _assignDivision(d, p),
-        leave: async (collId: string, clientId: string) => await leaveCollection(collId, clientId),
-        kick: async (collId: string, clId: string) => await kickUser(collId, clId, clientId.value),
+        leave: async (collId: string, clientId: string) =>
+            await leaveCollection(collId, clientId),
+        kick: async (collId: string, clId: string) =>
+            await kickUser(collId, clId, clientId.value),
         requests: computed(() => _activeCollection.value.requestedUsers),
         member: computed(() => _activeCollection.value.confirmedUsers),
         handleRequest: (
@@ -297,7 +280,7 @@ export const useCollectionService = (id: string) => {
         connectionStatus: computed(() => _websocketStatus.value),
         kickMessage: computed(() => _kickMessage.value),
         collectionClosed: computed(() => _collectionClosed.value),
-        latestLeavedUser: computed(() => _latestLeavedUser.value)
+        latestLeavedUser: computed(() => _latestLeavedUser.value),
     };
 };
 
@@ -306,8 +289,6 @@ export const useCollectionService = (id: string) => {
  */
 
 function handleAccessRequest(message: InviteMessage) {
-    console.log('TEST:');
-    console.log(_activeCollection.value.requestedUsers);
     _activeCollection.value.requestedUsers = [];
     _activeCollection.value.requestedUsers.push({
         username: message.username,
@@ -342,18 +323,14 @@ function handleCollectionUpdate(message: UpdateCollectionMessage) {
             active:
                 message.collection.confirmedUsers.find(
                     (active) => existing.id === active.clientId
-                ) !== undefined, 
+                ) !== undefined,
         }));
 }
 
 function handleIncrementalTracks(message: IncrementalTrackMessage) {
-    console.log(message);
     let memberOfTrack = _activeCollection.value.confirmedUsers.find(
         (el) => el.id === message.clientId
     );
-
-    console.log('Owner of Track:');
-    console.log(memberOfTrack);
 
     let listOfTracks = memberOfTrack.progress.filter(
         (el) => el.id === message.trackId

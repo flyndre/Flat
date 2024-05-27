@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
+import java.net.SocketTimeoutException
 import java.util.UUID
 
 class JoinScreenViewModel(db: AppDatabase, settingService: ISettingService, trackingScreenViewModel: TrackingScreenViewModel, connectionService: IConnectionService): ViewModel() {
@@ -25,6 +26,9 @@ class JoinScreenViewModel(db: AppDatabase, settingService: ISettingService, trac
     //join link
     private val _joinLink = MutableStateFlow("")
     val joinLink: StateFlow<String> = _joinLink.asStateFlow()
+    //access denied dialog
+    private val _showAccessDenied = MutableStateFlow(false)
+    val showAccessDenied = _showAccessDenied.asStateFlow()
 
     fun updateJoinLink(joinLink: String){
         _joinLink.value = joinLink
@@ -50,8 +54,20 @@ class JoinScreenViewModel(db: AppDatabase, settingService: ISettingService, trac
     private val _showConnectionError = MutableStateFlow(false)
     val showConnectionError = _showConnectionError.asStateFlow()
 
+    //connection timeout handling
+    private val _showTimeoutError = MutableStateFlow(false)
+    val showTimeoutError = _showTimeoutError.asStateFlow()
+
     fun hideConnectionError(){
         _showConnectionError.value = false
+    }
+
+    fun hideTimeoutError(){
+        _showTimeoutError.value = false
+    }
+
+    fun hideAccessDenied(){
+        _showAccessDenied.value = false
     }
 
     fun join(navigateToTrackingScreen: ()->Unit){
@@ -65,10 +81,15 @@ class JoinScreenViewModel(db: AppDatabase, settingService: ISettingService, trac
                     _connectionService.openWebsocket(answer.collection.id!!)
 
                     navigateToTrackingScreen()
+                }else{
+                    _showAccessDenied.value = true
                 }
             }catch (e: IllegalArgumentException){
                 e.message?.let { Log.e(this.toString(), it) }
                 _showConnectionError.value = true
+            }catch(e: SocketTimeoutException){
+                e.message?.let { Log.e(this.toString(), it) }
+                _showTimeoutError.value = true
             }
         }
     }
