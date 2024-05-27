@@ -139,7 +139,7 @@ namespace FlatBackend.Websocket
                 }
             }
             else
-            { await webSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "Unauthorised connection this user isn't confirmed by the collection owner.", CancellationToken.None); }
+            { if (webSocket.State == WebSocketState.Open) await webSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "Unauthorised connection this user isn't confirmed by the collection owner.", CancellationToken.None); }
             return;
         }
 
@@ -179,9 +179,12 @@ namespace FlatBackend.Websocket
                     {
                         await sendSummaryToBoss(trackCollections.Find(x => x.collectionId == collectionId), collectionId, user.clientId);
                     }
-                    if (user.webSocket.State == WebSocketState.Open)
-                    { await user.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "The Collection was closed so the Connection is closed too.", CancellationToken.None); }
-
+                    try
+                    {
+                        if (user.webSocket.State == WebSocketState.Open)
+                        { await user.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "The Collection was closed so the Connection is closed too.", CancellationToken.None); }
+                    }
+                    catch { tempUsers.Add(user); continue; }
                     tempUsers.Add(user);
                 }
             }

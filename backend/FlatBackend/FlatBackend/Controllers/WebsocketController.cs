@@ -101,7 +101,7 @@ namespace FlatBackend.Controllers
                 }
             }
 
-            if (webSocket.State == WebSocketState.Open)
+            if (webSocket.State == WebSocketState.Open || webSocket.State == WebSocketState.CloseReceived || webSocket.State == WebSocketState.CloseSent)
             {
                 _WebsocketManager.removeWebsocketUser(webSocket);
                 await webSocket.CloseAsync(
