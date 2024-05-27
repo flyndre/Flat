@@ -111,12 +111,14 @@ namespace FlatBackend.Controllers
                     if (confirmedUser.accepted)
                     {
                         var resultAccessResult = new ResultAccessRequest() { accepted = true, collection = oldCol };
+                        oldCol.confirmedUsers.Remove(confirmedUser);
                         Json = JsonConvert.SerializeObject(resultAccessResult);
                         return Json;
                     }
                     else
                     {
-                        Json = JsonConvert.SerializeObject(confirmedUser); return Json;
+                        Json = JsonConvert.SerializeObject(new ResultAccessRequest() { accepted = confirmedUser.accepted, collection = null });
+                        return Json;
                     }
                 }
                 else
