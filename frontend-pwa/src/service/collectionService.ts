@@ -154,7 +154,6 @@ export function _closeCollection(collectionId: string) {
     _stopTracking();
     const answer = { type: 'CollectionClosed', collectionId: collectionId };
     ws.send(JSON.stringify(answer));
-    if (ws.readyState === ws.OPEN) ws.close();
 }
 
 export function _acceptOrDeclineAccessRequest(
