@@ -59,18 +59,22 @@ class TrackingService(
     }
 
     override fun addIncrementalTrack(track: IncrementalTrackMessage) {
-        if(messages.contains(track)){
-            Log.d(this.toString(),"Double message +${track}")
-            return
-        }
-        messages.add(track)
-        if(track.clientId!=settingService.getClientId()){
-            if(!remoteTracks.containsKey(track.clientId)) {
-
-                remoteTracks[track.clientId] = TrackCollection(track.clientId)
+        try{
+            if(messages.contains(track)){
+                Log.d(this.toString(),"Double message +${track}")
+                return
             }
-            remoteTracks[track.clientId]?.addIncrementalTrack(track.trackId,track.track)
-            onRemoteTrackUpdate.forEach { x->x() }
+            messages.add(track)
+            if(track.clientId!=settingService.getClientId()){
+                if(!remoteTracks.containsKey(track.clientId)) {
+
+                    remoteTracks[track.clientId] = TrackCollection(track.clientId)
+                }
+                remoteTracks[track.clientId]?.addIncrementalTrack(track.trackId,track.track)
+                onRemoteTrackUpdate.forEach { x->x() }
+            }
+        } catch (e:Exception){
+            Log.e(this.toString(),e.message.toString())
         }
     }
 

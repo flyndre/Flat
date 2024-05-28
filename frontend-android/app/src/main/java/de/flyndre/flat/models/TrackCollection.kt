@@ -1,5 +1,6 @@
 package de.flyndre.flat.models
 
+import android.util.Log
 import androidx.compose.foundation.pager.PagerSnapDistance
 import io.github.dellisd.spatialk.geojson.MultiLineString
 import io.github.dellisd.spatialk.geojson.LineString
@@ -38,15 +39,30 @@ data class TrackCollection(
         if(tracks.none { x -> x.trackId == trackId }){
             tracks.add(Track(trackId))
         }
-        if(track.coordinates.size==2&& track.coordinates[0] == track.coordinates[0]){
+        if(track.coordinates.size==2&& track.coordinates[0] == track.coordinates[1]){
             tracks.findLast { x->x.trackId==trackId }?.positions?.add(track.coordinates.first())
             return
         }
-        if(track.coordinates.first()==tracks.findLast { x->x.trackId==trackId }?.positions?.last()){
-            tracks.findLast { x->x.trackId==trackId }?.positions?.addAll(track.coordinates-track.coordinates.first())
-            return
+        try{
+            if(track.coordinates.first()==tracks.findLast { x->x.trackId==trackId }?.positions?.last()){
+                tracks.findLast { x->x.trackId==trackId }?.positions?.addAll(track.coordinates-track.coordinates.first())
+                return
+            }
+        }catch (e:Exception){
+            Log.e(this.toString(),"Couldn't compare first and last point.:${e}")
         }
-        tracks.findLast { x->x.trackId==trackId }?.positions?.addAll(track.coordinates)
+        val lastTrack = tracks.findLast { x->x.trackId==trackId }?.positions
+        if(lastTrack!=null){
+            /*
+            track.coordinates.forEach {
+                if(!lastTrack.contains(it)){
+                    lastTrack.add(it)
+                }else{
+                    Log.d(this.toString(),"Position already there. $it")
+                }
+            }*/
+            lastTrack.addAll(track.coordinates)
+        }
     }
 
     fun deepCopy(): TrackCollection {
