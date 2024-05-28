@@ -208,7 +208,7 @@ class MainActivity : ComponentActivity() {
         settingService = SettingService(getPreferences(MODE_PRIVATE))
         connectionService = ConnectionService(settingService)
         locationService = LocationService(
-            1000,
+            500,
             LocationServices.getFusedLocationProviderClient(this), this
         )
         trackingService = TrackingService(connectionService, locationService, 10000,settingService)
