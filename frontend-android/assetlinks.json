@@ -1,0 +1,9 @@
+[{
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "de.flyndre.flat",
+      "sha256_cert_fingerprints":
+      ["C6:90:7F:89:86:76:7D:88:5C:BA:9E:ED:12:F6:39:50:74:75:24:5D:8C:D4:3D:46:73:0B:30:BF:9D:6A:43:EC"]
+    }
+  }]
