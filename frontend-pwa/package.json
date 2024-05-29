@@ -23,6 +23,7 @@
         "@vueuse/router": "^10.9.0",
         "@vueuse/rxjs": "^10.9.0",
         "axios": "^1.7.2",
+        "axios-mock-adapter": "^1.22.0",
         "dexie": "^4.0.4",
         "geojson": "^0.5.0",
         "html2canvas": "^1.4.1",

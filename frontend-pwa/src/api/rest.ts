@@ -1,6 +1,6 @@
 import { Collection } from '@/types/Collection';
 import { Division } from '@/types/Division';
-import api from './api';
+import api from './mockApi';
 
 /**
  * opens the collection.
