@@ -21,7 +21,14 @@
     },
     "home": {
         "join": "Sammlung beitreten",
-        "presets": "Meine Sammlungen"
+        "presets": "Meine Sammlungen",
+        "demo": {
+            "info": "Flat PWA befindet sich im Demomodus.",
+            "title": "Demomodus",
+            "more": "Was bedeutet das?",
+            "hide": "Info ausblenden", 
+            "explanation": "Im Demomodus läuft Flat PWA ohne Backend-Server. Jegliche Funktionalität ist simuliert und es findet keine Kommunikation zwischen verschiedenen App-Clients statt."
+        }
     },
     "edit": {
         "title_edit": "Bearbeiten",

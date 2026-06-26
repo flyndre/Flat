@@ -21,7 +21,14 @@
     },
     "home": {
         "join": "Join a Collection",
-        "presets": "My Collections"
+        "presets": "My Collections",
+        "demo": {
+            "info": "Flat PWA is running in demo mode.",
+            "title": "Demo Mode",
+            "more": "What does this mean?",
+            "hide": "Hide info", 
+            "explanation": "In demo mode, Flat PWA is running without a backend server. All functionality is simulated and there is no communication between app clients."
+        }
     },
     "edit": {
         "title_edit": "Edit",

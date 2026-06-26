@@ -1,18 +1,20 @@
 <script setup lang="ts">
+import brandingSrc from '@/assets/images/branding.webp?url';
+import DemoInfo from '@/components/home/DemoInfo.vue';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
+import CinematicMap from '@/components/map/CinematicMap.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
+import { useSettings } from '@/plugins/SettingsPlugin';
+import { isOnMobile } from '@/util/mobileDetection';
 import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
 import { mdiCog, mdiImport, mdiMapMarkerPath } from '@mdi/js';
 import { useGeolocation, useThrottle } from '@vueuse/core';
 import Button from 'primevue/button';
-import brandingSrc from '@/assets/images/branding.webp?url';
-import { isOnMobile } from '@/util/mobileDetection';
 import Slider from 'primevue/slider';
-import { ref } from 'vue';
-import { useSettings } from '@/plugins/SettingsPlugin';
-import { computed } from 'vue';
-import CinematicMap from '@/components/map/CinematicMap.vue';
+import { computed, ref } from 'vue';
+
+const mode = import.meta.env.MODE;
 
 const { settings } = useSettings();
 const homeCoordsDefaults = computed(() => ({
@@ -76,6 +78,7 @@ const mapZoomReal = useThrottle(mapZoomSlider, 25);
                     :min="4"
                     :max="20"
                 />
+                <DemoInfo v-if="mode === 'demo'" />
             </div>
             <div id="clouds" class="animate-areal" />
         </template>

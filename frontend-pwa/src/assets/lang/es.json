@@ -21,7 +21,14 @@
     },
     "home": {
         "join": "Unirse a la colección",
-        "presets": "Mis colecciones"
+        "presets": "Mis colecciones",
+        "demo": {
+            "info": "Flat PWA se está ejecutando en modo de demostración.",
+            "title": "Modo de demostración",
+            "more": "¿Qué significa esto?",
+            "hide": "Ocultar información", 
+            "explanation": "En el modo de demostración, Flat PWA se ejecuta sin un servidor backend. Todas las funcionalidades se simulan y no hay comunicación entre los clientes de la aplicación."
+        }
     },
     "edit": {
         "title_edit": "Editar",
