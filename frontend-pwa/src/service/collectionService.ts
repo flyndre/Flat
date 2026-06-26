@@ -11,6 +11,7 @@ import { SERVER_UPDATE_INTERVAL, WS_RECONNECT_DELAY } from '@/data/constants';
 import { trackingLogDB } from '@/data/trackingLogs';
 import { ActiveCollection } from '@/types/ActiveCollection';
 import { Division } from '@/types/Division';
+import { JoinRequest } from '@/types/JoinRequest';
 import { ParticipantTrack } from '@/types/ParticipantTrack';
 import { IncrementalTrackMessage } from '@/types/websocket/IncrementalTrackMessage';
 import { InviteMessage } from '@/types/websocket/InviteMessage';
@@ -21,8 +22,9 @@ import { getParticipantColor } from '@/util/trackingUtils';
 import { useIntervalFn, watchDebounced } from '@vueuse/core';
 import { computed, ref } from 'vue';
 
-let ws: WebSocket = null;
-const _websocketStatus = ref<number>(null);
+const mode = import.meta.env.MODE;
+let ws: WebSocket | undefined;
+const _websocketStatus = ref<number>();
 let _stopRetries = false;
 
 function initialiseWebsocket() {
@@ -31,7 +33,7 @@ function initialiseWebsocket() {
     ws = new WebSocket(import.meta.env.VITE_WS_BASE_URL);
 
     ws.onmessage = function (event) {
-        _websocketStatus.value = ws.readyState;
+        _websocketStatus.value = ws?.readyState;
         console.debug('ON MESSAGE EVENT:', event);
         let websocketMsg = JSON.parse(event.data);
         Array.isArray(websocketMsg)
@@ -40,20 +42,20 @@ function initialiseWebsocket() {
     };
 
     ws.onopen = function (event) {
-        _websocketStatus.value = ws.readyState;
+        _websocketStatus.value = ws?.readyState;
         console.debug('ON OPEN EVENT:', event);
         establishWebsocket(clientId.value, _activeCollection.value.id);
     };
 
     ws.onclose = function (event) {
-        _websocketStatus.value = ws.readyState;
+        _websocketStatus.value = ws?.readyState;
         console.debug('ON CLOSE EVENT:', event);
-        ws = null;
+        ws = undefined;
         setTimeout(initialiseWebsocket, WS_RECONNECT_DELAY);
     };
 
     ws.onerror = function (event) {
-        _websocketStatus.value = ws.readyState;
+        _websocketStatus.value = ws?.readyState;
         console.debug('ON ERROR EVENT:', event);
     };
 }
@@ -79,7 +81,7 @@ const {
         Object.entries(result).forEach(([key, logs]) => {
             var lineStringOfPosition = {
                 type: 'LineString',
-                coordinates: logs.map((el) => el.position),
+                coordinates: logs?.map((el) => el.position),
             };
 
             const msg = {
@@ -89,7 +91,7 @@ const {
                 clientId: clientId.value,
             };
             console.debug('Sending Tracks:', msg);
-            ws.send(JSON.stringify(msg));
+            ws?.send(JSON.stringify(msg));
         });
 
         latestSendTimestamp = tracks.at(-1)?.timestamp ?? Date.now();
@@ -143,8 +145,8 @@ function handleCollectionClosed() {
     _collectionClosed.value = true;
 }
 
-function _assignDivision(d: Division, p: ParticipantTrack | null) {
-    d.clientId = p === null ? null : p.id;
+function _assignDivision(d: Division, p: ParticipantTrack | undefined) {
+    d.clientId = p?.id;
     divideCollectionArea(_activeCollection.value.id, [d]);
 }
 
@@ -164,7 +166,7 @@ export function _closeCollection(collectionId: string) {
     _stopTracking();
     _stopRetries = true;
     const answer = { type: 'CollectionClosed', collectionId: collectionId };
-    ws.send(JSON.stringify(answer));
+    ws?.send(JSON.stringify(answer));
 }
 
 export function _acceptOrDeclineAccessRequest(
@@ -178,7 +180,7 @@ export function _acceptOrDeclineAccessRequest(
 }
 
 export function establishWebsocket(clientId: string, collectionId: string) {
-    ws.send(
+    ws?.send(
         JSON.stringify({
             type: 'WebsocketConnection',
             clientId: clientId,
@@ -195,28 +197,20 @@ export const useCollectionService = (id: string) => {
     let response = getCollection(id, clientId.value);
 
     response.then(({ data }) => {
-        console.debug(data);
-
         _isAdmin.value = data.clientId === clientId.value;
 
-        const collection = {
+        const collection: ActiveCollection = {
             id: data.id,
             adminClientId: data.clientId,
             name: data.name,
             area: data.area,
             divisions: data.collectionDivision,
             requestedUsers: data.requestedUsers,
-            confirmedUsers: data.confirmedUsers.map((user) => {
-                return {
-                    name: user.username,
-                    id: user.clientId,
-                    color: getParticipantColor(
-                        user.clientId,
-                        data.collectionDivision
-                    ),
-                    progress: [],
-                };
-            }),
+            confirmedUsers: data.confirmedUsers.map((user: JoinRequest) => ({
+                name: user.username,
+                id: user.clientId,
+                progress: [],
+            })),
         };
 
         const lastActive = lastActiveCollection.get();
@@ -261,7 +255,7 @@ export const useCollectionService = (id: string) => {
                 })
             ),
         })),
-        assignDivision: (d: Division, p: ParticipantTrack | null) =>
+        assignDivision: (d: Division, p: ParticipantTrack | undefined) =>
             _assignDivision(d, p),
         leave: (collId: string, clientId: string) =>
             _leaveCollection(collId, clientId),
@@ -304,7 +298,7 @@ function handleAccessRequest(message: InviteMessage) {
     _activeCollection.value.requestedUsers.push({
         username: message.username,
         clientId: message.clientId,
-        accepted: null,
+        accepted: undefined,
         collectionId: _activeCollection.value.id,
     });
 }
@@ -343,21 +337,22 @@ function handleIncrementalTracks(message: IncrementalTrackMessage) {
         (el) => el.id === message.clientId
     );
 
-    let listOfTracks = memberOfTrack.progress.filter(
+    let listOfTracks = memberOfTrack?.progress.filter(
         (el) => el.id === message.trackId
     );
-
-    if (listOfTracks.length == 0) {
-        memberOfTrack.progress.push({
-            id: message.trackId,
-            track: message.track,
-        });
-    } else {
-        listOfTracks[0].track.coordinates.push.apply(
-            listOfTracks[0].track.coordinates,
-            message.track.coordinates
-        );
+    if (listOfTracks) {
+        if (listOfTracks.length === 0) {
+            memberOfTrack?.progress.push({
+                id: message.trackId,
+                track: message.track,
+            });
+        } else {
+            listOfTracks[0].track.coordinates.push.apply(
+                listOfTracks[0].track.coordinates,
+                message.track.coordinates
+            );
+        }
     }
 
-    memberOfTrack.progress.push.apply(memberOfTrack.progress, message.track);
+    memberOfTrack?.progress.push.apply(memberOfTrack.progress, [{ id: message.trackId, track: message.track }]);
 }

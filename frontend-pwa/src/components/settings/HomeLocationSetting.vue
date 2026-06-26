@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import { useSettings } from '@/plugins/SettingsPlugin';
-import { mdiMapMarker, mdiPencil } from '@mdi/js';
+import { mdiCrosshairsGps, mdiEarthBoxOff, mdiMapMarker, mdiPencil } from '@mdi/js';
 import SelectButton from 'primevue/selectbutton';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
@@ -10,18 +10,23 @@ import InputNumber from 'primevue/inputnumber';
 const { settings } = useSettings();
 const options: {
     messageCode: string;
-    value: boolean;
+    value: typeof settings.value.homePosition;
     icon: string;
 }[] = [
     {
+        messageCode: 'components.home_location_setting.off',
+        value: 'off',
+        icon: mdiEarthBoxOff,
+    },
+    {
         messageCode: 'components.home_location_setting.live',
-        value: true,
-        icon: mdiMapMarker,
+        value: 'live',
+        icon: mdiCrosshairsGps,
     },
     {
         messageCode: 'components.home_location_setting.custom',
-        value: false,
-        icon: mdiPencil,
+        value: 'static',
+        icon: mdiMapMarker,
     },
 ];
 </script>
@@ -29,7 +34,7 @@ const options: {
 <template>
     <SelectButton
         class="flex w-full flex-row"
-        v-model="settings.homeLive"
+        v-model="settings.homePosition"
         :options="options"
         :option-value="(o) => o.value"
         :allow-empty="false"
@@ -56,7 +61,7 @@ const options: {
                 :min-fraction-digits="0"
                 :max-fraction-digits="6"
                 :format="false"
-                :disabled="settings.homeLive === true"
+                :disabled="settings.homePosition !== 'static'"
                 v-model="settings.homeLatitude"
             />
         </InputGroup>
@@ -67,7 +72,7 @@ const options: {
                 :min-fraction-digits="0"
                 :max-fraction-digits="6"
                 :format="false"
-                :disabled="settings.homeLive === true"
+                :disabled="settings.homePosition !== 'static'"
                 v-model="settings.homeLongitude"
             />
         </InputGroup>

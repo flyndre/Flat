@@ -2,8 +2,8 @@
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import MdiInputIcon from '@/components/icons/MdiInputIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
+import { Division } from '@/types/Division';
 import { IdentifyableTypedOverlay } from '@/types/map/IdentifyableTypedOverlay';
-import { getShapeColor } from '@/util/googleMapsUtils';
 import {
     mdiChartLineVariant,
     mdiCircle,
@@ -19,23 +19,15 @@ import IconField from 'primevue/iconfield';
 import InputText from 'primevue/inputtext';
 import ScrollPanel from 'primevue/scrollpanel';
 
-type _Shape = IdentifyableTypedOverlay;
+const divisions = defineModel<Division[]>('divisions', {
+    required: true,
+})
 
-const props = withDefaults(
-    defineProps<{
-        shapes: _Shape[];
-        centerShapeHook?: (id: _Shape) => any;
-        setShapeNameHook?: (shape: _Shape, name: string) => any;
-        deleteShapeHook?: (shape: _Shape) => any;
-        deleteAllShapesHook?: () => any;
-    }>(),
-    {
-        centerShapeHook: () => {},
-        setShapeNameHook: () => {},
-        deleteShapeHook: () => {},
-        deleteAllShapesHook: () => {},
-    }
-);
+const emit = defineEmits<{
+    centerDivision: [Division],
+    deleteDivision: [Division, number],
+    clearDivisions: []
+}>();
 
 function getShapeIcon(shape: IdentifyableTypedOverlay) {
     return shape.type === 'rectangle'
@@ -59,10 +51,11 @@ function getShapeIcon(shape: IdentifyableTypedOverlay) {
         }"
     >
         <div
+            v-for="(d, i) of divisions"
+            :key="d.id"
             class="w-full flex flex-row justify-between gap-2 overflow-auto shrink-0"
-            v-for="shape of shapes"
         >
-            <Button severity="secondary" @click="centerShapeHook(shape)">
+            <Button severity="secondary" @click="emit('centerDivision', d)">
                 <template #icon>
                     <MdiIcon :icon="mdiCrosshairs" />
                 </template>
@@ -70,24 +63,21 @@ function getShapeIcon(shape: IdentifyableTypedOverlay) {
             <IconField class="grow" icon-position="left">
                 <MdiInputIcon
                     :style="{
-                        color: getShapeColor(shape),
+                        color: d.color,
                     }"
                     :icon="mdiTextureBox"
                 />
                 <InputText
                     class="w-full"
-                    :model-value="shape.name"
+                    v-model="d.name"
                     :placeholder="$t('components.divisions_list.division_name')"
-                    @update:model-value="
-                        (v: string) => setShapeNameHook(shape, v)
-                    "
                 />
             </IconField>
             <Button
                 class="shrink-0"
                 severity="secondary"
                 text
-                @click="deleteShapeHook(shape)"
+                @click="emit('deleteDivision', d, i)"
             >
                 <template #icon>
                     <MdiIcon :icon="mdiDeleteForever" />
@@ -98,8 +88,8 @@ function getShapeIcon(shape: IdentifyableTypedOverlay) {
             class="shrink-0"
             severity="danger"
             text
-            :disabled="shapes.length === 0"
-            @click="deleteAllShapesHook"
+            :disabled="divisions.length === 0"
+            @click="emit('clearDivisions')"
         >
             <template #default>
                 <MdiTextButtonIcon :icon="mdiCloseBox" />

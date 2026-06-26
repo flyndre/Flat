@@ -4,8 +4,8 @@ import Button from 'primevue/button';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import { computed } from 'vue';
 
-const model = defineModel<google.maps.drawing.OverlayType>();
-const isDrawing = computed(() => model.value !== null);
+const model = defineModel<string>();
+const isDrawing = computed(() => model.value !== 'select');
 const messageCode = computed(
     () =>
         'components.draw_shape_button.' +
@@ -13,8 +13,8 @@ const messageCode = computed(
 );
 
 function toggle() {
-    model.value = <google.maps.drawing.OverlayType>(
-        (isDrawing.value ? null : 'polygon')
+    model.value = (
+        (isDrawing.value ? 'select' : 'draw')
     );
 }
 </script>

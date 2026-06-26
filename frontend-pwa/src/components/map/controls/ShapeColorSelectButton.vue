@@ -2,23 +2,20 @@
 import SelectButton from 'primevue/selectbutton';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import { mdiCircle } from '@mdi/js';
+
 const selectedColor = defineModel<string>({
-    required: false,
-    default: '#1E90FF',
+    required: true,
 });
-const colorOptions: string[] = [
-    '#1E90FF',
-    '#FF1493',
-    '#32CD32',
-    '#FF8C00',
-    '#4B0082',
-];
+
+defineProps<{
+    options: string[]
+}>();
 </script>
 
 <template>
     <SelectButton
         v-model="selectedColor"
-        :options="colorOptions"
+        :options
         :allow-empty="false"
         :pt="{
             button: {

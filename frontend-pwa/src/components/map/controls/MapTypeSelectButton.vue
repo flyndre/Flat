@@ -1,39 +1,26 @@
 <script setup lang="ts">
 import SelectButton from 'primevue/selectbutton';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
-import { mdiRoadVariant, mdiTerrain, mdiEarth, mdiEarthPlus } from '@mdi/js';
-const selectedMapType = defineModel<`${google.maps.MapTypeId}`>({
-    required: false,
-    default: 'roadmap',
-});
-type MapTypeOption = {
-    value: `${google.maps.MapTypeId}`;
+import { MapType } from '@/types/map/MapType';
+
+export type MapTypeOption = {
+    value: MapType;
     icon: string;
 };
-const mapTypeOptions: MapTypeOption[] = [
-    {
-        value: 'roadmap',
-        icon: mdiRoadVariant,
-    },
-    {
-        value: 'terrain',
-        icon: mdiTerrain,
-    },
-    {
-        value: 'satellite',
-        icon: mdiEarth,
-    },
-    {
-        value: 'hybrid',
-        icon: mdiEarthPlus,
-    },
-];
+
+const selectedMapType = defineModel<MapType>({
+    required: true,
+});
+
+defineProps<{
+    options: MapTypeOption[]
+}>();
 </script>
 
 <template>
     <SelectButton
         v-model="selectedMapType"
-        :options="mapTypeOptions"
+        :options
         data-key="value"
         option-value="value"
         :allow-empty="false"

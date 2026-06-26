@@ -4,6 +4,7 @@ import SettingsPlugin from '@/plugins/SettingsPlugin';
 import ThemePlugin from '@/plugins/ThemePlugin';
 import router from '@/router';
 import '@/style.css';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import PrimeVue from 'primevue/config';
 import ToastService from 'primevue/toastservice';
 import { createApp } from 'vue';

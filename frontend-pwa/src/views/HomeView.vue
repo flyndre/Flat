@@ -6,30 +6,45 @@ import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import CinematicMap from '@/components/map/CinematicMap.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { useSettings } from '@/plugins/SettingsPlugin';
+import { useSanitizedGeolocation } from '@/util/geoLocationUtils';
 import { isOnMobile } from '@/util/mobileDetection';
-import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
 import { mdiCog, mdiImport, mdiMapMarkerPath } from '@mdi/js';
-import { useGeolocation, useThrottle } from '@vueuse/core';
+import { refThrottled } from '@vueuse/core';
 import Button from 'primevue/button';
 import Slider from 'primevue/slider';
 import { computed, ref } from 'vue';
+import backgroundImageSrc from '@/assets/images/background-wireframe.webp?url';
+import { useTheme } from '@/plugins/ThemePlugin';
 
 const mode = import.meta.env.MODE;
 
 const { settings } = useSettings();
-const homeCoordsDefaults = computed(() => ({
-    lat: settings.value.homeLatitude,
-    lng: settings.value.homeLongitude,
-}));
-const mapCenter = settings.value.homeLive
-    ? mapCenterWithDefaults(useGeolocation().coords, homeCoordsDefaults.value)
-    : homeCoordsDefaults.value;
-const mapZoomSlider = ref(15);
-const mapZoomReal = useThrottle(mapZoomSlider, 25);
+const { activeTheme } = useTheme();
+const { coords } = useSanitizedGeolocation();
+const mapCenter = computed(() => {
+    switch (settings.value.homePosition) {
+        case 'off':
+            return undefined;
+    
+        case 'live':
+            if (coords.value !== undefined) {
+                return [coords.value.longitude, coords.value.latitude];
+            }
+            return undefined;
+        
+        case 'static':
+            return [
+            settings.value.homeLongitude,
+            settings.value.homeLatitude,
+        ];
+    }
+});
+const mapZoomSlider = ref(15.5);
+const mapZoomReal = refThrottled(mapZoomSlider, 25);
 </script>
 
 <template>
-    <DefaultLayout>
+    <DefaultLayout :backdrop="false">
         <template #action-left>
             <router-link :to="{ name: 'settings' }">
                 <Button severity="secondary">
@@ -56,16 +71,21 @@ const mapZoomReal = useThrottle(mapZoomSlider, 25);
             </router-link>
         </template>
         <template #background>
-            <CinematicMap :center="mapCenter" :zoom="mapZoomReal" />
+            <div
+                class="fixed -top-[10%] -left-[10%] -right-[10%] -bottom-[10%]"
+                :class="[ activeTheme === 'light' ? 'opacity-10' : 'opacity-15' ]"
+                :style="{ backgroundSize: '50rem', backgroundImage: `url('${backgroundImageSrc}')`  }"
+            ></div>
+            <CinematicMap v-if="mapCenter !== undefined" :center="mapCenter" :zoom="mapZoomReal" />
         </template>
         <template #default>
             <div
                 class="grow flex flex-col justify-center items-center select-none"
                 :class="{ 'pb-[10vh]': !isOnMobile }"
             >
-                <!-- ⭕ -->
                 <img class="object-contain w-full" :src="brandingSrc" />
                 <Slider
+                    v-if="mapCenter !== undefined"
                     class="cursor-pointer"
                     :class="[
                         !isOnMobile
@@ -76,11 +96,10 @@ const mapZoomReal = useThrottle(mapZoomSlider, 25);
                     :orientation="isOnMobile ? 'vertical' : 'horizontal'"
                     :step="0.01"
                     :min="4"
-                    :max="20"
+                    :max="16.5"
                 />
                 <DemoInfo v-if="mode === 'demo'" />
             </div>
-            <div id="clouds" class="animate-areal" />
         </template>
     </DefaultLayout>
 </template>

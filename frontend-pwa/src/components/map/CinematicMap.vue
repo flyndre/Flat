@@ -1,32 +1,71 @@
 <script setup lang="ts">
-import {
-    GOOGLE_MAPS_API_KEY,
-    GOOGLE_MAPS_API_LIBRARIES,
-} from '@/data/constants';
-import { GoogleMap } from 'vue3-google-map';
-
-const apiKey = GOOGLE_MAPS_API_KEY;
-const libraries = GOOGLE_MAPS_API_LIBRARIES;
+import { toLngLatLike } from '@/util/geoUtils';
+import { useRafFn, watchImmediate } from '@vueuse/core';
+import { Position } from 'geojson';
+import { Map } from 'maplibre-gl';
+import { onMounted, onUnmounted, ref, useTemplateRef } from 'vue';
+import { getStyle } from '@/util/mapStyleUtils';
+import { useTheme } from '@/plugins/ThemePlugin';
+import { useToast } from 'primevue/usetoast';
+import { useI18n } from 'vue-i18n';
+import { TOAST_LIFE_LONG } from '@/data/constants';
 
 const props = defineProps<{
     zoom: number;
-    center: google.maps.LatLng | google.maps.LatLngLiteral;
+    center: Position;
 }>();
+
+const loading = ref(true);
+const mapContainer = useTemplateRef<HTMLDivElement>('map-container');
+const { activeTheme } = useTheme();
+const { t } = useI18n();
+const { add } = useToast();
+
+onMounted(async () => {
+    const m = new Map({
+        container: mapContainer.value!,
+        pitch: 45,
+        centerClampedToGround: true,
+        style: getStyle('terrain', activeTheme.value),
+    });
+
+    watchImmediate(() => props.zoom, (z) => {
+        m.setZoom(z);
+    });
+
+    watchImmediate(() => props.center, (c) => {
+        m.setCenter(toLngLatLike(c));
+    });
+
+    onUnmounted(() => {
+        m.remove();
+    });
+
+    const { unsubscribe } = m.on('error', () => {
+        add({
+            severity: 'warn',
+            summary: t('components.cinematic_map.initialization_failed'),
+            detail: t('components.cinematic_map.initialization_failed_text'),
+            life: TOAST_LIFE_LONG,
+        });
+        unsubscribe(); // Only show error once.
+    });
+
+    await new Promise((r) => m.on('load', r));
+
+    useRafFn(({ timestamp }) => {
+        m.rotateTo((timestamp / 200) % 360, { duration: 0 });
+    });
+
+    loading.value = false;
+});
 </script>
 
 <template>
-    <GoogleMap
-        class="min-w-[150vmax] min-h-[150vmax] blur-[1px] bg-yellow-50 c-animate-areal"
-        :api-key
-        :libraries
-        :zoom
-        :center
-        version="beta"
-        :map-type-id="'satellite'"
-        :disable-default-ui="true"
-    />
+    <div ref="map-container" class="min-w-[150vmax] min-h-[150vmax] blur-[1px] transition-opacity duration-1000" :class="{ 'opacity-0': loading }"></div>
     <div
-        class="!z-10 fixed -top-[10%] -left-[10%] -right-[10%] -bottom-[10%] backdrop-blur c-tilt-shift-filter"
+        v-if="!loading"
+        class="!z-10 fixed -top-[10%] -left-[10%] -right-[10%] -bottom-[10%] backdrop-blur c-tilt-shift-filter transition-opacity duration-1000"
     ></div>
 </template>
 

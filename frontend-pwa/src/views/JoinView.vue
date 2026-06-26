@@ -27,6 +27,7 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
+const mode = import.meta.env.MODE;
 const props = defineProps<{
     id: string;
 }>();
@@ -41,24 +42,43 @@ const dialogVisible = ref(false);
 async function join() {
     lastActiveCollection.set(undefined);
     dialogVisible.value = true;
-    const response = await accessRequest(
-        joinName.value,
-        clientId.value,
-        props.id
-    );
-    if (response.status == 200 && response.data['accepted'] == true) {
+
+    if (mode === 'demo') {
+        await new Promise(r => setTimeout(r, 2000));
         router.push({ name: 'track', params: { id: props.id } });
-    } else {
-        const messageCode =
-            response.status == 200
-                ? 'join.error_rejected'
-                : 'join.error_failed';
+        dialogVisible.value = false;
+        return;
+    }
+    
+    try {
+        const response = await accessRequest(
+            joinName.value,
+            clientId.value,
+            props.id
+        );
+
+        if (response.status !== 200 || response.data?.accepted !== true) {
+            const messageCode =
+                response.status === 200
+                    ? 'join.error_rejected'
+                    : 'join.error_failed';
+            add({
+                closable: true,
+                life: TOAST_LIFE,
+                severity: 'error',
+                summary: t(messageCode),
+            });
+        } else {
+            router.push({ name: 'track', params: { id: props.id } });
+        }
+    } catch (error) {
         add({
             closable: true,
             life: TOAST_LIFE,
             severity: 'error',
-            summary: t(messageCode),
+            summary: t('join.error_failed'),
         });
+    } finally {
         dialogVisible.value = false;
     }
 }
@@ -72,17 +92,17 @@ function cancel() {
     <DefaultLayout>
         <template #action-left>
             <router-link :to="{ name: 'scan' }">
-                <Button :label="$t('universal.back')" severity="secondary" text>
+                <Button :label="t('universal.back')" severity="secondary" text>
                     <template #icon>
                         <MdiTextButtonIcon :icon="mdiArrowLeft" />
                     </template>
                 </Button>
             </router-link>
         </template>
-        <template #title> {{ $t('join.title') }} </template>
+        <template #title> {{ t('join.title') }} </template>
         <template #action-right>
             <Button
-                :label="$t('universal.join')"
+                :label="t('universal.join')"
                 severity="primary"
                 :disabled="!submittable"
                 @click="join"
@@ -100,14 +120,14 @@ function cancel() {
                 modal
                 :position="isOnMobile ? 'bottom' : 'top'"
                 class="overflow-hidden"
-                :header="$t('join.waiting_title')"
+                :header="t('join.waiting_title')"
             >
                 <CardProgressIndicator mode="indeterminate" />
-                {{ $t('join.waiting_text') }}
+                {{ t('join.waiting_text') }}
                 <template #footer>
                     <div class="w-full flex flex-row justify-center">
                         <Button
-                            :label="$t('join.cancel_waiting')"
+                            :label="t('join.cancel_waiting')"
                             severity="danger"
                             text
                             @click="cancel"
@@ -132,7 +152,7 @@ function cancel() {
                             <MdiInputIcon :icon="mdiIdentifier" />
                             <InputText
                                 class="w-full"
-                                :placeholder="$t('join.enter_link')"
+                                :placeholder="t('join.enter_link')"
                                 :value="id"
                                 :disabled="id !== undefined"
                             />
@@ -141,7 +161,7 @@ function cancel() {
                             <MdiInputIcon :icon="mdiAccount" />
                             <InputText
                                 class="w-full"
-                                :placeholder="$t('join.nickname')"
+                                :placeholder="t('join.nickname')"
                                 v-model="joinName"
                             />
                         </IconField>

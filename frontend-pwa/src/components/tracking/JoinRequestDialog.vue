@@ -18,18 +18,22 @@ const props = withDefaults(
     }
 );
 const emit = defineEmits<{
-    requestAnswered: [JoinRequest];
+    requestAnswered: [JoinRequest & { accepted: boolean }];
 }>();
 const visible = computed(() => props.requests?.length > 0);
 
 function accept(request: JoinRequest) {
-    request.accepted = true;
-    emit('requestAnswered', request);
+    emit('requestAnswered', {
+        ...request,
+        accepted: true,
+    });
 }
 
 function decline(request: JoinRequest) {
-    request.accepted = false;
-    emit('requestAnswered', request);
+    emit('requestAnswered', {
+        ...request,
+        accepted: false,
+    });
 }
 </script>
 

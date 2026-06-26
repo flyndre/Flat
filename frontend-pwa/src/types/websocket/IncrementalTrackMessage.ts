@@ -4,5 +4,5 @@ import { TrackInstance } from "../TrackInstance";
 export type IncrementalTrackMessage = {
     clientId: string;
     trackId: string;
-    track: LineString
+    track: GeoJSON.LineString
 };

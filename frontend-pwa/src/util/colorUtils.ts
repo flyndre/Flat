@@ -6,6 +6,9 @@
  */
 export function standardizeCSStoHex(cssColor: string) {
     var ctx = document.createElement('canvas').getContext('2d');
+    if (!ctx) {
+        throw new Error('Failed to create drawing context, are you in a browser?');
+    }
     ctx.fillStyle = cssColor;
     return ctx.fillStyle;
 }
@@ -21,8 +24,8 @@ export function standardizeCSStoHex(cssColor: string) {
 export function blendColors(colorA: string, colorB: string, blendAmount = 0.5) {
     const colorAStd = standardizeCSStoHex(colorA);
     const colorBStd = standardizeCSStoHex(colorB);
-    const [rA, gA, bA] = colorAStd.match(/\w\w/g).map((c) => parseInt(c, 16));
-    const [rB, gB, bB] = colorBStd.match(/\w\w/g).map((c) => parseInt(c, 16));
+    const [rA, gA, bA] = colorAStd.match(/\w\w/g)?.map((c) => parseInt(c, 16)) ?? [];
+    const [rB, gB, bB] = colorBStd.match(/\w\w/g)?.map((c) => parseInt(c, 16)) ?? [];
     const r = Math.round(rA + (rB - rA) * blendAmount)
         .toString(16)
         .padStart(2, '0');
@@ -33,4 +36,11 @@ export function blendColors(colorA: string, colorB: string, blendAmount = 0.5) {
         .toString(16)
         .padStart(2, '0');
     return '#' + r + g + b;
+}
+
+export function asHexColor(color: unknown) {
+    if (typeof color === 'string' && color.startsWith('#')) {
+        return color as `#${string}`;
+    }
+    return undefined;
 }

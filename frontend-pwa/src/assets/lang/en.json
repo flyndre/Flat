@@ -171,6 +171,7 @@
             "left": "Left"
         },
         "home_location_setting": {
+            "off": "Off",
             "live": "Live",
             "custom": "Custom"
         },
@@ -196,10 +197,16 @@
             "inactive": "Eliminated",
             "self": "You"
         },
+        "cinematic_map": {
+            "initialization_failed": "Failed to load background map",
+            "initialization_failed_text": "An error ocurred while loading the background map. Other app features should still work."
+        },
         "map_with_controls": {
             "map": "Map",
             "tools": "Tools",
-            "divisions": "Divisions"
+            "divisions": "Divisions",
+            "initialization_failed": "Failed to load map data",
+            "initialization_failed_text": "This probably affects app functionality, is there an internet connection?"
         },
         "draw_shape_button": {
             "draw_division": "Draw Division",

@@ -19,7 +19,6 @@ import SelectButton from 'primevue/selectbutton';
 import Sidebar from 'primevue/sidebar';
 import Textarea from 'primevue/textarea';
 import { useToast } from 'primevue/usetoast';
-import { v4 as uuidv4 } from 'uuid';
 import { computed, ref } from 'vue';
 import MdiIcon from '../icons/MdiIcon.vue';
 import { useI18n } from 'vue-i18n';
@@ -66,13 +65,13 @@ async function importData() {
     try {
         if (overwriteExisting.value) {
             await collectionDB.bulkPut(
-                importedCollections.value.map((c) => dbSafe(c))
+                importedCollections.value!.map((c) => dbSafe(c))
             );
         } else {
             await collectionDB.bulkPut(
-                importedCollections.value.map((c) => ({
+                importedCollections.value!.map((c) => ({
                     ...dbSafe(c),
-                    id: uuidv4(),
+                    id: crypto.randomUUID(),
                 }))
             );
         }

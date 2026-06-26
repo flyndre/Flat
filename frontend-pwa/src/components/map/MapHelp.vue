@@ -54,7 +54,7 @@ const visible = defineModel<boolean>('visible', {
                 <p>
                     {{ $t('components.map_help.introduction.2') }}
                 </p>
-                <p>
+                <div>
                     <p class="font-bold border border-solid rounded-lg p-2 w-max mt-8">
                         <MdiIcon
                             class="overflow-visible ml-1 mr-1.5"
@@ -63,8 +63,8 @@ const visible = defineModel<boolean>('visible', {
                         {{ $t('universal.save') }}
                     </p>
                     {{ $t('components.map_help.explanation_save') }}
-                </p>
-                <p>
+                </div>
+                <div>
                     <p class="font-bold border border-solid rounded-lg p-2 w-max mt-8">
                         <MdiIcon
                             class="overflow-visible ml-1 mr-1.5"
@@ -101,9 +101,9 @@ const visible = defineModel<boolean>('visible', {
                             {{ $t('components.map_help.explanation_map.map_type') }}
                         </li>
                     </ul>
-                </p>
+                </div>
 
-                <p>
+                <div>
                     <p class="font-bold border border-solid rounded-lg p-2 w-max mt-8">
                         <MdiIcon
                             class="overflow-visible ml-1 mr-1.5"
@@ -132,9 +132,9 @@ const visible = defineModel<boolean>('visible', {
                             {{ $t('components.map_help.explanation_tools.select_color') }}
                         </li>
                     </ul>
-                </p>
+                </div>
 
-                <p>
+                <div>
                     <p class="font-bold border border-solid rounded-lg p-2 w-max mt-8">
                         <MdiIcon
                             class="overflow-visible ml-1 mr-1.5"
@@ -172,7 +172,7 @@ const visible = defineModel<boolean>('visible', {
                             {{ $t('components.map_help.explanation_divisions.delete_all') }}
                         </li>
                     </ul>
-                </p>
+                </div>
             </template>
         </DefaultLayout>
     </Sidebar>

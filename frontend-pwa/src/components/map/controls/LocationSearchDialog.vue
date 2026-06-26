@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import { query } from '@/api/locationSearch';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
 import { TOAST_LIFE } from '@/data/constants';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { mdiArrowLeft, mdiChevronRight, mdiMagnify } from '@mdi/js';
+import { LngLatBoundsLike } from 'maplibre-gl';
 import Button from 'primevue/button';
 import InputGroup from 'primevue/inputgroup';
 import InputText from 'primevue/inputtext';
@@ -12,53 +14,54 @@ import { useToast } from 'primevue/usetoast';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-const props = defineProps<{
-    placesService: google.maps.places.PlacesService;
-    selectResultCallback: (result: google.maps.places.PlaceResult) => void;
-}>();
+type Result = { title: string, subtitle?: string, bounds: LngLatBoundsLike };
 
 const { add } = useToast();
 const { t } = useI18n();
 
+const emit = defineEmits<{
+    select: [LngLatBoundsLike]
+}>()
+
 const visible = ref(false);
 const searchTerm = ref('');
-const searchResults = ref<google.maps.places.PlaceResult[]>([]);
+const results = ref<Result[]>([]);
 const searchLoading = ref(false);
-function submitSearch() {
+
+async function submitSearch() {
     searchLoading.value = true;
     try {
-        props.placesService.textSearch(
-            {
-                query: searchTerm.value,
-            },
-            (results, status, _pagination) => {
-                if (status !== google.maps.places.PlacesServiceStatus.OK) {
-                    add({
-                        closable: true,
-                        life: TOAST_LIFE,
-                        severity: 'error',
-                        summary: t(
-                            'components.location_search_dialog.search_failed'
-                        ),
-                        detail: t(
-                            'components.location_search_dialog.search_failed_text',
-                            { code: status }
-                        ),
-                    });
-                    return;
-                }
-                searchResults.value.length = 0;
-                searchResults.value.push(...results);
-                searchLoading.value = false;
+        const { features } = await query(searchTerm.value);
+        for (const feature of features) {
+            if (feature.bbox) {
+                results.value.push({
+                    title: feature.properties?.name,
+                    subtitle: feature.properties?.display_name,
+                    bounds: feature.bbox as LngLatBoundsLike,
+                });
             }
-        );
-    } catch (e) {
+        }
+    } catch (error) {
+        add({
+            closable: true,
+            life: TOAST_LIFE,
+            severity: 'error',
+            summary: t(
+                'components.location_search_dialog.search_failed'
+            ),
+            detail: t(
+                'components.location_search_dialog.search_failed_text',
+                { code: error }
+            ),
+        });
+    } finally {
         searchLoading.value = false;
     }
 }
-function selectResult(result: google.maps.places.PlaceResult) {
+function selectResult(result: Result) {
     visible.value = false;
-    props.selectResultCallback(result);
+    results.value.length = 0;
+    emit('select', result.bounds);
 }
 </script>
 
@@ -109,7 +112,7 @@ function selectResult(result: google.maps.places.PlaceResult) {
                     <InputText
                         type="search"
                         class="grow"
-                        v-model="searchTerm"
+                        v-model.trim="searchTerm"
                         :placeholder="
                             $t('components.location_search_dialog.find_place')
                         "
@@ -126,7 +129,7 @@ function selectResult(result: google.maps.places.PlaceResult) {
             </template>
             <template #default>
                 <Button
-                    v-for="result of searchResults"
+                    v-for="result of results"
                     class="w-full shrink-0 text-left"
                     severity="contrast"
                     @click="selectResult(result)"
@@ -136,9 +139,14 @@ function selectResult(result: google.maps.places.PlaceResult) {
                         <div
                             class="w-full flex flex-row justify-between items-center gap-2"
                         >
-                            <span>
-                                {{ result.name }}
-                            </span>
+                            <div class="flex flex-col">
+                                <span class="font-bold">
+                                    {{ result.title }}
+                                </span>
+                                <span v-if="result.subtitle" class="opacity-60">
+                                    {{ result.subtitle }}
+                                </span>
+                            </div>
                             <MdiIcon :icon="mdiChevronRight" />
                         </div>
                     </template>

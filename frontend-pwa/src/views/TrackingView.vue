@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import MdiTextButtonIcon from '@/components/icons/MdiTextButtonIcon.vue';
+import MapTypeSelectButton, { MapTypeOption } from '@/components/map/controls/MapTypeSelectButton.vue';
 import MapWithControls from '@/components/map/MapWithControls.vue';
 import DivisionsList from '@/components/tracking/DivisionsList.vue';
 import InvitationDialog from '@/components/tracking/InvitationDialog.vue';
@@ -10,14 +11,14 @@ import { clientId } from '@/data/clientMetadata';
 import { lastActiveCollection } from '@/data/collections';
 import { collectionStatsDB } from '@/data/collectionStats';
 import { TOAST_LIFE } from '@/data/constants';
-import { trackingLogDB, trackingLogs } from '@/data/trackingLogs';
+import { trackingLogDB } from '@/data/trackingLogs';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { useCollectionService } from '@/service/collectionService';
 import { useTrackingService } from '@/service/trackingService';
 import { JoinRequest } from '@/types/JoinRequest';
+import { MapType } from '@/types/map/MapType';
 import { Participant } from '@/types/Participant';
 import { dbSafe } from '@/util/dbUtils';
-import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
 import { isOnMobile } from '@/util/mobileDetection';
 import { calculateCollectionStats } from '@/util/statsUtils';
 import {
@@ -73,7 +74,7 @@ const {
 
 const trackingLoading = ref(false);
 const locationError = computed(
-    () => trackingError.value !== undefined && trackingError.value?.code > 0
+    () => trackingError.value && trackingError.value.code > 0
 );
 const mapCenterOptions: {
     value?: 'area' | 'position';
@@ -212,7 +213,7 @@ watch(kickMessage, (value) => {
     router.push({ name: 'home' });
 });
 
-function processJoinRequest(joinRequest: JoinRequest) {
+function processJoinRequest(joinRequest: JoinRequest & { accepted: boolean }) {
     handleRequest(
         joinRequest.accepted,
         joinRequest.username,
@@ -224,9 +225,12 @@ function processJoinRequest(joinRequest: JoinRequest) {
 const mapCenterSelected = ref<undefined | 'area' | 'position'>(
     mapCenterOptions[isAdmin.value ? 2 : 1].value
 );
-const clientPos = mapCenterWithDefaults(trackingPosition, {
-    lat: null,
-    lng: null,
+
+const clientPos = computed(() => {
+    if (trackingPosition.value !== undefined) {
+        return [trackingPosition.value.longitude, trackingPosition.value.latitude]
+    }
+    return undefined
 });
 
 const isTracking = computed(
@@ -271,31 +275,19 @@ async function kickParticipant(collectionId: string, participant: Participant) {
     }
 }
 
-const mapTypeId = ref<`${google.maps.MapTypeId}`>('roadmap');
-const mapTypeMenu = ref<InstanceType<typeof Menu>>(null);
-function toggleMapTypeMenu(e: Event) {
-    mapTypeMenu.value.toggle(e);
-}
-const mapTypeOptions: MenuItem[] = [
+const mapType = ref<MapType>('roadmap');
+const mapTypeOptions: MapTypeOption[] = [
     {
         value: 'roadmap',
         icon: mdiRoadVariant,
-        command: () => (mapTypeId.value = 'roadmap'),
-    },
-    {
-        value: 'terrain',
-        icon: mdiTerrain,
-        command: () => (mapTypeId.value = 'terrain'),
     },
     {
         value: 'satellite',
         icon: mdiEarth,
-        command: () => (mapTypeId.value = 'satellite'),
     },
     {
-        value: 'hybrid',
-        icon: mdiEarthPlus,
-        command: () => (mapTypeId.value = 'hybrid'),
+        value: 'terrain',
+        icon: mdiTerrain,
     },
 ];
 
@@ -337,7 +329,7 @@ onBeforeUnmount(_clearUpBeforeLeave);
             <SplitButton
                 v-if="isAdmin"
                 :model="adminActions"
-                :label="isOnMobile ? '' : $t('tracking.action_invite')"
+                :label="isOnMobile ? '' : t('tracking.action_invite')"
                 severity="secondary"
                 @click="invitationScreenVisible = true"
             >
@@ -347,14 +339,14 @@ onBeforeUnmount(_clearUpBeforeLeave);
                         :icon="mdiAccountPlus"
                     />
                 </template>
-                <template #menuitemicon="slotProps">
-                    <MdiTextButtonIcon :icon="slotProps.item.icon" />
+                <template #menuitemicon="{ item: { icon } }">
+                    <MdiTextButtonIcon v-if="icon" :icon />
                 </template>
             </SplitButton>
 
             <Button
                 v-else
-                :label="$t('tracking.action_leave')"
+                :label="t('tracking.action_leave')"
                 severity="secondary"
                 @click="leaveCollectionHandler()"
             >
@@ -372,22 +364,22 @@ onBeforeUnmount(_clearUpBeforeLeave);
                     class="text-red-500 animate-ping"
                     :icon="mdiCircle"
                 />
-                {{ $t('tracking.title_active') }}
+                {{ t('tracking.title_active') }}
             </template>
             <template v-else>
                 <MdiTextButtonIcon class="opacity-75" :icon="mdiPauseCircle" />
-                {{ $t('tracking.title_paused') }}
+                {{ t('tracking.title_paused') }}
             </template>
         </template>
         <template #action-right>
             <Button
                 :label="
                     isTracking
-                        ? $t('tracking.action_pause_tracking')
-                        : $t('tracking.action_start_tracking')
+                        ? t('tracking.action_pause_tracking')
+                        : t('tracking.action_start_tracking')
                 "
                 :loading="trackingLoading"
-                :disabled="locationError"
+                :disabled="!!locationError"
                 @click="toggleTracking"
             >
                 <template #icon>
@@ -451,18 +443,18 @@ onBeforeUnmount(_clearUpBeforeLeave);
                 modal
             >
                 <template #default>
-                    {{ $t('tracking.action_end_warning.0') }}
+                    {{ t('tracking.action_end_warning.0') }}
                     <br />
                     <span class="text-red-500">
-                        {{ $t('tracking.action_end_warning.1') }}
+                        {{ t('tracking.action_end_warning.1') }}
                     </span>
                     <br />
-                    {{ $t('tracking.action_end_warning.2') }}
+                    {{ t('tracking.action_end_warning.2') }}
                 </template>
                 <template #footer>
                     <div class="w-full flex flex-row justify-center gap-2">
                         <Button
-                            :label="$t('universal.cancel')"
+                            :label="t('universal.cancel')"
                             severity="secondary"
                             @click="closeCollectionDialogVisible = false"
                         >
@@ -471,7 +463,7 @@ onBeforeUnmount(_clearUpBeforeLeave);
                             </template>
                         </Button>
                         <Button
-                            :label="$t('tracking.action_end_confirm')"
+                            :label="t('tracking.action_end_confirm')"
                             severity="danger"
                             @click="closeCollectionNow"
                         >
@@ -565,7 +557,7 @@ onBeforeUnmount(_clearUpBeforeLeave);
                                                 class="max-[400px]:hidden text-ellipsis overflow-hidden z-10"
                                             >
                                                 {{
-                                                    $t(
+                                                    t(
                                                         slotProps.option
                                                             .messageCode
                                                     )
@@ -574,39 +566,15 @@ onBeforeUnmount(_clearUpBeforeLeave);
                                         </div>
                                     </template>
                                 </SelectButton>
-                                <Button
-                                    severity="secondary"
-                                    @click="toggleMapTypeMenu"
-                                >
-                                    <template #icon>
-                                        <MdiIcon :icon="mdiMenu" />
-                                    </template>
-                                </Button>
-                                <Menu
-                                    ref="mapTypeMenu"
-                                    :model="mapTypeOptions"
-                                    popup
-                                    :pt="{
-                                        root: {
-                                            class: 'min-w-0 cursor-pointer',
-                                        },
-                                    }"
-                                >
-                                    <template #item="slotProps">
-                                        <MdiIcon
-                                            class="m-3"
-                                            :icon="slotProps.item.icon"
-                                        />
-                                    </template>
-                                </Menu>
+                                <MapTypeSelectButton v-model="mapType" :options="mapTypeOptions" />
                             </div>
                             <MapWithControls
                                 class="!min-h-32 !h-32 -m-2.5"
                                 controls="none"
-                                :map-type="mapTypeId"
+                                :map-type
                                 :center="mapCenterSelected"
-                                :locked="mapCenterSelected != null"
-                                :divisions="activeCollection.divisions"
+                                :locked="mapCenterSelected !== undefined"
+                                :divisions="activeCollection.divisions ?? []"
                                 :client-pos
                                 :tracks="activeCollection.confirmedUsers"
                             />
@@ -664,7 +632,7 @@ onBeforeUnmount(_clearUpBeforeLeave);
                                 :divisions="activeCollection.divisions"
                                 :admin-mode="isAdmin"
                                 @unassign-division="
-                                    (d) => assignDivision(d, null)
+                                    (d) => assignDivision(d, undefined)
                                 "
                                 @assign-division="
                                     (d, p) => assignDivision(d, p)

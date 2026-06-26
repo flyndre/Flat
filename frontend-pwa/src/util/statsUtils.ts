@@ -3,15 +3,14 @@ import { ParticipantTrack } from '@/types/ParticipantTrack';
 import { CollectionStats } from '@/types/stats/CollectionStats';
 import area from '@turf/area';
 import length from '@turf/length';
-import { v4 as uuidv4 } from 'uuid';
 import { dbSafe } from './dbUtils';
 
-export function getGeoJsonArea(geometry: GeoJSON.Geometry) {
+export function getGeoJsonArea(geometry: GeoJSON.Feature) {
     return (area(geometry) ?? 0) / 1000000;
 }
 
 export function getGeoJsonLength(
-    geometry: GeoJSON.LineString | GeoJSON.MultiLineString
+    geometry: GeoJSON.Feature
 ) {
     return length(geometry);
 }
@@ -43,7 +42,7 @@ export function calculateCollectionStats(
         _getParticipantStats(dbSafe(u))
     );
     return {
-        id: uuidv4(),
+        id: crypto.randomUUID(),
         collectionId: collection.id,
         startDate,
         finishDate: new Date(),

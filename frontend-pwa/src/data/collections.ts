@@ -13,22 +13,45 @@ export const collections = useObservable<Collection[]>(
 export const collectionDB = db.collections;
 
 export const collectionDraft = {
-    get: (): Collection => JSON.parse(localStorage.getItem('collectionDraft')),
-    set: (v: Collection) =>
-        localStorage.setItem('collectionDraft', JSON.stringify(v)),
-};
-
-export const lastActiveCollection = {
-    get: (): ActiveCollection => {
+    get: (): Collection | undefined => {
+        const item = localStorage.getItem('collectionDraft');
+        if (item === null) {
+            return undefined;
+        }
         try {
-            return JSON.parse(localStorage.getItem('lastActiveCollection'));
+            return JSON.parse(item);
         } catch (e) {
-            lastActiveCollection.set(null);
+            localStorage.removeItem('collectionDraft');
             return undefined;
         }
     },
-    set: (v: ActiveCollection) =>
-        localStorage.setItem('lastActiveCollection', JSON.stringify(v ?? null)),
+    set: (v: Collection | undefined) => {
+        if (v === undefined) {
+            localStorage.removeItem('collectionDraft');
+        }
+        localStorage.setItem('collectionDraft', JSON.stringify(v))
+    }
+};
+
+export const lastActiveCollection = {
+    get: (): ActiveCollection | undefined => {
+        const item = localStorage.getItem('lastActiveCollection');
+        if (item === null) {
+            return undefined;
+        }
+        try {
+            return JSON.parse(item);
+        } catch (e) {
+            localStorage.removeItem('lastActiveCollection');
+            return undefined;
+        }
+    },
+    set: (v: ActiveCollection | undefined) => {
+        if (v === undefined) {
+            localStorage.removeItem('lastActiveCollection');
+        }
+        localStorage.setItem('lastActiveCollection', JSON.stringify(v))
+    },
 };
 
 export function autoUpdateLastActiveCollection(

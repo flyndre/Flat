@@ -171,6 +171,7 @@
             "left": "Links"
         },
         "home_location_setting": {
+            "off": "Deaktiviert",
             "live": "Live",
             "custom": "Angepasst"
         },
@@ -196,10 +197,16 @@
             "inactive": "Ausgeschieden",
             "self": "Dieses Gerät"
         },
+        "cinematic_map": {
+            "initialization_failed": "Laden der Hintergrundkarte fehlgeschlagen",
+            "initialization_failed_text": "Beim Laden des Startbildschirm-Hintergrunds ist ein Fehler aufgetreten. Ansonsten funktioniert die App weiterhin."
+        },
         "map_with_controls": {
             "map": "Karte",
             "tools": "Wekzeuge",
-            "divisions": "Bereiche"
+            "divisions": "Bereiche",
+            "initialization_failed": "Laden von Kartendaten fehlgeschlagen",
+            "initialization_failed_text": "Die Funktionalität der App ist wahrscheinlich beeinträchtigt, besteht eine Internetverbindung?"
         },
         "draw_shape_button": {
             "draw_division": "Bereich einzeichnen",

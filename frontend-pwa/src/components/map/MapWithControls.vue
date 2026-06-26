@@ -5,715 +5,546 @@ import DrawShapeButton from '@/components/map/controls/DrawShapeButton.vue';
 import LocateMeButton from '@/components/map/controls/LocateMeButton.vue';
 import LocateShapesButton from '@/components/map/controls/LocateShapesButton.vue';
 import LocationSearchDialog from '@/components/map/controls/LocationSearchDialog.vue';
-import MapTypeSelectButton from '@/components/map/controls/MapTypeSelectButton.vue';
+import MapTypeSelectButton, { MapTypeOption } from '@/components/map/controls/MapTypeSelectButton.vue';
 import ShapeColorSelectButton from '@/components/map/controls/ShapeColorSelectButton.vue';
 import ShapesList from '@/components/map/controls/ShapesList.vue';
-import { MarkerWithLabel } from '@googlemaps/markerwithlabel';
-import {
-    GOOGLE_MAPS_API_KEY,
-    GOOGLE_MAPS_API_LIBRARIES,
-} from '@/data/constants';
-import {
-    DARK_MAP_STYLES,
-    LABELS_OFF_STYLES,
-    markerHtmlFromTrack,
-    POSITION_ICON_INNER,
-    POSITION_ICON_OUTER,
-} from '@/data/googleMapsPresets';
+import { clientId } from '@/data/clientMetadata';
 import { useTheme } from '@/plugins/ThemePlugin';
 import { Division } from '@/types/Division';
-import { IdentifyableTypedOverlay } from '@/types/map/IdentifyableTypedOverlay';
-import { TypedOverlay } from '@/types/map/TypedOverlay';
+import { MapType } from '@/types/map/MapType';
 import { ParticipantTrack } from '@/types/ParticipantTrack';
-import {
-    divisionToShape,
-    shapeToDivision,
-    trackToShapeList,
-} from '@/util/converters';
-import {
-    getShapeBounds,
-    getShapeListBounds,
-    shapeToGeoJSON,
-} from '@/util/googleMapsUtils';
+import { asHexColor } from '@/util/colorUtils.js';
+import { getDivisionBounds, getDivisionsBounds, toLngLatLike } from '@/util/geoUtils';
+import { setStyleSafe } from '@/util/maplibreUtils.js';
+import { getStyle } from '@/util/mapStyleUtils.js';
 import { isOnMobile } from '@/util/mobileDetection';
-import { mdiLock, mdiMap, mdiPalette, mdiTextureBox } from '@mdi/js';
+import { mdiEarth, mdiLock, mdiMap, mdiPalette, mdiRoadVariant, mdiTerrain, mdiTextureBox } from '@mdi/js';
+import { watchImmediate } from '@vueuse/core';
+import { Position } from 'geojson';
+import { LngLatBoundsLike, Map as Maplibre } from 'maplibre-gl';
 import Card from 'primevue/card';
 import TabPanel from 'primevue/tabpanel';
 import TabView from 'primevue/tabview';
-import { v4 as uuidv4 } from 'uuid';
-import { computed, nextTick, onMounted, ref, watch } from 'vue';
-import { GoogleMap } from 'vue3-google-map';
+import { useToast } from 'primevue/usetoast';
+import { TerraDraw, TerraDrawModeUndoRedo, TerraDrawPolygonMode, TerraDrawRenderMode, TerraDrawSelectMode, TerraDrawSessionUndoRedo, TerraDrawUndoRedoKeyboardShortcuts } from "terra-draw";
+import { TerraDrawMapLibreGLAdapter } from "terra-draw-maplibre-gl-adapter";
+import { onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import MdiIcon from '../icons/MdiIcon.vue';
-import { computedWithControl } from '@vueuse/core';
-import { clientId } from '@/data/clientMetadata';
+import { TOAST_LIFE_LONG } from '@/data/constants.js';
 
-/**
- * The shapes drawn on the map.
- */
-const shapes = ref<IdentifyableTypedOverlay[]>([]);
 const divisions = defineModel<Division[]>('divisions', {
-    default: [],
+    required: true,
 });
+
+const mapType = defineModel<MapType>('mapType', {
+    default: 'roadmap'
+})
 
 const props = withDefaults(
     defineProps<{
         controls?: 'none' | 'drawing' | 'minimal';
         labels?: boolean;
-        mapType?: `${google.maps.MapTypeId}`;
-        clientPos?: google.maps.LatLngLiteral;
-        center?: google.maps.LatLngLiteral | 'area' | 'position';
+        clientPos?: Position;
+        center?: Position | 'area' | 'position';
         tracks?: ParticipantTrack[];
         locked?: boolean;
     }>(),
     {
         controls: 'minimal',
         labels: true,
-        mapType: 'roadmap',
         locked: false,
     }
 );
 
-watch(() => props.clientPos, setPositionMarker);
-
-let pannedOnce = false;
-const mapCenter = computedWithControl<
-    google.maps.LatLngLiteral | google.maps.LatLng,
-    any
->(
-    () => [props.center, props.clientPos, shapes.value],
-    () => {
-        if (!props.locked && pannedOnce) return;
-        if (props.center === 'position') {
-            panMapToPos(props.clientPos, false);
-            return undefined;
-        }
-        if (props.center === 'area') {
-            if (all_overlays?.length > 0) panMapToShapes(all_overlays);
-            return undefined;
-        }
-        if (props.center.lat != null && props.center.lng != null) {
-            return props.center;
-        }
-        return undefined;
-    }
-);
-
-const sanitizedClientPos = computed(() => {
-    if (
-        props.clientPos == null ||
-        props.clientPos.lat == null ||
-        props.clientPos.lng == null
-    ) {
-        return undefined;
-    }
-    return props.clientPos;
-});
-
-let recentlyUpdated = false;
-
-const apiKey = GOOGLE_MAPS_API_KEY;
-const libraries = GOOGLE_MAPS_API_LIBRARIES;
-const mapComponentRef = ref<InstanceType<typeof GoogleMap> | null>();
-const mapReady = computed(() => mapComponentRef.value?.ready);
-const map = computed(() => mapComponentRef.value?.map);
-const mapZoom = 15;
-const mapRestriction: google.maps.MapRestriction = {
-    strictBounds: true,
-    latLngBounds: {
-        north: 85,
-        south: -85,
-        west: -180,
-        east: 180,
-    },
+const mapDefaults = {
+    zoom: 15,
+    pitch: 0,
+    padding: 20,
+    bearing: 0,
 };
 
-const placesService = ref<google.maps.places.PlacesService>();
-const shapeSelected = ref(false);
-const mapTypeId = ref<`${google.maps.MapTypeId}`>(props.mapType);
-watch(
-    () => props.mapType,
-    (v) => (mapTypeId.value = v)
-);
+const colorOptions = [
+    '#1E90FF',
+    '#FF1493',
+    '#32CD32',
+    '#FF8C00',
+    '#4B0082',
+];
 
+const mapTypeOptions: MapTypeOption[] = [
+    {
+        value: 'roadmap',
+        icon: mdiRoadVariant,
+    },
+    {
+        value: 'satellite',
+        icon: mdiEarth,
+    },
+    {
+        value: 'terrain',
+        icon: mdiTerrain,
+    },
+];
+
+const mapContainer = useTemplateRef('map-container');
+const map = ref<Maplibre>()
+const draw = ref<TerraDraw>()
+const selectedDivision = ref<Division>()
+const selectedMode = ref<'draw' | 'select' | 'render'>(props.locked ? 'render' : 'select');
+const selectedColor = ref<string>(colorOptions[0]);
+const { t } = useI18n()
+const undoRedoMode = ref<TerraDrawModeUndoRedo>()
+const undoRedoSession = ref<TerraDrawSessionUndoRedo>()
 const { activeTheme } = useTheme();
-const mapStyles = computed<google.maps.MapTypeStyle[]>(() => [
-    ...(activeTheme.value === 'dark' ? DARK_MAP_STYLES : []),
-    ...(props.labels ? [] : LABELS_OFF_STYLES),
-]);
+const { add: addToast } = useToast();
 
-const stop = watch(mapReady, (v) => {
-    if (!v) return;
-    stop();
-    syncAreas();
-    watch(() => divisions.value, syncAreas, { deep: true });
-    drawTracks();
-    watch(() => props.tracks, drawTracks, { deep: true });
-});
+watch(() => props.clientPos, (p) => p && setPositionMarker(p));
 
-function syncAreas() {
-    if (recentlyUpdated) return; // Prevents infinite update loop
-    deleteAllShapes(false);
-    divisions.value.forEach((d) => {
-        if (d.area == null) return;
-        const shape = divisionToShape(
-            d,
-            d.id === '0'
-                ? {
-                      ...shapeOptions,
-                      strokeOpacity: 0.1,
-                      fillOpacity: 0,
-                  }
-                : shapeOptions
-        );
-        shape.overlay.setMap(map.value);
-        processNewOverlay(shape, false);
-    });
-    recentlyUpdated = true;
-    shapes.value.length = 0;
-    shapes.value.push(...all_overlays);
-    clearSelection();
-    if (props.center === 'area' && shapes.value?.length > 0)
-        panMapToShapes(all_overlays);
-    nextTick(() => (recentlyUpdated = false));
-}
+// const stop = watch(mapReady, (v) => {
+//     if (!v) return;
+//     stop();
+//     // syncAreas();
+//     // watch(() => divisions.value, syncAreas, { deep: true });
+//     drawTracks();
+//     watch(() => props.tracks, drawTracks, { deep: true });
+// });
 
-let progressLines: IdentifyableTypedOverlay[] = [];
-let progressLabels: MarkerWithLabel[] = [];
+// function syncAreas() {
+//     if (recentlyUpdated) return; // Prevents infinite update loop
+//     deleteAllShapes(false);
+//     divisions.value.forEach((d) => {
+//         if (d.area == null) return;
+//         const shape = divisionToShape(
+//             d,
+//             d.id === '0'
+//                 ? {
+//                     ...shapeOptions,
+//                     strokeOpacity: 0.1,
+//                     fillOpacity: 0,
+//                 }
+//                 : shapeOptions
+//         );
+//         // shape.overlay.setMap(map.value);
+//         processNewOverlay(shape, false);
+//     });
+//     recentlyUpdated = true;
+//     shapes.value.length = 0;
+//     shapes.value.push(...all_overlays);
+//     clearSelection();
+//     if (props.center === 'area' && shapes.value?.length > 0)
+//         focusDivisions(all_overlays);
+//     nextTick(() => (recentlyUpdated = false));
+// }
+
+// let progressLines: IdentifyableTypedOverlay[] = [];
+// let progressLabels: MarkerWithLabel[] = [];
 function drawTracks() {
-    progressLines.forEach((l) => l.overlay.setMap(null));
-    progressLines.length = 0;
-    progressLabels.forEach((l) => l.setMap(null));
-    progressLabels.length = 0;
-    props.tracks?.forEach((t) => {
-        const shapes = trackToShapeList(t, {
-            strokeColor: t.color,
-            fillColor: t.color,
-            editable: false,
-            draggable: false,
-        });
-        shapes?.forEach((s) => s.overlay?.setMap(map.value));
-        progressLines.push(...shapes);
-        const lastPosition = t.progress?.at(-1)?.track?.coordinates?.at(-1);
-        if (lastPosition != null && t.id !== clientId.value) {
-            const label = new MarkerWithLabel({
-                position: {
-                    lng: lastPosition[0],
-                    lat: lastPosition[1],
-                },
-                labelContent: markerHtmlFromTrack(t),
-                labelAnchor: new google.maps.Point(6, -6),
-                clickable: false,
-                draggable: false,
-                cursor: 'default',
-                icon: {
-                    ...POSITION_ICON_INNER,
-                    fillColor: t.color,
-                    scale: POSITION_ICON_INNER.scale * 0.6,
-                    anchor: new google.maps.Point(12, 12),
-                },
-            });
-            progressLabels.push(label);
-            label.setMap(map.value);
-        }
-    });
-}
-
-const selectedToolRef = ref<google.maps.drawing.OverlayType>(null);
-watch(selectedToolRef, (v) => drawingManager.setDrawingMode(v));
-
-const selectedColorRef = ref<string>();
-watch(selectedColorRef, (v) => setShapeColor(v));
-
-function deleteShape(shape: IdentifyableTypedOverlay) {
-    const index = all_overlays.findIndex((o) => o.id === shape.id);
-    setSelection(all_overlays[index]?.overlay);
-    deleteSelectedShape();
-}
-function centerShape(shape: IdentifyableTypedOverlay) {
-    const index = all_overlays.findIndex((o) => o.id === shape.id);
-    setSelection(all_overlays[index]?.overlay);
-    panMapToShape(all_overlays[index]);
-}
-function setShapeName(shape: IdentifyableTypedOverlay, name: string) {
-    const index = all_overlays.findIndex((o) => o.id === shape.id);
-    all_overlays[index].name = name;
-    shapeListChanged();
+    // progressLines.forEach((l) => l.overlay.setMap(null));
+    // progressLines.length = 0;
+    // progressLabels.forEach((l) => l.setMap(null));
+    // progressLabels.length = 0;
+    // props.tracks?.forEach((t) => {
+    //     const shapes = trackToShapeList(t, {
+    //         strokeColor: t.color,
+    //         fillColor: t.color,
+    //         editable: false,
+    //         draggable: false,
+    //     });
+    //     // shapes?.forEach((s) => s.overlay?.setMap(map.value));
+    //     progressLines.push(...shapes);
+    //     const lastPosition = t.progress?.at(-1)?.track?.coordinates?.at(-1);
+    //     if (lastPosition != null && t.id !== clientId.value) {
+    //         const label = new MarkerWithLabel({
+    //             position: {
+    //                 lng: lastPosition[0],
+    //                 lat: lastPosition[1],
+    //             },
+    //             labelContent: markerHtmlFromTrack(t),
+    //             labelAnchor: new google.maps.Point(6, -6),
+    //             clickable: false,
+    //             draggable: false,
+    //             cursor: 'default',
+    //             icon: {
+    //                 ...POSITION_ICON_INNER,
+    //                 fillColor: t.color,
+    //                 scale: POSITION_ICON_INNER.scale * 0.6,
+    //                 anchor: new google.maps.Point(12, 12),
+    //             },
+    //         });
+    //         progressLabels.push(label);
+    //         // label.setMap(map.value);
+    //     }
+    // });
 }
 
 let marker_inner;
 let marker_outer;
 function setPositionMarker(
-    position: google.maps.LatLngLiteral | google.maps.LatLng
+    position: Position
 ) {
-    if (mapReady.value) {
-        if (marker_inner === undefined || marker_outer === undefined) {
-            marker_outer = new google.maps.Marker({
-                position,
-                map: map.value,
-                icon: {
-                    ...POSITION_ICON_OUTER,
-                    anchor: new google.maps.Point(12, 12),
-                },
-            });
-            marker_inner = new google.maps.Marker({
-                position,
-                map: map.value,
-                icon: {
-                    ...POSITION_ICON_INNER,
-                    anchor: new google.maps.Point(12, 12),
-                },
-            });
-        }
-        marker_inner.setPosition(position);
-        marker_outer.setPosition(position);
-    }
+    // if (mapReady.value) {
+    //     if (marker_inner === undefined || marker_outer === undefined) {
+    //         marker_outer = new google.maps.Marker({
+    //             position,
+    //             map: map.value,
+    //             icon: {
+    //                 ...POSITION_ICON_OUTER,
+    //                 anchor: new google.maps.Point(12, 12),
+    //             },
+    //         });
+    //         marker_inner = new google.maps.Marker({
+    //             position,
+    //             map: map.value,
+    //             icon: {
+    //                 ...POSITION_ICON_INNER,
+    //                 anchor: new google.maps.Point(12, 12),
+    //             },
+    //         });
+    //     }
+    //     marker_inner.setPosition(position);
+    //     marker_outer.setPosition(position);
+    // }
 }
 
 function panMapToPos(
-    position: google.maps.LatLngLiteral | google.maps.LatLng,
-    zoom: number | false = mapZoom
+    position: Position | undefined,
+    animate = true,
+    zoom: number | false = mapDefaults.zoom
 ) {
-    console.log(position.lat, position.lng);
-    if (position == null || position.lat == null || position.lng == null) {
+    if (position === undefined || position.length < 2) {
         return;
     }
-    try {
-        map.value?.panTo(position);
-        pannedOnce = true;
-    } catch (e) {
-        console.warn('Failed to pan to pos', e);
+    map.value?.setCenter(toLngLatLike(position), { animate, zoom });
+}
+
+function panMapToBounds(bounds: LngLatBoundsLike, animate = true) {
+    const { padding, pitch, bearing, zoom: maxZoom } = mapDefaults;
+    map.value?.fitBounds(bounds,  { padding, pitch, bearing, animate, maxZoom })
+}
+
+function focusDivision(division: Division, animate = true) {
+    panMapToBounds(getDivisionBounds(division), animate);
+}
+function focusDivisions(divisions: Division[], animate = true) {
+    if (divisions.length === 0) {
+        return;
     }
-    if (zoom != false) map.value?.setZoom(zoom);
-}
-function panMapToShape(shape: TypedOverlay) {
-    map.value.fitBounds(getShapeBounds(shape));
-    pannedOnce = true;
-}
-function panMapToShapes(shapes: TypedOverlay[]) {
-    map.value.fitBounds(getShapeListBounds(shapes));
-    pannedOnce = true;
+    panMapToBounds(getDivisionsBounds(divisions), animate);
 }
 
-function addShapeChangeListeners(shape: any) {
-    switch (shape.type) {
-        case google.maps.drawing.OverlayType.RECTANGLE:
-            google.maps.event.addListener(
-                shape,
-                'bounds_changed',
-                shapeListChanged
-            );
-            break;
-
-        case google.maps.drawing.OverlayType.CIRCLE:
-            google.maps.event.addListener(
-                shape,
-                'radius_changed',
-                shapeListChanged
-            );
-            google.maps.event.addListener(
-                shape,
-                'center_changed',
-                shapeListChanged
-            );
-            break;
-
-        case google.maps.drawing.OverlayType.POLYGON:
-            google.maps.event.addListener(
-                shape.getPath(),
-                'insert_at',
-                shapeListChanged
-            );
-            google.maps.event.addListener(
-                shape.getPath(),
-                'remove_at',
-                shapeListChanged
-            );
-            google.maps.event.addListener(
-                shape.getPath(),
-                'set_at',
-                shapeListChanged
-            );
-            break;
-
-        case google.maps.drawing.OverlayType.POLYLINE:
-            google.maps.event.addListener(
-                shape.getPath(),
-                'insert_at',
-                shapeListChanged
-            );
-            google.maps.event.addListener(
-                shape.getPath(),
-                'remove_at',
-                shapeListChanged
-            );
-            google.maps.event.addListener(
-                shape.getPath(),
-                'set_at',
-                shapeListChanged
-            );
-            break;
-
-        case google.maps.drawing.OverlayType.MARKER:
-            break;
-
-        default:
-            console.warn('Unrecognized overlay created:', shape);
-            break;
-    }
-}
-function shapeListChanged() {
-    shapes.value.length = 0;
-    shapes.value.push(...all_overlays);
-    divisions.value = shapes.value.map((s) => shapeToDivision(s));
-    recentlyUpdated = true;
-    nextTick(() => (recentlyUpdated = false));
+function deleteDivision(division: Division, index: number) {
+    divisions.value.splice(index, 1);
+    // TODO: Show toast with undo
 }
 
-/**
- * A setup for a Google Maps Map with shape tracking.
- * Please be careful when changing and prefix changes with `/* 🟡 Custom *\/;`.
- * @see https://stackoverflow.com/a/12006751/11793652
- */
-
-/* 🟡 Custom */ var area_overlay;
-var drawingManager: google.maps.drawing.DrawingManager;
-var all_overlays = [];
-var selectedShape;
-var colors = ['#1E90FF', '#FF1493', '#32CD32', '#FF8C00', '#4B0082'];
-var selectedColor;
-
-function clearSelection() {
-    if (selectedShape) {
-        selectedShape.setEditable(false);
-        selectedShape.setDraggable(false);
-        selectedShape = null;
-        /* 🟡 Custom */ shapeSelected.value = false;
-    }
-}
-
-function setSelection(shape) {
-    clearSelection();
-    selectedShape = shape;
-    shape.setEditable(true);
-    shape.setDraggable(true);
-    /* 🟡 Custom */ selectedColorRef.value =
-        shape.get('fillColor') || shape.get('strokeColor');
-    // selectColor(shape.get('fillColor') || shape.get('strokeColor'));
-    /* 🟡 Custom */ shapeSelected.value = true;
+function clearDivisions() {
+    divisions.value.length = 0;
+    // TODO: Show toast with undo
 }
 
 function deleteSelectedShape() {
-    if (selectedShape) {
-        selectedShape.setMap(null);
-        /* 🟡 Custom */ all_overlays = all_overlays.filter(
-            (o) => o.overlay?.getMap() !== null
-        );
-        /* 🟡 Custom */ clearSelection();
-        /* 🟡 Custom */ shapeListChanged();
+    const id = selectedDivision.value?.id
+    const index = divisions.value.findIndex(d => d.id === id);
+    if (id && index >= 0) {
+        divisions.value.splice(index, 1);
     }
 }
 
-function deleteAllShapes(/* 🟡 Custom */ notify = true) {
-    all_overlays.forEach((o) => o?.overlay?.setMap(null));
-    // for (var i = 0; i < all_overlays.length; i++) {
-    //     all_overlays[i].overlay.setMap(null);
-    // }
-    all_overlays = [];
-    /* 🟡 Custom */ clearSelection();
-    /* 🟡 Custom */ if (notify) shapeListChanged();
+function undo() {
+    undoRedoMode.value?.undo() || undoRedoSession.value?.undo()
 }
 
-function selectColor(color) {
-    selectedColor = color;
-    // Retrieves the current options from the drawing manager and replaces the
-    // stroke or fill color as appropriate.
-    [
-        'polylineOptions',
-        'rectangleOptions',
-        'circleOptions',
-        'polygonOptions',
-    ].forEach((optionsKey) => {
-        const options = drawingManager.get(optionsKey);
-        options.strokeColor = color;
-        options.fillColor = color;
-        drawingManager.set(optionsKey, options);
+function redo() {
+    undoRedoMode.value?.redo() || undoRedoSession.value?.redo()
+}
+
+onMounted(async () => {
+    const { bearing, pitch, zoom } = mapDefaults;
+    const m = new Maplibre({
+        container: mapContainer.value!,
+        interactive: true,
+        zoom,
+        pitch,
+        bearing,
+        attributionControl: false,
     });
-}
-
-function setSelectedShapeColor(color) {
-    if (selectedShape) {
-        selectedShape.set('strokeColor', color);
-        selectedShape.set('fillColor', color);
-        /* 🟡 Custom */ shapeListChanged();
-    }
-}
-
-function setShapeColor(color: string) {
-    selectColor(color);
-    setSelectedShapeColor(color);
-}
-
-function buildColorPalette() {
-    selectColor(colors[0]);
-}
-
-const shapeOptions = {
-    // strokeWeight: 0,
-    // fillOpacity: 0.45,
-    editable: true,
-    draggable: true,
-};
-const lineOptions = {
-    ...shapeOptions,
-    strokeWeight: 4,
-    strokeOpacity: 0.45,
-};
-
-/* 🟡 Custom */ function processNewOverlay(
-    typedOverlay: any,
-    userCreated = true
-) {
-    if (userCreated) {
-        if (shapeToGeoJSON(typedOverlay).coordinates?.[0]?.length <= 2) {
-            typedOverlay.overlay.setMap(null);
-            selectedToolRef.value = null;
-            return;
+    watchImmediate(() => [mapType.value, activeTheme.value] as const, ([type, theme]) => {
+        setStyleSafe(m, getStyle(type, theme));
+    });
+    watchImmediate(
+        () => [props.center, props.clientPos, divisions.value] as const,
+        ([c, p, d]) => {
+            if (c === 'position') {
+                panMapToPos(p, false);
+                return;
+            }
+            if (c === 'area') {
+                focusDivisions(d, false);
+                return;
+            }
+            if (c && c.length >= 2) {
+                panMapToPos(c);
+                return;
+            }
         }
-        typedOverlay.id = uuidv4();
-        typedOverlay.name = '';
-    }
-    all_overlays.push(typedOverlay);
-    if (typedOverlay.type != google.maps.drawing.OverlayType.MARKER) {
-        // Switch back to non-drawing mode after drawing a shape.
-        // drawingManager.setDrawingMode(null);
-        /* 🟡 Custom */ if (userCreated) selectedToolRef.value = null;
-
-        // Add an event listener that selects the newly-drawn shape when the user
-        // mouses down on it.
-        var newShape = typedOverlay.overlay;
-        newShape.type = typedOverlay.type;
-        google.maps.event.addListener(newShape, 'click', function () {
-            if (props.locked || props.controls !== 'drawing') return;
-            setSelection(newShape);
-        });
-        if (userCreated) {
-            /* 🟡 Custom */ // Has to be next tick, otherwise the tool change above will unselect the selected shape
-            /* 🟡 Custom */ nextTick(() => setSelection(newShape));
-            /* 🟡 Custom */ shapeListChanged();
-        }
-        /* 🟡 Custom */ addShapeChangeListeners(newShape);
-    }
-}
-
-async function initialize() {
-    if (!mapReady.value) {
-        return setTimeout(initialize, 100);
-    }
-    // Creates a drawing manager attached to the map that allows the user to draw
-    // markers, lines, and shapes.
-    drawingManager = new google.maps.drawing.DrawingManager({
-        drawingMode: null,
-        drawingControl: false,
-        markerOptions: {
-            draggable: true,
+    );
+    map.value = m
+    await new Promise(r => m.on('style.load', r))
+    undoRedoMode.value = new TerraDrawModeUndoRedo({ maxStackSize: 100 })
+    undoRedoSession.value = new TerraDrawSessionUndoRedo({ maxStackSize: 100 })
+    const d = new TerraDraw({
+        adapter: new TerraDrawMapLibreGLAdapter({ map: m }),
+        undoRedo: {
+            modeLevel: undoRedoMode.value,
+            sessionLevel: undoRedoSession.value,
+            keyboardShortcuts: new TerraDrawUndoRedoKeyboardShortcuts(),
         },
-        polylineOptions: lineOptions,
-        rectangleOptions: shapeOptions,
-        circleOptions: shapeOptions,
-        polygonOptions: shapeOptions,
-        map: map.value,
+        modes: props.locked
+            ? [
+                new TerraDrawRenderMode({
+                    modeName: 'render',
+                    styles: {
+                        polygonFillColor: (f) => asHexColor(f.properties.color ?? selectedColor.value),
+                        polygonOutlineColor: (f) => asHexColor(f.properties.color ?? selectedColor.value),
+                    }
+                })
+            ]
+            : [
+                new TerraDrawPolygonMode({
+                    modeName: 'draw',
+                    editable: true,
+                    styles: {
+                        fillColor: (f) => asHexColor(f.properties.color ?? selectedColor.value),
+                        outlineColor: (f) => asHexColor(f.properties.color ?? selectedColor.value),
+                        closingPointColor: (f) => asHexColor(f.properties.color ?? selectedColor.value),
+                        snappingPointColor: (f) => asHexColor(f.properties.color ?? selectedColor.value),
+                    },
+                }),
+                new TerraDrawSelectMode({
+                    modeName: 'select',
+                    allowManualDeselection: true,
+                    styles: {
+                        selectedPolygonColor: (f) => asHexColor(f.properties.color),
+                        selectedPolygonOutlineColor: (f) => asHexColor(f.properties.color),
+                        midPointColor: () => asHexColor(selectedColor.value),
+                        selectionPointColor: () => asHexColor(selectedColor.value), 
+                    },
+                    flags: {
+                        'draw': {
+                            feature: {
+                                // The entire Feature can be moved
+                                draggable: true,
+
+                                // Individual coordinates that make up the Feature...
+                                coordinates: {
+                                    // Midpoint be added
+                                    midpoints: {
+                                        // Midpoint be dragged
+                                        draggable: true
+                                    },
+
+                                    // Can be moved
+                                    draggable: true,
+
+                                    // Can snap to other coordinates from geometries _of the same mode_
+                                    snappable: true,
+
+                                    // Can be deleted
+                                    deletable: true,
+                                },
+                            },
+                        },
+                    },
+                }),
+            ],
     });
+    d.start();
+    draw.value = d;
+    d.on('finish', (id) => {
+        const f = d.getSnapshotFeature(id)
+        selectedMode.value = 'select'
+        if (f && f.geometry.type === 'Polygon') {
+            const div: Division = {
+                id: id.toString(),
+                area: f.geometry,
+                clientId: clientId.value,
+                color: selectedColor.value,
+                name: undefined,
+            }
+            const index = divisions.value.findIndex(d => d.id === id.toString());
+            if (index >= 0) {
+                divisions.value[index] = div;
+            } else {
+                divisions.value.push(div);
+            }
+        }
+    })
+    d.on('select', (id) => {
+        const f = d.getSnapshotFeature(id);
+        if (f) {
+            selectedDivision.value = divisions.value.find(d => d.id === id);
+            const color = f.properties.color;
+            if (color && typeof color === 'string') {
+                selectedColor.value = color;
+            }
+        }
+    });
+    d.on('deselect', () => {
+        selectedDivision.value = undefined;
+    });
+    watchImmediate(
+        // Only use relevant properties as watch source.
+        () => new Map(divisions.value.map(
+            div => [div.id, ({
+                id: div.id,
+                geometry: div.area,
+                properties: {
+                    color: div.color ?? null,
+                },
+            })])
+        ),
+        (current, previous) => {
+            const deletedIds = previous?.keys().filter(idA => !current.keys().some(idB => idA === idB)).toArray();
+            if (deletedIds !== undefined) {
+                d.removeFeatures(deletedIds);
+            }
 
-    google.maps.event.addListener(
-        drawingManager,
-        'overlaycomplete',
-        /* 🟡 Custom */ (e) => processNewOverlay(e)
+            for (const { id, geometry, properties } of current.values()) {
+                if (d.hasFeature(id)) {
+                    d.updateFeatureGeometry(id, geometry);
+                    d.updateFeatureProperties(id, properties);
+                } else {
+                    d.addFeatures([{
+                        id,
+                        type: 'Feature',
+                        geometry,
+                        properties: {
+                            mode: props.locked ? 'render' : 'draw',
+                            ...properties,
+                        },
+                    }]);
+                }
+            }
+        }, {
+            deep: true,
+        }
     );
+    watchImmediate(() => selectedMode.value, (m) => {
+        draw.value?.setMode(m)
+    });
+    watchImmediate(() => selectedColor.value, (c) => {
+        if (selectedDivision.value) {
+            selectedDivision.value.color = c;
+        }
+    });
+    const { unsubscribe } = m.on('error', () => {
+        addToast({
+            severity: 'error',
+            summary: t('components.map_with_controls.initialization_failed'),
+            detail: t('components.map_with_controls.initialization_failed_text'),
+            life: TOAST_LIFE_LONG,
+        })
+        unsubscribe(); // Only show error once.
+    });
+});
 
-    // Clear the current selection when the drawing mode is changed, or when the
-    // map is clicked.
-    google.maps.event.addListener(
-        drawingManager,
-        'drawingmode_changed',
-        clearSelection
-    );
-    google.maps.event.addListener(map.value, 'click', clearSelection);
-    // google.maps.event.addDomListener(
-    //     document.getElementById('delete-button'),
-    //     'click',
-    //     deleteSelectedShape
-    // );
-    // google.maps.event.addDomListener(
-    //     document.getElementById('delete-all-button'),
-    //     'click',
-    //     deleteAllShape
-    // );
-
-    buildColorPalette();
-
-    /* 🟡 Custom */ placesService.value = new google.maps.places.PlacesService(
-        map.value
-    );
-}
-onMounted(initialize);
+onUnmounted(() => {
+    map.value?.remove();
+});
 </script>
 
 <template>
-    <Card
-        class="h-full basis-0 grow"
-        :class="[
-            {
-                'shadow-none': controls === 'none',
-            },
-        ]"
-        :pt="{
-            root: { class: isOnMobile ? 'flex-col' : 'flex-col-reverse' },
-            body: {
-                class: [
-                    controls !== 'none' ? 'p-2.5' : 'p-0',
-                    { 'pb-0': controls === 'drawing' && isOnMobile },
-                    { 'pt-0': controls === 'drawing' && !isOnMobile },
-                ],
-            },
-            header: {
-                class: 'h-full flex flex-col-reverse justify-stretch relative rounded-2xl overflow-hidden',
-            },
-        }"
-    >
+    <Card class="h-full basis-0 grow" :class="[
+        {
+            'shadow-none': controls === 'none',
+        },
+    ]" :pt="{
+        root: { class: isOnMobile ? 'flex-col' : 'flex-col-reverse' },
+        body: {
+            class: [
+                controls !== 'none' ? 'p-2.5' : 'p-0',
+                { 'pb-0': controls === 'drawing' && isOnMobile },
+                { 'pt-0': controls === 'drawing' && !isOnMobile },
+            ],
+        },
+        header: {
+            class: 'h-full flex flex-col-reverse justify-stretch relative rounded-2xl overflow-hidden',
+        },
+    }">
         <template #header>
-            <GoogleMap
-                version="beta"
-                ref="mapComponentRef"
-                background-color="transparent"
-                style="height: 100%; width: 100%"
-                :api-key
-                :libraries
-                :center="mapCenter"
-                :zoom="mapZoom"
-                :restriction="mapRestriction"
-                :disable-default-ui="true"
-                :map-type-id="mapTypeId"
-                :styles="mapStyles"
-                :clickable-icons="false"
-                :draggable="!locked"
-            />
-            <MdiIcon
-                v-if="mapReady && locked"
-                class="absolute bottom-[0.65rem] left-[5.15rem] text-white [&:not(dark)]:opacity-60 dark:!opacity-100 stroke-black stroke-[0.8px] transition-opacity"
-                :icon="mdiLock"
-            />
+            <div ref="map-container" class="size-full" :class="{ 'pointer-events-none': locked }"></div>
+            <MdiIcon v-if="locked"
+                class="absolute left-4 bottom-4 text-white [&:not(dark)]:opacity-60 dark:!opacity-100 stroke-black stroke-[0.8px] transition-opacity"
+                :icon="mdiLock" />
         </template>
-        <template #content v-if="controls === 'minimal'">
-            <div class="flex flex-row gap-2">
-                <LocateMeButton
-                    :client-pos="sanitizedClientPos"
-                    :locate-me-handler="
-                        (r) => {
-                            panMapToPos(r);
-                            setPositionMarker(r);
-                        }
-                    "
-                />
-                <LocateShapesButton
-                    :shapes-present="shapes?.length > 0"
-                    :locate-shapes-handler="() => panMapToShapes(all_overlays)"
-                />
+        <template #content >
+            <div v-if="controls === 'minimal'" class="flex flex-row gap-2">
+                <LocateMeButton :client-pos @click="(p) => {
+                    panMapToPos(p);
+                    setPositionMarker(p);
+                }" />
+                <LocateShapesButton :shapes-present="divisions?.length > 0"
+                    @click="focusDivisions(divisions)" />
             </div>
-        </template>
-        <template #content v-if="controls === 'drawing'">
-            <TabView
-                :pt="{
-                    root: {
-                        class:
-                            'flex ' +
-                            (isOnMobile ? 'flex-col-reverse' : 'flex-col'),
-                    },
-                    nav: {
-                        class: [isOnMobile ? 'mt-2' : 'mb-2'],
-                    },
-                    inkbar: { class: 'rounded-t h-1' },
-                    panelContainer: { class: 'p-0' },
-                }"
-            >
+            <TabView  v-if="controls === 'drawing'" :pt="{
+                root: {
+                    class:
+                        'flex ' +
+                        (isOnMobile ? 'flex-col-reverse' : 'flex-col'),
+                },
+                nav: {
+                    class: [isOnMobile ? 'mt-2' : 'mb-2'],
+                },
+                inkbar: { class: 'rounded-t h-1' },
+                panelContainer: { class: 'p-0' },
+            }">
                 <TabPanel>
                     <template #header>
                         <div class="flex justify-center items-center">
                             <MdiTextButtonIcon :icon="mdiMap" />
-                            {{ $t('components.map_with_controls.map') }}
+                            {{ t('components.map_with_controls.map') }}
                         </div>
                     </template>
-                    <div
-                        class="flex flex-row gap-2 items-center justify-stretch flex-wrap"
-                    >
-                        <div
-                            class="flex flex-row gap-2 grow text-nowrap basis-7/12"
-                        >
-                            <LocateMeButton
-                                :client-pos="sanitizedClientPos"
-                                :locate-me-handler="
-                                    (r) => {
-                                        panMapToPos(r);
-                                        setPositionMarker(r);
-                                    }
-                                "
-                            />
-                            <LocateShapesButton
-                                :shapes-present="shapes?.length > 0"
-                                :locate-shapes-handler="
-                                    () => panMapToShapes(all_overlays)
-                                "
-                            />
-                            <LocationSearchDialog
-                                :places-service
-                                :select-result-callback="
-                                    (r) => panMapToPos(r.geometry?.location)
-                                "
-                            />
+                    <div class="flex flex-row gap-2 items-center justify-stretch flex-wrap">
+                        <div class="flex flex-row gap-2 grow text-nowrap basis-7/12">
+                            <LocateMeButton :client-pos @click="(p) => {
+                                panMapToPos(p);
+                                setPositionMarker(p);
+                            }" />
+                            <LocateShapesButton :shapes-present="divisions.length > 0" :initial-pan="true" @click="() => focusDivisions(divisions)"/>
+                            <LocationSearchDialog @select="panMapToBounds" />
                         </div>
-                        <MapTypeSelectButton
-                            class="basis-1/12"
-                            v-model="mapTypeId"
-                        />
+                        <MapTypeSelectButton class="basis-1/12" v-model="mapType" :options="mapTypeOptions" />
                     </div>
                 </TabPanel>
                 <TabPanel>
                     <template #header>
                         <div class="flex justify-center items-center">
                             <MdiTextButtonIcon :icon="mdiPalette" />
-                            {{ $t('components.map_with_controls.tools') }}
+                            {{ t('components.map_with_controls.tools') }}
                         </div>
                     </template>
-                    <div
-                        class="flex flex-row gap-2 items-center justify-stretch flex-wrap"
-                    >
-                        <div
-                            class="flex flex-row gap-2 items-center justify-stretch flex-nowrap grow basis-0"
-                        >
-                            <DrawShapeButton v-model="selectedToolRef" />
-                            <DeleteShapeButton
-                                :shape-selected
-                                :delete-shape-handler="deleteSelectedShape"
-                            />
+                    <div class="flex flex-row gap-2 items-center justify-stretch flex-wrap">
+                        <div class="flex flex-row gap-2 items-center justify-stretch flex-nowrap max-md:grow">
+                            <DrawShapeButton class="grow" v-model="selectedMode" />
+                            <DeleteShapeButton class="shrink-0" :selected="!!selectedDivision" @click="deleteSelectedShape" @undo="undo" @redo="redo" />
                         </div>
-                        <ShapeColorSelectButton
-                            class="basis-52 min-w-[240px]"
-                            v-model="selectedColorRef"
-                        />
+                        <ShapeColorSelectButton class="grow shrink-0" v-model="selectedColor" :options="colorOptions" />
                     </div>
                 </TabPanel>
                 <TabPanel>
                     <template #header>
                         <div class="flex justify-center items-center">
                             <MdiTextButtonIcon :icon="mdiTextureBox" />
-                            {{ $t('components.map_with_controls.divisions') }}
+                            {{ t('components.map_with_controls.divisions') }}
                         </div>
                     </template>
                     <ShapesList
-                        :shapes
-                        :center-shape-hook="centerShape"
-                        :delete-shape-hook="deleteShape"
-                        :delete-all-shapes-hook="deleteAllShapes"
-                        :set-shape-name-hook="setShapeName"
+                        v-model:divisions="divisions"
+                        @center-division="focusDivision"
+                        @delete-division="deleteDivision"
+                        @clear-divisions="clearDivisions"
                     />
                 </TabPanel>
             </TabView>

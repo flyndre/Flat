@@ -171,6 +171,7 @@
             "left": "Izquierda"
         },
         "home_location_setting": {
+            "off": "Apagado",
             "live": "En vivo",
             "custom": "Fijado"
         },
@@ -196,10 +197,16 @@
             "inactive": "Eliminado",
             "self": "Este Dispositivo"
         },
+        "cinematic_map": {
+            "initialization_failed": "No se ha podido cargar el mapa de fondo",
+            "initialization_failed_text": "Se ha producido un error al cargar el mapa de fondo. El resto de funciones de la aplicación deberían seguir funcionando."
+        },
         "map_with_controls": {
             "map": "Mapa",
             "tools": "Herramientas",
-            "divisions": "Departamentos"
+            "divisions": "Departamentos",
+            "itialization_failed": "No se han podido cargar los datos del mapa",
+            "initialization_failed_text": "Es probable que esto afecte al funcionamiento de la aplicación. ¿Hay conexión a Internet?"
         },
         "draw_shape_button": {
             "draw_division": "Agregar departamento",

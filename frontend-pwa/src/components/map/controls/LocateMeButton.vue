@@ -3,15 +3,14 @@ import { mdiCrosshairsGps } from '@mdi/js';
 import { onMounted } from 'vue';
 import MdiIcon from '@/components/icons/MdiIcon.vue';
 import Button from 'primevue/button';
+import { Position } from 'geojson';
 
 const props = withDefaults(
     defineProps<{
         /** Whether the `locateMeHandler` should be called on mounted. @default true */
         initialPan?: boolean;
         panOnUpdate?: boolean;
-        clientPos?: google.maps.LatLngLiteral;
-        /** A function to handle when the button is clicked. */
-        locateMeHandler: (clientPos: google.maps.LatLngLiteral) => any;
+        clientPos?: Position;
     }>(),
     {
         initialPan: false,
@@ -19,20 +18,20 @@ const props = withDefaults(
     }
 );
 
-function locateMe() {
-    props.locateMeHandler(props.clientPos);
-}
+const emit = defineEmits<{
+    click: [Position]
+}>()
 
 onMounted(() => {
-    if (props.clientPos != null) locateMe();
+    if (props.clientPos) emit('click', props.clientPos);
 });
 </script>
 
 <template>
     <Button
         severity="secondary"
-        :disabled="clientPos == null"
-        @click="locateMe"
+        :disabled="!clientPos"
+        @click="emit('click', clientPos!)"
     >
         <template #icon>
             <MdiIcon :icon="mdiCrosshairsGps" />

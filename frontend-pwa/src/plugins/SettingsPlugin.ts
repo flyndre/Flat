@@ -2,6 +2,7 @@ import { useTheme } from '@/plugins/ThemePlugin';
 import { ColorSchemeType } from '@vueuse/core';
 import { Plugin, ref, watch } from 'vue';
 import I18nPlugin from './I18nPlugin';
+import { Position } from 'geojson';
 
 const { settingsTheme: theme } = useTheme();
 const { locale } = I18nPlugin.global;
@@ -10,7 +11,7 @@ const SETTINGS_KEY = 'flat/settings/settings';
 
 type Settings = {
     theme: ColorSchemeType;
-    homeLive: boolean;
+    homePosition: 'off' | 'live' | 'static';
     homeLatitude: number;
     homeLongitude: number;
     handedness: 'left' | 'right';
@@ -19,7 +20,7 @@ type Settings = {
 
 const defaultSettings: Settings = {
     theme: 'no-preference',
-    homeLive: true,
+    homePosition: 'live',
     homeLatitude: 8.297651,
     homeLongitude: -79.12684,
     handedness: 'right',
@@ -41,7 +42,7 @@ watch(
 
 function read(key: string) {
     try {
-        return JSON.parse(localStorage.getItem(key));
+        return JSON.parse(`${localStorage.getItem(key)}`);
     } catch (e) {
         console.error(e);
         return undefined;
@@ -58,6 +59,7 @@ function remove(key: string) {
 
 function reset() {
     Object.entries(defaultSettings).forEach(
+        // @ts-expect-error: hardly typable
         ([key, value]) => (settings.value[key] = value)
     );
 }

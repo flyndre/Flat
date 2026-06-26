@@ -9,9 +9,11 @@ const { settings } = useSettings();
 withDefaults(
     defineProps<{
         height?: string;
+        backdrop?: boolean;
     }>(),
     {
         height: '100dvh',
+        backdrop: true,
     }
 );
 </script>
@@ -27,7 +29,7 @@ withDefaults(
             >
                 <slot name="background" />
             </div>
-            <TopNav v-if="!isOnMobile || $slots.title">
+            <TopNav v-if="!isOnMobile || $slots.title" :backdrop>
                 <template v-if="!isOnMobile" #action-left>
                     <slot name="action-left" />
                 </template>
@@ -47,6 +49,7 @@ withDefaults(
                     ($slots?.['action-right'] || $slots?.['action-left'])
                 "
                 :layout="settings.handedness"
+                :backdrop
             >
                 <template #action-left>
                     <slot name="action-left" />

@@ -27,14 +27,18 @@ import DataTable from 'primevue/datatable';
 import Dialog from 'primevue/dialog';
 import { MenuItem } from 'primevue/menuitem';
 import SplitButton from 'primevue/splitbutton';
-import { v4 as uuidv4 } from 'uuid';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 
 const displayedCollections = computedAsync(() =>
-    collections.value.sort((a, b) => a.name.localeCompare(b.name))
+    collections.value?.sort((a, b) => {
+        if (a.name && b.name) {
+            return a.name.localeCompare(b.name);
+        }
+        return a.name ? -1 : b.name ? 1 : 0;
+    })
 );
 const selectedCollections = ref<Collection[]>([]);
 const selectionEmpty = computed(() => selectedCollections.value?.length === 0);
@@ -50,7 +54,7 @@ function duplicateSelected() {
         ...selectedCollections.value.map((c) => ({
             ...dbSafe(c),
             name: `${c.name} ${t('presets.copy_suffix')}`,
-            id: uuidv4(),
+            id: crypto.randomUUID(),
         })),
     ]);
     selectedCollections.value = [];
@@ -220,9 +224,10 @@ const deleteDialogVisible = ref(false);
                                                 :icon="mdiDeleteSweep"
                                             />
                                         </template>
-                                        <template #menuitemicon="slotProps">
+                                        <template #menuitemicon="{ item: { icon } }">
                                             <MdiTextButtonIcon
-                                                :icon="slotProps.item.icon"
+                                                v-if="icon"
+                                                :icon
                                             />
                                         </template>
                                     </SplitButton>

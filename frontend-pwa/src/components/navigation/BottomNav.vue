@@ -1,13 +1,14 @@
 <script setup lang="ts">
 defineProps<{
     layout: 'left' | 'right';
+    backdrop: boolean;
 }>();
 </script>
 
 <template>
     <nav
-        class="sticky left-0 right-0 bottom-0 z-10 p-2.5 flex justify-between items-center gap-2 backdrop-blur"
-        :class="layout === 'right' ? 'flex-row' : 'flex-row-reverse'"
+        class="sticky left-0 right-0 bottom-0 z-10 p-2.5 flex justify-between items-center gap-2"
+        :class="[ layout === 'right' ? 'flex-row' : 'flex-row-reverse', backdrop ? 'backdrop-blur' : '' ]"
     >
         <div
             class="flex-grow flex flex-row gap-2"

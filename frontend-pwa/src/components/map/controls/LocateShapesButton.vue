@@ -9,21 +9,19 @@ const props = withDefaults(
         shapesPresent: boolean;
         /** Whether the `locateMeHandler` should be called on mounted. @default true */
         initialPan?: boolean;
-        /** A function to handle when the button is clicked. */
-        locateShapesHandler: () => any;
     }>(),
     {
         initialPan: true,
     }
 );
 
-function locateShapes() {
-    props.locateShapesHandler();
-}
+const emit = defineEmits<{
+    click: []
+}>()
 
 onMounted(() => {
     if (props.shapesPresent) {
-        locateShapes();
+        emit('click')
     }
 });
 </script>
@@ -32,7 +30,7 @@ onMounted(() => {
     <Button
         severity="secondary"
         :disabled="!shapesPresent"
-        @click="locateShapes"
+        @click="emit('click')"
     >
         <template #icon>
             <MdiIcon :icon="mdiFitToScreen" />

@@ -7,14 +7,12 @@ import { collectionDB, collectionDraft } from '@/data/collections';
 import { TOAST_LIFE } from '@/data/constants';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { Collection } from '@/types/Collection';
-import { areaFromShapeList, divisionToShape } from '@/util/converters';
 import { dbSafe } from '@/util/dbUtils';
-import { mapCenterWithDefaults } from '@/util/googleMapsUtils';
+import { useSanitizedGeolocation } from '@/util/geoLocationUtils';
+import { getDivisionsBounds, toMultiPolygon } from '@/util/geoUtils';
 import { mdiArrowLeft, mdiCheck, mdiHelp } from '@mdi/js';
-import { useGeolocation } from '@vueuse/core';
 import Button from 'primevue/button';
 import { useToast } from 'primevue/usetoast';
-import { v4 as uuidv4 } from 'uuid';
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
@@ -31,7 +29,10 @@ const props = withDefaults(
 );
 
 const defaultCollection: Collection = {
-    id: uuidv4(),
+    id: crypto.randomUUID(),
+    name: undefined,
+    area: undefined,
+    divisions: [],
     adminClientId: clientId.value,
 };
 
@@ -54,6 +55,7 @@ onMounted(async () => {
                     summary: t('map.error_collection_not_found'),
                 });
                 await router.replace({ name: 'presets' });
+                return;
             }
             collection.value = storedCollection;
         } catch (error) {
@@ -67,15 +69,15 @@ onMounted(async () => {
     }
 });
 
-const submittable = computed(() => collection.value.divisions?.length > 0);
+const submittable = computed(() => (collection.value.divisions && collection.value.divisions.length > 0));
 
 const { add } = useToast();
 
 async function save() {
     loading.value = true;
-    collection.value.area = areaFromShapeList(
-        collection.value.divisions.map((d) => divisionToShape(d))
-    );
+    if (collection.value.divisions) {
+        collection.value.area = toMultiPolygon(getDivisionsBounds(collection.value.divisions))
+    }
     try {
         if (props.edit) {
             await collectionDB.put(dbSafe(collection.value));
@@ -98,10 +100,13 @@ async function save() {
 }
 
 const helpVisible = ref(false);
-const clientPos = mapCenterWithDefaults(useGeolocation().coords, {
-    lat: null,
-    lng: null,
-});
+const { coords } = useSanitizedGeolocation();
+const clientPos = computed(() => {
+    if (coords.value !== undefined) {
+        return [coords.value.longitude, coords.value.latitude]
+    }
+    return undefined
+})
 </script>
 
 <template>

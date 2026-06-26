@@ -3,7 +3,7 @@ import { fileURLToPath } from 'url';
 import { defineConfig } from 'vite';
 import { VitePWA, VitePWAOptions } from 'vite-plugin-pwa';
 
-const pwaProps = {
+const pwaProps: Partial<VitePWAOptions> = {
     registerType: 'prompt',
     includeAssets: [
         'favicon.ico',
@@ -37,11 +37,15 @@ const pwaProps = {
             },
         ],
     },
+    workbox: {
+        maximumFileSizeToCacheInBytes: 2097152 * 10
+    }
 };
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    plugins: [vue(), VitePWA(pwaProps as Partial<VitePWAOptions>)],
+    base: '/',
+    plugins: [vue(), VitePWA(pwaProps)],
     resolve: {
         alias: {
             '@': fileURLToPath(new URL('./src', import.meta.url)),

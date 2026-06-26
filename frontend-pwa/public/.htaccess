@@ -1,0 +1,11 @@
+RewriteEngine On
+
+# Apache automatically assumes the current folder context for relative substitutions.
+# RewriteBase /subapp/ is not required
+
+# Allow physical assets (CSS, JS, images) to load normally
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+
+# Route all other virtual paths to the SPA entry point to let the client-side router handle them
+RewriteRule ^(.*)$ index.html [L]

@@ -11,13 +11,12 @@ import {
     collectionDraft,
     lastActiveCollection,
 } from '@/data/collections';
+import { statsOf } from '@/data/collectionStats';
 import { TOAST_LIFE } from '@/data/constants';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { Collection } from '@/types/Collection';
 import { Division } from '@/types/Division';
-import { CollectionStats } from '@/types/stats/CollectionStats';
 import { dbSafe } from '@/util/dbUtils';
-import { getGeoJsonArea } from '@/util/statsUtils';
 import validateCollection from '@/validation/validateCollection';
 import { mdiArrowLeft, mdiCheck, mdiMapMarkerPath, mdiPlay } from '@mdi/js';
 import Button from 'primevue/button';
@@ -25,11 +24,9 @@ import Card from 'primevue/card';
 import IconField from 'primevue/iconfield';
 import InputText from 'primevue/inputtext';
 import { useToast } from 'primevue/usetoast';
-import { v4 as uuidv4 } from 'uuid';
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { RouteLocationRaw, useRouter } from 'vue-router';
-import { statsOf, collectionStatsDB } from '@/data/collectionStats';
+import { useRouter } from 'vue-router';
 
 const props = withDefaults(
     defineProps<{
@@ -43,7 +40,7 @@ const props = withDefaults(
 );
 
 const defaultCollection: Collection = {
-    id: uuidv4(),
+    id: crypto.randomUUID(),
     adminClientId: clientId.value,
     name: '',
 };
@@ -59,27 +56,10 @@ const loading = ref(false);
 const title = t(props.edit ? 'edit.title_edit' : 'edit.title_create');
 const submittable = computed(() => validateCollection(collection.value));
 
-const displayedDivisions = computed<Division[]>(() => [
-    ...(!collection.value.area
-        ? []
-        : <Division[]>[
-              {
-                  id: '0',
-                  area: {
-                      type: 'Polygon',
-                      coordinates: collection.value.area?.coordinates[0] ?? [
-                          [],
-                      ],
-                  },
-              },
-          ]),
-    ...(collection.value.divisions ?? []),
-]);
-
 const { add } = useToast();
 
 onMounted(async () => {
-    if (props.edit) {
+    if (props.edit && props.id) {
         try {
             const storedCollection = await collectionDB.get(props.id);
             if (storedCollection === undefined) {
@@ -89,6 +69,7 @@ onMounted(async () => {
                     summary: t('edit.error_collection_not_found'),
                 });
                 await router.replace({ name: 'presets' });
+                return;
             }
             collection.value = storedCollection;
         } catch (error) {
@@ -117,7 +98,7 @@ async function _saveCollection(afterSavedCallback: () => any) {
             await collectionDB.put(dbSafe(collection.value));
         } else {
             await collectionDB.add(dbSafe(collection.value));
-            collectionDraft.set(null);
+            collectionDraft.set(undefined);
         }
         afterSavedCallback();
     } catch (error) {
@@ -161,11 +142,11 @@ function editDivisions() {
 }
 
 function back() {
-    collectionDraft.set(null);
+    collectionDraft.set(undefined);
     router.push({ name: 'presets' });
 }
 
-const stats = statsOf(props.id);
+const stats = computed(() => props.id ? statsOf(props.id).value : undefined);
 </script>
 
 <template>
@@ -218,9 +199,9 @@ const stats = statsOf(props.id);
                     <MapWithControls
                         controls="none"
                         center="area"
-                        :locked="true"
+                        locked
                         :labels="false"
-                        :divisions="displayedDivisions"
+                        :divisions="collection.divisions ?? []"
                     />
                 </template>
                 <template #content>
@@ -238,8 +219,8 @@ const stats = statsOf(props.id);
                             :edit-divisions-handler="editDivisions"
                         />
                         <StatsList
-                            v-if="edit && stats?.length > 0"
-                            :stats="stats"
+                            v-if="edit && stats && stats?.length > 0"
+                            :stats
                         />
                     </div>
                 </template>

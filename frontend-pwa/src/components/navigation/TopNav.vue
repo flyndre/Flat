@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { computed, useSlots } from 'vue';
+defineProps<{
+    backdrop: boolean;
+}>();
 const slots = useSlots();
 const onlyHeader = computed(
     () => !slots['action-left'] && !slots['action-right']
@@ -7,7 +10,8 @@ const onlyHeader = computed(
 </script>
 
 <template>
-    <header class="sticky left-0 top-0 right-0 p-2 z-10 backdrop-blur">
+    <header class="sticky left-0 top-0 right-0 p-2 z-10" 
+        :class="[ backdrop ? 'backdrop-blur' : '' ]">
         <nav
             class="flex flex-row justify-between items-center gap-2 h-10 [&>*]:whitespace-nowrap"
         >
